@@ -106,18 +106,12 @@ module.exports = function (component) {
     var deferredInitController
 
     /**
-     * Service d'authentification, qui sert de proxy vers les différents authClient enregistrés
-     * @service $auth
-     */
-    var $auth = {}
-
-    /**
      * Inscrit un client d'authentification
      * Chaque service d'authentification devra appeler cette méthode pour s'inscrire en passant un objet AuthClient
      * @param {AuthClient} authClient
      * @memberOf $auth
      */
-    $auth.addClient = function (authClient) {
+    function addClient (authClient) {
       try {
         checkValidClient(authClient)
         if (_.isEmpty(clients)) {
@@ -136,7 +130,7 @@ module.exports = function (component) {
      * @memberOf $auth
      * @param {function} initController
      */
-    $auth.deferController = function (initController) {
+    function deferController (initController) {
       modLog('adding', 'controller')
       if (_.isEmpty(clients)) deferredInitController = initController
       else initController()
@@ -148,7 +142,7 @@ module.exports = function (component) {
      * @param {Context} context
      * @returns {object} authBloc, avec les propriétés user, ssoLinks, loginLink, loginLinks, logoutLink
      */
-    $auth.getAuthBloc = function (context) {
+    function getAuthBloc (context) {
       const authBloc = {}
       if ($accessControl.isAuthenticated(context)) {
         // menu authentifié
@@ -246,7 +240,7 @@ module.exports = function (component) {
      * @param {Context} context
      * @returns {Link[]} La liste de liens
      */
-    $auth.getSsoLinks = function (context) {
+    function getSsoLinks (context) {
       var links = []
       var personne = $accessControl.getCurrentUser(context)
       if (personne && personne.pid) {
@@ -273,7 +267,7 @@ module.exports = function (component) {
      * @memberOf $auth
      * @param {Context} context
      */
-    $auth.login = function (context) {
+    function login (context) {
       if ($accessControl.isAuthenticated(context)) {
         if (context.get.redirect) context.redirect(context.get.redirect)
         else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
@@ -293,7 +287,7 @@ module.exports = function (component) {
      * @memberOf $auth
      * @param {Context} context
      */
-    $auth.logout = function (context) {
+    function logout (context) {
       if ($accessControl.isAuthenticated(context)) {
         $accessControl.logout(context)
         var client = getClient(context)
@@ -305,6 +299,15 @@ module.exports = function (component) {
       }
     }
 
-    return $auth
+    return {
+      addClient,
+      deferController,
+      getAuthBloc,
+      getLogoutUrl,
+      getLoginLinks,
+      getSsoLinks,
+      login,
+      logout
+    }
   })
 }

@@ -30,75 +30,45 @@
  */
 
 'use strict'
+module.exports = function ressourceComponentFactory (lassi) {
+  // Composant de gestion des ressources
+  const ressourceComponent = lassi.component('ressource')
 
-// Composant de gestion des ressources
-var ressourceComponent = lassi.component('ressource')
+  require('./EntityExternalRef')(ressourceComponent)
+  require('./EntityArchive')(ressourceComponent)
+  require('./EntityRessource')(ressourceComponent)
 
-ressourceComponent.entity('EntityExternalRef', function () {
-  require('./EntityExternalRef')(this)
-})
+  require('./serviceCacheRessource')(ressourceComponent)
+  require('./serviceRessourceRemote')(ressourceComponent)
+  require('./serviceRoutes')(ressourceComponent)
+  require('./serviceRessourceRepository')(ressourceComponent)
+  require('./serviceRessourceFetch')(ressourceComponent)
+  require('./serviceRessourceControl')(ressourceComponent)
 
-require('./EntityArchive')(ressourceComponent)
+  require('./serviceRessourceConverter')(ressourceComponent)
+  require('./serviceRessourcePage')(ressourceComponent)
 
-ressourceComponent.entity('EntityRessource', function () {
-  require('./EntityRessource')(this)
-})
+  // les pages html de consultation / modification
+  require('./controllerRessource')(ressourceComponent)
+  // un controleur html pour des pages publiques sans session
+  require('./controllerPublic')(ressourceComponent)
+  // l'api json
+  require('./controllerApi')(ressourceComponent)
 
-ressourceComponent.service('$cacheRessource', function ($cache, $settings, EntityRessource) {
-  return require('./serviceCacheRessource')($cache, $settings, EntityRessource)
-})
+  // import calculatice
+  require('./controllerImportEc')(ressourceComponent)
 
-ressourceComponent.service('$ressourceRemote', function () {
-  return require('./serviceRessourceRemote')()
-})
+  // En dev on ajoute des routes de debug
+  if (!global.isProd) {
+    require('./controllerDebug')(ressourceComponent)
+  }
 
-ressourceComponent.service('$routes', function ($accessControl) {
-  return require('./serviceRoutes')($accessControl)
-})
-
-require('./serviceRessourceRepository')(ressourceComponent)
-
-ressourceComponent.service('$ressourceFetch', function ($cache, $ressourceRepository) {
-  return require('./serviceRessourceFetch')($cache, $ressourceRepository)
-})
-
-ressourceComponent.service('$ressourceControl', function (EntityRessource) {
-  return require('./serviceRessourceControl')(EntityRessource)
-})
-
-require('./serviceRessourceConverter')(ressourceComponent)
-require('./serviceRessourcePage')(ressourceComponent)
-
-// les pages html de consultation / modification
-ressourceComponent.controller('ressource', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) { // jshint ignore:line
-  require('./controllerRessource')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $ressourcePage, $routes, $ressourceFetch) // jshint ignore:line
-})
-
-// un controleur html pour des pages publiques sans session
-ressourceComponent.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl) {
-  require('./controllerPublic')(this, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $cache, $accessControl)
-})
-
-// l'api json
-require('./controllerApi')(ressourceComponent)
-
-// import calculatice
-ressourceComponent.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) { // jshint ignore:line
-  require('./controllerImportEc')(this, $ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes)
-})
-
-// En dev on ajoute des routes de debug
-if (!global.isProd) {
-  ressourceComponent.controller('debug/ressource', function ($ressourceRepository, EntityRessource) {
-    require('./controllerDebug')(this, $ressourceRepository, EntityRessource)
+  // settings
+  ressourceComponent.config(function ($settings) {
+    // on vérifie que l'on a un cache avec des valeur acceptables
+    var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
+    if (!cacheTTL) log.error('Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h')
+    else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
+    else if (cacheTTL > 24 * 3600) throw new Error('Le cache ressource doit avoir un TTL inférieur à 24h (86400s)')
   })
 }
-
-// settings
-ressourceComponent.config(function ($settings) {
-  // on vérifie que l'on a un cache avec des valeur acceptables
-  var cacheTTL = $settings.get('components.ressource.cacheTTL', null)
-  if (!cacheTTL) log.error('Pas de TTL pour le cache de ressource  (components.ressource.cacheTTL, en s), fixé à 1h')
-  else if (cacheTTL < 60) throw new Error("Le cache ressource doit avoir un TTL d'au moins 60s")
-  else if (cacheTTL > 24 * 3600) throw new Error('Le cache ressource doit avoir un TTL inférieur à 24h (86400s)')
-})

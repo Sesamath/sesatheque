@@ -31,39 +31,39 @@
 
 'use strict'
 
-var Groupe = require('../../constructors/Groupe')
+const Groupe = require('../../constructors/Groupe')
 
-module.exports = function (EntityGroupe, $cacheGroupe) {
-  /**
-   * L'entité groupe
-   * @entity EntityGroupe
-   * @extends Entity
-   * @extends Groupe
-   */
-  EntityGroupe.construct(function (values) {
-    Object.assign(this, new Groupe(values))
+module.exports = function (component) {
+  component.entity('EntityGroupe', function ($cacheGroupe) {
+    const EntityGroupe = this
+    /**
+     * L'entité groupe
+     * @entity EntityGroupe
+     * @extends Entity
+     * @extends Groupe
+     */
+    EntityGroupe.construct(function (values) {
+      Object.assign(this, new Groupe(values))
+    })
+
+    EntityGroupe.beforeStore(function (next) {
+      this.nom = this.nom.toLowerCase()
+      if (!this.creationDate) this.creationDate = new Date()
+      if (!this.gestionnaires || !this.gestionnaires.length) return next(new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`))
+      next()
+    })
+
+    EntityGroupe.afterStore(function (next) {
+      // on met en cache
+      $cacheGroupe.set(this, function (error) { if (error) log.error(error) })
+      // et on passe au suivant sans se préoccuper du retour de mise en cache
+      next()
+    })
+
+    EntityGroupe
+      .defineIndex('nom', 'string')
+      .defineIndex('ouvert', 'boolean')
+      .defineIndex('public', 'boolean')
+      .defineIndex('gestionnaires', 'string')
   })
-
-  // @todo inutile avec lassi#mongo, à virer après migration
-  EntityGroupe.table = 'groupe'
-
-  EntityGroupe.beforeStore(function (next) {
-    this.nom = this.nom.toLowerCase()
-    if (!this.creationDate) this.creationDate = new Date()
-    if (!this.gestionnaires || !this.gestionnaires.length) return next(new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`))
-    next()
-  })
-
-  EntityGroupe.afterStore(function (next) {
-    // on met en cache
-    $cacheGroupe.set(this, function (error) { if (error) log.error(error) })
-    // et on passe au suivant sans se préoccuper du retour de mise en cache
-    next()
-  })
-
-  EntityGroupe
-    .defineIndex('nom', 'string')
-    .defineIndex('ouvert', 'boolean')
-    .defineIndex('public', 'boolean')
-    .defineIndex('gestionnaires', 'string')
 }

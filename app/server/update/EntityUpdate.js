@@ -33,27 +33,29 @@
 
 var tools = require('../tools')
 
-module.exports = function (EntityUpdate) {
-  /**
-   * Notre entité update, cf [Entity](lassi/Entity.html)
-   * @entity EntityUpdate
-   * @param {Object} initObj Un objet ayant des propriétés d'un update
-   * @extends Entity
-   */
-  EntityUpdate.construct(function (initObj) {
-    // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
-    if (initObj) {
-      if (initObj.date && !(initObj.date instanceof Date)) initObj.date = tools.toDate(initObj.date)
-    } else {
-      initObj = {}
-    }
-    this.name = initObj.name || 'sans nom'
-    this.num = initObj.num || 0
-    this.date = initObj.date || new Date()
-  })
+module.exports = function (component) {
+  component.entity('EntityUpdate', function () {
+    /**
+     * Notre entité update, cf [Entity](lassi/Entity.html)
+     * @entity EntityUpdate
+     * @param {Object} initObj Un objet ayant des propriétés d'un update
+     * @extends Entity
+     */
+    this.construct(function (initObj) {
+      // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
+      if (initObj) {
+        if (initObj.date && !(initObj.date instanceof Date)) initObj.date = tools.toDate(initObj.date)
+      } else {
+        initObj = {}
+      }
+      this.name = initObj.name || 'sans nom'
+      this.num = initObj.num || 0
+      this.date = initObj.date || new Date()
+    })
 
-  // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
-  EntityUpdate
-    .defineIndex('num', 'integer')
-    .defineIndex('date', 'date')
+    // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
+    this
+      .defineIndex('num', 'integer')
+      .defineIndex('date', 'date')
+  })
 }

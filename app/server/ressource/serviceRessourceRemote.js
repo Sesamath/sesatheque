@@ -47,103 +47,105 @@ appConfig.sesatheques.forEach(({baseId, apiToken}) => {
  * @requires $ressourceRepository
  */
 
-module.exports = function serviceRessourceRemoteFactory () {
-  /**
-   * Appelle registerListener pour ajouter ou virer des listener
-   * @param {string} action add|delete
-   * @param {string[]} rids liste de rid (qui doivent tous être sur la même baseId)
-   * @param next
-   */
-  function registerCall (action, rids, next) {
-    try {
-      // on prend la baseId du 1er rid fourni
-      const baseId = getBaseIdFromRid(rids[0])
-      if (baseId === myBaseId) return next(new Error('inutile de s’enregistrer pour une modif locale'))
+module.exports = function (component) {
+  component.service('$ressourceRemote', function () {
+    /**
+     * Appelle registerListener pour ajouter ou virer des listener
+     * @param {string} action add|delete
+     * @param {string[]} rids liste de rid (qui doivent tous être sur la même baseId)
+     * @param next
+     */
+    function registerCall (action, rids, next) {
+      try {
+        // on prend la baseId du 1er rid fourni
+        const baseId = getBaseIdFromRid(rids[0])
+        if (baseId === myBaseId) return next(new Error('inutile de s’enregistrer pour une modif locale'))
+        if (!exists(baseId)) return next(new Error(`Sésathèque ${baseId} inconnue`))
+        if (!tokens[baseId]) return next(new Error(`pas de token en configuration pour ${baseId}`))
+        if (rids.some(rid => getBaseIdFromRid(rid) !== baseId)) return next(new Error(`Tous les rids fournis ne sont pas sur ${baseId}`))
+        // on peut appeler
+        const baseUrl = getBaseUrl(baseId)
+        var options = {
+          uri: `${baseUrl}api/ressource/registerListener`,
+          headers: {'X-ApiToken': encodeURIComponent(tokens[baseId])},
+          gzip: true,
+          json: true,
+          body: {action: action, baseId: myBaseId, rids},
+          timeout: 3000
+        }
+        request.post(options, function (error, response, result) {
+          if (error) return next(error)
+          if (response.statusCode === 200 && result && result.success) {
+            if (result.warnings) log.dataError(`Warnings à l’appel de ${options.uri}`, result.warnings)
+            return next()
+          }
+          if (result && result.error) return next(new Error(result.error))
+          // si on est toujours là y'a un pb…
+          log.error(new Error(`réponse inattendue sur ${options.uri}, status ${response.statusCode}`), result)
+          next(new Error(`réponse invalide, la modification des listener sur ${baseId} a probablement échouée`))
+        })
+      } catch (error) {
+        next(error)
+      }
+    }
+
+    /**
+     * Enregistre un listener pour être prévenu (call sur updateArbre)
+     * @param {string[]} rids liste de rid (qui doivent tous être sur la même baseId)
+     * @param next
+     */
+    function register (rids, next) {
+      registerCall('add', rids, next)
+    }
+
+    /**
+     * Supprime un listener
+     * @param {string[]} rids liste de rid (qui doivent tous être sur la même baseId)
+     * @param next
+     */
+    function unregister (rids, next) {
+      registerCall('remove', rids, next)
+    }
+
+    /**
+     * Demande une mise à jour des arbres distants en envoyant une ref qui a changé ici
+     * @memberOf $ressourceRemote
+     * @param {string} baseId
+     * @param {Ref} ref
+     * @param {simpleCallback} next
+     */
+    function externalUpdate (baseId, ref, next) {
+      if (baseId === myBaseId) return next(new Error('$ressourceRemote.externalUpdate ne gère pas les ressources locales'))
       if (!exists(baseId)) return next(new Error(`Sésathèque ${baseId} inconnue`))
       if (!tokens[baseId]) return next(new Error(`pas de token en configuration pour ${baseId}`))
-      if (rids.some(rid => getBaseIdFromRid(rid) !== baseId)) return next(new Error(`Tous les rids fournis ne sont pas sur ${baseId}`))
-      // on peut appeler
-      const baseUrl = getBaseUrl(baseId)
-      var options = {
-        uri: `${baseUrl}api/ressource/registerListener`,
-        headers: {'X-ApiToken': encodeURIComponent(tokens[baseId])},
-        gzip: true,
-        json: true,
-        body: {action: action, baseId: myBaseId, rids},
-        timeout: 3000
-      }
-      request.post(options, function (error, response, result) {
-        if (error) return next(error)
-        if (response.statusCode === 200 && result && result.success) {
-          if (result.warnings) log.dataError(`Warnings à l’appel de ${options.uri}`, result.warnings)
-          return next()
+      if (!ref || !ref.aliasOf) return next(new Error('ref invalide'))
+      try {
+        const baseUrl = getBaseUrl(baseId)
+        var options = {
+          uri: `${baseUrl}api/ressource/externalUpdate`,
+          headers: {'X-ApiToken': encodeURIComponent(tokens[baseId])},
+          gzip: true,
+          json: true,
+          body: {ref},
+          timeout: 3000
         }
-        if (result && result.error) return next(new Error(result.error))
-        // si on est toujours là y'a un pb…
-        log.error(new Error(`réponse inattendue sur ${options.uri}, status ${response.statusCode}`), result)
-        next(new Error(`réponse invalide, la modification des listener sur ${baseId} a probablement échouée`))
-      })
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  /**
-   * Enregistre un listener pour être prévenu (call sur updateArbre)
-   * @param {string[]} rids liste de rid (qui doivent tous être sur la même baseId)
-   * @param next
-   */
-  function register (rids, next) {
-    registerCall('add', rids, next)
-  }
-
-  /**
-   * Supprime un listener
-   * @param {string[]} rids liste de rid (qui doivent tous être sur la même baseId)
-   * @param next
-   */
-  function unregister (rids, next) {
-    registerCall('remove', rids, next)
-  }
-
-  /**
-   * Demande une mise à jour des arbres distants en envoyant une ref qui a changé ici
-   * @memberOf $ressourceRemote
-   * @param {string} baseId
-   * @param {Ref} ref
-   * @param {simpleCallback} next
-   */
-  function externalUpdate (baseId, ref, next) {
-    if (baseId === myBaseId) return next(new Error('$ressourceRemote.externalUpdate ne gère pas les ressources locales'))
-    if (!exists(baseId)) return next(new Error(`Sésathèque ${baseId} inconnue`))
-    if (!tokens[baseId]) return next(new Error(`pas de token en configuration pour ${baseId}`))
-    if (!ref || !ref.aliasOf) return next(new Error('ref invalide'))
-    try {
-      const baseUrl = getBaseUrl(baseId)
-      var options = {
-        uri: `${baseUrl}api/ressource/externalUpdate`,
-        headers: {'X-ApiToken': encodeURIComponent(tokens[baseId])},
-        gzip: true,
-        json: true,
-        body: {ref},
-        timeout: 3000
+        request.post(options, function (error, response, result) {
+          if (error) return next(error)
+          if (response.statusCode === 200 && result && result.success) return next()
+          if (result && result.error) return next(new Error(result.error))
+          // si on est toujours là y'a un pb…
+          log.error(new Error(`réponse inattendue sur ${options.uri}, status ${response.statusCode}`), result)
+          next(new Error(`réponse invalide, la mise à jour des arbres contenant ${ref.aliasOf} sur ${baseId} a probablement échouée`))
+        })
+      } catch (error) {
+        next(error)
       }
-      request.post(options, function (error, response, result) {
-        if (error) return next(error)
-        if (response.statusCode === 200 && result && result.success) return next()
-        if (result && result.error) return next(new Error(result.error))
-        // si on est toujours là y'a un pb…
-        log.error(new Error(`réponse inattendue sur ${options.uri}, status ${response.statusCode}`), result)
-        next(new Error(`réponse invalide, la mise à jour des arbres contenant ${ref.aliasOf} sur ${baseId} a probablement échouée`))
-      })
-    } catch (error) {
-      next(error)
     }
-  }
 
-  return {
-    externalUpdate,
-    register,
-    unregister
-  }
+    return {
+      externalUpdate,
+      register,
+      unregister
+    }
+  })
 }

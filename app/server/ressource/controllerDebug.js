@@ -37,69 +37,71 @@
  * @Controller controlleurDebug
  * @requires {@link $ressourceRepository}
  */
-module.exports = function (controller, $ressourceRepository, EntityRessource) {
-  /**
-   * Dump une ressource
-   * @route GET /dump?oid=…
-   * @param {Integer} oid              L'oid de la ressource dont on veut le dump
-   * @param {Integer} [depth=null]     La profondeur
-   * @param {boolean} [hidden=false]   Pour voir les propriétés cachées
-   * @param {boolean} [terminal=false] Pour l'afficher en console plutôt que sur la page
-   */
-  controller.get('dump', function (context) {
-    var oid = context.get.oid
-    var depth = Number(context.get.depth) || null
-    var hidden = !!context.get.hidden
-    var terminal = !!context.get.terminal
-    $ressourceRepository.load(oid, function (error, ressource) {
-      if (error) context.json({error: error.toString()})
-      else {
-        var util = require('util')
-        var options = {showHidden: hidden, depth: depth, colors: terminal}
-        var objStr = util.inspect(ressource, options)
-        if (terminal) {
-          console.log(objStr)
-          context.json({msg: 'affiché en console'})
-        } else {
-          if (hidden) {
-            // faut envoyer du texte (chrome râle quand même parce que ça ressemble à du json mais il n'est pas valide
-            context.plain('la ressource avec ses champs cachés en texte\n' + objStr)
+module.exports = function (component) {
+  component.controller('debug/ressource', function ($ressourceRepository, EntityRessource) {
+    /**
+     * Dump une ressource
+     * @route GET /dump?oid=…
+     * @param {Integer} oid              L'oid de la ressource dont on veut le dump
+     * @param {Integer} [depth=null]     La profondeur
+     * @param {boolean} [hidden=false]   Pour voir les propriétés cachées
+     * @param {boolean} [terminal=false] Pour l'afficher en console plutôt que sur la page
+     */
+    this.get('dump', function (context) {
+      var oid = context.get.oid
+      var depth = Number(context.get.depth) || null
+      var hidden = !!context.get.hidden
+      var terminal = !!context.get.terminal
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (error) context.json({error: error.toString()})
+        else {
+          var util = require('util')
+          var options = {showHidden: hidden, depth: depth, colors: terminal}
+          var objStr = util.inspect(ressource, options)
+          if (terminal) {
+            console.log(objStr)
+            context.json({msg: 'affiché en console'})
           } else {
-            // on peut parser
-            var objInspected
-            try {
-              // mais c'est pas du json, et eval est pas permis, on ruse
-              var objectify = new Function('return ' + objStr) // eslint-disable-line no-new-func
-              objInspected = objectify()
-            } catch (error) {
-              objInspected = {error: 'erreur de parsing de la ressource ' + oid}
-              log(objInspected.error)
-              log(objStr)
+            if (hidden) {
+              // faut envoyer du texte (chrome râle quand même parce que ça ressemble à du json mais il n'est pas valide
+              context.plain('la ressource avec ses champs cachés en texte\n' + objStr)
+            } else {
+              // on peut parser
+              var objInspected
+              try {
+                // mais c'est pas du json, et eval est pas permis, on ruse
+                var objectify = new Function('return ' + objStr) // eslint-disable-line no-new-func
+                objInspected = objectify()
+              } catch (error) {
+                objInspected = {error: 'erreur de parsing de la ressource ' + oid}
+                log(objInspected.error)
+                log(objStr)
+              }
+              context.json(objInspected)
             }
-            context.json(objInspected)
           }
         }
+      })
+    })
+
+    this.get('like', function (context) {
+      var index = context.get.index
+      var value = context.get.value
+      var limit = context.limit || 10
+      var skip = context.skip || 0
+      if (index && value) {
+        EntityRessource.match(index).like(value).grab({limit, skip}, function (error, ressources) {
+          if (error) context.json({error: error.toString()})
+          else context.json({ressources: ressources})
+        })
       }
     })
-  })
 
-  controller.get('like', function (context) {
-    var index = context.get.index
-    var value = context.get.value
-    var limit = context.limit || 10
-    var skip = context.skip || 0
-    if (index && value) {
-      EntityRessource.match(index).like(value).grab({limit, skip}, function (error, ressources) {
-        if (error) context.json({error: error.toString()})
-        else context.json({ressources: ressources})
-      })
-    }
-  })
-
-  controller.get('headers', function (context) {
-    context.json({success: true, headers: context.request.headers})
-  })
-  controller.post('headers', function (context) {
-    context.json({success: true, headers: context.request.headers})
+    this.get('headers', function (context) {
+      context.json({success: true, headers: context.request.headers})
+    })
+    this.post('headers', function (context) {
+      context.json({success: true, headers: context.request.headers})
+    })
   })
 }

@@ -31,69 +31,43 @@
 
 'use strict'
 
-/**
- * Component de gestion des personnes (auteurs) et des groupes
- * On ne peut pas scinder en 2 composants car on aurait des dépendances cycliques
- * avec les services à cheval les deux entités
- * @private
- */
-var personneComponent = lassi.component('personne')
+module.exports = function personneComponentFactory (lassi) {
+  /**
+   * Component de gestion des personnes (auteurs) et des groupes
+   * On ne peut pas scinder en 2 composants car on aurait des dépendances cycliques
+   * avec les services à cheval les deux entités
+   * @private
+   */
+  const personneComponent = lassi.component('personne')
 
-// var _ = require('lodash')
-// var tools = require('../tools')
+  personneComponent.config(function ($settings) {
+    // on vérifie que l'on a un cache avec des valeur acceptables
+    var cacheTTL = $settings.get('components.personne.cacheTTL', null)
+    if (!cacheTTL) {
+      log.error('Il faudrait indiquer un TTL pour le cache de personne' +
+        ' (en s, dans components.personne.cacheTTL), on le fixe à 1h')
+    }
+    if (cacheTTL < 60) throw new Error("Le cache personne doit avoir un TTL d'au moins 60s")
+    if (cacheTTL > 24 * 3600) throw new Error('Le cache personne doit avoir un TTL inférieur à 24h (86400s)')
+  })
 
-personneComponent.config(function ($settings) {
-  // on vérifie que l'on a un cache avec des valeur acceptables
-  var cacheTTL = $settings.get('components.personne.cacheTTL', null)
-  if (!cacheTTL) {
-    log.error('Il faudrait indiquer un TTL pour le cache de personne' +
-      ' (en s, dans components.personne.cacheTTL), on le fixe à 1h')
-  }
-  if (cacheTTL < 60) throw new Error("Le cache personne doit avoir un TTL d'au moins 60s")
-  if (cacheTTL > 24 * 3600) throw new Error('Le cache personne doit avoir un TTL inférieur à 24h (86400s)')
-})
+  require('./serviceCachePersonne')(personneComponent)
 
-personneComponent.service('$cachePersonne', function ($cache, $settings) {
-  return require('./serviceCachePersonne')($cache, $settings)
-})
+  require('./EntityPersonne')(personneComponent)
 
-personneComponent.entity('EntityPersonne', function ($cachePersonne) {
-  require('./EntityPersonne')(this, $cachePersonne)
-})
+  require('./serviceCacheGroupe')(personneComponent)
 
-personneComponent.service('$cacheGroupe', function ($cache, $settings) {
-  return require('./serviceCacheGroupe')($cache, $settings)
-})
+  require('./EntityGroupe')(personneComponent)
 
-personneComponent.entity('EntityGroupe', function ($cacheGroupe) {
-  require('./EntityGroupe')(this, $cacheGroupe)
-})
+  require('./serviceGroupeRepository')(personneComponent)
+  require('./servicePersonneRepository')(personneComponent)
+  require('./serviceAccessControl')(personneComponent)
+  require('./servicePersonneControl')(personneComponent)
 
-personneComponent.service('$groupeRepository', function (EntityGroupe, $cacheGroupe) {
-  return require('./serviceGroupeRepository')(EntityGroupe, $cacheGroupe)
-})
-
-personneComponent.service('$personneRepository', function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
-  return require('./servicePersonneRepository')(EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository)
-})
-
-personneComponent.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
-  return require('./serviceAccessControl')(EntityPersonne, EntityGroupe, $settings, $personneRepository)
-})
-
-personneComponent.service('$personneControl', function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
-  return require('./servicePersonneControl')(EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl)
-})
-
-// controleur des pages html de gestion de groupe
-personneComponent.controller('groupe', function (EntityGroupe, $groupeRepository, $personneRepository, $accessControl, $page, $form, $flashMessages) {
-  require('./controllerGroupe')(this, EntityGroupe, $groupeRepository, $personneRepository, $accessControl, $page, $form, $flashMessages)
-})
-
-// l'api json
-personneComponent.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl) {
-  require('./controllerApiPersonne')(this, EntityPersonne, $personneRepository, $accessControl)
-})
-personneComponent.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
-  require('./controllerApiGroupe')(this, EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository)
-})
+  // controleur des pages html de gestion de groupe
+  require('./controllerGroupe')(personneComponent)
+  // pour api/personne
+  require('./controllerApiPersonne')(personneComponent)
+  // pour api/groupe
+  require('./controllerApiGroupe')(personneComponent)
+}

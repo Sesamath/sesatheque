@@ -36,76 +36,80 @@
  * @controller controllerAuth
  * @extends Controller
  */
-module.exports = function (controller, $auth, $accessControl, $ressourcePage, $flashMessages) {
-  function redirectOrError (context) {
-    context.layout = 'page'
-    if (context.get.redirect) context.redirect(context.get.redirect)
-    else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
-  }
+module.exports = function (component) {
+  component.controller(function ($auth, $accessControl, $ressourcePage, $flashMessages) {
+    function redirectOrError (context) {
+      context.layout = 'page'
+      if (context.get.redirect) context.redirect(context.get.redirect)
+      else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
+    }
 
-  // on diffère la création des routes à l'ajout du premier client
-  $auth.deferController(function () {
-    /**
-     * connexion, redirige vers le serveur d'authentification par défaut ou précisé par ?source=xxx
-     * @route GET /connexion
-     */
-    controller.get('connexion', function (context) {
-      if ($accessControl.isAuthenticated(context)) {
-        redirectOrError(context)
-      } else {
-        $auth.login(context)
-      }
-    })
+    const controller = this
 
-    /**
-     * Déconnexion ici (action de l'utilisateur sur ce site),
-     * et redirection vers la déconnexion du serveur sso (qui rappellera son client ici)
-     * On est juste là en fallBack, normalement le lien de déconnexion pointe directement sur
-     * l'url de déconnexion de notre serveur d'authentification (ou ici si on l'a pas trouvé,
-     * pour au moins déconnecter localement)
-     * @route GET /deconnexion
-     */
-    controller.get('deconnexion', function (context) {
-      if ($accessControl.isAuthenticated(context)) {
-        $auth.logout(context)
-      } else {
-        context.layout = 'page'
-        $ressourcePage.printError(context, new Error('Utilisateur déjà déconnecté (ou jamais connecté)'), 200)
-      }
-    })
+    // on diffère la création des routes à l'ajout du premier client
+    $auth.deferController(function () {
+      /**
+       * connexion, redirige vers le serveur d'authentification par défaut ou précisé par ?source=xxx
+       * @route GET /connexion
+       */
+      controller.get('connexion', function (context) {
+        if ($accessControl.isAuthenticated(context)) {
+          redirectOrError(context)
+        } else {
+          $auth.login(context)
+        }
+      })
 
-    /**
-     * Valide un retour du serveur d'authentification (qui peut répondre que l'on est pas connecté)
-     * @route GET /validation
-     */
-    controller.get('validation', function (context) {
-      if ($accessControl.isAuthenticated(context)) {
-        redirectOrError(context)
-      } else {
-        $auth.validate(context, function (error, personne) {
-          if (error) {
-            $ressourcePage.printError(context, error)
-          } else {
-            if (personne && personne.pid) $flashMessages.add(context, 'Authentification réussie', 'info')
-            var uri = context.get.redirect || '/'
-            context.redirect(uri)
-          }
-        })
-      }
-    })
+      /**
+       * Déconnexion ici (action de l'utilisateur sur ce site),
+       * et redirection vers la déconnexion du serveur sso (qui rappellera son client ici)
+       * On est juste là en fallBack, normalement le lien de déconnexion pointe directement sur
+       * l'url de déconnexion de notre serveur d'authentification (ou ici si on l'a pas trouvé,
+       * pour au moins déconnecter localement)
+       * @route GET /deconnexion
+       */
+      controller.get('deconnexion', function (context) {
+        if ($accessControl.isAuthenticated(context)) {
+          $auth.logout(context)
+        } else {
+          context.layout = 'page'
+          $ressourcePage.printError(context, new Error('Utilisateur déjà déconnecté (ou jamais connecté)'), 200)
+        }
+      })
 
-    /**
-     * Controleur sur toutes les routes html pour peupler le authBloc (faut passer après les contrôleurs html),
-     * @route GET /*
-     */
-    controller.get('*', function (context) {
-      // si on est pas concerné on passe au suivant sans rien faire
-      if (context.layout !== 'page') return context.next()
-      const data = {
-        authBloc: $auth.getAuthBloc(context)
-      }
-      data.authBloc.$view = 'auth'
-      context.next(null, data)
-    })
-  }) // deferController
+      /**
+       * Valide un retour du serveur d'authentification (qui peut répondre que l'on est pas connecté)
+       * @route GET /validation
+       */
+      controller.get('validation', function (context) {
+        if ($accessControl.isAuthenticated(context)) {
+          redirectOrError(context)
+        } else {
+          $auth.validate(context, function (error, personne) {
+            if (error) {
+              $ressourcePage.printError(context, error)
+            } else {
+              if (personne && personne.pid) $flashMessages.add(context, 'Authentification réussie', 'info')
+              var uri = context.get.redirect || '/'
+              context.redirect(uri)
+            }
+          })
+        }
+      })
+
+      /**
+       * Controleur sur toutes les routes html pour peupler le authBloc (faut passer après les contrôleurs html),
+       * @route GET /*
+       */
+      controller.get('*', function (context) {
+        // si on est pas concerné on passe au suivant sans rien faire
+        if (context.layout !== 'page') return context.next()
+        const data = {
+          authBloc: $auth.getAuthBloc(context)
+        }
+        data.authBloc.$view = 'auth'
+        context.next(null, data)
+      })
+    }) // deferController
+  })
 }
