@@ -54,7 +54,7 @@ const MetaForm = () => (
             name="type"
             component="input"
             type="text"
-            props={{ disabled: true }}
+            disabled
             format={typeToLabel}
           />
         </label>
