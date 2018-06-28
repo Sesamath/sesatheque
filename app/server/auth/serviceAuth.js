@@ -32,7 +32,6 @@
 'use strict'
 
 const _ = require('lodash')
-const sjtUrl = require('sesajstools/http/url')
 const modLog = require('an-log')('$auth')
 
 /**
