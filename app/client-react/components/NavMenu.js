@@ -62,20 +62,16 @@ NavMenu.propTypes = {
 const mapDispatchToProps = (dispatch) => ({
   askDelete: (oid) => {
     if (confirm('Êtes vous sûr de vouloir supprimer cette ressource ?')) {
-      const success = () => {
-        // @todo virer cette attente pour remplacer par du dispatch(push('/')) dès que la home est gérée par react
-        setTimeout(() => { window.location = '/' }, 1000)
-        // dispatch(push('/'))
-      }
+      const success = () => dispatch(push('/'))
 
-      dispatch(deleteRessource(oid, success))
+      return dispatch(deleteRessource(oid, success))
     }
   },
   askClone: (oid) => {
     if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource ?')) {
-      const success = (clonedOid) => {
-        return dispatch(push(`/ressource/modifier/${clonedOid}`))
-      }
+      const success = (clonedOid) => dispatch(
+        push(`/ressource/modifier/${clonedOid}`)
+      )
 
       return dispatch(cloneRessource(oid, success))
     }
