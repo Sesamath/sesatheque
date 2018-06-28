@@ -56,7 +56,7 @@ export const deleteRessource = (oid, success) => (dispatch) => {
     .then(() => {
       return dispatch(addNotification({
         level: 'info',
-        message: 'La ressource a été supprimée (redirection dans 1s)'
+        message: 'La ressource a été supprimée'
       }))
     })
     .then(success)
