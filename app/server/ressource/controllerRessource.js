@@ -479,41 +479,24 @@ module.exports = function (component) {
         ressource = ressourceBdd
         const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
         // faut laisser passer ceux qui ont la permission index
-        if (deniedMsg && $accessControl.getDeniedMessage('index', context, ressource)) return denied(context, deniedMsg)
+        if (deniedMsg && !$accessControl.hasPermission('index', context, ressource)) return denied(context, deniedMsg)
 
         // sinon on peut afficher le form
         addToken(context, ressource)
-        if (['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
-          let data = {
-            contentBloc: {
-              $view: 'react-config',
-              verbose: (appConfig.application.staging !== 'prod'),
-              isDev: (appConfig.application.staging !== 'prod'),
-              baseId: appConfig.application.baseId,
-              sesatheques: appConfig.sesatheques
-            },
-            jsBloc: {
-              $view: 'js',
-              jsFiles: ['/react.js']
-            }
+        const data = {
+          contentBloc: {
+            $view: 'react-config',
+            verbose: (appConfig.application.staging !== 'prod'),
+            isDev: (appConfig.application.staging !== 'prod'),
+            baseId: appConfig.application.baseId,
+            sesatheques: appConfig.sesatheques
+          },
+          jsBloc: {
+            $view: 'js',
+            jsFiles: ['/react.js']
           }
-          context.html(data)
-        } else {
-          // si c'est un alias, on utilise forkAlias et redirige vers l'édition de la nouvelle ressource
-          if (ressource.aliasOf) {
-            return $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
-              if (error) return $ressourcePage.printError(context, error)
-              if (!forkedRessource) return $ressourcePage.printError(context, 'L’original a été supprimé, impossible de modifier cet alias')
-
-              let route = $routes.getAbs('edit', forkedRessource.oid)
-              if (context.get.layout === 'iframe') route = $routes.addParam(route, 'layout', 'iframe')
-              if (context.get.closerId) route = $routes.addParam(route, 'closerId', context.get.closerId)
-              context.redirect(route)
-            })
-          }
-
-          $ressourcePage.printForm(context, null, ressource)
         }
+        context.html(data)
       }).catch(function (error) {
         log.error(error)
         $ressourcePage.printError(context, error)
@@ -638,49 +621,6 @@ module.exports = function (component) {
       })
     })
 
-<<<<<<< HEAD
-  /**
-   * Affichage du formulaire d'édition
-   * @route GET /ressource/modifier/:oid
-   */
-  controller.get($routes.get('edit', ':oid'), function (context) {
-    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-    context.tab = 'edit'
-    const myPid = $accessControl.getCurrentUserPid(context)
-    // pas la peine de la charger si on est pas authentifié
-    if (!myPid) return denied(context)
-    const oid = context.arguments.oid
-    let ressource // la ressource qu'on va envoyer au form
-    flow().seq(function () {
-      $ressourceRepository.load(oid, this)
-    }).seq(function (ressourceBdd) {
-      if (!ressourceBdd) return print404(context, oid)
-      ressource = ressourceBdd
-      const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
-      // faut laisser passer ceux qui ont la permission index
-      if (deniedMsg && !$accessControl.hasPermission('index', context, ressource)) return denied(context, deniedMsg)
-
-      // sinon on peut afficher le form
-      addToken(context, ressource)
-      const data = {
-        contentBloc: {
-          $view: 'ressource-editor',
-          verbose: (appConfig.application.staging !== 'prod'),
-          isDev: (appConfig.application.staging !== 'prod'),
-          baseId: appConfig.application.baseId,
-          sesatheques: appConfig.sesatheques,
-          ressource: ressource ? sjt.stringify(ressource) : ''
-        },
-        jsBloc: {
-          $view: 'js',
-          jsFiles: ['/react.js']
-        }
-      }
-      context.html(data)
-    }).catch(function (error) {
-      log.error(error)
-      $ressourcePage.printError(context, error)
-=======
     /**
      * Importe une ressource (via du js client qui appelera l'api
      * @route GET /ressource/import
@@ -706,7 +646,6 @@ module.exports = function (component) {
       } else {
         denied(context)
       }
->>>>>>> master
     })
 
     /**
