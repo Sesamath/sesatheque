@@ -66,7 +66,7 @@ function notifyError (data) {
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
  * @Controller controllerApi
  */
-module.exports = function controllersFactory (component) {
+module.exports = function (component) {
   component.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
     /**
      * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id

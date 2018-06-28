@@ -31,63 +31,52 @@
 
 'use strict'
 
-var path = require('path')
+const path = require('path')
 
-/**
- * Component qui défini
- * - le layout et les vues pour le html
- * - les controleurs des pages statiques
- * - des controleurs de debug en dev
- */
-var mainComponent = lassi.component('main')
+module.exports = function mainComponentFactory (lassi) {
+  /**
+   * Component qui défini
+   * - le layout et les vues pour le html
+   * - les controleurs des pages statiques
+   * - des controleurs de debug en dev
+   */
+  const mainComponent = lassi.component('main')
 
-/**
- * On ajoute un dust.helper à l'initialisation du framework
- * Cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
- *
- * context contient les propriétés stack,global,blocks,templateName,
- *     on peut récupérer les paramètres passés à la vue avec context.get('param')
- * bodies contient block
- * params liste les attributs passé au helper avec {@helper attrName1=...}
- * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
- * this.application.templateEngines.dust existe plus /
-this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
+  /**
+   * On ajoute un dust.helper à l'initialisation du framework
+   * Cf https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
+   *
+   * context contient les propriétés stack,global,blocks,templateName,
+   *     on peut récupérer les paramètres passés à la vue avec context.get('param')
+   * bodies contient block
+   * params liste les attributs passé au helper avec {@helper attrName1=...}
+   * @see https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#Writing_a_dust_helper
+   * this.application.templateEngines.dust existe plus /
+   this.application.templateEngines.dust.helper('dump', function (chunk, context, bodies, params) {
   return chunk.write('<pre class='debug'>' + JSON.stringify(params, null, 2) + '</pre>');
 }); /**/
 
-// pour le statique
-require('./controllerMain')(mainComponent)
+  // pour le statique
+  require('./controllerMain')(mainComponent)
+  // pour /api/checkSesalab et /api/checkSesatheque
+  require('./controllerApi')(mainComponent)
 
-// pour /api/checkSesalab et /api/checkSesatheque
-require('./controllerApi')(mainComponent)
+  require('./servicePage')(mainComponent)
+  require('./serviceFlashMessages')(mainComponent)
+  require('./serviceForm')(mainComponent)
+  require('./serviceJson')(mainComponent)
 
-mainComponent.service('$page', function () {
-  return require('./servicePage')()
-})
-
-mainComponent.service('$flashMessages', function () {
-  return require('./serviceFlashMessages')()
-})
-
-mainComponent.service('$form', function ($page) {
-  return require('./serviceForm')($page)
-})
-
-mainComponent.service('$json', function () {
-  return require('./serviceJson')()
-})
-
-// pour la doc
-mainComponent.controller(function () {
-  this.serve('doc', path.resolve(__dirname, '../../../documentation'))
-})
-/**
- * En dev on ajoute des routes de debug
- */
-if (!global.isProd) {
-  mainComponent.controller('debug', function () {
-    require('./controllerDebug')(this)
+  // pour la doc
+  mainComponent.controller(function () {
+    this.serve('doc', path.resolve(__dirname, '../../../documentation'))
   })
-}
 
-// le listener beforeTransport est dans le composant ressource pour avoir les services qu'il utilise
+  /**
+   * En dev on ajoute des routes de debug
+   */
+  if (!global.isProd) {
+    require('./controllerDebug')(mainComponent)
+  }
+
+  // le listener beforeTransport est dans le composant ressource (il a besoin des services de ressurce)
+}

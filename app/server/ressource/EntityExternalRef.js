@@ -28,74 +28,74 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
-module.exports = function (EntityExternalRef) {
-  const config = require('../config')
-  const myBaseId = config.application.baseId
-  const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
+const config = require('../config')
+const myBaseId = config.application.baseId
+const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
 
-  /**
-   * entity EntityExternalRef cf [Entity](lassi/Entity.html)
-   * registry pour les sésathèques qui veulent être notifiées lors d'un changement sur une ressource
-   * @entity EntityExternalRef
-   * @extends Entity
-   */
-  EntityExternalRef.construct(function (data) {
-    if (!data) data = {}
+module.exports = function entityExternalRefFactory (component) {
+  component.entity('EntityExternalRef', function () {
+    const EntityExternalRef = this
+
     /**
-     * Oid de ce "listener"
-     * @type {string}
+     * entity EntityExternalRef cf [Entity](lassi/Entity.html)
+     * registry pour les sésathèques qui veulent être notifiées lors d'un changement sur une ressource
+     * @entity EntityExternalRef
+     * @extends Entity
      */
-    this.oid = data.oid
-    /**
-     * baseId de la sésathèque qui veut être prévenue lors d'une modif
-     * @type {string}
-     */
-    this.baseId = data.baseId
-    /**
-     * rid de la ressource à surveiller
-     * @type {string}
-     */
-    this.rid = data.rid
-  })
+    EntityExternalRef.construct(function (data) {
+      if (!data) data = {}
+      /**
+       * Oid de ce "listener"
+       * @type {string}
+       */
+      this.oid = data.oid
+      /**
+       * baseId de la sésathèque qui veut être prévenue lors d'une modif
+       * @type {string}
+       */
+      this.baseId = data.baseId
+      /**
+       * rid de la ressource à surveiller
+       * @type {string}
+       */
+      this.rid = data.rid
+    })
 
-  // @todo inutile avec lassi#mongo, à virer après migration
-  EntityExternalRef.table = 'externalRef'
+    EntityExternalRef
+      .defineIndex('baseId', 'string')
+      .defineIndex('rid', 'string')
 
-  EntityExternalRef
-    .defineIndex('baseId', 'string')
-    .defineIndex('rid', 'string')
-
-  EntityExternalRef.beforeStore(function (next) {
-    try {
-      // vérifications d'intégrité
-      if (!this.baseId) throw new Error('EntityExternalRef sans baseId')
-      if (!this.rid) throw new Error('EntityExternalRef sans rid')
-      if (getBaseIdFromRid(this.rid) !== myBaseId) throw new Error(`Cette EntityExternalRef ne doit pas être gérée ici (${myBaseId}, alors que rid vaut ${this.rid}`)
-      if (!exists(this.baseId)) throw new Error(`${this.baseId} inconnue`)
-      if (!config.sesatheques.find(s => s.baseId === this.baseId)) throw new Error(`${this.baseId} n’est pas déclaré en config, impossible de mettre un listener ici pour la prévenir en cas de modif sur ${this.rid}`)
-      // on a passé toutes les vérifs, sans oid on vérifie qu'on a pas déjà un listener
-      // pour ce couple baseId / rid
-      if (this.oid) return next()
-      EntityExternalRef
-        .match('baseId').equals(this.baseId)
-        .match('rid').equals(this.rid)
-        .grab(function (error, extRefs) {
-          if (error) return next(error)
-          if (extRefs.length === 0) return next()
-          // y'en a au moins un, on garde le premier
-          this.oid = extRefs[0].oid
-          next()
-          // on vire d'éventuels surnuméraires…
-          if (extRefs.length > 1) {
-            log.error(new Error(`ExternalRef en doublon (${extRefs.length}) pour ${this.rid} sur ${this.baseId}`))
-            extRefs.slice(1).forEach(extRef => extRef.delete(log.error))
-          }
-        })
-    } catch (error) {
-      next(error)
-    }
+    EntityExternalRef.beforeStore(function (next) {
+      try {
+        // vérifications d'intégrité
+        if (!this.baseId) throw new Error('EntityExternalRef sans baseId')
+        if (!this.rid) throw new Error('EntityExternalRef sans rid')
+        if (getBaseIdFromRid(this.rid) !== myBaseId) throw new Error(`Cette EntityExternalRef ne doit pas être gérée ici (${myBaseId}, alors que rid vaut ${this.rid}`)
+        if (!exists(this.baseId)) throw new Error(`${this.baseId} inconnue`)
+        if (!config.sesatheques.find(s => s.baseId === this.baseId)) throw new Error(`${this.baseId} n’est pas déclaré en config, impossible de mettre un listener ici pour la prévenir en cas de modif sur ${this.rid}`)
+        // on a passé toutes les vérifs, sans oid on vérifie qu'on a pas déjà un listener
+        // pour ce couple baseId / rid
+        if (this.oid) return next()
+        EntityExternalRef
+          .match('baseId').equals(this.baseId)
+          .match('rid').equals(this.rid)
+          .grab(function (error, extRefs) {
+            if (error) return next(error)
+            if (extRefs.length === 0) return next()
+            // y'en a au moins un, on garde le premier
+            this.oid = extRefs[0].oid
+            next()
+            // on vire d'éventuels surnuméraires…
+            if (extRefs.length > 1) {
+              log.error(new Error(`ExternalRef en doublon (${extRefs.length}) pour ${this.rid} sur ${this.baseId}`))
+              extRefs.slice(1).forEach(extRef => extRef.delete(log.error))
+            }
+          })
+      } catch (error) {
+        next(error)
+      }
+    })
   })
 }

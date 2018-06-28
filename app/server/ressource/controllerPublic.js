@@ -32,17 +32,8 @@
 'use strict'
 
 const _ = require('lodash')
-const request = require('request')
 const {ensure, linkQs} = require('../tools')
 const config = require('./config')
-
-/**
- * Une callback qui ne fait rien sinon logguer une éventuelle erreur
- * @private
- */
-function logIfError (error) {
-  if (error) log.error(error)
-}
 
 /**
  * Le controleur html des routes /public/ (pages sans authentification)
@@ -51,208 +42,212 @@ function logIfError (error) {
  * La session n'est pas utilisée ici (varnish a viré les cookies en amont pour mettre ces pages en cache)
  * @controller controllerPublic
  */
-module.exports = function (controller, $ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $accessControl, $ressourceFetch) {
-  /**
-   * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
-   * @private
-   * @param {Context} context
-   * @param view
-   * @param options
-   */
-  function affiche (context, view, options) {
-    var oid = context.arguments.oid
-    $ressourceRepository.load(oid, function (error, ressource) {
-      if (error) return $ressourcePage.printError(context, error, 500)
+module.exports = function (component) {
+  component.controller('public', function ($ressourceRepository, $ressourceConverter, $ressourcePage, $routes, $accessControl, $ressourceFetch) {
+    /**
+     * Charge une ressource publique (d'après context.arguments.oid) et l'envoie à la vue
+     * @private
+     * @param {Context} context
+     * @param view
+     * @param options
+     */
+    function affiche (context, view, options) {
+      var oid = context.arguments.oid
+      $ressourceRepository.load(oid, function (error, ressource) {
+        if (error) return $ressourcePage.printError(context, error, 500)
+        if (!ressource) return $ressourcePage.printError(context, 'Cette ressource n’existe pas', 404)
+        if (!$accessControl.isPublic(ressource)) return $ressourcePage.printError(context, `La ressource ${ressource.oid} n’est pas publique`, 403)
+        $ressourcePage.prepareAndSend(context, null, ressource, view, options)
+      })
+    }
+
+    /**
+     * Vérifie qu'une ressource est publique puis l'envoie à la vue
+     * @private
+     * @param {Context} context
+     * @param error
+     * @param ressource
+     * @param view
+     * @param options
+     */
+    function checkAndAffiche (context, error, ressource, view, options) {
+      if (error) return $ressourcePage.printError(context, error)
       if (!ressource) return $ressourcePage.printError(context, 'Cette ressource n’existe pas', 404)
       if (!$accessControl.isPublic(ressource)) return $ressourcePage.printError(context, `La ressource ${ressource.oid} n’est pas publique`, 403)
       $ressourcePage.prepareAndSend(context, null, ressource, view, options)
+    }
+
+    const controller = this
+
+    /**
+     * Page describe
+     * @route GET /public/decrire/:oid
+     */
+    controller.get($routes.get('describe', ':oid'), function (context) {
+      context.layout = 'page'
+      context.tab = 'describe'
+      affiche(context, 'describe')
     })
-  }
-
-  /**
-   * Vérifie qu'une ressource est publique puis l'envoie à la vue
-   * @private
-   * @param {Context} context
-   * @param error
-   * @param ressource
-   * @param view
-   * @param options
-   */
-  function checkAndAffiche (context, error, ressource, view, options) {
-    if (error) return $ressourcePage.printError(context, error)
-    if (!ressource) return $ressourcePage.printError(context, 'Cette ressource n’existe pas', 404)
-    if (!$accessControl.isPublic(ressource)) return $ressourcePage.printError(context, `La ressource ${ressource.oid} n’est pas publique`, 403)
-    $ressourcePage.prepareAndSend(context, null, ressource, view, options)
-  }
-
-  /**
-   * Page describe
-   * @route GET /public/decrire/:oid
-   */
-  controller.get($routes.get('describe', ':oid'), function (context) {
-    context.layout = 'page'
-    context.tab = 'describe'
-    affiche(context, 'describe')
-  })
-  /**
-   * Page describe
-   * @route GET /public/decrire/:origine/:idOrigine
-   */
-  controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
-    context.layout = 'page'
-    context.tab = 'describe'
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      checkAndAffiche(context, error, ressource, 'describe')
-    })
-  })
-
-  /**
-   * Page display (pleine page, prévu pour iframe)
-   * @route GET /public/voir/:oid
-   */
-  controller.get($routes.get('display', ':oid'), function (context) {
-    context.layout = 'iframe'
-    affiche(context, 'display')
-  })
-  /**
-   * Page display (pleine page, prévu pour iframe)
-   * @route GET /public/voir/:origine/:idOrigine
-   */
-  controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
-    context.layout = 'iframe'
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    if (origine === 'cle') {
-      $ressourceRepository.loadByCle(idOrigine, function (error, ressource) {
-        // on fait sauter la restriction si c'est une ressource publiée dont on connait la clé
-        if (!error && ressource && ressource.publie) ressource.restriction = 0
-        checkAndAffiche(context, error, ressource, 'display')
+    /**
+     * Page describe
+     * @route GET /public/decrire/:origine/:idOrigine
+     */
+    controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
+      context.layout = 'page'
+      context.tab = 'describe'
+      var origine = context.arguments.origine
+      var idOrigine = context.arguments.idOrigine
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        checkAndAffiche(context, error, ressource, 'describe')
       })
-    } else {
+    })
+
+    /**
+     * Page display (pleine page, prévu pour iframe)
+     * @route GET /public/voir/:oid
+     */
+    controller.get($routes.get('display', ':oid'), function (context) {
+      context.layout = 'iframe'
+      affiche(context, 'display')
+    })
+    /**
+     * Page display (pleine page, prévu pour iframe)
+     * @route GET /public/voir/:origine/:idOrigine
+     */
+    controller.get($routes.get('display', ':origine', ':idOrigine'), function (context) {
+      context.layout = 'iframe'
+      var origine = context.arguments.origine
+      var idOrigine = context.arguments.idOrigine
+      if (origine === 'cle') {
+        $ressourceRepository.loadByCle(idOrigine, function (error, ressource) {
+          // on fait sauter la restriction si c'est une ressource publiée dont on connait la clé
+          if (!error && ressource && ressource.publie) ressource.restriction = 0
+          checkAndAffiche(context, error, ressource, 'display')
+        })
+      } else {
+        $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+          checkAndAffiche(context, error, ressource, 'display')
+        })
+      }
+    })
+    /**
+     * Page preview (avec le layout du site)
+     * @route GET /public/apercevoir/:oid
+     */
+    controller.get($routes.get('preview', ':oid'), function (context) {
+      context.layout = 'page'
+      context.tab = 'preview'
+      affiche(context, 'display')
+    })
+    /**
+     * Page preview (avec le layout du site)
+     * @route GET /public/apercevoir/:origine/:idOrigine
+     */
+    controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
+      context.layout = 'page'
+      context.tab = 'preview'
+      var origine = context.arguments.origine
+      var idOrigine = context.arguments.idOrigine
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         checkAndAffiche(context, error, ressource, 'display')
       })
-    }
-  })
-  /**
-   * Page preview (avec le layout du site)
-   * @route GET /public/apercevoir/:oid
-   */
-  controller.get($routes.get('preview', ':oid'), function (context) {
-    context.layout = 'page'
-    context.tab = 'preview'
-    affiche(context, 'display')
-  })
-  /**
-   * Page preview (avec le layout du site)
-   * @route GET /public/apercevoir/:origine/:idOrigine
-   */
-  controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
-    context.layout = 'page'
-    context.tab = 'preview'
-    var origine = context.arguments.origine
-    var idOrigine = context.arguments.idOrigine
-    $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-      checkAndAffiche(context, error, ressource, 'display')
     })
-  })
 
-  /**
-   * La recherche (form et résultats)
-   * @private
-   */
-  function search (context) {
-    context.layout = 'page'
-    if (_.isEmpty(context.get)) {
-      // form de recherche
-      $ressourcePage.printSearchForm(context)
-    } else {
-      // résultats
-      log.debug('search reçoit', context.get)
-      // faut passer en revue les critères
-      var filters = []
-      var crit = context.get
-      var filter
-
-      // les filtres, parmi les propriétés défini en conf
-      for (var prop in crit) {
-        if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
-          filter = {
-            index: prop,
-            values: Array.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
-          }
-          filters.push(filter)
-        }
-      }
-      log.debug('traduits en filters', filters)
-      // @todo ajouter des critères de tri
-      if (filters.length) {
-        var options = {
-          filters: filters
-        }
-        // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
-        options.skip = ensure(crit.skip, 'integer', 0)
-        options.limit = ensure(crit.limit, 'integer', 25)
-        options.orderBy = crit.orderBy || 'dateCreation'
-        $ressourceRepository.getListe('public', options, function (error, ressources) {
-          var data = $ressourcePage.getDefaultData('liste')
-          data.$metas.title = 'Résultats de la recherche'
-          if (error) {
-            data.contentBloc.error = error.toString()
-          } else {
-            if (ressources.length === options.limit) {
-              crit.skip = options.skip + options.limit
-              data.contentBloc.linkPageNext = linkQs($routes.get('search'), 'Résultats suivants', crit)
-            }
-            if (options.skip) {
-              crit.skip = options.skip - options.limit
-              if (crit.skip < 0) crit.skip = 0
-              data.contentBloc.linkPagePrev = linkQs($routes.get('search'), 'Résultats précédents', crit)
-            }
-            if (ressources.length) data.contentBloc.pagination = '(' + (options.skip + 1) + ' à ' + (options.skip + 1 + ressources.length) + ')'
-            data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources) // inutile de passer le context si on est pas authentifié
-          }
-          context.html(data)
-        })
+    /**
+     * La recherche (form et résultats)
+     * @private
+     */
+    function search (context) {
+      context.layout = 'page'
+      if (_.isEmpty(context.get)) {
+        // form de recherche
+        $ressourcePage.printSearchForm(context)
       } else {
-        $ressourcePage.printSearchForm(context, ['il faut choisir au moins un critère'])
+        // résultats
+        log.debug('search reçoit', context.get)
+        // faut passer en revue les critères
+        var filters = []
+        var crit = context.get
+        var filter
+
+        // les filtres, parmi les propriétés défini en conf
+        for (var prop in crit) {
+          if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
+            filter = {
+              index: prop,
+              values: Array.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
+            }
+            filters.push(filter)
+          }
+        }
+        log.debug('traduits en filters', filters)
+        // @todo ajouter des critères de tri
+        if (filters.length) {
+          var options = {
+            filters: filters
+          }
+          // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
+          options.skip = ensure(crit.skip, 'integer', 0)
+          options.limit = ensure(crit.limit, 'integer', 25)
+          options.orderBy = crit.orderBy || 'dateCreation'
+          $ressourceRepository.getListe('public', options, function (error, ressources) {
+            var data = $ressourcePage.getDefaultData('liste')
+            data.$metas.title = 'Résultats de la recherche'
+            if (error) {
+              data.contentBloc.error = error.toString()
+            } else {
+              if (ressources.length === options.limit) {
+                crit.skip = options.skip + options.limit
+                data.contentBloc.linkPageNext = linkQs($routes.get('search'), 'Résultats suivants', crit)
+              }
+              if (options.skip) {
+                crit.skip = options.skip - options.limit
+                if (crit.skip < 0) crit.skip = 0
+                data.contentBloc.linkPagePrev = linkQs($routes.get('search'), 'Résultats précédents', crit)
+              }
+              if (ressources.length) data.contentBloc.pagination = '(' + (options.skip + 1) + ' à ' + (options.skip + 1 + ressources.length) + ')'
+              data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources) // inutile de passer le context si on est pas authentifié
+            }
+            context.html(data)
+          })
+        } else {
+          $ressourcePage.printSearchForm(context, ['il faut choisir au moins un critère'])
+        }
       }
     }
-  }
-  // avec mysql ça peut être vraiment très lent… (3s pour le count et 3s pour remonter les data)
-  search.timeout = 10000
+    // avec mysql ça peut être vraiment très lent… (3s pour le count et 3s pour remonter les data)
+    search.timeout = 10000
 
-  /**
-   * Formulaire de recherche et affichage des résultats
-   * @route GET /public/recherche
-   */
-  controller.get($routes.get('search'), search)
+    /**
+     * Formulaire de recherche et affichage des résultats
+     * @route GET /public/recherche
+     */
+    controller.get($routes.get('search'), search)
 
-  /**
-   * Un proxy pour les pages externes en http à partir d'un identifiant de ressource
-   * @route GET /public/urlProxy/:oid
-   */
-  controller.get('urlProxy/:oid', function (context) {
-    var oid = context.arguments.oid
+    /**
+     * Un proxy pour les pages externes en http à partir d'un identifiant de ressource
+     * @route GET /public/urlProxy/:oid
+     */
+    controller.get('urlProxy/:oid', function (context) {
+      var oid = context.arguments.oid
 
-    $ressourceRepository.load(oid, (error, ressource) => {
-      if (error) {
-        log.error(error)
-        context.plain(error.toString())
-      } else if (ressource && ressource.type === 'url') {
-        const url = ressource && ressource.parametres && ressource.parametres.adresse
-        if (url && url.substr(0, 7) === 'http://') {
-          $ressourceFetch.fetchURL(url, `urlProxy${oid}`, context)
+      $ressourceRepository.load(oid, (error, ressource) => {
+        if (error) {
+          log.error(error)
+          context.plain(error.toString())
+        } else if (ressource && ressource.type === 'url') {
+          const url = ressource && ressource.parametres && ressource.parametres.adresse
+          if (url && url.substr(0, 7) === 'http://') {
+            $ressourceFetch.fetchURL(url, `urlProxy${oid}`, context)
+          } else {
+            const msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
+            log.error(msg)
+            context.plain(msg)
+          }
         } else {
-          const msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
-          log.error(msg)
-          context.plain(msg)
+          context.plain('Il n’y a pas de ressource ' + oid + ' de type page externe')
         }
-      } else {
-        context.plain('Il n’y a pas de ressource ' + oid + ' de type page externe')
-      }
+      })
     })
   })
 }

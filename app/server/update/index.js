@@ -38,69 +38,68 @@ const config = require('../config')
 const applog = require('an-log')(config.application.name)
 
 // Composant de gestion des updates
-const updateComponent = lassi.component('update')
+module.exports = function updateComponentFactory (lassi) {
+  const updateComponent = lassi.component('update')
 
-updateComponent.entity('EntityUpdate', function () {
-  require('./EntityUpdate')(this)
-})
+  require('./EntityUpdate')(updateComponent)
+  require('./serviceUpdateCli')(updateComponent)
 
-updateComponent.service('$update-cli', function () {
-  return require('./serviceUpdateCli')
-})
-
-if (!lassi.options.cli) {
-  lassi.on('startup', function () {
-    // si on est en mode cluster avec pm2, on ne se lance que sur la 1re instance (0)
-    if (process.env.NODE_APP_INSTANCE && process.env.NODE_APP_INSTANCE > 0) {
-      applog('update', 'instance n° ' + process.env.NODE_APP_INSTANCE + ', abandon pour laisser l’instance 0 faire le job')
-      return
-    }
-    const EntityUpdate = lassi.service('EntityUpdate')
-    // on cherche le dernier update appliqué
-    EntityUpdate.match('num').sort('num', 'desc').grabOne(function (error, update) {
-      function done (error) {
-        if (error) {
-          log.error(error)
-          applog('updates', `Une erreur est survenue dans l’update ${dbVersion}, cf les logs ${config.logs.dir}/${config.logs.error} et ${config.logs.dir}/${config.logs.dataError}`)
-        } else {
-          applog('updates', 'plus d’update à faire, base en version', dbVersion)
-        }
+  if (!lassi.options.cli) {
+    // on ajoute le lancement des updates au startup
+    // @todo utiliser les updates de lassi à la place
+    lassi.on('startup', function () {
+      // si on est en mode cluster avec pm2, on ne se lance que sur la 1re instance (0)
+      if (process.env.NODE_APP_INSTANCE && process.env.NODE_APP_INSTANCE > 0) {
+        applog('update', 'instance n° ' + process.env.NODE_APP_INSTANCE + ', abandon pour laisser l’instance 0 faire le job')
+        return
       }
-
-      function nextUpdate (error) {
-        if (error) return done(error)
-        const update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
-        const lock = path.join(__dirname, '../../_private/updates.lock')
-        try {
-          fs.accessSync(lock, fs.R_OK)
-          return applog('updates', `${lock} présent, on ignore les updates automatiques, base en version ${dbVersion}`)
-        } catch (error) {
-          // lock n’existe pas, on met ça pour rappeler qu'il pourrait exister
-          applog('updates', `${lock} non présent, on étudie un éventuel update à lancer`)
+      const EntityUpdate = lassi.service('EntityUpdate')
+      // on cherche le dernier update appliqué
+      EntityUpdate.match('num').sort('num', 'desc').grabOne(function (error, update) {
+        function done (error) {
+          if (error) {
+            log.error(error)
+            applog('updates', `Une erreur est survenue dans l’update ${dbVersion}, cf les logs ${config.logs.dir}/${config.logs.error} et ${config.logs.dir}/${config.logs.dataError}`)
+          } else {
+            applog('updates', 'plus d’update à faire, base en version', dbVersion)
+          }
         }
-        fs.access(update, fs.R_OK, function (error) {
-          if (error) return done() // plus d'updates à passer, c'est pas une erreur
-          // sinon on applique
-          dbVersion++
-          const currentUpdate = require(update)
-          applog('updates', `lancement update n° ${dbVersion} : ${currentUpdate.name}`)
-          currentUpdate.run(function (error) {
-            applog('updates', `fin update n° ${dbVersion}`)
-            if (error) return done(error)
-            EntityUpdate.create({
-              name: currentUpdate.name,
-              description: currentUpdate.description,
-              num: dbVersion
-            }).store(nextUpdate)
-            applog('updates', `update n° ${dbVersion} OK, base en version ${dbVersion}`)
+
+        function nextUpdate (error) {
+          if (error) return done(error)
+          const update = path.join(__dirname, 'updates', (dbVersion + 1) + '.js')
+          const lock = path.join(__dirname, '../../_private/updates.lock')
+          try {
+            fs.accessSync(lock, fs.R_OK)
+            return applog('updates', `${lock} présent, on ignore les updates automatiques, base en version ${dbVersion}`)
+          } catch (error) {
+            // lock n’existe pas, on met ça pour rappeler qu'il pourrait exister
+            applog('updates', `${lock} non présent, on étudie un éventuel update à lancer`)
+          }
+          fs.access(update, fs.R_OK, function (error) {
+            if (error) return done() // plus d'updates à passer, c'est pas une erreur
+            // sinon on applique
+            dbVersion++
+            const currentUpdate = require(update)
+            applog('updates', `lancement update n° ${dbVersion} : ${currentUpdate.name}`)
+            currentUpdate.run(function (error) {
+              applog('updates', `fin update n° ${dbVersion}`)
+              if (error) return done(error)
+              EntityUpdate.create({
+                name: currentUpdate.name,
+                description: currentUpdate.description,
+                num: dbVersion
+              }).store(nextUpdate)
+              applog('updates', `update n° ${dbVersion} OK, base en version ${dbVersion}`)
+            })
           })
-        })
-      }
+        }
 
-      if (error) return done(error)
-      // à partir de la sesatheque 1.0.1 on démarre en db version 27
-      let dbVersion = (update && update.num) || 27
-      nextUpdate()
+        if (error) return done(error)
+        // à partir de la sesatheque 1.0.1 on démarre en db version 27
+        let dbVersion = (update && update.num) || 27
+        nextUpdate()
+      })
     })
-  })
+  }
 }
