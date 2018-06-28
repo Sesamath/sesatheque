@@ -47,8 +47,8 @@ GroupesSelector.propTypes = {
   fields: PropTypes.object
 }
 
-const mapStateToProps = ({personne}) => ({
-  groupesList: (personne && personne.user && personne.user.groupesMembre) || []
+const mapStateToProps = ({session}) => ({
+  groupesList: (session && session.personne && session.personne.groupesMembre) || []
 })
 
 export default connect(

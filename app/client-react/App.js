@@ -8,10 +8,10 @@ import Description from './components/Description'
 import Preview from './components/Preview'
 import ResourceForm from './components/ResourceForm'
 import Notifications from './components/Notifications'
-import {getCurrentUser} from './actions/personne'
+import {getCurrentSession} from './actions/session'
 import store from './store'
 
-store.dispatch(getCurrentUser())
+store.dispatch(getCurrentSession())
 
 const App = () => (
   <Provider store={store}>

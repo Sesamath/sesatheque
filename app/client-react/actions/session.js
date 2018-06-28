@@ -1,14 +1,14 @@
 import {GET} from '../utils/httpMethods'
 
-const receiveCurrentUser = personne => ({
-  type: 'RECEIVE_CURRENT_USER',
-  personne
+const receiveCurrentSession = session => ({
+  type: 'RECEIVE_CURRENT_SESSION',
+  session
 })
 
-export const getCurrentUser = () => dispatch =>
+export const getCurrentSession = () => dispatch =>
   GET('/api/personne/current')
-    .then((user) => {
-      dispatch(receiveCurrentUser(user))
+    .then((session) => {
+      dispatch(receiveCurrentSession(session))
     })
 
 export const addGroupe = (groupe) => dispatch =>

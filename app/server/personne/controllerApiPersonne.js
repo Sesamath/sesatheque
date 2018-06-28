@@ -133,7 +133,7 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
         groupesMembre,
         groupesSuivis
       } = $accessControl.getCurrentUser(context)
-      response.user = {
+      response.personne = {
         pid,
         nom,
         prenom,
@@ -143,7 +143,7 @@ module.exports = function (controller, EntityPersonne, $personneRepository, $acc
       response.logoutUrl = $auth.getLogoutUrl(context)
       response.ssoLinks = $auth.getSsoLinks(context)
     } else {
-      response.user = null
+      response.personne = null
       response.loginLinks = $auth.getLoginLinks(context)
     }
     sendJson(context, null, response)

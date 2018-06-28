@@ -23,7 +23,7 @@ const setRedirect = (str) => {
   return url.href
 }
 
-const getButtons = (user) => {
+const getButtons = (personne) => {
   const buttonSearch = {
     id: 'buttonSearch',
     title: 'Recherche',
@@ -31,7 +31,7 @@ const getButtons = (user) => {
     icon: 'search',
     target: '_self'
   }
-  if (user === null) {
+  if (personne === null) {
     return [buttonSearch]
   }
 
@@ -47,7 +47,7 @@ const getButtons = (user) => {
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
-      to: `/ressource/rechercher?auteurs=${user.pid}`,
+      to: `/ressource/rechercher?auteurs=${personne.pid}`,
       icon: 'bookmark',
       target: '_self'
     },
@@ -62,7 +62,7 @@ const getButtons = (user) => {
 }
 
 const Header = ({
-  user,
+  personne,
   loginLink,
   logoutUrl,
   ssoLinks
@@ -77,7 +77,7 @@ const Header = ({
       className="navigation fr"
       role="navigation"
     >
-      {getButtons(user).map(({
+      {getButtons(personne).map(({
         icon,
         title,
         to,
@@ -94,7 +94,7 @@ const Header = ({
         </NavLink>
       ))}
       <div className="auth">
-        {user === null ? (
+        {personne === null ? (
           loginLink ? (
             <a href={setRedirect(loginLink.href)} title="Connexion">
               <i className="fa fa-sign-in-alt"></i>
@@ -110,7 +110,7 @@ const Header = ({
               <i className="fa fa-ellipsis-v"></i>
             </NavLink>
             <ul>
-              <div>{`${user.prenom} ${user.nom} (${user.pid})`}</div>
+              <div>{`${personne.prenom} ${personne.nom} (${personne.pid})`}</div>
               {ssoLinks ? ssoLinks.map(({
                 href,
                 icon,
@@ -138,19 +138,19 @@ const Header = ({
 )
 
 Header.propTypes = {
-  user: PropTypes.object,
+  personne: PropTypes.object,
   logoutUrl: PropTypes.string,
   loginLink: PropTypes.object,
   ssoLinks: PropTypes.arrayOf(PropTypes.object)
 }
 
-const mapStateToProps = ({personne}) => ({
-  user: personne && personne.user,
-  logoutUrl: personne && personne.logoutUrl,
+const mapStateToProps = ({session}) => ({
+  personne: session && session.personne,
+  logoutUrl: session && session.logoutUrl,
   // we suppose that loginLinks is a singleton
   // todo: add support for several links
-  loginLink: personne && personne.loginLinks && personne.loginLinks[0],
-  ssoLinks: personne && personne.ssoLinks
+  loginLink: session && session.loginLinks && session.loginLinks[0],
+  ssoLinks: session && session.ssoLinks
 })
 
 export default connect(mapStateToProps, {})(Header)
