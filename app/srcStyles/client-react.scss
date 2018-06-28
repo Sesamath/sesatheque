@@ -49,3 +49,26 @@ footer {
     }
   }
 }
+
+.resourceList {
+  th {
+    &:nth-child(1) {
+      width: 30px;
+    }
+    &:nth-child(2) {
+      width: 210px;
+    }
+    &:nth-child(3) {
+      width: 35%;
+    }
+  }
+
+  .empty {
+    color: #666;
+    text-align:center;
+  }
+
+  .links a {
+    padding: 5px;
+  }
+}

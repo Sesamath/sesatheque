@@ -3,12 +3,14 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 const SingleCheckboxForGroups = ({
+  name,
   value,
   inputValue,
   onChange,
   parseValue = identity
 }) => (
   <input
+    name={name}
     value={value}
     checked={inputValue.includes(parseValue(value))}
     type="checkbox"
@@ -28,6 +30,7 @@ const SingleCheckboxForGroups = ({
 )
 
 SingleCheckboxForGroups.propTypes = {
+  name: PropTypes.string,
   value: PropTypes.node,
   inputValue: PropTypes.arrayOf(PropTypes.node),
   onChange: PropTypes.func,

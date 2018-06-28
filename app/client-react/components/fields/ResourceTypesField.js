@@ -13,7 +13,8 @@ const ResourceTypesField = ({label, disabled = false, optional = false}) => (
     label={label}
     values={types}
     disabled={disabled}
-    optional={optional} />
+    optional={optional}
+    name="type" />
 )
 
 ResourceTypesField.propTypes = {

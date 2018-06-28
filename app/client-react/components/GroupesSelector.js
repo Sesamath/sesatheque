@@ -27,6 +27,7 @@ const GroupesSelector = ({
               return (
                 <td key={index.toString()}>
                   <SingleCheckboxForGroups
+                    name={name}
                     value={groupeName}
                     inputValue={value}
                     onChange={onChange}
