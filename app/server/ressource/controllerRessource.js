@@ -487,8 +487,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
             verbose: (appConfig.application.staging !== 'prod'),
             isDev: (appConfig.application.staging !== 'prod'),
             baseId: appConfig.application.baseId,
-            sesatheques: appConfig.sesatheques,
-            ressource: ressource ? sjt.stringify(ressource) : ''
+            sesatheques: appConfig.sesatheques
           },
           jsBloc: {
             $view: 'js',

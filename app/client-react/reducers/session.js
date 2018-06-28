@@ -15,7 +15,6 @@ const sessionReducer = (state = null, {type, ...payload}) => {
         }
       }
     case 'RECEIVE_CURRENT_SESSION':
-      console.log(payload.session)
       return payload.session
     case 'CLEAR_SESSION':
       return null
