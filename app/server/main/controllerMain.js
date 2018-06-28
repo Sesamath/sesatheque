@@ -77,7 +77,7 @@ module.exports = function (mainComponent) {
       context.layout = 'page'
       let data = {
         contentBloc: {
-          $view: 'ressource-editor',
+          $view: 'react-config',
           verbose: (config.application.staging !== 'prod'),
           isDev: (config.application.staging !== 'prod'),
           baseId: config.application.baseId,

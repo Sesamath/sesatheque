@@ -249,7 +249,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
           // version react
           let data = {
             contentBloc: {
-              $view: 'ressource-editor',
+              $view: 'react-config',
               verbose: (appConfig.application.staging !== 'prod'),
               isDev: (appConfig.application.staging !== 'prod'),
               baseId: appConfig.application.baseId,
@@ -483,7 +483,7 @@ module.exports = function (controller, $ressourceRepository, $ressourceConverter
       if (['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
         let data = {
           contentBloc: {
-            $view: 'ressource-editor',
+            $view: 'react-config',
             verbose: (appConfig.application.staging !== 'prod'),
             isDev: (appConfig.application.staging !== 'prod'),
             baseId: appConfig.application.baseId,
