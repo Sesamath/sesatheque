@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {connect} from 'react-redux'
-import {addGroupe} from '../actions/personne'
+import {addGroupe} from '../actions/session'
 
 const AddGroupe = ({
   saveGroupe
