@@ -10,6 +10,7 @@ import EditorExternal from './EditorExternal'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
+import EditorSimple from './EditorSimple'
 import GroupContainer from './GroupContainer'
 import aliasForker from '../hoc/aliasForker'
 import resourceLoader from '../hoc/resourceLoader'
@@ -18,10 +19,15 @@ import NavMenu from './NavMenu'
 
 const typeToData = {
   arbre: EditorArbre,
+  calkc: EditorSimple,
+  ec2: EditorSimple,
   ecjs: EditorEcjs,
   iep: EditorIep,
   j3p: EditorJ3p,
-  mathgraph: EditorMathGraph
+  mathgraph: EditorMathGraph,
+  mental: EditorSimple,
+  poseur: EditorSimple,
+  tep: EditorSimple
 }
 
 const ResourceForm = ({

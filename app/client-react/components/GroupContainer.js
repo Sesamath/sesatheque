@@ -1,16 +1,34 @@
+import PropTypes from 'prop-types'
 import React from 'react'
+import {connect} from 'react-redux'
 import {Fields} from 'redux-form'
 import AddGroup from './AddGroup'
 import GroupesSelector from './GroupesSelector'
 
-let GroupContainer = () => (
-  <fieldset>
-    <Fields
-      names={['groupes', 'groupesAuteurs']}
-      component={GroupesSelector}
-    />
-    <AddGroup />
-  </fieldset>
-)
+const GroupContainer = ({groupesList}) => {
+  if (groupesList.length) {
+    return (
+      <fieldset>
+        <Fields
+          names={['groupes', 'groupesAuteurs']}
+          component={GroupesSelector}
+          groupesList={groupesList}
+        />
+        <AddGroup/>
+      </fieldset>
+    )
+  }
+  return (
+    <p>Vous n’êtes membre d’aucun groupe (pour y publier cette ressource ou déléguer des droits de modification)</p>
+  )
+}
 
-export default GroupContainer
+GroupContainer.propTypes = {
+  groupesList: PropTypes.arrayOf(PropTypes.string)
+}
+
+const mapStateToProps = (state) => ({
+  groupesList: (state.personne && state.personne.groupesMembre) || []
+})
+
+export default connect(mapStateToProps)(GroupContainer)

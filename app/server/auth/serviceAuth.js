@@ -32,9 +32,12 @@
 'use strict'
 
 const _ = require('lodash')
-const sjtUrl = require('sesajstools/http/url')
 const modLog = require('an-log')('$auth')
 
+/**
+ * Service d'authentification, qui sert de proxy vers les différents authClient enregistrés
+ * @service $auth
+ */
 module.exports = function (component) {
   component.service('$auth', function ($accessControl, $ressourcePage) {
     /**
@@ -79,6 +82,21 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne l'url de retour (pour revenir ici après une connexion ou déconnexion)
+     * @private
+     * @param {Context} context
+     * @return {string}
+     */
+    function getUrlRetour (context) {
+      // si on est sur /connexion ou /deconnexion faudra revenir sur la home après (dé)connexion,
+      // sinon la page courante
+      const currentUrl = context.request.originalUrl
+      // sauf si on est sur l'api, dans ce cas on renvoie ((s))
+      if (/\/api\//.test(currentUrl)) return '((s))'
+      return currentUrl.replace(/\/(:?de)?connexion/, '')
+    }
+
+    /**
      * La liste des clients d'authentification inscrits
      * @private
      */
@@ -91,18 +109,12 @@ module.exports = function (component) {
     var deferredInitController
 
     /**
-     * Service d'authentification, qui sert de proxy vers les différents authClient enregistrés
-     * @service $auth
-     */
-    var $auth = {}
-
-    /**
      * Inscrit un client d'authentification
      * Chaque service d'authentification devra appeler cette méthode pour s'inscrire en passant un objet AuthClient
      * @param {AuthClient} authClient
      * @memberOf $auth
      */
-    $auth.addClient = function (authClient) {
+    function addClient (authClient) {
       try {
         checkValidClient(authClient)
         if (_.isEmpty(clients)) {
@@ -121,7 +133,7 @@ module.exports = function (component) {
      * @memberOf $auth
      * @param {function} initController
      */
-    $auth.deferController = function (initController) {
+    function deferController (initController) {
       modLog('adding', 'controller')
       if (_.isEmpty(clients)) deferredInitController = initController
       else initController()
@@ -133,52 +145,22 @@ module.exports = function (component) {
      * @param {Context} context
      * @returns {object} authBloc, avec les propriétés user, ssoLinks, loginLink, loginLinks, logoutLink
      */
-    $auth.getAuthBloc = function (context) {
+    function getAuthBloc (context) {
       const authBloc = {}
-      // si on est sur /connexion ou /deconnexion faudra revenir sur la home après (dé)connexion,
-      // sinon la page courante
-      const urlRetour = context.request.originalUrl.replace(/\/(:?de)?connexion/, '')
       if ($accessControl.isAuthenticated(context)) {
         // menu authentifié
         const {pid, nom, prenom} = $accessControl.getCurrentUser(context)
         authBloc.user = {pid, nom, prenom}
         // éventuels liens spécifiques au sso
-        authBloc.ssoLinks = $auth.getSsoLinks(context)
-        let client
-        try {
-          client = getClient(context)
-        } catch (error) {
-          log.error(error)
-        }
+        authBloc.ssoLinks = getSsoLinks(context)
         // lien de logout
         authBloc.logoutLink = {
-          href: (client && client.getLogoutUrl && client.getLogoutUrl(context)) || '/deconnexion?redirect=' + encodeURIComponent(urlRetour),
+          href: getLogoutUrl(context),
           icon: 'sign-out-alt',
           value: 'Déconnexion'
         }
       } else {
-        // lien(s) de connexion
-        var loginLinks = []
-        Object.keys(clients).forEach(baseId => {
-          const client = clients[baseId]
-          let url = client.getLoginUrl && client.getLoginUrl(context)
-          if (url) {
-            url = sjtUrl.complete(url, {redirect: urlRetour})
-            const link = {
-              href: url,
-              icon: 'arrow-right',
-              value: client.description
-            }
-            if (!link.value) {
-              log.error(`client ${client.baseId} sans description`, client)
-              link.value = `login sur ${client.baseId}`
-            }
-            loginLinks.push(link)
-            // pour le moment labomep2 ne gère pas ça
-            // } else {
-            //   log.error(`client ${client.baseId} sans getLoginUrl`, client)
-          }
-        })
+        const loginLinks = getLoginLinks(context)
         if (loginLinks.length > 1) {
           // y'en a plusieurs, un bouton pour ouvrir le menu
           authBloc.loginLink = {
@@ -203,12 +185,65 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne la liste des urls de login possible (une par SSO enregistré)
+     * @memberOf $auth
+     * @param context
+     * @param urlRetour
+     */
+    function getLoginLinks (context) {
+      const urlRetour = getUrlRetour(context)
+      // lien(s) de connexion
+      const loginLinks = []
+      Object.keys(clients).forEach(baseId => {
+        const client = clients[baseId]
+        let url = client.getLoginUrl && client.getLoginUrl(context, urlRetour)
+        if (url) {
+          const link = {
+            href: url,
+            icon: 'arrow-right',
+            value: client.description
+          }
+          if (!link.value) {
+            log.error(`client ${client.baseId} sans description`, client)
+            link.value = `login sur ${client.baseId}`
+          }
+          loginLinks.push(link)
+          // pour le moment labomep2 ne gère pas ça
+          // } else {
+          //   log.error(`client ${client.baseId} sans getLoginUrl`, client)
+        }
+      })
+
+      return loginLinks
+    }
+
+    /**
+     * Retourne le lien de logout
+     * @param context
+     * @return {string}
+     */
+    function getLogoutUrl (context) {
+      if (!$accessControl.isAuthenticated(context)) return
+      const urlRetour = getUrlRetour(context)
+      let url
+      try {
+        const client = getClient(context)
+        url = client && client.getLogoutUrl && client.getLogoutUrl(context, urlRetour)
+      } catch (error) {
+        log.error(error)
+      }
+      if (!url) url = `/deconnexion?redirect=${encodeURIComponent(urlRetour)}`
+
+      return url
+    }
+
+    /**
      * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée
      * @memberOf $auth
      * @param {Context} context
      * @returns {Link[]} La liste de liens
      */
-    $auth.getSsoLinks = function (context) {
+    function getSsoLinks (context) {
       var links = []
       var personne = $accessControl.getCurrentUser(context)
       if (personne && personne.pid) {
@@ -235,7 +270,7 @@ module.exports = function (component) {
      * @memberOf $auth
      * @param {Context} context
      */
-    $auth.login = function (context) {
+    function login (context) {
       if ($accessControl.isAuthenticated(context)) {
         if (context.get.redirect) context.redirect(context.get.redirect)
         else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
@@ -255,7 +290,7 @@ module.exports = function (component) {
      * @memberOf $auth
      * @param {Context} context
      */
-    $auth.logout = function (context) {
+    function logout (context) {
       if ($accessControl.isAuthenticated(context)) {
         $accessControl.logout(context)
         var client = getClient(context)
@@ -267,6 +302,15 @@ module.exports = function (component) {
       }
     }
 
-    return $auth
+    return {
+      addClient,
+      deferController,
+      getAuthBloc,
+      getLogoutUrl,
+      getLoginLinks,
+      getSsoLinks,
+      login,
+      logout
+    }
   })
 }
