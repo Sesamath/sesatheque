@@ -90,7 +90,10 @@ module.exports = function (component) {
     function getUrlRetour (context) {
       // si on est sur /connexion ou /deconnexion faudra revenir sur la home après (dé)connexion,
       // sinon la page courante
-      return context.request.originalUrl.replace(/\/(:?de)?connexion/, '')
+      const currentUrl = context.request.originalUrl
+      // sauf si on est sur l'api, dans ce cas on renvoie ((s))
+      if (/\/api\//.test(currentUrl)) return '((s))'
+      return currentUrl.replace(/\/(:?de)?connexion/, '')
     }
 
     /**

@@ -54,7 +54,6 @@ var xmls = ['cp', 'ce1', 'ce2', 'cm1', 'cm2', '6eme']
  */
 module.exports = function (component) {
   component.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) {
-
     /**
      * Met à jour un arbre calculatice
      * @route GET /importEc/:xml
