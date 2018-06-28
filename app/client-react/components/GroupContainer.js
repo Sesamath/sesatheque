@@ -5,7 +5,7 @@ import {Fields} from 'redux-form'
 import AddGroup from './AddGroup'
 import GroupesSelector from './GroupesSelector'
 
-let GroupContainer = ({groupesList}) => {
+const GroupContainer = ({groupesList}) => {
   if (groupesList.length) {
     return (
       <fieldset>
