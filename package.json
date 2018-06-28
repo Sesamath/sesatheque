@@ -79,6 +79,7 @@
     "an-log": "git://src.sesamath.net/an-log#55ea104",
     "an-uuid": "git://src.sesamath.net/an-uuid#4ba4304",
     "body-parser": "^1.18.2",
+    "connected-react-router": "^4.3.0",
     "elementtree": "0.1.6",
     "express": "^4.16.2",
     "ip": "^1.1.5",

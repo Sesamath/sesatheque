@@ -35,8 +35,7 @@ const ResourceForm = ({
   submitting,
   updateStoreFromEditor,
   setUpdateStoreFromEditor,
-  saveRessource,
-  history
+  saveRessource
 }) => {
   const Editor = typeToData[type] || EditorExternal
 
@@ -44,7 +43,6 @@ const ResourceForm = ({
     <Fragment>
       <h1 className="fl">Modifier la ressource « {titre} »</h1>
       <NavMenu
-        history={history}
         ressourceOid={ressourceOid}
       />
       <form>
@@ -82,8 +80,7 @@ ResourceForm.propTypes = {
   submitting: PropTypes.bool,
   updateStoreFromEditor: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func,
-  saveRessource: PropTypes.func,
-  history: PropTypes.object
+  saveRessource: PropTypes.func
 }
 
 export default flowRight([
