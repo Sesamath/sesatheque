@@ -16,7 +16,7 @@ const iframeHelper = (WrappedComponent) => {
         if (error) {
           return this.props.notify({
             level: 'error',
-            message: `Une erreur s’est produite pendant le chargement de l’éditeur: ${error.message}`
+            message: `Une erreur s’est produite pendant le chargement de l’éditeur : ${error}`
           })
         }
         this.setState({

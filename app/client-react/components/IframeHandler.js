@@ -35,7 +35,7 @@ class IframeHandler extends Component {
   }
 
   /**
-   * Callback appelé au chargement de l'iframe
+   * Callback appelé au chargement de l'iframe, on passe alors l'iframe à props.onLoad
    */
   onLoad () {
     this.props.onLoad(this.iframe)

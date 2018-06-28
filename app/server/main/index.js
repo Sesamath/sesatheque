@@ -71,11 +71,22 @@ module.exports = function mainComponentFactory (lassi) {
     this.serve('doc', path.resolve(__dirname, '../../../documentation'))
   })
 
-  /**
-   * En dev on ajoute des routes de debug
-   */
+  // En dev on ajoute des routes :
   if (!global.isProd) {
+    // de debug
     require('./controllerDebug')(mainComponent)
+    // et le proxy pour /replication_calculatice
+    // (vers https://ressources.sesamath.net/replication_calculatice
+    // en prod c'est varnish qui route directement là-bas)
+    mainComponent.controller('replication_calculatice', function () {
+      let $ressourceFetch
+      const base = 'https://ressources.sesamath.net'
+      this.get('*', function (context) {
+        if (!$ressourceFetch) $ressourceFetch = lassi.service('$ressourceFetch')
+        const url = `${base}${context.request.url}`
+        $ressourceFetch.fetchURL(url, context)
+      })
+    })
   }
 
   // le listener beforeTransport est dans le composant ressource (il a besoin des services de ressurce)

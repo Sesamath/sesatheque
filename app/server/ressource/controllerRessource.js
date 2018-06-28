@@ -639,64 +639,65 @@ module.exports = function (component) {
       })
     })
 
-  /**
-   * Affichage du formulaire d'édition (react)
-   * @route GET /ressource/modifier/:oid
-   */
-  controller.get($routes.get('edit', ':oid'), function (context) {
-    context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-    context.tab = 'edit'
-    const myPid = $accessControl.getCurrentUserPid(context)
-    // pas la peine de la charger si on est pas authentifié
-    if (!myPid) return denied(context)
-    const oid = context.arguments.oid
-    let ressource // la ressource qu'on va envoyer au form
-    flow().seq(function () {
-      $ressourceRepository.load(oid, this)
-    }).seq(function (ressourceBdd) {
-      if (!ressourceBdd) return print404(context, oid)
-      ressource = ressourceBdd
-      const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
-      // faut laisser passer ceux qui ont la permission index
-      if (deniedMsg && !$accessControl.hasPermission('index', context, ressource)) return denied(context, deniedMsg)
+    /**
+     * Affichage du formulaire d'édition (react)
+     * @route GET /ressource/modifier/:oid
+     */
+    controller.get($routes.get('edit', ':oid'), function (context) {
+      context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
+      context.tab = 'edit'
+      const myPid = $accessControl.getCurrentUserPid(context)
+      // pas la peine de la charger si on est pas authentifié
+      if (!myPid) return denied(context)
+      const oid = context.arguments.oid
+      let ressource // la ressource qu'on va envoyer au form
+      flow().seq(function () {
+        $ressourceRepository.load(oid, this)
+      }).seq(function (ressourceBdd) {
+        if (!ressourceBdd) return print404(context, oid)
+        ressource = ressourceBdd
+        const deniedMsg = $accessControl.getDeniedMessage('update', context, ressource)
+        // faut laisser passer ceux qui ont la permission index
+        if (deniedMsg && !$accessControl.hasPermission('index', context, ressource)) return denied(context, deniedMsg)
 
-      // sinon on peut afficher le form
-      addToken(context, ressource)
-      const data = {
-        contentBloc: {
-          $view: 'ressource-editor',
-          verbose: (appConfig.application.staging !== 'prod'),
-          isDev: (appConfig.application.staging !== 'prod'),
-          baseId: appConfig.application.baseId,
-          sesatheques: appConfig.sesatheques,
-          ressource: ressource ? sjt.stringify(ressource) : ''
-        },
-        jsBloc: {
-          $view: 'js',
-          jsFiles: ['/react.js']
+        // sinon on peut afficher le form
+        addToken(context, ressource)
+        const data = {
+          contentBloc: {
+            $view: 'ressource-editor',
+            verbose: (appConfig.application.staging !== 'prod'),
+            isDev: (appConfig.application.staging !== 'prod'),
+            baseId: appConfig.application.baseId,
+            sesatheques: appConfig.sesatheques,
+            ressource: ressource ? sjt.stringify(ressource) : ''
+          },
+          jsBloc: {
+            $view: 'js',
+            jsFiles: ['/react.js']
+          }
         }
-      }
-      context.html(data)
-    }).catch(function (error) {
-      log.error(error)
-      $ressourcePage.printError(context, error)
-    })
-  })
-
-  /**
-   * Redirect vers le form d'édition par oid (pour jstree qui nous appelle ici si les enfants sont en origine/idOrigine)
-   * @route GET /ressource/modifier/:origine/:idOrigine
-   */
-  controller.get($routes.get('edit', ':origine', ':idOrigine'), function (context) {
-    $ressourceRepository.loadByOrigin(context.arguments.origine, context.arguments.idOrigine, function (error, ressource) {
-      if (error) {
+        context.html(data)
+      }).catch(function (error) {
         log.error(error)
-        $ressourcePage.printError(context, "Probleme d'accès à la base de données")
-      } else if (ressource) {
-        context.redirect($routes.getAbs('edit', ressource.oid))
-      } else {
-        denied404(context, context.arguments.origine + '/' + context.arguments.idOrigine)
-      }
+        $ressourcePage.printError(context, error)
+      })
+    })
+
+    /**
+     * Redirect vers le form d'édition par oid (pour jstree qui nous appelle ici si les enfants sont en origine/idOrigine)
+     * @route GET /ressource/modifier/:origine/:idOrigine
+     */
+    controller.get($routes.get('edit', ':origine', ':idOrigine'), function (context) {
+      $ressourceRepository.loadByOrigin(context.arguments.origine, context.arguments.idOrigine, function (error, ressource) {
+        if (error) {
+          log.error(error)
+          $ressourcePage.printError(context, "Probleme d'accès à la base de données")
+        } else if (ressource) {
+          context.redirect($routes.getAbs('edit', ressource.oid))
+        } else {
+          denied404(context, context.arguments.origine + '/' + context.arguments.idOrigine)
+        }
+      })
     })
 
     /**
@@ -917,8 +918,8 @@ module.exports = function (component) {
       })
     }
 
-    // avec mysql ça peut être vraiment très lent… (3s pour le count et 3s pour remonter les data)
-    search.timeout = 10000
+    // ça peut être un peu long… (mais au delà de 5s y'a un soucis)
+    search.timeout = 5000
 
     /**
      * Affiche le formulaire de recherche (s'il n'y a pas de critères) ou la liste de résultat
@@ -933,7 +934,7 @@ module.exports = function (component) {
     controller.get('urlProxy/:url', function (context) {
       // decodeURIComponent est déjà passé sur les arguments
       const url = context.arguments.url
-      return $ressourceFetch.fetchURL(url, `urlProxy${url}`, context)
+      return $ressourceFetch.fetchURL(url, context)
     })
 
     /**

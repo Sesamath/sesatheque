@@ -48,6 +48,7 @@ const conf = {
     iframe: ['./app/srcStyles/iframe.scss'],
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
+    editEcjs: './app/client/plugins/ecjs/edit.js',
     import: './app/client/edit/import.js',
     react: './app/client-react/index.js',
     // arbre passe par babel

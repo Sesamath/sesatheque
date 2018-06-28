@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur Calcul@tice</title>
+  <script type="application/javascript" src="/editEcjs.js"></script>
+</head>
+<body>
+<p class="warning"><strong>ATTENTION : vous devez fermer les paramètres calcul@tice avant d’enregistrer pour que ce soit pris en compte</strong></p>
+<div id="root"></div>
+<script type="application/javascript">
+  // une fct en global que notre parent appellera
+  window.load = function loadEcjsEditor (ressource, loadCb) {
+    const container = document.getElementById('root')
+    const options = {
+      container,
+      loadEditCb: loadCb
+    }
+    if (typeof steditEcjs === 'function') steditEcjs(ressource, options)
+    else root.innerText = 'Problème de chargement de l’éditeur calcul@tice'
+  }
+</script>
+</body>
+</html>

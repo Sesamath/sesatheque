@@ -30,11 +30,62 @@
  */
 'use strict'
 
-var dom = require('sesajstools/dom')
-var log = require('sesajstools/utils/log')
+const dom = require('sesajstools/dom')
 
-var page = require('../../page/index')
-var display = require('./display')
+const page = require('../../page/index')
+const display = require('./display')
+
+// récupérer cette liste avec (sur le site ressources)
+// ls -1 replication_calculatice/javascript/exercices/|tr '\n' ','|sed -e 's/,/', '/g'
+// et virer complement et lang
+const typesEc = ['addiclic',
+  'approximationsomme',
+  'balance',
+  'balanceadd',
+  'basketmath',
+  'basketmath2p',
+  'basketmath3p',
+  'bocal',
+  'bouleetboule',
+  'bouleetbouledecimaux',
+  'calculdiffere',
+  'carre',
+  'chocolat1',
+  'chocolat2',
+  'cibles',
+  'complement',
+  'croupier',
+  'decollage',
+  'diviclic',
+  'elephants',
+  'estimation',
+  'frise',
+  'grenouille',
+  'lacaisse',
+  'lebanquier',
+  'lesbornes',
+  'mbrique',
+  'memory',
+  'mistral',
+  'multiclic',
+  'nombresympathique',
+  'numbercrushdecimaux',
+  'oiseauaddition',
+  'oiseaumultiplication',
+  'operationsatrous',
+  'planeteaddition',
+  'quadricalc',
+  'quadricalcinv',
+  'recette',
+  'rectangle',
+  'sommeenligne',
+  'supermarche',
+  'surfacebleue',
+  'tableattaque',
+  'tapisdecarte',
+  'train',
+  'viaduc'
+]
 
 /**
  * Édite une ressource ecjs
@@ -44,135 +95,45 @@ var display = require('./display')
  */
 module.exports = function edit (ressource, options) {
   require.ensure(['jquery'], function (require) {
+    // ajoute le select dans le dom
     function addSelect (ressource, options) {
-      var select = dom.getElement('select')
+      // on ajoute select et un nouveau container
+      const select = dom.addElement(options.container, 'select')
       dom.addElement(select, 'option', {id: 'selectFichier', value: 0}, "Choisir un type d'exercice")
       typesEc.forEach(function (typeEc) {
         dom.addElement(select, 'option', {value: typeEc}, typeEc)
       })
-      $textarea.before(select)
-      $textarea.hide()
-      // code piqué dans http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript/api/
-      var $select = $(select)
+      const $select = $(select)
       $select.on('change', function () {
-        var sExo = $select.val()
+        const sExo = $select.val()
         if (sExo) {
           if (!ressource.parametres) ressource.parametres = {}
           ressource.parametres.fichierjs = sExo
           $select.hide()
-          $textarea.show()
           displayEcOptions(ressource, options)
         }
       })
+      // et le nouveau container après ce select
+      const divClc = dom.addElement(options.container, 'div')
+      options.container = divClc
     }
 
+    // affiche calculatice en mode paramétrage
     function displayEcOptions (ressource, options) {
-      var submitAsked = false
-      var submitDone = false
-      var $form = $('#formRessource')
-      $form.submit(function () {
-        if (!submitDone) {
-          submitAsked = true
-          $('button.tester-parametre').click()
-          setTimeout(function () {
-            if (!submitDone) {
-              log("On a pas récupéré les options après 2s d'attente, on poste tel quel")
-              submitDone = true
-              $form.submit()
-            }
-          }, 2000)
-        }
-
-        return submitDone
-      })
       options.optionsClcCallback = function (optionsClc) {
-        log('dans edit on récupère les options', optionsClc)
-        try {
-          var parametres = JSON.parse($textarea.val())
-          if (!parametres) {
-            log.error('parametres vide quand on voulait affecter options (il devrait y avoir fichierjs)')
-            parametres = {}
-          }
-          if (!parametres.fichierjs && ressource.parametres.fichierjs) parametres.fichierjs = ressource.parametres.fichierjs
-          parametres.options = optionsClc
-          // sans le setTimeout, le $textarea.val(string) ne change rien dans le html, aucune idée du pourquoi...
-          setTimeout(function () {
-            $textarea.val(JSON.stringify(parametres, null, 2))
-            if (submitAsked) {
-              submitDone = true
-              log('on lance le submit avec ' + $textarea.val())
-              $form.submit()
-            }
-          }, 0)
-        } catch (error) {
-          page.addError('la modification des paramètres a échoué')
-        }
+        ressource.parametres.options = optionsClc
       }
+      // on lance un display ordinaire (c'est lui qui clique sur le bouton des options de l'exo
+      // s'il a un optionsClcCallback
       display(ressource, options, function (error) {
         if (error) page.addError(error)
+        const getParametres = () => ressource.parametres
+        if (options.loadEditCb) options.loadEditCb(null, getParametres)
       })
     }
-
-    var $textarea
-
-    // récupérer cette liste avec (sur le site ressources)
-    // ls -1 replication_calculatice/javascript/exercices/|tr '\n' ','|sed -e 's/,/', '/g'
-    // et virer complement et lang
-    var typesEc = ['addiclic',
-      'approximationsomme',
-      'balance',
-      'balanceadd',
-      'basketmath',
-      'basketmath2p',
-      'basketmath3p',
-      'bocal',
-      'bouleetboule',
-      'bouleetbouledecimaux',
-      'calculdiffere',
-      'carre',
-      'chocolat1',
-      'chocolat2',
-      'cibles',
-      'complement',
-      'croupier',
-      'decollage',
-      'diviclic',
-      'elephants',
-      'estimation',
-      'frise',
-      'grenouille',
-      'lacaisse',
-      'lebanquier',
-      'lesbornes',
-      'mbrique',
-      'memory',
-      'mistral',
-      'multiclic',
-      'nombresympathique',
-      'numbercrushdecimaux',
-      'oiseauaddition',
-      'oiseaumultiplication',
-      'operationsatrous',
-      'planeteaddition',
-      'quadricalc',
-      'quadricalcinv',
-      'recette',
-      'rectangle',
-      'sommeenligne',
-      'supermarche',
-      'surfacebleue',
-      'tableattaque',
-      'tapisdecarte',
-      'train',
-      'viaduc'
-    ]
 
     const $ = require('jquery')
     if (!ressource || !ressource.parametres) throw new Error('Il faut passer une ressource à éditer')
-    var textarea = window.document.getElementById('parametres')
-    if (!textarea) throw new Error('Pas de textarea #parametres trouvé dans cette page')
-    $textarea = $(textarea)
-    log('les options dans ecjs/edit.init', options)
     if (ressource.parametres.fichierjs) {
       displayEcOptions(ressource, options)
     } else {

@@ -5,6 +5,7 @@ import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
 import EditorArbre from './EditorArbre'
+import EditorEcjs from './EditorEcjs'
 import EditorExternal from './EditorExternal'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
@@ -17,6 +18,7 @@ import NavMenu from './NavMenu'
 
 const typeToData = {
   arbre: EditorArbre,
+  ecjs: EditorEcjs,
   iep: EditorIep,
   j3p: EditorJ3p,
   mathgraph: EditorMathGraph

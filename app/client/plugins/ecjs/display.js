@@ -34,7 +34,7 @@ var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 var sjtUrl = require('sesajstools/http/url')
 
-var page = require('../../page/index')
+var page = require('../../page')
 
 /**
  * Affiche les ressources ecjs (exercices calculatice en javascript)
@@ -66,8 +66,9 @@ module.exports = function display (ressource, options, next) {
       if (typeof window.define !== 'undefined') {
         console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec requireJs, on désactive define et require')
         window.define = undefined // eslint-disable-line no-native-reassign
-        if (typeof window.require !== 'undefined') window.require = undefined
-      } else if (typeof window.require !== 'undefined') {
+        window.require = undefined
+      }
+      if (typeof window.require !== 'undefined') {
         console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec commonJs, on désactive require')
         window.require = undefined
       }
@@ -174,7 +175,7 @@ module.exports = function display (ressource, options, next) {
             })
             $exoClc.ready(function () {
               // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
-              var i = 0
+              let i = 0
 
               function delayOptions () {
                 if (i++ < 300) {
