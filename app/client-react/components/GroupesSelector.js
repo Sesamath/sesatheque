@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {connect} from 'react-redux'
 import SingleCheckboxForGroups from './SingleCheckboxForGroups'
 
 const GroupesSelector = ({
@@ -47,10 +46,4 @@ GroupesSelector.propTypes = {
   fields: PropTypes.object
 }
 
-const mapStateToProps = (state) => ({
-  groupesList: (state.personne && state.personne.groupesMembre) || []
-})
-
-export default connect(
-  mapStateToProps
-)(GroupesSelector)
+export default GroupesSelector
