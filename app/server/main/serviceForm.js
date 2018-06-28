@@ -34,98 +34,100 @@
 var sjt = require('sesajstools')
 var Form = require('../../constructors/Form')
 
-module.exports = function ($page) {
-  /**
-   * Service de gestion des formulaires
-   * @service $form
-   */
-  var $form = {}
+module.exports = function (component) {
+  component.service('$form', function ($page) {
+    /**
+     * Service de gestion des formulaires
+     * @service $form
+     */
+    var $form = {}
 
-  /**
-   * Ajoute un champ au form (dans le formGroup demandé ou un nouveau) et le retourne.
-   * Wrapper de formGroup.addField
-   * @param {Form}             form      L'objet form que l'on va augmenter et qui sera passé à la vue
-   * @param {object|FormField} field     Propriétés du champ à créer (passer au moins name et value)
-   * @param {object}           [options] options pour le groupe qui enveloppera le champ
-   *                              si fieldGroupId existe on cherchera un FormGroup correspondant dans form
-   *                              sinon, si fieldGroupName existe idem
-   *                              sinon, si formGroup existe, on crée un FormGroup avec
-   *                              sinon on crée un nouveau FormGroup avec ses valeurs par défaut
-   */
-  $form.addField = function addField (form, field, options) {
-    if (!options) options = {}
-    var formGroup
-    if (options.fieldGroupId) formGroup = form.getGroupById(options.fieldGroupId)
-    if (!formGroup && options.fieldGroupName) formGroup = form.getGroupByName(options.fieldGroupName)
-    if (!formGroup) formGroup = form.addGroup(options.formGroup)
+    /**
+     * Ajoute un champ au form (dans le formGroup demandé ou un nouveau) et le retourne.
+     * Wrapper de formGroup.addField
+     * @param {Form}             form      L'objet form que l'on va augmenter et qui sera passé à la vue
+     * @param {object|FormField} field     Propriétés du champ à créer (passer au moins name et value)
+     * @param {object}           [options] options pour le groupe qui enveloppera le champ
+     *                              si fieldGroupId existe on cherchera un FormGroup correspondant dans form
+     *                              sinon, si fieldGroupName existe idem
+     *                              sinon, si formGroup existe, on crée un FormGroup avec
+     *                              sinon on crée un nouveau FormGroup avec ses valeurs par défaut
+     */
+    $form.addField = function addField (form, field, options) {
+      if (!options) options = {}
+      var formGroup
+      if (options.fieldGroupId) formGroup = form.getGroupById(options.fieldGroupId)
+      if (!formGroup && options.fieldGroupName) formGroup = form.getGroupByName(options.fieldGroupName)
+      if (!formGroup) formGroup = form.addGroup(options.formGroup)
 
-    return formGroup.addField(field)
-  }
-
-  /**
-   * Ajoute un token au form en hidden
-   * @param {Form} form
-   * @returns {string} Le token
-   */
-  $form.addToken = function (form) {
-    var token = sjt.getToken()
-    var field = {
-      name: 'token',
-      value: token,
-      widget: 'hidden'
+      return formGroup.addField(field)
     }
-    form.addField(field)
 
-    return token
-  }
+    /**
+     * Ajoute un token au form en hidden
+     * @param {Form} form
+     * @returns {string} Le token
+     */
+    $form.addToken = function (form) {
+      var token = sjt.getToken()
+      var field = {
+        name: 'token',
+        value: token,
+        widget: 'hidden'
+      }
+      form.addField(field)
 
-  /**
-   * Retourne un form avec tous les champs dans le même groupe
-   * @param {object|Form}          [formValues]
-   * @param {object|FormGroup}     [groupValues]
-   * @param {object[]|FormField[]} [fields]
-   * @param {string}               [submitValue]
-   * @returns {Form}
-   */
-  $form.construct = function (formValues, groupValues, fields, submitValue) {
-    var form = new Form(formValues)
-    var formGroupField = form.addGroup(groupValues)
-    if (fields) {
-      if (!Array.isArray(fields)) fields = [fields]
-      fields.forEach(function (field) {
-        formGroupField.addField(field)
-      })
+      return token
     }
-    if (submitValue) form.addSubmit(submitValue)
 
-    return form
-  }
+    /**
+     * Retourne un form avec tous les champs dans le même groupe
+     * @param {object|Form}          [formValues]
+     * @param {object|FormGroup}     [groupValues]
+     * @param {object[]|FormField[]} [fields]
+     * @param {string}               [submitValue]
+     * @returns {Form}
+     */
+    $form.construct = function (formValues, groupValues, fields, submitValue) {
+      var form = new Form(formValues)
+      var formGroupField = form.addGroup(groupValues)
+      if (fields) {
+        if (!Array.isArray(fields)) fields = [fields]
+        fields.forEach(function (field) {
+          formGroupField.addField(field)
+        })
+      }
+      if (submitValue) form.addSubmit(submitValue)
 
-  /**
-   * Retourne un form vide
-   * @param {object|Form} formValues
-   * @returns {Form}
-   */
-  $form.get = function (formValues) {
-    return new Form(formValues)
-  }
+      return form
+    }
 
-  /**
-   * Affiche un formulaire
-   * @param {Context} context
-   * @param {object|Form} formValues
-   * @param {object|FormGroup} groupValues
-   * @param {object[]|FormField[]} fields
-   * @param {string} submitValue
-   * @param {string} pageTitle
-   * @param {object|Array} moreData
-   */
-  $form.print = function print (context, formValues, groupValues, fields, submitValue, pageTitle, moreData) {
-    var contentBloc = $form.construct(formValues, groupValues, fields, submitValue)
-    contentBloc.$view = 'form'
-    // log.debug('contentBloc du form', contentBloc, 'form', {max: 10000})
-    $page.print(context, pageTitle, contentBloc, moreData)
-  }
+    /**
+     * Retourne un form vide
+     * @param {object|Form} formValues
+     * @returns {Form}
+     */
+    $form.get = function (formValues) {
+      return new Form(formValues)
+    }
 
-  return $form
+    /**
+     * Affiche un formulaire
+     * @param {Context} context
+     * @param {object|Form} formValues
+     * @param {object|FormGroup} groupValues
+     * @param {object[]|FormField[]} fields
+     * @param {string} submitValue
+     * @param {string} pageTitle
+     * @param {object|Array} moreData
+     */
+    $form.print = function print (context, formValues, groupValues, fields, submitValue, pageTitle, moreData) {
+      var contentBloc = $form.construct(formValues, groupValues, fields, submitValue)
+      contentBloc.$view = 'form'
+      // log.debug('contentBloc du form', contentBloc, 'form', {max: 10000})
+      $page.print(context, pageTitle, contentBloc, moreData)
+    }
+
+    return $form
+  })
 }
