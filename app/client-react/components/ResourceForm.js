@@ -5,6 +5,7 @@ import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
 import EditorArbre from './EditorArbre'
+import EditorExternal from './EditorExternal'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
@@ -15,26 +16,14 @@ import resourceSaver from '../hoc/resourceSaver'
 import NavMenu from './NavMenu'
 
 const typeToData = {
-  iep: {
-    Editor: EditorIep,
-    name: 'iep'
-  },
-  j3p: {
-    Editor: EditorJ3p,
-    name: 'j3p'
-  },
-  mathgraph: {
-    Editor: EditorMathGraph,
-    name: 'mathGraph'
-  },
-  arbre: {
-    Editor: EditorArbre,
-    name: 'arbre'
-  }
+  arbre: EditorArbre,
+  iep: EditorIep,
+  j3p: EditorJ3p,
+  mathgraph: EditorMathGraph
 }
 
 const ResourceForm = ({
-  initialValues: {type, oid: ressourceOid},
+  initialValues: {type, oid: ressourceOid, titre},
   handleSubmit,
   change,
   submitting,
@@ -43,11 +32,11 @@ const ResourceForm = ({
   saveRessource,
   history
 }) => {
-  const {Editor, name} = typeToData[type]
+  const Editor = typeToData[type] || EditorExternal
 
   return (
     <Fragment>
-      <h1 className="fl">Modifier la ressource {name}</h1>
+      <h1 className="fl">Modifier la ressource « {titre} »</h1>
       <NavMenu
         history={history}
         ressourceOid={ressourceOid}
