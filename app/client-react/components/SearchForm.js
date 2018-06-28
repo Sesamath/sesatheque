@@ -1,16 +1,16 @@
 import {listes, labels} from '../../server/ressource/config'
-import {reduxForm, formValueSelector} from 'redux-form'
+import {reduxForm} from 'redux-form'
 import {POST} from '../utils/httpMethods'
 import Classification from './Classification'
-import InputField from './fields/InputField'
+import {
+  InputField,
+  ResourceTypesField,
+  SelectField
+} from './fields'
 import MetaForm from './MetaForm'
-import NavMenu from './NavMenu'
 import React, {Component, Fragment} from 'react'
 import {connect} from 'react-redux'
-import ResourceTypesField from './fields/ResourceTypesField'
 import ResourceList from './ResourceList'
-import SelectField from './fields/SelectField'
-import {searchRessources} from '../actions/ressource'
 
 const publieValues = {
   'true': 'Oui',
@@ -26,11 +26,11 @@ class SearchForm extends Component {
     }
   }
 
-  search () {
-    let filters = []
-    Object.keys(this.props.query).map((key, index) => {
-      if (!this.props.query[key] || this.props.query[key] === 'peu importe') return
-      const values = Array.isArray(this.props.query[key]) ? this.props.query[key] : [this.props.query[key]]
+  search (query) {
+    const filters = []
+    Object.keys(query).map((key, index) => {
+      if (!query[key] || query[key] === 'peu importe') return
+      const values = Array.isArray(query[key]) ? query[key] : [query[key]]
       filters.push({index: key, values})
     })
 
@@ -47,8 +47,7 @@ class SearchForm extends Component {
     return (
       <Fragment>
         <h1>Recherche de ressources</h1>
-        <NavMenu history={this.props.history} />
-        <form>
+        <form onSubmit={this.props.handleSubmit(this.search.bind(this))}>
           <fieldset>
             <div className="grid-3">
               <InputField
@@ -84,9 +83,8 @@ class SearchForm extends Component {
           <Classification detailled />
           <div className="buttons-area">
             <button
-            type="button"
+            type="submit"
             className="btn--primary"
-            onClick={this.search.bind(this)}
             >
             Rechercher
             </button>
@@ -98,7 +96,7 @@ class SearchForm extends Component {
   }
 }
 
-SearchForm = reduxForm({
+export default reduxForm({
   form: 'searchForm',
   initialValues: {
     categories: [],
@@ -108,15 +106,3 @@ SearchForm = reduxForm({
     langue: 'fra'
   }
 })(SearchForm)
-
-const selector = formValueSelector('searchForm')
-SearchForm = connect(
-  state => {
-    return {
-      query: selector(state, 'oid', 'titre', 'origine', 'idOrigine', 'type', 'publie',
-                      'langue', 'categories', 'niveaux', 'typePedagogiques', 'typeDocumentaires')
-    }
-  }
-)(SearchForm)
-
-export default SearchForm
