@@ -99,7 +99,14 @@ class SearchForm extends Component {
 }
 
 SearchForm = reduxForm({
-  form: 'searchForm'
+  form: 'searchForm',
+  initialValues: {
+    categories: [],
+    niveaux: [],
+    typePedagogiques: [],
+    typeDocumentaires: [],
+    langue: 'fra'
+  }
 })(SearchForm)
 
 const selector = formValueSelector('searchForm')
