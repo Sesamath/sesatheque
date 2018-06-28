@@ -110,11 +110,13 @@ listUpdates.help = function listUpdatesHelp () {
  * Service de gestion des updates via cli
  * @service $update-cli
  */
-module.exports = function () {
-  return {
-    commands: () => ({
-      applyUpdate,
-      listUpdates
-    })
-  }
+module.exports = function (component) {
+  component.service('$update-cli', function () {
+    return {
+      commands: () => ({
+        applyUpdate,
+        listUpdates
+      })
+    }
+  })
 }

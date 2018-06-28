@@ -41,70 +41,74 @@ const sjtObj = require('sesajstools/utils/object')
  * @extends Entity
  * @extends Personne
  */
-module.exports = function (EntityPersonne, $cachePersonne) {
-  const configRoles = lassi.settings.components.personne.roles
-  /**
-   * Calcule et affecte les permissions d'une personne en fonction de ses rôles
-   * et des permissions données à chaque rôle en configuration
-   * @param {Object} roles La liste des rôles avec {role1: true}
-   * @returns {Object} avec les permissions en propriété (valeur true|false|undefined)
-   */
-  function getPermissions (roles) {
-    var permissions = {}
-    Object.keys(roles).forEach(role => {
-      const hasRole = roles[role]
-      // on ajoute les permissions définies pour ce role en config
-      if (hasRole && configRoles[role]) {
-        // faut pas faire de merge, on pourrait écraser avec false
-        // une permission déjà accordée par un rôle précédent
-        Object.keys(configRoles[role]).forEach(permission => {
-          const hasPerm = configRoles[role][permission]
-          if (hasPerm) permissions[permission] = true
-        })
-      }
-    })
-    return permissions
-  }
+module.exports = function (component) {
+  component.entity('EntityPersonne', function ($cachePersonne) {
+    const configRoles = lassi.settings.components.personne.roles
+    const EntityPersonne = this
 
-  EntityPersonne.construct(function (values) {
-    // on impose les permissions d'après les rôles définis en config
-    // faut copier pour pas modifier values.permissions
-    const data = values
-    if (values.roles) data.permissions = getPermissions(values.roles)
-    // avant d'appeler le constructeur
-    Personne.call(this, data)
+    /**
+     * Calcule et affecte les permissions d'une personne en fonction de ses rôles
+     * et des permissions données à chaque rôle en configuration
+     * @param {Object} roles La liste des rôles avec {role1: true}
+     * @returns {Object} avec les permissions en propriété (valeur true|false|undefined)
+     */
+    function getPermissions (roles) {
+      var permissions = {}
+      Object.keys(roles).forEach(role => {
+        const hasRole = roles[role]
+        // on ajoute les permissions définies pour ce role en config
+        if (hasRole && configRoles[role]) {
+          // faut pas faire de merge, on pourrait écraser avec false
+          // une permission déjà accordée par un rôle précédent
+          Object.keys(configRoles[role]).forEach(permission => {
+            const hasPerm = configRoles[role][permission]
+            if (hasPerm) permissions[permission] = true
+          })
+        }
+      })
+      return permissions
+    }
+
+    EntityPersonne.construct(function (values) {
+      // on impose les permissions d'après les rôles définis en config
+      // faut copier pour pas modifier values.permissions
+      const data = values
+      if (values.roles) data.permissions = getPermissions(values.roles)
+      // avant d'appeler le constructeur
+      Personne.call(this, data)
+    })
+
+    EntityPersonne.beforeStore = function (next) {
+      // recalculé d'après les roles à chaque create/load (dans le constructeur),
+      // mais on le fait aussi ici pour le garantir avant persistance (pas grave) mais surtout mise en cache
+      // le faire 2 fois garanti d'avoir un db ok (avec la conf au moment de la sauvegarde)
+      // ET des permissions ok au runtime (au cas où la conf change)
+      if (this.roles) this.permissions = getPermissions(this.roles)
+      // @todo ajouter ici un checkAuthSource
+      if (!this.pid) throw new Error('personne sans pid, impossible à sauvegarder')
+      next()
+    }
+
+    EntityPersonne.afterStore(function (next) {
+      // on met en cache, attention à mettre la session à jour si besoin (pas de contexte ici)
+      $cachePersonne.set(this, function (error) {
+        if (error) log.error(error)
+      })
+      // et on passe au suivant sans se préoccuper du retour de mise en cache
+      next()
+    })
+
+    EntityPersonne
+      .defineIndex('pid', 'string')
+      .defineIndex('nom', 'string')
+      .defineIndex('email', 'string')
+      // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
+      // une callback qui renvoie la valeur (ou un tableau de valeurs)
+      .defineIndex('roles', 'string', function () {
+        log.debug('roles de ' + this.oid, sjtObj.truePropertiesList(this.roles))
+        return sjtObj.truePropertiesList(this.roles)
+      })
+      .defineIndex('groupesMembre', 'string')
+      .defineIndex('groupesSuivis', 'string')
   })
-
-  EntityPersonne.beforeStore = function (next) {
-    // recalculé d'après les roles à chaque create/load (dans le constructeur),
-    // mais on le fait aussi ici pour le garantir avant persistance (pas grave) mais surtout mise en cache
-    // le faire 2 fois garanti d'avoir un db ok (avec la conf au moment de la sauvegarde)
-    // ET des permissions ok au runtime (au cas où la conf change)
-    if (this.roles) this.permissions = getPermissions(this.roles)
-    // @todo ajouter ici un checkAuthSource
-    if (!this.pid) throw new Error('personne sans pid, impossible à sauvegarder')
-    next()
-  }
-
-  EntityPersonne.afterStore(function (next) {
-    // on met en cache, attention à mettre la session à jour si besoin (pas de contexte ici)
-    $cachePersonne.set(this, function (error) {
-      if (error) log.error(error)
-    })
-    // et on passe au suivant sans se préoccuper du retour de mise en cache
-    next()
-  })
-
-  EntityPersonne
-    .defineIndex('pid', 'string')
-    .defineIndex('nom', 'string')
-    .defineIndex('email', 'string')
-    // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
-    // une callback qui renvoie la valeur (ou un tableau de valeurs)
-    .defineIndex('roles', 'string', function () {
-      log.debug('roles de ' + this.oid, sjtObj.truePropertiesList(this.roles))
-      return sjtObj.truePropertiesList(this.roles)
-    })
-    .defineIndex('groupesMembre', 'string')
-    .defineIndex('groupesSuivis', 'string')
 }

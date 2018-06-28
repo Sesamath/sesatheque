@@ -42,197 +42,200 @@ function optionsOk (context) {
   context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
 }
 
-module.exports = function (controller, EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
-  const h = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
-  /**
-   * Controleur de la route /api/groupe/
-   * @Controller controllerApiGroupe
-   */
+module.exports = function (component) {
+  component.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
+    const h = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
+    /**
+     * Controleur de la route /api/groupe/
+     * @Controller controllerApiGroupe
+     */
+    const controller = this
 
-  /**
-   * Create un groupe
-   * @route GET /api/groupe/add/:nom
-   */
-  controller.get('ajouter/:nom', function (context) {
-    /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-     log.error(new Error('une trace pour ' +reqHttp)) */
-    if (context.perf) {
-      var msg = 'start-pers-' + context.post.id
-      log.perf(context.response, msg)
-    }
-    if ($accessControl.hasGenericPermission('createGroupe', context)) {
-      const nom = context.arguments.nom.toLowerCase()
-      $groupeRepository.load(nom, function (error, groupeBdd) {
-        if (error) {
-          $json.sendError(context, new Error('Erreur interne (impossible de vérifier l’existence préalable du groupe)'))
-        } else if (groupeBdd) {
-          $json.sendError(context, 'Le groupe ' + nom + ' existe déjà')
-        } else {
-          // par défaut fermé et public
-          var groupe = EntityGroupe.create({
-            nom: nom,
-            ouvert: false,
-            public: true,
-            gestionnaires: [$accessControl.getCurrentUserPid(context)]
-          })
-          groupe.store(function (error, groupeBdd) {
-            if (error) {
-              $json.sendError(context, error)
-            } else if (groupeBdd && groupeBdd.oid) {
-              h.addGroup(context, nom, false, function (error, personne) {
-                if (!error && personne) $json.sendOk(context)
-                else $json.sendError(context, new Error('Erreur interne (enregistrement des modifications sur la personne)'))
-              })
-            } else {
-              $json.sendError(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))
+    /**
+     * Create un groupe
+     * @route GET /api/groupe/add/:nom
+     */
+    controller.get('ajouter/:nom', function (context) {
+      /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+       log.error(new Error('une trace pour ' +reqHttp)) */
+      if (context.perf) {
+        var msg = 'start-pers-' + context.post.id
+        log.perf(context.response, msg)
+      }
+      if ($accessControl.hasGenericPermission('createGroupe', context)) {
+        const nom = context.arguments.nom.toLowerCase()
+        $groupeRepository.load(nom, function (error, groupeBdd) {
+          if (error) {
+            $json.sendError(context, new Error('Erreur interne (impossible de vérifier l’existence préalable du groupe)'))
+          } else if (groupeBdd) {
+            $json.sendError(context, 'Le groupe ' + nom + ' existe déjà')
+          } else {
+            // par défaut fermé et public
+            var groupe = EntityGroupe.create({
+              nom: nom,
+              ouvert: false,
+              public: true,
+              gestionnaires: [$accessControl.getCurrentUserPid(context)]
+            })
+            groupe.store(function (error, groupeBdd) {
+              if (error) {
+                $json.sendError(context, error)
+              } else if (groupeBdd && groupeBdd.oid) {
+                h.addGroup(context, nom, false, function (error, personne) {
+                  if (!error && personne) $json.sendOk(context)
+                  else $json.sendError(context, new Error('Erreur interne (enregistrement des modifications sur la personne)'))
+                })
+              } else {
+                $json.sendError(context, new Error("Erreur interne (groupe.store ne renvoie pas d'objet avec oid)"))
+              }
+            })
+          }
+        })
+      } else {
+        $json.denied(context)
+      }
+    })
+
+    /**
+     * Ne plus suivre le groupe
+     * @route GET /api/groupe/ignorer/:nom
+     */
+    controller.get('ignorer/:nom', function (context) {
+      var nom = context.arguments.nom.toLowerCase()
+      flow().seq(function () {
+        $groupeRepository.load(nom, this)
+      }).seq(function (grp) {
+        var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
+        if (grp && h.isFollowed(context, nom)) h.ignoreGroup(context, nom, this)
+        else this(deniedMsg)
+      }).seq(function () {
+        $json.sendOk(context)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+    })
+
+    /**
+     * Retire le groupe au user courant
+     * @route GET /groupe/quitter/:nom
+     */
+    controller.get('quitter/:nom', function (context) {
+      var nom = context.arguments.nom.toLowerCase()
+      flow().seq(function () {
+        $groupeRepository.load(nom, this)
+      }).seq(function (grp) {
+        var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
+        if (grp && $accessControl.isGroupeMembre(context, nom)) h.quitGroup(context, nom, this)
+        else this(deniedMsg)
+      }).seq(function () {
+        $json.send(context, 'Vous avez quitté le groupe ' + nom)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+    })
+
+    /**
+     * Récupère la liste des groupes dont on est admin
+     * @route GET /api/groupe/admin
+     */
+    controller.get('admin', function (context) {
+      var groupesAdmin = []
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (pid) {
+        flow().seq(function () {
+          $groupeRepository.getListManagedBy(pid, this)
+        }).seq(function (groupesManaged) {
+          if (groupesManaged && groupesManaged.length) {
+            groupesManaged.forEach(function (groupe) {
+              groupesAdmin.push({name: groupe.nom, admin: true})
+            })
+          }
+          $json.sendOk(context, {groupesAdmin: groupesAdmin})
+        }).catch(function (error) {
+          console.error(error)
+          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        })
+      } else {
+        $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
+      }
+    })
+    controller.options('admin', optionsOk)
+
+    /**
+     * Récupère la liste des groupes dont on est membre
+     * @route GET /api/groupe/membre
+     */
+    controller.get('membre', function (context) {
+      var groupesMembre = []
+      var done = {}
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (pid) {
+        flow().seq(function () {
+          $groupeRepository.getListManagedBy(pid, this)
+        }).seq(function (groupesManaged) {
+          if (groupesManaged && groupesManaged.length) {
+            groupesManaged.forEach(function (groupe) {
+              groupesMembre.push({name: groupe.nom, admin: true})
+              done[groupe.nom] = true
+            })
+          }
+          $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
+            if (!done[groupeName]) {
+              groupesMembre.push({name: groupeName, member: true})
+              done[groupeName] = true
             }
           })
-        }
-      })
-    } else {
-      $json.denied(context)
-    }
-  })
-
-  /**
-   * Ne plus suivre le groupe
-   * @route GET /api/groupe/ignorer/:nom
-   */
-  controller.get('ignorer/:nom', function (context) {
-    var nom = context.arguments.nom.toLowerCase()
-    flow().seq(function () {
-      $groupeRepository.load(nom, this)
-    }).seq(function (grp) {
-      var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
-      if (grp && h.isFollowed(context, nom)) h.ignoreGroup(context, nom, this)
-      else this(deniedMsg)
-    }).seq(function () {
-      $json.sendOk(context)
-    }).catch(function (error) {
-      $json.sendError(context, error)
+          $json.sendOk(context, {groupesMembre: groupesMembre})
+        }).catch(function (error) {
+          console.error(error)
+          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        })
+      } else {
+        $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
+      }
     })
-  })
+    controller.options('membre', optionsOk)
 
-  /**
-   * Retire le groupe au user courant
-   * @route GET /groupe/quitter/:nom
-   */
-  controller.get('quitter/:nom', function (context) {
-    var nom = context.arguments.nom.toLowerCase()
-    flow().seq(function () {
-      $groupeRepository.load(nom, this)
-    }).seq(function (grp) {
-      var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
-      if (grp && $accessControl.isGroupeMembre(context, nom)) h.quitGroup(context, nom, this)
-      else this(deniedMsg)
-    }).seq(function () {
-      $json.send(context, 'Vous avez quitté le groupe ' + nom)
-    }).catch(function (error) {
-      $json.sendError(context, error)
+    /**
+     * Récupère la liste des groupes suivis
+     * @route GET /api/groupe/suivis
+     */
+    controller.get('suivis', function (context) {
+      var groupesSuivis = []
+      var done = {}
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (pid) {
+        flow().seq(function () {
+          $groupeRepository.getListManagedBy(pid, this)
+        }).seq(function (groupesManaged) {
+          if (groupesManaged && groupesManaged.length) {
+            groupesManaged.forEach(function (groupe) {
+              groupesSuivis.push({name: groupe.nom, admin: true})
+              done[groupe.nom] = true
+            })
+          }
+          $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
+            if (!done[groupeName]) {
+              groupesSuivis.push({name: groupeName, member: true})
+              done[groupeName] = true
+            }
+          })
+          $accessControl.getCurrentUserGroupesSuivis(context).forEach(function (groupeName) {
+            if (!done[groupeName]) {
+              // on ajoute les urls pour ne plus suivre
+              groupesSuivis.push({name: groupeName, follower: true})
+              done[groupeName] = true
+            }
+          })
+          $json.sendOk(context, {groupesSuivis: groupesSuivis})
+        }).catch(function (error) {
+          console.error(error)
+          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        })
+      } else {
+        $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes suivis")
+      }
     })
+    controller.options('suivis', optionsOk)
   })
-
-  /**
-   * Récupère la liste des groupes dont on est admin
-   * @route GET /api/groupe/admin
-   */
-  controller.get('admin', function (context) {
-    var groupesAdmin = []
-    var pid = $accessControl.getCurrentUserPid(context)
-    if (pid) {
-      flow().seq(function () {
-        $groupeRepository.getListManagedBy(pid, this)
-      }).seq(function (groupesManaged) {
-        if (groupesManaged && groupesManaged.length) {
-          groupesManaged.forEach(function (groupe) {
-            groupesAdmin.push({ name: groupe.nom, admin: true })
-          })
-        }
-        $json.sendOk(context, {groupesAdmin: groupesAdmin})
-      }).catch(function (error) {
-        console.error(error)
-        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
-      })
-    } else {
-      $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
-    }
-  })
-  controller.options('admin', optionsOk)
-
-  /**
-   * Récupère la liste des groupes dont on est membre
-   * @route GET /api/groupe/membre
-   */
-  controller.get('membre', function (context) {
-    var groupesMembre = []
-    var done = {}
-    var pid = $accessControl.getCurrentUserPid(context)
-    if (pid) {
-      flow().seq(function () {
-        $groupeRepository.getListManagedBy(pid, this)
-      }).seq(function (groupesManaged) {
-        if (groupesManaged && groupesManaged.length) {
-          groupesManaged.forEach(function (groupe) {
-            groupesMembre.push({ name: groupe.nom, admin: true })
-            done[ groupe.nom ] = true
-          })
-        }
-        $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
-          if (!done[ groupeName ]) {
-            groupesMembre.push({ name: groupeName, member: true })
-            done[ groupeName ] = true
-          }
-        })
-        $json.sendOk(context, {groupesMembre: groupesMembre})
-      }).catch(function (error) {
-        console.error(error)
-        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
-      })
-    } else {
-      $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
-    }
-  })
-  controller.options('membre', optionsOk)
-
-  /**
-   * Récupère la liste des groupes suivis
-   * @route GET /api/groupe/suivis
-   */
-  controller.get('suivis', function (context) {
-    var groupesSuivis = []
-    var done = {}
-    var pid = $accessControl.getCurrentUserPid(context)
-    if (pid) {
-      flow().seq(function () {
-        $groupeRepository.getListManagedBy(pid, this)
-      }).seq(function (groupesManaged) {
-        if (groupesManaged && groupesManaged.length) {
-          groupesManaged.forEach(function (groupe) {
-            groupesSuivis.push({ name: groupe.nom, admin: true })
-            done[ groupe.nom ] = true
-          })
-        }
-        $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
-          if (!done[ groupeName ]) {
-            groupesSuivis.push({ name: groupeName, member: true })
-            done[ groupeName ] = true
-          }
-        })
-        $accessControl.getCurrentUserGroupesSuivis(context).forEach(function (groupeName) {
-          if (!done[ groupeName ]) {
-            // on ajoute les urls pour ne plus suivre
-            groupesSuivis.push({ name: groupeName, follower: true })
-            done[ groupeName ] = true
-          }
-        })
-        $json.sendOk(context, { groupesSuivis: groupesSuivis })
-      }).catch(function (error) {
-        console.error(error)
-        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
-      })
-    } else {
-      $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes suivis")
-    }
-  })
-  controller.options('suivis', optionsOk)
 }

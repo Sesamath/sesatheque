@@ -34,126 +34,128 @@
 const sjtObj = require('sesajstools/utils/object')
 const version = require('../../../package.json').version
 
-module.exports = function () {
-  /**
-   * Service de gestion des pages html
-   * @service $page
-   */
-  const $page = {}
+module.exports = function (component) {
+  component.service('$page', function () {
+    /**
+     * Service de gestion des pages html
+     * @service $page
+     */
+    const $page = {}
 
-  /**
-   * Ajoute une erreur à la liste qui sera envoyée à la vue
-   * @param {string|error} error
-   * @param {object} data objet qui sera passé à context.html()
-   */
-  $page.addError = function (error, data) {
-    if (!data.errors || !data.errors.errorMessages) {
-      data.errors = {
-        errorMessages: []
+    /**
+     * Ajoute une erreur à la liste qui sera envoyée à la vue
+     * @param {string|error} error
+     * @param {object} data objet qui sera passé à context.html()
+     */
+    $page.addError = function (error, data) {
+      if (!data.errors || !data.errors.errorMessages) {
+        data.errors = {
+          errorMessages: []
+        }
       }
+      const errorMessage = (typeof error === 'string') ? error : error.toString()
+      data.errors.errorMessages.push(errorMessage)
+      // si c'est juste une string pas la peine de le loguer
+      if (error && error.stack) log.error(error.stack)
     }
-    const errorMessage = (typeof error === 'string') ? error : error.toString()
-    data.errors.errorMessages.push(errorMessage)
-    // si c'est juste une string pas la peine de le loguer
-    if (error && error.stack) log.error(error.stack)
-  }
 
-  /**
-   * Affiche une 401 avec Authentification requise en html
-   * @param {Context} context
-   * @param {string} [message='Authentification requise']
-   */
-  $page.denied = function denied (context, message) {
-    if (!message) message = 'Authentification requise'
-    $page.printError(context, message, 401)
-  }
+    /**
+     * Affiche une 401 avec Authentification requise en html
+     * @param {Context} context
+     * @param {string} [message='Authentification requise']
+     */
+    $page.denied = function denied (context, message) {
+      if (!message) message = 'Authentification requise'
+      $page.printError(context, message, 401)
+    }
 
-  /**
-   * Retourne les datas minimales ($metas & co) et initialise context.layout (si context fourni)
-   * @param {Context} [context]
-   * @param {string}  [titre]
-   * @param {object}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
-   *                                  et les autres propriétés qui seront passées à cette vue)
-   *                                  ou un simple texte (qui sera passé à la vue contents
-   * @returns {{$metas: {}}}
-   */
-  $page.getDefaultData = function getDefaultData (context, titre, contentBloc) {
-    const data = {
-      $metas: {
-        js: [`/page.js?${version}`]
-      },
-      version
+    /**
+     * Retourne les datas minimales ($metas & co) et initialise context.layout (si context fourni)
+     * @param {Context} [context]
+     * @param {string}  [titre]
+     * @param {object}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
+     *                                  et les autres propriétés qui seront passées à cette vue)
+     *                                  ou un simple texte (qui sera passé à la vue contents
+     * @returns {{$metas: {}}}
+     */
+    $page.getDefaultData = function getDefaultData (context, titre, contentBloc) {
+      const data = {
+        $metas: {
+          js: [`/page.js?${version}`]
+        },
+        version
+      }
+      if (titre) {
+        data.$metas.title = titre
+      }
+      if (context) {
+        context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
+        // data.$layout est fixé dans beforeTransport
+      }
+      if (typeof contentBloc === 'string') {
+        data.contentBloc = {
+          $view: 'contents',
+          contents: [contentBloc]
+        }
+      } else if (contentBloc) {
+        data.contentBloc = contentBloc
+      }
+
+      return data
     }
-    if (titre) {
-      data.$metas.title = titre
+
+    /**
+     * Affiche une page simple
+     * @param {Context} [context]
+     * @param {string}  [titre]
+     * @param {object|string}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
+     *                                        et les autres propriétés qui seront passées à cette vue)
+     *                                        ou un simple texte (qui sera passé à la vue contents
+     * @param {object|Array}  [moreData]  Si c'est un array sera traité comme une blocList (d'une propriété blocs ajoutée ici),
+     *                                    sinon sera fusionné avec data avant context.html(data) (par ex pour des ajouts de $metas)
+     */
+    $page.print = function (context, titre, contentBloc, moreData) {
+      const data = $page.getDefaultData(context, titre, contentBloc)
+      if (Array.isArray(moreData)) {
+        if (moreData.length) moreData = {blocs: {blocList: moreData}}
+        else moreData = null
+      }
+      if (moreData) sjtObj.merge(data, moreData)
+      // log.debug('data envoyés à la vue', data, 'form', {max: 10000})
+      context.html(data)
     }
-    if (context) {
-      context.layout = (context.get.layout === 'iframe') ? 'iframe' : 'page'
-      // data.$layout est fixé dans beforeTransport
+
+    /**
+     * Affiche un message d'erreur
+     * @memberOf $page
+     * @param {Context}      context
+     * @param {string|Error} error
+     * @param {number}       [status=200]
+     */
+    $page.printError = function (context, error, status) {
+      const data = $page.getDefaultData(context)
+      $page.addError(error, data)
+      context.status = status || 200
+      context.html(data)
     }
-    if (typeof contentBloc === 'string') {
+
+    /**
+     * Affiche un ou des message(s)
+     * @memberOf $page
+     * @param {Context}         context
+     * @param {string|string[]} message (en mettre plusieurs dans un array pour avoir plusieurs paragraphes)
+     * @param {string}          titre
+     */
+    $page.printMessage = function (context, message, titre) {
+      const data = $page.getDefaultData(context, titre)
+      const contents = Array.isArray(message) ? message : [message]
       data.contentBloc = {
         $view: 'contents',
-        contents: [contentBloc]
+        contents: contents
       }
-    } else if (contentBloc) {
-      data.contentBloc = contentBloc
+      context.html(data)
     }
 
-    return data
-  }
-
-  /**
-   * Affiche une page simple
-   * @param {Context} [context]
-   * @param {string}  [titre]
-   * @param {object|string}  [contentBloc] Le bloc de contenu (objet avec une propriété $view
-   *                                        et les autres propriétés qui seront passées à cette vue)
-   *                                        ou un simple texte (qui sera passé à la vue contents
-   * @param {object|Array}  [moreData]  Si c'est un array sera traité comme une blocList (d'une propriété blocs ajoutée ici),
-   *                                    sinon sera fusionné avec data avant context.html(data) (par ex pour des ajouts de $metas)
-   */
-  $page.print = function (context, titre, contentBloc, moreData) {
-    const data = $page.getDefaultData(context, titre, contentBloc)
-    if (Array.isArray(moreData)) {
-      if (moreData.length) moreData = { blocs: { blocList: moreData } }
-      else moreData = null
-    }
-    if (moreData) sjtObj.merge(data, moreData)
-    // log.debug('data envoyés à la vue', data, 'form', {max: 10000})
-    context.html(data)
-  }
-
-  /**
-   * Affiche un message d'erreur
-   * @memberOf $page
-   * @param {Context}      context
-   * @param {string|Error} error
-   * @param {number}       [status=200]
-   */
-  $page.printError = function (context, error, status) {
-    const data = $page.getDefaultData(context)
-    $page.addError(error, data)
-    context.status = status || 200
-    context.html(data)
-  }
-
-  /**
-   * Affiche un ou des message(s)
-   * @memberOf $page
-   * @param {Context}         context
-   * @param {string|string[]} message (en mettre plusieurs dans un array pour avoir plusieurs paragraphes)
-   * @param {string}          titre
-   */
-  $page.printMessage = function (context, message, titre) {
-    const data = $page.getDefaultData(context, titre)
-    const contents = Array.isArray(message) ? message : [message]
-    data.contentBloc = {
-      $view: 'contents',
-      contents: contents
-    }
-    context.html(data)
-  }
-
-  return $page
+    return $page
+  })
 }
