@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
-import IntegerField from './IntegerField'
+import IntegerField from './fields/IntegerField'
 import addNotifyToProps from '../utils/addNotifyToProps'
 import ShowError from './ShowError.js'
 
