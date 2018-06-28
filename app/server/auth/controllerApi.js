@@ -35,52 +35,55 @@
  * Controleur de la route /api/auth/
  * @Controller controllerApiAuth
  */
-module.exports = function (controller, $auth, $accessControl, $ressourceRepository) {
-  /**
-   * Renvoie en json les infos pour le bloc d'authentification et les droits sur une ressource éventuelle
-   * (pour ajouter les boutons modifier / supprimer sur les pages publiques, utilisé par la méthode cliente page.refreshAuth)
-   * @route GET /api/auth[?ressourceId=xxx]
-   */
-  controller.get('api/auth', function (context) {
+module.exports = function (component) {
+  component.controller(function ($auth, $accessControl, $ressourceRepository) {
+    const controller = this
     /**
-     * @name context
-     * @type {Context}
-     * @private
+     * Renvoie en json les infos pour le bloc d'authentification et les droits sur une ressource éventuelle
+     * (pour ajouter les boutons modifier / supprimer sur les pages publiques, utilisé par la méthode cliente page.refreshAuth)
+     * @route GET /api/auth[?ressourceId=xxx]
      */
-    const isLogged = $accessControl.isAuthenticated(context)
-    const auth = {
-      isLogged: isLogged,
-      permissions: ''
-    }
-    if (isLogged) {
-      auth.pid = $accessControl.getCurrentUserPid(context)
-      auth.authBloc = $auth.getAuthBloc(context)
-      if ($accessControl.hasPermission('create', context)) auth.permissions += 'C'
-    }
-    if (isLogged && context.get.ressourceId) {
-      $ressourceRepository.load(context.get.ressourceId, function (error, ressource) {
-        if (error) return log.error(error)
-        if (ressource) {
-          if ($accessControl.hasPermission('delete', context, ressource)) auth.permissions += 'D'
-          if ($accessControl.hasPermission('update', context, ressource)) auth.permissions += 'W'
-        }
+    controller.get('api/auth', function (context) {
+      /**
+       * @name context
+       * @type {Context}
+       * @private
+       */
+      const isLogged = $accessControl.isAuthenticated(context)
+      const auth = {
+        isLogged: isLogged,
+        permissions: ''
+      }
+      if (isLogged) {
+        auth.pid = $accessControl.getCurrentUserPid(context)
+        auth.authBloc = $auth.getAuthBloc(context)
+        if ($accessControl.hasPermission('create', context)) auth.permissions += 'C'
+      }
+      if (isLogged && context.get.ressourceId) {
+        $ressourceRepository.load(context.get.ressourceId, function (error, ressource) {
+          if (error) return log.error(error)
+          if (ressource) {
+            if ($accessControl.hasPermission('delete', context, ressource)) auth.permissions += 'D'
+            if ($accessControl.hasPermission('update', context, ressource)) auth.permissions += 'W'
+          }
+          context.json(auth)
+        })
+      } else {
         context.json(auth)
-      })
-    } else {
-      context.json(auth)
-    }
-  })
-  /**
-   * retourne isLogged & roles
-   * @route /api/auth/getRoles
-   */
-  controller.get('api/auth/getRoles', function (context) {
-    const currentUser = $accessControl.getCurrentUser(context)
-    const isLogged = !!currentUser
-    const roles = (currentUser && currentUser.roles) || []
-    return {
-      isLogged,
-      roles
-    }
+      }
+    })
+    /**
+     * retourne isLogged & roles
+     * @route /api/auth/getRoles
+     */
+    controller.get('api/auth/getRoles', function (context) {
+      const currentUser = $accessControl.getCurrentUser(context)
+      const isLogged = !!currentUser
+      const roles = (currentUser && currentUser.roles) || []
+      return {
+        isLogged,
+        roles
+      }
+    })
   })
 }

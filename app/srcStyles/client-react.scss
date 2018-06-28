@@ -1,5 +1,14 @@
 $footer-link-color: #f17045;
 
+@mixin cartouche() { /* texte secondary sur fond foncé primary */
+  background-color: $color-primary;
+  color: $secondary-color-light;
+  a { color: $secondary-color-light}
+  a:hover {
+    color: $secondary-color-link;
+  };
+}
+
 #root {
   table {
     margin: 10px;
@@ -34,17 +43,88 @@ $footer-link-color: #f17045;
 }
 
 footer {
+  @include cartouche();
   background-color: #237;
 
-  li {
-    margin: 10px;
-    color: $footer-link-color;
+  ul {
+    margin: 0;
 
-    a {
+    li {
+      margin: 10px;
       color: $footer-link-color;
 
+      a {
+        color: $footer-link-color;
+
+        &:hover {
+          color: lighten($footer-link-color, 5%);
+        }
+      }
+    }
+  }
+}
+
+header {
+  @include cartouche();
+  padding: 10px;
+  nav {
+    z-index: 15;
+    button, a {
+      @extend .btn;
+      padding: 0.5rem 1rem;
+      margin: 0 1rem;
+      background-color: $primary-color-light;
+      text-align: center;
+      text-decoration: none;
+      color: $secondary-color-link;
+      line-height: 21px;
+    };
+    a.selected, a:hover {
+      background-color: $primary-color-lighter;
+      color: darken( $secondary-color-link, 10% );
+    }
+    a .fa {margin-right: 0;}
+
+    @media (min-width: $medium)  {
+        a .fa {margin-right: 1rem;}
+    }
+    .auth {
+      float: right;
+      ul {
+        display: none;
+        position: absolute; // pour qu'il n'agrandisse pas le header quand il s'ouvre
+        top: 3rem; // pour démarrer à ras des boutons
+        right: 0;
+        padding-top: 2rem;
+        list-style: none;
+        div {
+          padding: 0.2rem;
+          text-align: center;
+          background-color: $color-primary;
+        }
+        ul {
+          padding: 0.5rem;
+        }
+        li {
+          width: 100%;
+          padding: 0.5rem;
+          margin: 0;
+          background-color: $color-primary;
+        }
+        li a {
+          width: 100%;
+          margin-right: $spacer-tiny;
+          text-align: left;
+        }
+      }
       &:hover {
-        color: lighten($footer-link-color, 5%);
+        ul {
+          display: block;
+        }
+      }
+
+      ul {
+        z-index: 10;
       }
     }
   }
@@ -71,4 +151,18 @@ footer {
   .links a {
     padding: 5px;
   }
+}
+
+@media (max-width: ($medium)) { // tiny et small
+  .gt-medium-only,
+  header a span,
+    { display: none; }
+  .lt-medium-only { display: block; }
+}
+
+@media (min-width: ($medium + 1)) { // medium, large et au delà
+  .gt-medium-only { display: block;}
+  header a span,
+    { display: inline;}
+  .lt-medium-only { display: none; }
 }

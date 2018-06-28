@@ -2,15 +2,24 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 
-const SelectField = ({label, name, values, disabled = false, optional = false}) => (
+const SelectField = ({
+  label,
+  name,
+  values,
+  disabled = false,
+  optional = false
+}) => (
   <label className="select">
     {label}
-    <Field name={name} component="select" props={{ disabled: Boolean(disabled) }}>
-      {optional ?  (
+    <Field
+      name={name}
+      component="select"
+      disabled={{ disabled: Boolean(disabled) }}
+    >
+      {optional ? (
         <option>peu importe</option>
       ) : null}
-      {
-        Object.keys(values).map(key => (
+      {Object.keys(values).map(key => (
         <Fragment key={key.toString()}>
           <option value={key}>{values[key]}</option>
         </Fragment>

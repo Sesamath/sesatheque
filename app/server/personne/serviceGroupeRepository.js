@@ -31,160 +31,166 @@
 
 'use strict'
 
-var flow = require('an-flow')
+const flow = require('an-flow')
 
-module.exports = function (EntityGroupe, $cacheGroupe) {
-  /**
-   * Service d'accès aux groupes utilisé par les différents contrôleurs
-   * @service $groupeRepository
-   */
-  var $groupeRepository = {}
+// on ne peut pas mettre ces services en dépendance de $groupeRepository car ils sont déclarés après
+let $ressourceRepository
+let $personneRepository
 
-  /**
-   * Récupère un groupe d'après son nom
-   * @param {string} groupeNom
-   * @param {groupeCallback} next
-   * @memberOf $groupeRepository
-   */
-  $groupeRepository.load = function (groupeNom, next) {
-    const nom = groupeNom.toLowerCase()
-    $cacheGroupe.get(nom, function (error, groupe) {
-      if (error) log.error(error)
-      if (groupe) {
-        next(null, groupe)
-      } else {
-        // pas en cache, on va chercher en bdd
-        EntityGroupe.match('nom').equals(nom).grabOne(function (error, groupe) {
-          if (error) {
-            next(error)
-          } else if (groupe) {
-            $cacheGroupe.set(groupe)
-            next(null, groupe)
-          } else {
-            next()
-          }
-        })
-      }
-    })
-  }
+module.exports = function (component) {
+  component.service('$groupeRepository', function (EntityGroupe, $cacheGroupe) {
+    /**
+     * Service d'accès aux groupes utilisé par les différents contrôleurs
+     * @service $groupeRepository
+     */
+    const $groupeRepository = {}
 
-  /**
-   * Récupère une liste de groupes dont le pid fourni est gestionnaire
-   * @param {string} pid
-   * @param {groupeListCallback} next
-   * @memberOf $groupeRepository
-   */
-  $groupeRepository.getListManagedBy = function (pid, next) {
-    EntityGroupe.match('gestionnaires').equals(pid).sort('nom').grab(next)
-  }
-
-  /**
-   * Récupère tous les groupes ouverts
-   * @param {groupeCallback} next
-   * @memberOf $groupeRepository
-   */
-  $groupeRepository.loadOuvert = function (next) {
-    EntityGroupe.match('ouvert').equals(true).grab(function (error, groupes) {
-      if (error) {
-        next(error)
-      } else if (groupes) {
-        next(null, groupes)
-      } else {
-        next(null, [])
-      }
-    })
-  }
-
-  /**
-   * Récupère tous les groupes publics
-   * @param {groupeCallback} next
-   * @memberOf $groupeRepository
-   */
-  $groupeRepository.loadPublic = function (next) {
-    EntityGroupe.match('public').equals(true).grab(function (error, groupes) {
-      if (error) {
-        next(error)
-      } else if (groupes) {
-        next(null, groupes)
-      } else {
-        next(null, [])
-      }
-    })
-  }
-
-  /**
-   * Enregistre une groupe en bdd (et met à jour le cache)
-   * @param {EntityGroupe}       groupe
-   * @param {entityPersonneCallback} next
-   * @memberOf $groupeRepository
-   */
-  $groupeRepository.save = function (groupe, next) {
-    if (!groupe.nom) {
-      var error = new Error('Impossible d’enregistrer un groupe sans nom')
-      log.error(error)
-      return next(error)
-    }
-    if (!groupe.store) groupe = EntityGroupe.create(groupe)
-    // la mise en cache est dans afterStore de l'entity
-    groupe.store(next)
-  }
-
-  /**
-   * Supprime un groupe (ET modifie les ressources liées)
-   * @param {string} groupeName
-   * @param {errorCallback} next
-   * @memberOf $groupeRepository
-   */
-  $groupeRepository.delete = function (groupName, next) {
-    if (!groupName) {
-      var error = new Error('Impossible d’effacer un groupe sans nom')
-      log.error(error)
-      return next(error)
-    }
-    const nom = groupName.toLowerCase()
-    // on ne peut pas le mettre en dépendance du controleur, car il est déclaré après nous
-    var $ressourceRepository = lassi.service('$ressourceRepository')
-    var $personneRepository = lassi.service('$personneRepository')
-    // on efface d'abord le groupe des ressources
-    flow().seq(function () {
-      // log.debug('début suppression du groupe ' + groupName)
-      $ressourceRepository.getListeFull('groupe/' + nom, {}, this)
-    }).seqEach(function (ressource) {
-      // log.debug('suppression de groupe, avec la ressource', ressource)
-      ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== nom)
-      $ressourceRepository.save(ressource, this)
-    }).seq(function () {
-      // log.debug('suppression de groupe, personnes')
-      $personneRepository.removeGroup(nom, this)
-    }).seq(function () {
-      // log.debug('suppression de groupe, groupe')
-      // on peut effacer le groupe, au cas où y'en aurait plusieurs du même nom on les cherche tous
-      EntityGroupe.match('nom').equals(nom).grab(function (error, groups) {
-        if (error) return next(error)
-        if (groups.length === 0) {
-          var error2 = new Error('Il y a aucun groupe ' + nom)
-          log.error(error2)
-          return next(error2)
+    /**
+     * Récupère un groupe d'après son nom
+     * @param {string} groupeNom
+     * @param {groupeCallback} next
+     * @memberOf $groupeRepository
+     */
+    $groupeRepository.load = function (groupeNom, next) {
+      const nom = groupeNom.toLowerCase()
+      $cacheGroupe.get(nom, function (error, groupe) {
+        if (error) log.error(error)
+        if (groupe) {
+          next(null, groupe)
+        } else {
+          // pas en cache, on va chercher en bdd
+          EntityGroupe.match('nom').equals(nom).grabOne(function (error, groupe) {
+            if (error) {
+              next(error)
+            } else if (groupe) {
+              $cacheGroupe.set(groupe)
+              next(null, groupe)
+            } else {
+              next()
+            }
+          })
         }
-        if (groups.length > 1) log.error(new Error('Il y a ' + groups.length + ' groupes ' + nom))
-        flow(groups).seqEach(function (group) {
-          var nextGroup = this
-          group.delete(function (error) {
-            if (error) return next(error)
-            nextGroup()
-          })
-        }).seq(function () {
-          // afterStore n'est pas appelé sur un delete, faut gérer le cache
-          // mais lui on est sûr qu'il est en un seul exemplaire car il utilise le nom comme clé
-          $cacheGroupe.delete(nom, function (error) {
-            if (error) log.error(error)
-            // on fait pas suivre l'erreur car y'en a pas eu à la suppression en bdd
-            next()
-          })
-        }).catch(next)
       })
-    }).catch(next)
-  }
+    }
 
-  return $groupeRepository
+    /**
+     * Récupère une liste de groupes dont le pid fourni est gestionnaire
+     * @param {string} pid
+     * @param {groupeListCallback} next
+     * @memberOf $groupeRepository
+     */
+    $groupeRepository.getListManagedBy = function (pid, next) {
+      EntityGroupe.match('gestionnaires').equals(pid).sort('nom').grab(next)
+    }
+
+    /**
+     * Récupère tous les groupes ouverts
+     * @param {groupeCallback} next
+     * @memberOf $groupeRepository
+     */
+    $groupeRepository.loadOuvert = function (next) {
+      EntityGroupe.match('ouvert').equals(true).grab(function (error, groupes) {
+        if (error) {
+          next(error)
+        } else if (groupes) {
+          next(null, groupes)
+        } else {
+          next(null, [])
+        }
+      })
+    }
+
+    /**
+     * Récupère tous les groupes publics
+     * @param {groupeCallback} next
+     * @memberOf $groupeRepository
+     */
+    $groupeRepository.loadPublic = function (next) {
+      EntityGroupe.match('public').equals(true).grab(function (error, groupes) {
+        if (error) {
+          next(error)
+        } else if (groupes) {
+          next(null, groupes)
+        } else {
+          next(null, [])
+        }
+      })
+    }
+
+    /**
+     * Enregistre une groupe en bdd (et met à jour le cache)
+     * @param {EntityGroupe}       groupe
+     * @param {entityPersonneCallback} next
+     * @memberOf $groupeRepository
+     */
+    $groupeRepository.save = function (groupe, next) {
+      if (!groupe.nom) {
+        const error = new Error('Impossible d’enregistrer un groupe sans nom')
+        log.error(error)
+        return next(error)
+      }
+      if (!groupe.store) groupe = EntityGroupe.create(groupe)
+      // la mise en cache est dans afterStore de l'entity
+      groupe.store(next)
+    }
+
+    /**
+     * Supprime un groupe (ET modifie les ressources liées)
+     * @param {string} groupeName
+     * @param {errorCallback} next
+     * @memberOf $groupeRepository
+     */
+    $groupeRepository.delete = function (groupName, next) {
+      if (!groupName) {
+        const error = new Error('Impossible d’effacer un groupe sans nom')
+        log.error(error)
+        return next(error)
+      }
+      const nom = groupName.toLowerCase()
+      // on affecte au 1er appel
+      if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
+      if (!$personneRepository) $personneRepository = lassi.service('$personneRepository')
+      // on efface d'abord le groupe des ressources
+      flow().seq(function () {
+        // log.debug('début suppression du groupe ' + groupName)
+        $ressourceRepository.getListeFull('groupe/' + nom, {}, this)
+      }).seqEach(function (ressource) {
+        // log.debug('suppression de groupe, avec la ressource', ressource)
+        ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== nom)
+        $ressourceRepository.save(ressource, this)
+      }).seq(function () {
+        // log.debug('suppression de groupe, personnes')
+        $personneRepository.removeGroup(nom, this)
+      }).seq(function () {
+        // log.debug('suppression de groupe, groupe')
+        // on peut effacer le groupe, au cas où y'en aurait plusieurs du même nom on les cherche tous
+        EntityGroupe.match('nom').equals(nom).grab(function (error, groups) {
+          if (error) return next(error)
+          if (groups.length === 0) {
+            const error2 = new Error('Il y a aucun groupe ' + nom)
+            log.error(error2)
+            return next(error2)
+          }
+          if (groups.length > 1) log.error(new Error('Il y a ' + groups.length + ' groupes ' + nom))
+          flow(groups).seqEach(function (group) {
+            const nextGroup = this
+            group.delete(function (error) {
+              if (error) return next(error)
+              nextGroup()
+            })
+          }).seq(function () {
+            // afterStore n'est pas appelé sur un delete, faut gérer le cache
+            // mais lui on est sûr qu'il est en un seul exemplaire car il utilise le nom comme clé
+            $cacheGroupe.delete(nom, function (error) {
+              if (error) log.error(error)
+              // on fait pas suivre l'erreur car y'en a pas eu à la suppression en bdd
+              next()
+            })
+          }).catch(next)
+        })
+      }).catch(next)
+    }
+
+    return $groupeRepository
+  })
 }

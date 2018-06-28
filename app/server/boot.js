@@ -86,7 +86,7 @@ function boot (beforeBootstrapCb, options, afterBootCb) {
   // les déclarations de nos components
   const dependancies = ['main', 'personne', 'ressource', 'update', 'auth']
   // on charge ces composants
-  dependancies.forEach(dep => require(`./${dep}`))
+  dependancies.forEach(dep => require(`./${dep}`)(lassiInstance))
   // des modules sup à charger
   if (config.extraModules) {
     config.extraModules.forEach(function (module) {

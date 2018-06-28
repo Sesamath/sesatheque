@@ -29,19 +29,9 @@
  * pour une explication en français)
  */
 'use strict'
-var authComponent = lassi.component('auth')
-
-authComponent.service('$auth', function ($accessControl, $ressourcePage) {
-  return require('./serviceAuth')($accessControl, $ressourcePage)
-})
-
-authComponent.controller(function ($auth, $accessControl, $ressourcePage, $flashMessages) {
-  require('./controllerAuth')(this, $auth, $accessControl, $ressourcePage, $flashMessages)
-})
-
-authComponent.controller(function ($auth, $accessControl, $ressourceRepository) {
-  require('./controllerApi')(this, $auth, $accessControl, $ressourceRepository)
-})
-
-// rien à faire en config
-authComponent.config(function () {})
+module.exports = function authComponentFactory (lassi) {
+  const authComponent = lassi.component('auth')
+  require('./serviceAuth')(authComponent)
+  require('./controllerAuth')(authComponent)
+  require('./controllerApi')(authComponent)
+}
