@@ -14,16 +14,16 @@ store.dispatch(getCurrentUser())
 
 const App = () => (
   <Provider store={store}>
-    <ConnectedRouter history={history}>
-      <Fragment>
-        <Notifications />
+    <Fragment>
+      <Notifications />
+      <ConnectedRouter history={history}>
         <Switch>
           <Route exact path="/ressource/modifier/:ressourceOid" component={ResourceForm} />
           <Route exact path="/ressource/apercevoir/:ressourceOid" component={Preview} />
           <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />
         </Switch>
-      </Fragment>
-    </ConnectedRouter>
+      </ConnectedRouter>
+    </Fragment>
   </Provider>
 )
 
