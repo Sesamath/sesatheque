@@ -96,11 +96,16 @@ export const forkAlias = (oid) => (dispatch, getState) => {
  * @param {Ressource} ressource
  * @return {promisedThunk} qui va faire le post puis dispatch de setRessource & addNotification
  */
-export const saveRessource = (ressource) => (dispatch) => {
-  return POST(`/api/ressource`, {body: ressource})
-    .then(() => {
-      return dispatch(setRessource(ressource))
+export const saveRessource = (
+  ressource,
+  success = () => {}
+) => (dispatch) => {
+  return POST(`/api/ressource?format=full`, {body: ressource})
+    .then((responseRessource) => {
+      dispatch(setRessource(responseRessource))
+      return responseRessource.oid
     })
+    .then(success)
     .then(() => {
       return dispatch(addNotification({
         level: 'info',

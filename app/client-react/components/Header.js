@@ -28,8 +28,7 @@ const getButtons = (personne) => {
       id: 'buttonAdd',
       title: 'Ajouter une ressource',
       to: '/ressource/ajouter',
-      icon: 'plus-circle',
-      target: '_self'
+      icon: 'plus-circle'
     },
     buttonSearch,
     {
