@@ -5,20 +5,23 @@ import {Fields} from 'redux-form'
 import AddGroup from './AddGroup'
 import GroupesSelector from './GroupesSelector'
 
-let GroupContainer = ({groupesList}) => (
-  <fieldset>
-    {groupesList.length ? (
-      <Fields
-        names={['groupes', 'groupesAuteurs']}
-        component={GroupesSelector}
-        groupesList={groupesList}
-      />
-    ) : (
-      <p>Vous n’êtes membre d’aucun groupe (pour y publier cette ressource ou déléguer des droits de modification)</p>
-    )}
-    <AddGroup />
-  </fieldset>
-)
+let GroupContainer = ({groupesList}) => {
+  if (groupesList.length) {
+    return (
+      <fieldset>
+        <Fields
+          names={['groupes', 'groupesAuteurs']}
+          component={GroupesSelector}
+          groupesList={groupesList}
+        />
+        <AddGroup/>
+      </fieldset>
+    )
+  }
+  return (
+    <p>Vous n’êtes membre d’aucun groupe (pour y publier cette ressource ou déléguer des droits de modification)</p>
+  )
+}
 
 GroupContainer.propTypes = {
   groupesList: PropTypes.arrayOf(PropTypes.string)
