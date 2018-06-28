@@ -1,5 +1,5 @@
 import React from 'react'
-import {formValues, Field} from 'redux-form'
+import {Field} from 'redux-form'
 
 /**
  * Formate un objet en string json (pretty)
@@ -32,5 +32,4 @@ const EditorSimple = () => (
   </fieldset>
 )
 
-// on wrap dans reduxForm
-export default formValues({parametres: 'parametres'})(EditorSimple)
+export default EditorSimple
