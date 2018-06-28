@@ -194,9 +194,8 @@ module.exports = function ($accessControl, $ressourcePage) {
     const loginLinks = []
     Object.keys(clients).forEach(baseId => {
       const client = clients[baseId]
-      let url = client.getLoginUrl && client.getLoginUrl(context)
+      let url = client.getLoginUrl && client.getLoginUrl(context, urlRetour)
       if (url) {
-        url = sjtUrl.complete(url, {redirect: urlRetour})
         const link = {
           href: url,
           icon: 'arrow-right',
@@ -224,14 +223,16 @@ module.exports = function ($accessControl, $ressourcePage) {
   function getLogoutUrl (context) {
     if (!$accessControl.isAuthenticated(context)) return
     const urlRetour = getUrlRetour(context)
-    let client
+    let url
     try {
-      client = getClient(context)
+      const client = getClient(context)
+      url = client && client.getLogoutUrl && client.getLogoutUrl(context, urlRetour)
     } catch (error) {
       log.error(error)
     }
-    // lien de logout
-    return (client && client.getLogoutUrl && client.getLogoutUrl(context)) || `/deconnexion?redirect=${encodeURIComponent(urlRetour)}`
+    if (!url) url = `/deconnexion?redirect=${encodeURIComponent(urlRetour)}`
+
+    return url
   }
 
   /**

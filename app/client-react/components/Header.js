@@ -1,4 +1,3 @@
-import queryString from 'query-string'
 import React, {Fragment} from 'react'
 import PropTypes from 'prop-types'
 import {NavLink} from 'react-router-dom'
@@ -8,19 +7,9 @@ import {version} from '../../../package'
 const logoUrl = `/images/sesatheque.png?${version}`
 
 const setRedirect = (str) => {
-  // redirect to first loaded page
-  // should be improved to use current page
-  const url = new URL(str)
-  const parsedQuery = queryString.parse(url.search)
-  parsedQuery.redirect = document.location.href
-  const urlApplication = new URL(parsedQuery.url_application)
-  urlApplication.search = queryString.stringify({
-    redirect: document.location.href
-  })
-  parsedQuery.url_application = urlApplication.href
-  url.search = queryString.stringify(parsedQuery)
-
-  return url.href
+  // @todo changer ça pour remplacer par la page courante à chaque fois qu'on en change
+  // (actuellement c'est fait une seule fois au premier rendu du Header)
+  return str.replace('((s))', document.location.href)
 }
 
 const getButtons = (personne) => {
@@ -117,14 +106,14 @@ const Header = ({
                 value
               }) => (
                 <li key={href}>
-                  <a href={href} title={value}>
+                  <a href={setRedirect(href)} title={value}>
                     <i className={`fa fa-${icon}`}></i>
                     <span>{value}</span>
                   </a>
                 </li>
               )) : null}
               <li>
-                <a href={logoutUrl} title="Déconnexion">
+                <a href={setRedirect(logoutUrl)} title="Déconnexion">
                   <i className="fa fa-sign-out-alt"></i>
                   <span>Déconnexion</span>
                 </a>
