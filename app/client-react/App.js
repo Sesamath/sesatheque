@@ -9,7 +9,7 @@ import Description from './components/Description'
 import Preview from './components/Preview'
 import ResourceForm from './components/ResourceForm'
 import Notifications from './components/Notifications'
-import {getCurrentSession} from './actions/personne'
+import {getCurrentSession} from './actions/session'
 import history from './history'
 import store from './store'
 
