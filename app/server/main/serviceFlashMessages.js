@@ -31,48 +31,50 @@
 
 'use strict'
 
-module.exports = function () {
-  /**
-   * Un service pour stocker des message en session, en vue de les afficher à la prochaine page html (par le listener beforeTransport)
-   * @service $flashMessages
-   */
-  var $flashMessages = {}
+module.exports = function (component) {
+  component.service('$flashMessages', function () {
+    /**
+     * Un service pour stocker des message en session, en vue de les afficher à la prochaine page html (par le listener beforeTransport)
+     * @service $flashMessages
+     */
+    var $flashMessages = {}
 
-  /**
-   * Ajoute un message en session
-   * @param {Context} context
-   * @param message
-   * @param level
-   * @memberOf $flashMessages
-   */
-  $flashMessages.add = function (context, message, level) {
-    if (['info', 'warning', 'error'].indexOf(level) < 0) level = 'info'
-    if (!context.session.flashMessages) context.session.flashMessages = []
-    context.session.flashMessages.push({
-      cssClass: level,
-      value: message
-    })
-  }
-
-  /**
-   * Retourne les messages en session et les efface
-   * @param {Context} context
-   * @memberOf $flashMessages
-   */
-  $flashMessages.getAndPurge = function (context) {
-    var data
-    if (context.session.flashMessages) {
-      data = {
-        flashBloc: {
-          $view: 'flash',
-          messages: context.session.flashMessages
-        }
-      }
-      delete context.session.flashMessages
+    /**
+     * Ajoute un message en session
+     * @param {Context} context
+     * @param message
+     * @param level
+     * @memberOf $flashMessages
+     */
+    $flashMessages.add = function (context, message, level) {
+      if (['info', 'warning', 'error'].indexOf(level) < 0) level = 'info'
+      if (!context.session.flashMessages) context.session.flashMessages = []
+      context.session.flashMessages.push({
+        cssClass: level,
+        value: message
+      })
     }
 
-    return data
-  }
+    /**
+     * Retourne les messages en session et les efface
+     * @param {Context} context
+     * @memberOf $flashMessages
+     */
+    $flashMessages.getAndPurge = function (context) {
+      var data
+      if (context.session.flashMessages) {
+        data = {
+          flashBloc: {
+            $view: 'flash',
+            messages: context.session.flashMessages
+          }
+        }
+        delete context.session.flashMessages
+      }
 
-  return $flashMessages
+      return data
+    }
+
+    return $flashMessages
+  })
 }

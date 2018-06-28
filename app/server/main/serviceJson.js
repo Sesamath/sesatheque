@@ -35,108 +35,110 @@ const request = require('request')
 const defaultTimeout = 5000
 
 /**
- * Équivalent de context.denied en json
- * @param {Context} context
- * @param msg
+ * Service contenant les méthodes communes aux contrôleurs qui répondent en json
+ * @service $json
  */
-function denied (context, msg) {
-  if (!msg) msg = 'Accès refusé'
-  context.status = 403
-  sendError(context, msg)
-}
-
-/**
- * Équivalent de context.notFound en json
- * @param {Context} context
- * @param {string}  msg
- */
-function notFound (context, msg) {
-  if (!msg) msg = 'Contenu inexistant'
-  context.status = 404
-  sendError(context, msg)
-}
-
-/**
- * Wrapper de request.post, pour envoyer des data en json et récupérer du json
- * @param url
- * @param data
- * @param next
- */
-function post (url, data, next) {
-  const postOptions = {
-    url: url,
-    json: true,
-    content_type: 'charset=UTF-8',
-    timeout: defaultTimeout,
-    form: data
-  }
-  request.post(postOptions, function (error, response, body) {
-    if (error) return next(error)
-    if (body && body.error) return next(new Error(body.error))
-    next(null, body)
-  })
-}
-
-/**
- * Callback générique de sortie json
- * @param {Context} context
- * @param {string|string[]|Error} error
- * @param data
- */
-function send (context, error, data) {
-  if (error) {
-    // on logge l'erreur si s'en est vraiment une (pas les strings simples)
-    if (error.stack) {
-      log.error(error)
-      error = error.toString()
-    } else if (Array.isArray(error)) {
-      error = error.join(', ')
+module.exports = function (component) {
+  component.service('$json', function () {
+    /**
+     * Équivalent de context.denied en json
+     * @param {Context} context
+     * @param msg
+     */
+    function denied (context, msg) {
+      if (!msg) msg = 'Accès refusé'
+      context.status = 403
+      sendError(context, msg)
     }
-    sendError(context, error)
-  } else {
-    if (!data) data = {success: true}
-    log.debug('$json.send va renvoyer', data, 'api')
-    context.json(data)
-  }
-}
 
-/**
- * Envoie un message d'erreur {success:false, error: errorMessage}
- * @param {Context}      context
- * @param {Error|string} error
- */
-function sendError (context, error) {
-  if (error && error instanceof Error) {
-    log.error(error)
-    error = error.toString()
-  }
-  log.debug("$json va renvoyer l'erreur", error, 'api')
-  context.json({success: false, error: error})
-}
+    /**
+     * Équivalent de context.notFound en json
+     * @param {Context} context
+     * @param {string}  msg
+     */
+    function notFound (context, msg) {
+      if (!msg) msg = 'Contenu inexistant'
+      context.status = 404
+      sendError(context, msg)
+    }
 
-/**
- * Callback générique de sortie json avec {success:true}, et d'éventuelles autres data
- * @param {Context} context
- * @param {object} [data] des données à ajouter au {success:true}
- */
-function sendOk (context, data) {
-  if (!data) data = {}
-  data.success = true
-  log.debug('sendOk va renvoyer', data, 'api')
-  context.json(data)
-}
+    /**
+     * Wrapper de request.post, pour envoyer des data en json et récupérer du json
+     * @param url
+     * @param data
+     * @param next
+     */
+    function post (url, data, next) {
+      const postOptions = {
+        url: url,
+        json: true,
+        content_type: 'charset=UTF-8',
+        timeout: defaultTimeout,
+        form: data
+      }
+      request.post(postOptions, function (error, response, body) {
+        if (error) return next(error)
+        if (body && body.error) return next(new Error(body.error))
+        next(null, body)
+      })
+    }
 
-/**
-* Service contenant les méthodes communes aux contrôleurs qui répondent en json
-* @service $json
-*/
-module.exports = function () {
-  return {
-    denied,
-    notFound,
-    post,
-    send,
-    sendError,
-    sendOk
-  }
+    /**
+     * Callback générique de sortie json
+     * @param {Context} context
+     * @param {string|string[]|Error} error
+     * @param data
+     */
+    function send (context, error, data) {
+      if (error) {
+        // on logge l'erreur si s'en est vraiment une (pas les strings simples)
+        if (error.stack) {
+          log.error(error)
+          error = error.toString()
+        } else if (Array.isArray(error)) {
+          error = error.join(', ')
+        }
+        sendError(context, error)
+      } else {
+        if (!data) data = {success: true}
+        log.debug('$json.send va renvoyer', data, 'api')
+        context.json(data)
+      }
+    }
+
+    /**
+     * Envoie un message d'erreur {success:false, error: errorMessage}
+     * @param {Context}      context
+     * @param {Error|string} error
+     */
+    function sendError (context, error) {
+      if (error && error instanceof Error) {
+        log.error(error)
+        error = error.toString()
+      }
+      log.debug("$json va renvoyer l'erreur", error, 'api')
+      context.json({success: false, error: error})
+    }
+
+    /**
+     * Callback générique de sortie json avec {success:true}, et d'éventuelles autres data
+     * @param {Context} context
+     * @param {object} [data] des données à ajouter au {success:true}
+     */
+    function sendOk (context, data) {
+      if (!data) data = {}
+      data.success = true
+      log.debug('sendOk va renvoyer', data, 'api')
+      context.json(data)
+    }
+
+    return {
+      denied,
+      notFound,
+      post,
+      send,
+      sendError,
+      sendOk
+    }
+  })
 }

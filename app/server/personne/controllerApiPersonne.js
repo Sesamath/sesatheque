@@ -31,78 +31,123 @@
 
 'use strict'
 
-module.exports = function (controller, EntityPersonne, $personneRepository, $accessControl) {
-  /**
-   * Controleur de la route /api/personne/
-   * @Controller controllerApiPersonne
-   */
+module.exports = function (component) {
+  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl) {
+    /**
+     * Controleur de la route /api/personne/
+     * @Controller controllerApiPersonne
+     */
 
-  /**
-   * Équivalent de context.denied en json
-   * @private
-   * @param {Context} context
-   * @param msg
-   */
-  function denied (context, msg) {
-    if (!msg) msg = 'Accès refusé'
-    context.status = 403
-    context.json({error: msg})
-  }
-
-  /**
-   * Callback générique de sortie
-   * @private
-   * @param {Context} context
-   * @param error
-   * @param data
-   */
-  function sendJson (context, error, data) {
-    if (error) {
-      log.error(error)
-      log.debug("sendJson va renvoyer l'erreur", error, 'api')
-      context.json({error: error.toString()})
-    } else {
-      log.debug('sendJson va renvoyer', data, 'api')
-      context.json(data)
+    /**
+     * Équivalent de context.denied en json
+     * @private
+     * @param {Context} context
+     * @param msg
+     */
+    function denied (context, msg) {
+      if (!msg) msg = 'Accès refusé'
+      context.status = 403
+      context.json({error: msg})
     }
-  }
 
-  /**
-   * Create / update une personne (poster un objet ayant les propriétés de {@link Personne})
-   * @route POST /api/personne/add
-   */
-  controller.post('add', function (context) {
-    /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-     log.error(new Error('une trace pour ' +reqHttp)) */
-    if (context.perf) {
-      var msg = 'start-pers-' + context.post.id
-      log.perf(context.response, msg)
-    }
-    // log.debug('post /api/personne a reçu', context.post, 'api', {max: 1000})
-    log.debug('post /api/personne a reçu', context.post, 'api')
-    if ($accessControl.hasAllRights(context)) {
-      // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
-      // pour garantir l'intégrité des données
-      if (context.post.origine && context.post.idOrigine) {
-        var personne = EntityPersonne.create(context.post)
-        personne.store(function (error, personneBdd) {
-          if (error) sendJson(context, error)
-          else if (personneBdd && personneBdd.oid) sendJson(context, null, {oid: personneBdd.oid})
-          else sendJson(context, new Error("Erreur interne (personne.store ne renvoie pas d'objet avec oid)"))
-        })
+    /**
+     * Callback générique de sortie
+     * @private
+     * @param {Context} context
+     * @param error
+     * @param data
+     */
+    function sendJson (context, error, data) {
+      if (error) {
+        log.error(error)
+        log.debug("sendJson va renvoyer l'erreur", error, 'api')
+        context.json({error: error.toString()})
       } else {
-        sendJson(context, new Error('origine ou idOrigine manquant'))
+        log.debug('sendJson va renvoyer', data, 'api')
+        context.json(data)
       }
-    } else {
-      denied(context)
     }
-  })
 
-  /**
-   * Affiche les infos du user courant, pour debug
-   * @route GET /api/personne/me
-   */
-  controller.get('me', function (context) {
-    sendJson(context, null, context.session.user)
+    // service $auth qu'on ne peut pas mettre en dépendance car le component auth
+    // est chargé après ce component personne (il utilise ses services)
+    let $auth
+
+    /**
+     * Create / update une personne (poster un objet ayant les propriétés de {@link Personne})
+     * @route POST /api/personne/add
+     */
+    this.post('add', function (context) {
+      /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
+       log.error(new Error('une trace pour ' +reqHttp)) */
+      if (context.perf) {
+        var msg = 'start-pers-' + context.post.id
+        log.perf(context.response, msg)
+      }
+      // log.debug('post /api/personne a reçu', context.post, 'api', {max: 1000})
+      log.debug('post /api/personne a reçu', context.post, 'api')
+      if ($accessControl.hasAllRights(context)) {
+        // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
+        // pour garantir l'intégrité des données
+        if (context.post.origine && context.post.idOrigine) {
+          var personne = EntityPersonne.create(context.post)
+          personne.store(function (error, personneBdd) {
+            if (error) sendJson(context, error)
+            else if (personneBdd && personneBdd.oid) sendJson(context, null, {oid: personneBdd.oid})
+            else sendJson(context, new Error("Erreur interne (personne.store ne renvoie pas d'objet avec oid)"))
+          })
+        } else {
+          sendJson(context, new Error('origine ou idOrigine manquant'))
+        }
+      } else {
+        denied(context)
+      }
+    })
+
+    /**
+     * Affiche les infos du user courant, pour debug
+     * @route GET /api/personne/me
+     */
+    this.get('me', function (context) {
+      sendJson(context, null, context.session.user)
+    })
+
+    /**
+     * Renvoie le user courant et les liens pour le SSO
+     * Retourne un objet
+     * {
+   *   user: {pid, nom, prenom},
+   *   ssoLinks: link[], // si le sso propose des liens pour gérer son compte ou autre
+   *   logoutUrl: string, // si on est authentifié
+   *   loginLinks: link[]
+   * }
+     * un link est de la forme {href: string, icon: string, value: string}
+     * @route GET /api/personne/current
+     */
+    this.get('current', function (context) {
+      if (!$auth) $auth = lassi.service('$auth')
+      const response = {}
+      if ($accessControl.isAuthenticated(context)) {
+        const {
+          pid,
+          nom,
+          prenom,
+          groupesMembre,
+          groupesSuivis
+        } = $accessControl.getCurrentUser(context)
+        response.personne = {
+          pid,
+          nom,
+          prenom,
+          groupesMembre,
+          groupesSuivis
+        }
+        response.logoutUrl = $auth.getLogoutUrl(context)
+        response.ssoLinks = $auth.getSsoLinks(context)
+      } else {
+        response.personne = null
+        response.loginLinks = $auth.getLoginLinks(context)
+      }
+      sendJson(context, null, response)
+    })
   })
 }
