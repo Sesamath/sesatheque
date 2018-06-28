@@ -1,3 +1,4 @@
+import {push} from 'connected-react-router'
 import React from 'react'
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
@@ -58,23 +59,19 @@ NavMenu.propTypes = {
 }
 
 // les props sont passées en 2e argument
-const mapDispatchToProps = (dispatch, {history}) => ({
+const mapDispatchToProps = (dispatch) => ({
   askDelete: (oid) => {
-    if (confirm('Êtes vous sûr de vouloir supprimer cette ressource')) {
-      const success = () => {
-        // @todo virer cette attente pour remplacer par du history.push dès que la home est gérée par react
-        setTimeout(() => { window.location = '/' }, 1000)
-        // history.push('/')
-      }
+    if (confirm('Êtes vous sûr de vouloir supprimer cette ressource ?')) {
+      const success = () => dispatch(push('/'))
 
-      dispatch(deleteRessource(oid, success))
+      return dispatch(deleteRessource(oid, success))
     }
   },
   askClone: (oid) => {
-    if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource')) {
-      const success = (clonedOid) => {
-        return history.push(`/ressource/modifier/${clonedOid}`)
-      }
+    if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource ?')) {
+      const success = (clonedOid) => dispatch(
+        push(`/ressource/modifier/${clonedOid}`)
+      )
 
       return dispatch(cloneRessource(oid, success))
     }

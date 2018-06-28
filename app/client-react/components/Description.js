@@ -57,12 +57,11 @@ const Description = ({
     _contributeurs = [],
     _relations = [],
     groupes
-  },
-  history
+  }
 }) => (
   <Fragment>
     <h1 className="fl">{titre}</h1>
-    <NavMenu history={history} ressourceOid={oid} />
+    <NavMenu ressourceOid={oid} />
     <div className="block ressource">
       <span className="publie btn">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
       <span className="restriction btn">{getRestriction(restriction)}</span>
@@ -215,8 +214,7 @@ const Description = ({
 )
 
 Description.propTypes = {
-  ressource: PropTypes.shape({}),
-  history: PropTypes.object
+  ressource: PropTypes.shape({})
 }
 
 export default resourceLoader(Description)
