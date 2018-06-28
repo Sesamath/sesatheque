@@ -68,6 +68,10 @@ module.exports = function (component) {
       }
     }
 
+    // service $auth qu'on ne peut pas mettre en dépendance car le component auth
+    // est chargé après ce component personne (il utilise ses services)
+    let $auth
+
     /**
      * Create / update une personne (poster un objet ayant les propriétés de {@link Personne})
      * @route POST /api/personne/add
@@ -105,6 +109,45 @@ module.exports = function (component) {
      */
     this.get('me', function (context) {
       sendJson(context, null, context.session.user)
+    })
+
+    /**
+     * Renvoie le user courant et les liens pour le SSO
+     * Retourne un objet
+     * {
+   *   user: {pid, nom, prenom},
+   *   ssoLinks: link[], // si le sso propose des liens pour gérer son compte ou autre
+   *   logoutUrl: string, // si on est authentifié
+   *   loginLinks: link[]
+   * }
+     * un link est de la forme {href: string, icon: string, value: string}
+     * @route GET /api/personne/current
+     */
+    this.get('current', function (context) {
+      if (!$auth) $auth = lassi.service('$auth')
+      const response = {}
+      if ($accessControl.isAuthenticated(context)) {
+        const {
+          pid,
+          nom,
+          prenom,
+          groupesMembre,
+          groupesSuivis
+        } = $accessControl.getCurrentUser(context)
+        response.personne = {
+          pid,
+          nom,
+          prenom,
+          groupesMembre,
+          groupesSuivis
+        }
+        response.logoutUrl = $auth.getLogoutUrl(context)
+        response.ssoLinks = $auth.getSsoLinks(context)
+      } else {
+        response.personne = null
+        response.loginLinks = $auth.getLoginLinks(context)
+      }
+      sendJson(context, null, response)
     })
   })
 }

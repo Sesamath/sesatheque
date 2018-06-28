@@ -252,7 +252,7 @@ module.exports = function (component) {
             // version react
             let data = {
               contentBloc: {
-                $view: 'ressource-editor',
+                $view: 'react-config',
                 verbose: (appConfig.application.staging !== 'prod'),
                 isDev: (appConfig.application.staging !== 'prod'),
                 baseId: appConfig.application.baseId,
@@ -486,12 +486,11 @@ module.exports = function (component) {
         if (['iep', 'j3p', 'mathgraph', 'arbre'].includes(ressource.type)) {
           let data = {
             contentBloc: {
-              $view: 'ressource-editor',
+              $view: 'react-config',
               verbose: (appConfig.application.staging !== 'prod'),
               isDev: (appConfig.application.staging !== 'prod'),
               baseId: appConfig.application.baseId,
-              sesatheques: appConfig.sesatheques,
-              ressource: ressource ? sjt.stringify(ressource) : ''
+              sesatheques: appConfig.sesatheques
             },
             jsBloc: {
               $view: 'js',
