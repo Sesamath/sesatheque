@@ -12,7 +12,7 @@ const ResourceList = ({resources}) => (
         <th colSpan="4">Actions</th>
       </tr>
     </thead>
-	  <tbody>
+    <tbody>
       {resources.map(({
         oid,
         titre,
@@ -55,7 +55,7 @@ const ResourceList = ({resources}) => (
           </td>
         </tr>
       ))}
-      {!resources.length  ? (
+      {!resources.length ? (
         <Fragment>
           <tr>
             <td colSpan="7" className="empty">-</td>

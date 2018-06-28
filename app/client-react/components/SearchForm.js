@@ -1,5 +1,7 @@
-import {listes, labels} from '../../server/ressource/config'
+import PropTypes from 'prop-types'
+import React, {Component, Fragment} from 'react'
 import {reduxForm} from 'redux-form'
+import {listes, labels} from '../../server/ressource/config'
 import {POST} from '../utils/httpMethods'
 import Classification from './Classification'
 import {
@@ -7,9 +9,6 @@ import {
   ResourceTypesField,
   SelectField
 } from './fields'
-import MetaForm from './MetaForm'
-import React, {Component, Fragment} from 'react'
-import {connect} from 'react-redux'
 import ResourceList from './ResourceList'
 
 const publieValues = {
@@ -34,13 +33,12 @@ class SearchForm extends Component {
       filters.push({index: key, values})
     })
 
-    POST(`/api/liste/prof`, { body : {
-        format: 'full',
-        filters
-      }
-    })
+    POST(`/api/liste/prof`, {body: {
+      format: 'full',
+      filters
+    }})
       .then((resourceList) => this.setState({resourceList: Object.values(resourceList.liste)}))
-      .catch(()=> this.setState({resourceList: []}))
+      .catch(() => this.setState({resourceList: []}))
   }
 
   render () {
@@ -83,8 +81,8 @@ class SearchForm extends Component {
           <Classification detailled />
           <div className="buttons-area">
             <button
-            type="submit"
-            className="btn--primary"
+              type="submit"
+              className="btn--primary"
             >
             Rechercher
             </button>
@@ -94,6 +92,10 @@ class SearchForm extends Component {
       </Fragment>
     )
   }
+}
+
+SearchForm.propTypes = {
+  handleSubmit: PropTypes.func
 }
 
 export default reduxForm({
