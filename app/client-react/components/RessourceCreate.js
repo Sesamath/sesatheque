@@ -4,7 +4,6 @@ import React, {Fragment} from 'react'
 import {connect} from 'react-redux'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
-// import MetaForm from './MetaForm'
 import Classification from './Classification'
 import {saveRessource} from '../actions/ressource'
 
