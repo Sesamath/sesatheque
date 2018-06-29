@@ -73,7 +73,7 @@ module.exports = function (mainComponent) {
     // pour la page html react, c'est la même sur toutes les routes
     const sendReactPage = (context) => {
       context.layout = 'react'
-      const {baseId, name, sesatheques, staging} = config.application
+      const {sesatheques, application: {baseId, name, staging}} = config
       const options = {
         isDev: staging !== 'production',
         verbose: process.argv.includes('--debug'),
@@ -88,7 +88,6 @@ module.exports = function (mainComponent) {
           jsFiles: ['/react.js'],
           jsCode: `window.options = ${JSON.stringify(options)};`
         },
-        content: 'pour éviter que beforTransport prenne ça pour du 404',
         version
       }
       context.html(data)
