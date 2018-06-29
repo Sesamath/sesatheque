@@ -49,95 +49,103 @@ const getButtons = (personne) => {
 }
 
 const Header = ({
+  iframe,
   personne,
   loginLink,
   logoutUrl,
   ssoLinks
-}) => (
-  <header role="banner">
-    <NavLink
-      to="/"
-    >
-      <img src={logoUrl} width="250" height="48" alt="logo" />
-    </NavLink>
-    <nav
-      className="navigation fr"
-      role="navigation"
-    >
-      {getButtons(personne).map(({
-        icon,
-        title,
-        to,
-        target
-      }) => (
-        <NavLink
-          key={to}
-          to={to}
-          title={title}
-          target={target}
-        >
-          <i className={`fa fa-${icon}`}></i>
-          <span>{title}</span>
-        </NavLink>
-      ))}
-      <div className="auth">
-        {personne === null ? (
-          loginLink ? (
-            <a href={setRedirect(loginLink.href)} title="Connexion">
-              <i className="fa fa-sign-in-alt"></i>
-              <span>Connexion</span>
-            </a>
-          ) : null
-        ) : (
-          <Fragment>
-            <NavLink
-              to="#"
-            >
-              <i className="fa fa-user"></i>
-              <i className="fa fa-ellipsis-v"></i>
-            </NavLink>
-            <ul>
-              <div>{`${personne.prenom} ${personne.nom} (${personne.pid})`}</div>
-              {ssoLinks ? ssoLinks.map(({
-                href,
-                icon,
-                value
-              }) => (
-                <li key={href}>
-                  <a href={setRedirect(href)} title={value}>
-                    <i className={`fa fa-${icon}`}></i>
-                    <span>{value}</span>
+}) => {
+  if (iframe) return null
+
+  return (
+    <header role="banner">
+      <NavLink
+        to="/"
+      >
+        <img src={logoUrl} width="250" height="48" alt="logo" />
+      </NavLink>
+      <nav
+        className="navigation fr"
+        role="navigation"
+      >
+        {getButtons(personne).map(({
+          icon,
+          title,
+          to,
+          target
+        }) => (
+          <NavLink
+            key={to}
+            to={to}
+            title={title}
+            target={target}
+          >
+            <i className={`fa fa-${icon}`}></i>
+            <span>{title}</span>
+          </NavLink>
+        ))}
+        <div className="auth">
+          {personne === null ? (
+            loginLink ? (
+              <a href={setRedirect(loginLink.href)} title="Connexion">
+                <i className="fa fa-sign-in-alt"></i>
+                <span>Connexion</span>
+              </a>
+            ) : null
+          ) : (
+            <Fragment>
+              <NavLink
+                to="#"
+              >
+                <i className="fa fa-user"></i>
+                <i className="fa fa-ellipsis-v"></i>
+              </NavLink>
+              <ul>
+                <div>{`${personne.prenom} ${personne.nom} (${personne.pid})`}</div>
+                {ssoLinks ? ssoLinks.map(({
+                  href,
+                  icon,
+                  value
+                }) => (
+                  <li key={href}>
+                    <a href={setRedirect(href)} title={value}>
+                      <i className={`fa fa-${icon}`}></i>
+                      <span>{value}</span>
+                    </a>
+                  </li>
+                )) : null}
+                <li>
+                  <a href={setRedirect(logoutUrl)} title="Déconnexion">
+                    <i className="fa fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
                   </a>
                 </li>
-              )) : null}
-              <li>
-                <a href={setRedirect(logoutUrl)} title="Déconnexion">
-                  <i className="fa fa-sign-out-alt"></i>
-                  <span>Déconnexion</span>
-                </a>
-              </li>
-            </ul>
-          </Fragment>
-        )}
-      </div>
-    </nav>
-  </header>
-)
+              </ul>
+            </Fragment>
+          )}
+        </div>
+      </nav>
+    </header>
+  )
+}
 
 Header.propTypes = {
+  iframe: PropTypes.bool,
   personne: PropTypes.object,
   logoutUrl: PropTypes.string,
   loginLink: PropTypes.object,
   ssoLinks: PropTypes.arrayOf(PropTypes.object)
 }
 
-const mapStateToProps = ({session}) => ({
+const mapStateToProps = ({session, iframe, router}) => ({
   personne: session && session.personne,
   logoutUrl: session && session.logoutUrl,
   // we suppose that loginLinks is a singleton
   // todo: add support for several links
   loginLink: session && session.loginLinks && session.loginLinks[0],
-  ssoLinks: session && session.ssoLinks
+  ssoLinks: session && session.ssoLinks,
+  iframe,
+  router
 })
 
 export default connect(mapStateToProps, {})(Header)

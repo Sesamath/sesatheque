@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {connect} from 'react-redux'
 import {renameProp} from 'recompose'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
@@ -29,6 +30,7 @@ const typeToData = {
 }
 
 const ResourceForm = ({
+  iframe,
   initialValues: {type, oid: ressourceOid, titre},
   handleSubmit,
   change,
@@ -41,10 +43,12 @@ const ResourceForm = ({
 
   return (
     <Fragment>
-      <h1 className="fl">Modifier la ressource « {titre} »</h1>
-      <NavMenu
-        ressourceOid={ressourceOid}
-      />
+      <h1 className={iframe ? '' : 'fl'}>Modifier la ressource « {titre} »</h1>
+      {iframe ? null : (
+        <NavMenu
+          ressourceOid={ressourceOid}
+        />
+      )}
       <form>
         <MetaForm />
         <hr />
@@ -74,6 +78,7 @@ const ResourceForm = ({
 }
 
 ResourceForm.propTypes = {
+  iframe: PropTypes.bool,
   initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
   change: PropTypes.func,
@@ -88,5 +93,6 @@ export default flowRight([
   aliasForker,
   resourceSaver,
   renameProp('ressource', 'initialValues'),
-  reduxForm({form: 'ressource'})
+  reduxForm({form: 'ressource'}),
+  connect(({iframe}) => ({iframe}), {})
 ])(ResourceForm)

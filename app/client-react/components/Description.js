@@ -1,6 +1,7 @@
 import moment from 'moment'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {connect} from 'react-redux'
 import {NavLink} from 'react-router-dom'
 import resourceLoader from '../hoc/resourceLoader'
 import NavMenu from './NavMenu'
@@ -31,6 +32,7 @@ const getRestriction = (restriction) => {
 }
 
 const Description = ({
+  iframe,
   ressource: {
     titre,
     oid,
@@ -60,8 +62,10 @@ const Description = ({
   }
 }) => (
   <Fragment>
-    <h1 className="fl">{titre}</h1>
-    <NavMenu ressourceOid={oid} />
+    <h1 className={iframe ? '' : 'fl'}>{titre}</h1>
+    {iframe ? null : (
+      <NavMenu ressourceOid={oid} />
+    )}
     <div className="block ressource">
       <span className="publie btn">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
       <span className="restriction btn">{getRestriction(restriction)}</span>
@@ -214,7 +218,10 @@ const Description = ({
 )
 
 Description.propTypes = {
-  ressource: PropTypes.shape({})
+  ressource: PropTypes.shape({}),
+  iframe: PropTypes.bool
 }
 
-export default resourceLoader(Description)
+const mapStateToProps = ({iframe}) => ({iframe})
+
+export default connect(mapStateToProps, {})(resourceLoader(Description))
