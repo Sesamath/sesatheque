@@ -63,6 +63,7 @@ class EditorUrl extends Component {
             <label key={key}>
               <Field
                 name="parametres[question_options]"
+                className="radio"
                 component="input"
                 type="radio"
                 value={value}
@@ -86,6 +87,7 @@ class EditorUrl extends Component {
             <label key={key}>
               <Field
                 name="parametres[answer_option]"
+                className="radio"
                 component="input"
                 type="radio"
                 value={value}
