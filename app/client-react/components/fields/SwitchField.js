@@ -2,8 +2,8 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
 
-const SwitchField = ({label, name}) => (
-  <label>
+const SwitchField = ({className, label, name}) => (
+  <label className={className}>
     {label}
     <Field
       name={name}
@@ -15,6 +15,8 @@ const SwitchField = ({label, name}) => (
 )
 
 SwitchField.propTypes = {
+  checked: PropTypes.bool,
+  className: PropTypes.string,
   label: PropTypes.string,
   name: PropTypes.string
 }
