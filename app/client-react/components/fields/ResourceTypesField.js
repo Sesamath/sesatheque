@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 // import {Field} from 'redux-form'
 import {editable, listes} from '../../../server/ressource/config'
-import InputField from './InputField'
 import SelectField from './SelectField'
 
 /**
@@ -10,45 +9,39 @@ import SelectField from './SelectField'
  * car si on est admin ou éditeur toutes les ressources existantes sont éditables)
  * @type {object} la liste type=>label
  */
-const types = {}
+const editableTypes = {}
+const allTypes = {}
 Object.keys(editable).forEach(k => {
-  if (editable[k]) types[k] = listes.type[k]
+  const label = listes.type[k]
+  if (editable[k]) editableTypes[k] = label
+  allTypes[k] = label
 })
 // Le label d'un type, à mettre dans un input disabled pour afficher
 // le bon type d'une ressource "non éditable"
 // const typeToLabel = (type) => listes.type[type]
 
 const ResourceTypesField = ({
+  children,
   label,
   disabled = false,
   optional = false
-}) => {
-  if (disabled) {
-    // on rend un champ texte, vu qu'il n'est pas modifiable, mais on garde un Field
-    // pour le moment pour avoir le même look
-    return (
-      <InputField
-        label={label}
-        name="type"
-        disabled />
-    )
-  }
-  // sinon c'est du select classique
-  return (
-    <SelectField
-      label={label}
-      values={types}
-      disabled={disabled}
-      optional={optional}
-      name="type"
-    />
-  )
-}
+}) => (
+  <SelectField
+    name="type"
+    label={label}
+    values={disabled ? allTypes : editableTypes}
+    disabled={disabled}
+    optional={optional}
+  >
+    {children}
+  </SelectField>
+)
 
 ResourceTypesField.propTypes = {
   label: PropTypes.string,
   disabled: PropTypes.bool,
-  optional: PropTypes.bool
+  optional: PropTypes.bool,
+  children: PropTypes.node
 }
 
 export default ResourceTypesField

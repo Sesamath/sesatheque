@@ -30,7 +30,7 @@ const typeDocumentaires = {
 
 const parseInteger = (string) => parseInt(string, 10)
 
-const Classification = ({detailled}) => (
+const Classification = ({detailed}) => (
   <fieldset>
     <div className="grid-4">
       <Field
@@ -42,7 +42,7 @@ const Classification = ({detailled}) => (
         component={CheckboxGroup}
         {...niveaux}
       />
-      {detailled ? (
+      {detailed ? (
         <Fragment>
           <Field
             parseValue={parseInteger}
@@ -61,7 +61,7 @@ const Classification = ({detailled}) => (
 )
 
 Classification.propTypes = {
-  detailled: PropTypes.bool
+  detailed: PropTypes.bool
 }
 
 export default Classification

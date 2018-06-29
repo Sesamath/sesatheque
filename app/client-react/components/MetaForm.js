@@ -20,9 +20,10 @@ const MetaForm = () => (
           label={labels.type}
           disabled />
         <SelectField
+          name="langue"
           label={labels.langue}
           values={listes.langue}
-          name="langue" />
+        />
         <TextareaField
           label={labels.resume}
           name="resume" />
@@ -35,7 +36,7 @@ const MetaForm = () => (
       </div>
     </fieldset>
     <hr />
-    <Classification detailled />
+    <Classification detailed />
     <hr />
     <fieldset>
       <div className="grid-3">
