@@ -64,6 +64,11 @@ function notifyError (data) {
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
+ *
+ * Tout ce qui renvoie une ressource (ou un oid pour du post) accepte en queryString
+ * - format=(ref|ressource|full) ref renvoie une ref (toujours avec les _droits), full ajoute la résolution des id (auteurs, relations, groupes…)
+ * - droits=1 pour ajouter une propriété _droits (string contenant des lettres parmi RWD)
+ *
  * @Controller controllerApi
  */
 module.exports = function (component) {
@@ -600,28 +605,37 @@ module.exports = function (component) {
       if (error) return $json.send(context, error)
       if (!ressource) return $json.notFound(context, 'Cette ressource n’existe pas.')
       if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context)
-      const format = context.get.format
+      // on va renvoyer qq chose
+      const addDroits = (data) => {
+        data._droits = 'R'
+        if ($accessControl.hasPermission('update', context, ressource)) data._droits += 'W'
+        if ($accessControl.hasPermission('delete', context, ressource)) data._droits += 'D'
+      }
+      let {format, droits} = context.get
+      // ça vient de l'url donc toujours une string
+      if (['false', 'no', 'off', '0', 'undefined', 'null'].includes(droits)) droits = false
+      let data
       if (format === 'ref') {
-        const ref = new Ref(ressource)
-        // avec ajout des droits
-        ref.$droits = 'R'
-        if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
-        if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
-        $json.send(context, null, ref)
+        data = new Ref(ressource)
+        droits = true
       } else if (format === 'full') {
-        $ressourceConverter.enhance(ressource, (error, ressource) => {
+        // ressource complète avec résolution des oid externes (auteurs, groupe…)
+        // c'est async, donc on sort pour éviter le send final
+        return $ressourceConverter.enhance(ressource, (error, ressource) => {
           if (error) return $json.send(context, error)
-          log.debug('ressource full', ressource, 'aVirer', {max: 10000})
+          if (droits) addDroits(ressource)
           $json.send(context, null, ressource)
         })
       } else {
-        $json.send(context, null, ressource)
+        data = ressource
       }
+      if (droits) addDroits(data)
+      $json.send(context, null, data)
     }
 
     /**
      * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels
-     * ou le ?format= demandé (ref ou normalized, le reste donnant la ressource complète)
+     * ou le ?format= demandé (ref ou full, le reste donnant la ressource complète)
      * @private
      * @param {Context} context
      * @param ressource
@@ -1137,7 +1151,7 @@ module.exports = function (component) {
      */
 
     /**
-     * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|normalized)
+     * Retourne la ressource publique et publiée (sinon 404) d'après son oid
      * Retourne {@link reponseListe}
      * @route GET /api/public/:oid
      * @param {Integer} :oid
@@ -1154,7 +1168,7 @@ module.exports = function (component) {
     })
 
     /**
-     * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|normalized)
+     * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine
      * Retourne {@link reponseRessource}
      * @route GET /api/public/:origine/:idOrigine
      * @param {string} :origine
@@ -1227,7 +1241,7 @@ module.exports = function (component) {
      */
 
     /**
-     * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+     * Retourne la ressource d'après son oid (si on a les droit de lecture dessus)
      * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
      * @Route GET /api/ressource/:oid
      * @param {Integer} oid
@@ -1268,7 +1282,7 @@ module.exports = function (component) {
     })
 
     /**
-     * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+     * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus)
      * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
      * @route GET /api/ressource/:origine/:idOrigine
      * @param {string} :origine
