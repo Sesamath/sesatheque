@@ -14,7 +14,7 @@ const SelectField = ({
     <Field
       name={name}
       component="select"
-      disabled={{ disabled: Boolean(disabled) }}
+      disabled={disabled}
     >
       {optional ? (
         <option>peu importe</option>
