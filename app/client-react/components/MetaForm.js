@@ -21,7 +21,8 @@ const MetaForm = () => (
           disabled />
         <SelectField
           label={labels.langue}
-          values={listes.langue} />
+          values={listes.langue}
+          name="langue" />
         <TextareaField
           label={labels.resume}
           name="resume" />
@@ -64,7 +65,8 @@ const MetaForm = () => (
           disabled />
         <SelectField
           label={labels.restriction}
-          values={listes.restriction} />
+          values={listes.restriction}
+          name="restriction" />
         <SwitchField
           label={labels.publie}
           name="publie" />

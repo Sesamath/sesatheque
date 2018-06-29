@@ -9,6 +9,7 @@ import Footer from './components/Footer'
 import Description from './components/Description'
 import Preview from './components/Preview'
 import ResourceForm from './components/ResourceForm'
+import SearchForm from './components/SearchForm'
 import Notifications from './components/Notifications'
 import {getCurrentSession} from './actions/session'
 import history from './history'
@@ -29,6 +30,7 @@ const App = () => (
             <Route exact path="/ressource/modifier/:ressourceOid" component={ResourceForm} />
             <Route exact path="/ressource/apercevoir/:ressourceOid" component={Preview} />
             <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />
+            <Route exact path="/ressource/rechercher" component={SearchForm} />
           </Switch>
         </div>
         <Footer />

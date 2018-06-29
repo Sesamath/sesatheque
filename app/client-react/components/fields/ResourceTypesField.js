@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
 import {editable, listes} from '../../../server/ressource/config'
+import InputField from './InputField'
 import SelectField from './SelectField'
 
 /**
@@ -26,13 +27,10 @@ const ResourceTypesField = ({
     // on rend un champ texte, vu qu'il n'est pas modifiable, mais on garde un Field
     // pour le moment pour avoir le même look
     return (
-      <Field
+      <InputField
+        label={label}
         name="type"
-        component="input"
-        type="text"
-        disabled
-        format={typeToLabel}
-      />
+        disabled />
     )
   }
   // sinon c'est du select classique
@@ -42,6 +40,7 @@ const ResourceTypesField = ({
       values={types}
       disabled={disabled}
       optional={optional}
+      name="type"
     />
   )
 }

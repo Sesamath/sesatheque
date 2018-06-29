@@ -17,8 +17,7 @@ const getButtons = (personne) => {
     id: 'buttonSearch',
     title: 'Recherche',
     to: '/ressource/rechercher',
-    icon: 'search',
-    target: '_self'
+    icon: 'search'
   }
   if (personne === null) {
     return [buttonSearch]
