@@ -34,7 +34,8 @@ const fs = require('fs')
 const path = require('path')
 
 const config = require('../config')
-const version = require('../../../package').version
+
+const envSesathequeConf = process.env.SESATHEQUE_CONF
 
 let homeContent
 
@@ -64,38 +65,29 @@ module.exports = function (mainComponent) {
       fsPath: path.join(root, 'build'),
       maxAge: config.application.staticMaxAge || '7d'
     }
-    if (process.env.SESATHEQUE_CONF) expressOptions.fsPath = path.join(expressOptions.fsPath, process.env.SESATHEQUE_CONF)
+    if (envSesathequeConf) expressOptions.fsPath = path.join(expressOptions.fsPath, envSesathequeConf)
     this.serve('/', expressOptions)
     // et les ressources statiques qui bougent pas (CopyWebpackPlugin arrive pas à les copier, y'en a trop)
     expressOptions.fsPath = path.join(root, 'app', 'assets')
     this.serve('/', expressOptions)
 
+    const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
+    const reactPagePath = path.resolve(root, buildDir, 'index.html')
+    const reactPage = fs.readFileSync(reactPagePath)
     // pour la page html react, c'est la même sur toutes les routes
     const sendReactPage = (context) => {
-      context.layout = 'react'
-      const {sesatheques, application: {baseId, name, staging}} = config
       const options = {
-        isDev: staging !== 'production',
-        verbose: process.argv.includes('--debug'),
-        baseId,
-        sesatheques
+        headers: {
+          'Content-Length': Buffer.byteLength(reactPage, 'utf8'),
+          'Content-Type': 'text/html'
+        }
       }
-      const data = {
-        $metas: {
-          title: name
-        },
-        js: {
-          jsFiles: ['/react.js'],
-          jsCode: `window.options = ${JSON.stringify(options)};`
-        },
-        version
-      }
-      context.html(data)
+      context.raw(reactPage, options)
     }
 
     // cf app/client-react/App.js pour ne pas en oublier
     const reactRoutes = [
-      '/',
+      // '/', inutile car /build/index.html passe avant
       '/mentionsLegales',
       '/ressource/modifier/:oid',
       '/ressource/apercevoir/:oid',

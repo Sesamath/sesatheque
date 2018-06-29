@@ -21,10 +21,10 @@ const path = require('path')
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-// const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const appConfig = require('./app/server/config')
-// const version = require('./package').version
+const version = require('./package').version
 
 const isDebug = process.argv.includes('--debug')
 // prod d'après la conf (sauf --debug)
@@ -139,20 +139,18 @@ if (isProd) {
 
 // génération du html pour react
 // cf https://github.com/jantimon/html-webpack-plugin#options
-/* mais ça marche pas à cause des sesatheques, ça semble trop gros…
 conf.plugins.push(new HtmlWebpackPlugin({
   isDev: !isProd,
   title: appConfig.application.name,
   version: version,
   verbose: isDebug,
   baseId: appConfig.application.baseId,
-  sesatheques: JSON.stringify(appConfig.application.sesatheques), // trop gros pour HtmlWebpackPlugin
+  sesatheques: JSON.stringify(appConfig.sesatheques),
   template: './app/server/views/index.html',
   filename: 'index.html',
   // on ne veut pas qu'il génère de html, ni qu'il mette toutes nos entries en <head> ou <script>
   inject: false
 }))
-*/
 
 // pour pouvoir compiler les js de plusieurs baseId dans des dossiers différents
 // (qui se retrouveront docroot si on passe le même env SESATHEQUE_CONF au lancement de l'appli)
