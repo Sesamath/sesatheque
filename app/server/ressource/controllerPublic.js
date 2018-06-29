@@ -31,10 +31,6 @@
 
 'use strict'
 
-const _ = require('lodash')
-const {ensure, linkQs} = require('../tools')
-const config = require('./config')
-
 /**
  * Le controleur html des routes /public/ (pages sans authentification)
  * qui traite aussi les /ressource/ si on est pas authentifié
@@ -78,29 +74,8 @@ module.exports = function (component) {
     }
 
     const controller = this
-
-    /**
-     * Page describe
-     * @route GET /public/decrire/:oid
-     */
-    controller.get($routes.get('describe', ':oid'), function (context) {
-      context.layout = 'page'
-      context.tab = 'describe'
-      affiche(context, 'describe')
-    })
-    /**
-     * Page describe
-     * @route GET /public/decrire/:origine/:idOrigine
-     */
-    controller.get($routes.get('describe', ':origine', ':idOrigine'), function (context) {
-      context.layout = 'page'
-      context.tab = 'describe'
-      var origine = context.arguments.origine
-      var idOrigine = context.arguments.idOrigine
-      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-        checkAndAffiche(context, error, ressource, 'describe')
-      })
-    })
+    // pour le moment, on redirige simplement les routes /public vers /ressource pour react
+    const reactRedirect = (context) => context.redirect(context.request.originalUrl.replace('/public/', '/ressource/'))
 
     /**
      * Page display (pleine page, prévu pour iframe)
@@ -134,95 +109,17 @@ module.exports = function (component) {
      * Page preview (avec le layout du site)
      * @route GET /public/apercevoir/:oid
      */
-    controller.get($routes.get('preview', ':oid'), function (context) {
-      context.layout = 'page'
-      context.tab = 'preview'
-      affiche(context, 'display')
-    })
+    controller.get($routes.get('preview', ':oid'), reactRedirect)
     /**
      * Page preview (avec le layout du site)
      * @route GET /public/apercevoir/:origine/:idOrigine
      */
-    controller.get($routes.get('preview', ':origine', ':idOrigine'), function (context) {
-      context.layout = 'page'
-      context.tab = 'preview'
-      var origine = context.arguments.origine
-      var idOrigine = context.arguments.idOrigine
-      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
-        checkAndAffiche(context, error, ressource, 'display')
-      })
-    })
-
-    /**
-     * La recherche (form et résultats)
-     * @private
-     */
-    function search (context) {
-      context.layout = 'page'
-      if (_.isEmpty(context.get)) {
-        // form de recherche
-        $ressourcePage.printSearchForm(context)
-      } else {
-        // résultats
-        log.debug('search reçoit', context.get)
-        // faut passer en revue les critères
-        var filters = []
-        var crit = context.get
-        var filter
-
-        // les filtres, parmi les propriétés défini en conf
-        for (var prop in crit) {
-          if (crit.hasOwnProperty(prop) && config.labels.hasOwnProperty(prop) && crit[prop]) {
-            filter = {
-              index: prop,
-              values: Array.isArray(crit[prop]) ? crit[prop] : [crit[prop]]
-            }
-            filters.push(filter)
-          }
-        }
-        log.debug('traduits en filters', filters)
-        // @todo ajouter des critères de tri
-        if (filters.length) {
-          var options = {
-            filters: filters
-          }
-          // getListe vérifiera que ces valeurs sont acceptables, mais on veut des entiers
-          options.skip = ensure(crit.skip, 'integer', 0)
-          options.limit = ensure(crit.limit, 'integer', 25)
-          options.orderBy = crit.orderBy || 'dateCreation'
-          $ressourceRepository.getListe('public', options, function (error, ressources) {
-            var data = $ressourcePage.getDefaultData('liste')
-            data.$metas.title = 'Résultats de la recherche'
-            if (error) {
-              data.contentBloc.error = error.toString()
-            } else {
-              if (ressources.length === options.limit) {
-                crit.skip = options.skip + options.limit
-                data.contentBloc.linkPageNext = linkQs($routes.get('search'), 'Résultats suivants', crit)
-              }
-              if (options.skip) {
-                crit.skip = options.skip - options.limit
-                if (crit.skip < 0) crit.skip = 0
-                data.contentBloc.linkPagePrev = linkQs($routes.get('search'), 'Résultats précédents', crit)
-              }
-              if (ressources.length) data.contentBloc.pagination = '(' + (options.skip + 1) + ' à ' + (options.skip + 1 + ressources.length) + ')'
-              data.contentBloc.ressources = $ressourceConverter.addUrlsToList(ressources) // inutile de passer le context si on est pas authentifié
-            }
-            context.html(data)
-          })
-        } else {
-          $ressourcePage.printSearchForm(context, ['il faut choisir au moins un critère'])
-        }
-      }
-    }
-    // avec mysql ça peut être vraiment très lent… (3s pour le count et 3s pour remonter les data)
-    search.timeout = 10000
-
+    controller.get($routes.get('preview', ':origine', ':idOrigine'), reactRedirect)
     /**
      * Formulaire de recherche et affichage des résultats
      * @route GET /public/recherche
      */
-    controller.get($routes.get('search'), search)
+    controller.get($routes.get('search'), reactRedirect)
 
     /**
      * Un proxy pour les pages externes en http à partir d'un identifiant de ressource

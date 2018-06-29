@@ -34,6 +34,7 @@ const fs = require('fs')
 const path = require('path')
 
 const config = require('../config')
+const version = require('../../../package').version
 
 let homeContent
 
@@ -69,27 +70,41 @@ module.exports = function (mainComponent) {
     expressOptions.fsPath = path.join(root, 'app', 'assets')
     this.serve('/', expressOptions)
 
-    /**
-     * La home
-     * @route GET /
-     */
-    this.get('/', function (context) {
-      context.layout = 'page'
-      let data = {
-        contentBloc: {
-          $view: 'react-config',
-          verbose: (config.application.staging !== 'prod'),
-          isDev: (config.application.staging !== 'prod'),
-          baseId: config.application.baseId,
-          sesatheques: config.sesatheques
+    // pour la page html react, c'est la même sur toutes les routes
+    const sendReactPage = (context) => {
+      context.layout = 'react'
+      const {baseId, name, sesatheques, staging} = config.application
+      const options = {
+        isDev: staging !== 'production',
+        verbose: process.argv.includes('--debug'),
+        baseId,
+        sesatheques
+      }
+      const data = {
+        $metas: {
+          title: name
         },
-        jsBloc: {
-          $view: 'js',
-          jsFiles: ['/react.js']
-        }
+        js: {
+          jsFiles: ['/react.js'],
+          jsCode: `window.options = ${JSON.stringify(options)};`
+        },
+        content: 'pour éviter que beforTransport prenne ça pour du 404',
+        version
       }
       context.html(data)
-    })
+    }
+
+    // cf app/client-react/App.js pour ne pas en oublier
+    const reactRoutes = [
+      '/',
+      '/mentionsLegales',
+      '/ressource/modifier/:oid',
+      '/ressource/apercevoir/:oid',
+      '/ressource/decrire/:oid',
+      '/ressource/rechercher'
+    ]
+
+    reactRoutes.forEach(route => this.get(route, sendReactPage))
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
     // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)
