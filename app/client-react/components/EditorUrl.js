@@ -70,7 +70,7 @@ class EditorUrl extends Component {
             </label>
           ))}
           {this.hasConsigne ? (
-            <label>texte de la consigne
+            <label>Texte de la consigne
               <Field
                 id="parametres-consigne"
                 name="parametres[consigne]"
@@ -81,11 +81,11 @@ class EditorUrl extends Component {
             </label>
           ) : null }
         </div>
-        <div className="grid-3">Réponse
+        <div>Réponse
           {options.map(({key, value}) => (
             <label key={key}>
               <Field
-                name="parametres[question_options]"
+                name="parametres[answer_option]"
                 component="input"
                 type="radio"
                 value={value}

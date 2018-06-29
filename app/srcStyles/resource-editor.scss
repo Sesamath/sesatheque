@@ -9,7 +9,7 @@ label {
     margin-top: 6px;
   }
 
-  input:not([type='checkbox']), select, textarea {
+  input:not([type='checkbox']):not([type='radio']), select, textarea {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
