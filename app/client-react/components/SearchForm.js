@@ -7,14 +7,10 @@ import Classification from './Classification'
 import {
   InputField,
   ResourceTypesField,
-  SelectField
+  SelectField,
+  SwitchField
 } from './fields'
 import ResourceList from './ResourceList'
-
-const publieValues = {
-  'true': 'Oui',
-  'false': 'Non'
-}
 
 class SearchForm extends Component {
   constructor (props) {
@@ -47,12 +43,19 @@ class SearchForm extends Component {
         <h1>Recherche de ressources</h1>
         <form onSubmit={this.props.handleSubmit(this.search.bind(this))}>
           <fieldset>
-            <div className="grid-3">
+            <div className="grid-5">
               <InputField
+                className="col-3"
                 label={labels.titre}
+                info="(Vous pouvez utiliser le symbole % comme caractère joker)"
                 name="titre" />
-            </div>
-            <div className="grid-3">
+              <ResourceTypesField
+                label={labels.type}
+                optional />
+              <SwitchField
+                className="center"
+                label={labels.publie}
+                name="publie" />
               <InputField
                 label={labels.oid}
                 name="oid" />
@@ -62,19 +65,15 @@ class SearchForm extends Component {
               <InputField
                 label={labels.idOrigine}
                 name="idOrigine" />
-              <ResourceTypesField
-                label={labels.type}
-                optional />
               <SelectField
                 label={labels.langue}
                 values={listes.langue}
                 name="langue"
                 optional />
               <SelectField
-                label={labels.publie}
-                values={publieValues}
-                name="publie"
-                optional />
+                label={labels.restriction}
+                values={listes.restriction}
+                name="restriction" />
             </div>
           </fieldset>
           <hr />
@@ -105,6 +104,7 @@ export default reduxForm({
     niveaux: [],
     typePedagogiques: [],
     typeDocumentaires: [],
-    langue: 'fra'
+    langue: 'fra',
+    publie: true
   }
 })(SearchForm)
