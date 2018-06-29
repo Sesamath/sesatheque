@@ -27,6 +27,8 @@
     "docker:start": "docker-compose start",
     "docker:_start": "yarn install && yarn run start:dev",
     "docker:stop": "docker-compose stop",
+    "docker:test": "docker-compose run test",
+    "docker:_test": "yarn install && yarn run test:all",
     "localInstall": "node scripts/npmi.js",
     "lint": "eslint .",
     "maj": "git pull && npm install && npm run build",
