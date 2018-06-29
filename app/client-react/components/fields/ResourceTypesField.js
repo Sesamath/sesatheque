@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {Field} from 'redux-form'
+// import {Field} from 'redux-form'
 import {editable, listes} from '../../../server/ressource/config'
 import InputField from './InputField'
 import SelectField from './SelectField'
@@ -16,7 +16,7 @@ Object.keys(editable).forEach(k => {
 })
 // Le label d'un type, à mettre dans un input disabled pour afficher
 // le bon type d'une ressource "non éditable"
-const typeToLabel = (type) => listes.type[type]
+// const typeToLabel = (type) => listes.type[type]
 
 const ResourceTypesField = ({
   label,
