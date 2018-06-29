@@ -54,10 +54,8 @@ class SearchForm extends Component {
                 optional />
               <SwitchField
                 className="center"
-                checked
                 label={labels.publie}
                 name="publie" />
-
               <InputField
                 label={labels.oid}
                 name="oid" />
@@ -106,6 +104,7 @@ export default reduxForm({
     niveaux: [],
     typePedagogiques: [],
     typeDocumentaires: [],
-    langue: 'fra'
+    langue: 'fra',
+    publie: true
   }
 })(SearchForm)
