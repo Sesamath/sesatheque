@@ -10,6 +10,7 @@ import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
 import EditorSimple from './EditorSimple'
+import EditorUrl from './EditorUrl'
 import GroupContainer from './GroupContainer'
 import aliasForker from '../hoc/aliasForker'
 import resourceLoader from '../hoc/resourceLoader'
@@ -25,7 +26,8 @@ const typeToData = {
   mathgraph: EditorMathGraph,
   mental: EditorSimple,
   poseur: EditorSimple,
-  tep: EditorSimple
+  tep: EditorSimple,
+  url: EditorUrl
 }
 
 const ResourceForm = ({
