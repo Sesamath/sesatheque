@@ -3,9 +3,9 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {saveRessource} from '../actions/ressource'
 
-const mapDispatchToProps = {
-  saveRessource
-}
+const mapDispatchToProps = (dispatch) => ({
+  saveRessource: (values) => dispatch(saveRessource(values))
+})
 
 /**
  * High Order Component qui fournit updateStoreFromEditor et setUpdateStoreFromEditor à
