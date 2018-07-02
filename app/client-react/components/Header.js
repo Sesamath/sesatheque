@@ -7,12 +7,6 @@ import {version} from '../../../package'
 
 const logoUrl = `/images/sesatheque.png?${version}`
 
-const setRedirect = (str) => {
-  // @todo changer ça pour remplacer par la page courante à chaque fois qu'on en change
-  // (actuellement c'est fait une seule fois au premier rendu du Header)
-  return str.replace('((s))', document.location.href)
-}
-
 const getButtons = (personne) => {
   const buttonSearch = {
     id: 'buttonSearch',
@@ -54,9 +48,14 @@ const Header = ({
   personne,
   loginLink,
   logoutUrl,
-  ssoLinks
+  ssoLinks,
+  currentUrl
 }) => {
   if (isIframeLayout) return null
+
+  const setRedirect = (str) => {
+    return str.replace('((s))', currentUrl)
+  }
 
   return (
     <header role="banner">
@@ -135,17 +134,34 @@ Header.propTypes = {
   personne: PropTypes.object,
   logoutUrl: PropTypes.string,
   loginLink: PropTypes.object,
-  ssoLinks: PropTypes.arrayOf(PropTypes.object)
+  ssoLinks: PropTypes.arrayOf(PropTypes.object),
+  currentUrl: PropTypes.string
 }
 
-const mapStateToProps = ({session, iframe, router}) => ({
+const getCurrentUrl = ({
+  pathname,
+  search,
+  hash
+}) => {
+  const currentUrl = new URL(pathname, document.location)
+  currentUrl.search = search
+  currentUrl.hash = hash
+
+  return currentUrl.href
+}
+
+const mapStateToProps = ({
+  session,
+  iframe,
+  router: {location}
+}) => ({
   personne: session && session.personne,
   logoutUrl: session && session.logoutUrl,
   // we suppose that loginLinks is a singleton
   // todo: add support for several links
   loginLink: session && session.loginLinks && session.loginLinks[0],
   ssoLinks: session && session.ssoLinks,
-  router
+  currentUrl: getCurrentUrl(location)
 })
 
 export default getContext({isIframeLayout: PropTypes.bool})(connect(mapStateToProps, {})(Header))
