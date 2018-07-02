@@ -10,6 +10,10 @@
 </head>
 <body>
 <div id="root" role="document"></div>
+<script
+  type="application/javascript"
+  src="/react.js?<%= htmlWebpackPlugin.options.version %>"
+/>
 <script type="application/javascript">
   window.options = {
     isDev: <%= htmlWebpackPlugin.options.isDev %>,
