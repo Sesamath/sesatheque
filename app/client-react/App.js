@@ -1,7 +1,9 @@
-import { ConnectedRouter } from 'connected-react-router'
+import {ConnectedRouter} from 'connected-react-router'
+import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {Provider} from 'react-redux'
 import {Route, Switch} from 'react-router-dom'
+import {withContext} from 'recompose'
 import Header from './components/Header'
 import Home from './components/Home'
 import Footer from './components/Footer'
@@ -13,6 +15,7 @@ import SearchForm from './components/SearchForm'
 import ResourceForm from './components/ResourceForm'
 import Notifications from './components/Notifications'
 import {getCurrentSession} from './actions/session'
+import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
 import store from './store'
 
@@ -41,4 +44,11 @@ const App = () => (
   </Provider>
 )
 
-export default App
+export default withContext(
+  {
+    isIframeLayout: PropTypes.bool
+  },
+  () => ({
+    isIframeLayout: isIframeLayout
+  })
+)(App)

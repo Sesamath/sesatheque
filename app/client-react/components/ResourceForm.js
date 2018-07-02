@@ -41,8 +41,8 @@ const ResourceForm = ({
 
   return (
     <Fragment>
-      <h1 className="fl">Modifier la ressource « {titre} »</h1>
       <NavMenu
+        titre={`Modifier la ressource « ${titre} »`}
         ressourceOid={ressourceOid}
       />
       <form>

@@ -1,61 +1,75 @@
 import {push} from 'connected-react-router'
-import React from 'react'
+import React, {Fragment} from 'react'
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
+import {getContext} from 'recompose'
 import {deleteRessource, cloneRessource} from '../actions/ressource'
 import NavMenuItem from './NavMenuItem'
 import NavButton from './NavButton'
 
 const NavMenu = ({
+  isIframeLayout,
   ressourceOid,
   askClone,
-  askDelete
-}) => (
-  <div id="actions">
-    <ul>
-      <NavMenuItem
-        to={`/ressource/decrire/${ressourceOid}`}
-        title="Description"
-        icon="file-alt"
-      />
-      <NavMenuItem
-        to={`/ressource/apercevoir/${ressourceOid}`}
-        title="Aperçu"
-        icon="eye-slash"
-      />
-      <NavMenuItem
-        to={`/ressource/voir/${ressourceOid}`}
-        title="Voir"
-        icon="eye"
-        target="_blank"
-      />
-      <NavMenuItem
-        to={`/ressource/modifier/${ressourceOid}`}
-        title="Modifier"
-        icon="edit"
-        id="buttonEdit"
-      />
-      <NavButton
-        onClick={askClone.bind(null, ressourceOid)}
-        title="Dupliquer"
-        icon="copy"
-        id="buttonDuplicate"
-      />
-      <NavButton
-        onClick={askDelete.bind(null, ressourceOid)}
-        title="Supprimer"
-        icon="trash"
-        id="buttonDelete"
-      />
-    </ul>
-    <div className="clearfix"></div>
-  </div>
-)
+  askDelete,
+  titre
+}) => {
+  if (isIframeLayout) {
+    return <h1>{titre}</h1>
+  }
+
+  return (
+    <Fragment>
+      <h1 className="fl">{titre}</h1>
+      <div id="actions">
+        <ul>
+          <NavMenuItem
+            to={`/ressource/decrire/${ressourceOid}`}
+            title="Description"
+            icon="file-alt"
+          />
+          <NavMenuItem
+            to={`/ressource/apercevoir/${ressourceOid}`}
+            title="Aperçu"
+            icon="eye-slash"
+          />
+          <NavMenuItem
+            to={`/ressource/voir/${ressourceOid}`}
+            title="Voir"
+            icon="eye"
+            target="_blank"
+          />
+          <NavMenuItem
+            to={`/ressource/modifier/${ressourceOid}`}
+            title="Modifier"
+            icon="edit"
+            id="buttonEdit"
+          />
+          <NavButton
+            onClick={askClone.bind(null, ressourceOid)}
+            title="Dupliquer"
+            icon="copy"
+            id="buttonDuplicate"
+          />
+          <NavButton
+            onClick={askDelete.bind(null, ressourceOid)}
+            title="Supprimer"
+            icon="trash"
+            id="buttonDelete"
+          />
+        </ul>
+        <div className="clearfix"></div>
+      </div>
+    </Fragment>
+  )
+}
 
 NavMenu.propTypes = {
+  isIframeLayout: PropTypes.bool,
   askClone: PropTypes.func,
   askDelete: PropTypes.func,
-  ressourceOid: PropTypes.string
+  ressourceOid: PropTypes.string,
+  titre: PropTypes.string
 }
 
 // les props sont passées en 2e argument
@@ -78,4 +92,4 @@ const mapDispatchToProps = (dispatch) => ({
   }
 })
 
-export default connect(null, mapDispatchToProps)(NavMenu)
+export default getContext({isIframeLayout: PropTypes.bool})(connect(null, mapDispatchToProps)(NavMenu))

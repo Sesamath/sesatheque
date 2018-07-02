@@ -1,7 +1,6 @@
 import {push} from 'connected-react-router'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {connect} from 'react-redux'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import Classification from './Classification'
@@ -19,8 +18,7 @@ import {
 const RessourceCreate = ({
   handleSubmit,
   change,
-  submitting,
-  saveRessource
+  submitting
 }) => {
   return (
     <Fragment>
@@ -93,15 +91,10 @@ const RessourceCreate = ({
 RessourceCreate.propTypes = {
   handleSubmit: PropTypes.func,
   change: PropTypes.func,
-  submitting: PropTypes.bool,
-  saveRessource: PropTypes.func
+  submitting: PropTypes.bool
 }
 
 export default flowRight([
-  connect(
-    null,
-    {saveRessource}
-  ),
   reduxForm({
     form: 'create-ressource',
     initialValues: {
@@ -110,10 +103,13 @@ export default flowRight([
       langue: 'fra',
       restriction: '0'
     },
-    onSubmit: (values, dispatch, {saveRessource}) => {
-      return saveRessource(values, (oid) => {
-        dispatch(push(`/ressource/modifier/${oid}`))
-      })
+    onSubmit: (values, dispatch) => {
+      return dispatch(saveRessource(
+        values,
+        (oid) => {
+          dispatch(push(`/ressource/modifier/${oid}`))
+        }
+      ))
     }
   })
 ])(RessourceCreate)

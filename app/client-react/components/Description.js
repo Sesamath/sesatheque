@@ -60,8 +60,10 @@ const Description = ({
   }
 }) => (
   <Fragment>
-    <h1 className="fl">{titre}</h1>
-    <NavMenu ressourceOid={oid} />
+    <NavMenu
+      ressourceOid={oid}
+      titre={titre}
+    />
     <div className="block ressource">
       <span className="publie btn">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
       <span className="restriction btn">{getRestriction(restriction)}</span>
