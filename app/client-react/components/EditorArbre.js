@@ -39,7 +39,8 @@ class EditorArbre extends Component {
       titre: this.props.titre,
       type: 'arbre'
     }
-
+    // @todo window.options should be in
+    // GET /api/personne/current response
     iframe.current.contentWindow.load(ressource, window.options, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
