@@ -29,9 +29,8 @@ const getButtons = (personne) => {
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
-      to: `/ressource/rechercher?auteurs=${personne.pid}`,
-      icon: 'bookmark',
-      target: '_self'
+      to: `/ressources?auteurs=${personne.pid}`,
+      icon: 'bookmark'
     },
     {
       id: 'buttonMyGroupes',

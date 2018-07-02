@@ -19,7 +19,7 @@ const SelectField = ({
     >
       {children}
       {optional ? (
-        <option>peu importe</option>
+        <option value="">peu importe</option>
       ) : null}
       {Object.keys(values).map(key => (
         <Fragment key={key.toString()}>
