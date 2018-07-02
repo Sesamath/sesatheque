@@ -7,9 +7,15 @@ import ShowError from './ShowError.js'
 
 const avertMessage = 'Impossible de charger une page http dans une page https, elle sera ouverte dans un autre onglet (donc consigne et réponse ne pourront pas être superposé à son contenu)'
 
-const options = [
+const questionOptions = [
   {key: 'off', value: 'Aucune'},
   {key: 'before', value: 'Avant'},
+  {key: 'while', value: 'Pendant'},
+  {key: 'after', value: 'Après'}
+]
+const answerOptions = [
+  {key: 'off', value: 'Aucune'},
+  {key: 'question', value: 'Avec la consigne'},
   {key: 'while', value: 'Pendant'},
   {key: 'after', value: 'Après'}
 ]
@@ -62,7 +68,7 @@ class EditorUrl extends Component {
           </label>
         </div>
         <div>Consigne
-          {options.map(({key, value}) => (
+          {questionOptions.map(({key, value}) => (
             <label key={key}>
               <Field
                 name="parametres[question_options]"
@@ -86,7 +92,7 @@ class EditorUrl extends Component {
           ) : null }
         </div>
         <div>Réponse
-          {options.map(({key, value}) => (
+          {answerOptions.map(({key, value}) => (
             <label key={key}>
               <Field
                 name="parametres[answer_option]"
