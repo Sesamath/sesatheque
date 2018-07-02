@@ -8,16 +8,16 @@ import ShowError from './ShowError.js'
 const avertMessage = 'Impossible de charger une page http dans une page https, elle sera ouverte dans un autre onglet (donc consigne et réponse ne pourront pas être superposé à son contenu)'
 
 const questionOptions = [
-  {key: 'off', value: 'Aucune'},
-  {key: 'before', value: 'Avant'},
-  {key: 'while', value: 'Pendant'},
-  {key: 'after', value: 'Après'}
+  {key: 'off', label: 'Aucune'},
+  {key: 'before', label: 'Avant'},
+  {key: 'while', label: 'Pendant'},
+  {key: 'after', label: 'Après'}
 ]
 const answerOptions = [
-  {key: 'off', value: 'Aucune'},
-  {key: 'question', value: 'Avec la consigne'},
-  {key: 'while', value: 'Pendant'},
-  {key: 'after', value: 'Après'}
+  {key: 'off', label: 'Aucune'},
+  {key: 'question', label: 'Avec la consigne'},
+  {key: 'while', label: 'Pendant'},
+  {key: 'after', label: 'Après'}
 ]
 
 class EditorUrl extends Component {
@@ -68,7 +68,7 @@ class EditorUrl extends Component {
           </label>
         </div>
         <div>Consigne
-          {questionOptions.map(({key, value}) => (
+          {questionOptions.map(({key, label}) => (
             <label key={key}>
               <Field
                 name="parametres[question_options]"
@@ -76,7 +76,7 @@ class EditorUrl extends Component {
                 component="input"
                 type="radio"
                 value={key}
-              /> {value} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
+              /> {label} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
             </label>
           ))}
           {this.hasConsigne() ? (
@@ -92,7 +92,7 @@ class EditorUrl extends Component {
           ) : null }
         </div>
         <div>Réponse
-          {answerOptions.map(({key, value}) => (
+          {answerOptions.map(({key, label}) => (
             <label key={key}>
               <Field
                 name="parametres[answer_option]"
@@ -100,7 +100,7 @@ class EditorUrl extends Component {
                 component="input"
                 type="radio"
                 value={key}
-              /> {value} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
+              /> {label}
             </label>
           ))}
         </div>

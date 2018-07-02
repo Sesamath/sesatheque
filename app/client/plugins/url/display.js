@@ -68,23 +68,30 @@ module.exports = function urlDisplay (ressource, options, next) {
      */
     function addPage (url, params, next) {
       log('addPage avec les params', params)
-      var divIframe = dom.addElement(options.container, 'div', {id: divIframeId, 'class': 'invisible'})
-      var divIframeSrcId = 'urlSrc'
-      dom.addElement(divIframe, 'p', {id: divIframeSrcId}, 'source : ' + params.adresse)
+      const divIframe = dom.addElement(options.container, 'div', {id: divIframeId, 'class': 'invisible'})
+      const divIframeSrcId = 'urlSrc'
+      const source = dom.addElement(divIframe, 'p', {id: divIframeSrcId}, `source : `)
+      dom.addElement(source, 'a', {href: url, target: '_blank', rel: 'noopener noreferer'}, url)
+      dom.addText(source, ' (cliquez sur le lien pour ouvrir le contenu dans un nouvel onglet si rien ne s’affiche ci-dessous)')
       const autosizeBlocs = [divIframeSrcId]
       const autosizeOptions = {offsetHeight: 0, offsetWidth: 40}
       // toujours autosize sur le conteneur
       page.autosize(divIframeId, autosizeBlocs, null, autosizeOptions)
       // url sera ajouté après l'appel de afterLoading, pour éviter que l'eventListener soit ajouté après le load (si c'est en cache)
-      var args = {id: 'pageContent'}
+      const args = {id: 'pageContent'}
+
+      // test proto compatible
+      if (window.location.protocol === 'https:' && !/^https:/.test(url)) {
+        const p = dom.addElement(divIframe, 'p', {}, 'La page externe demandée ne peut être incorporée ici car elle n’est pas en https. Vous pouvez ')
+        dom.addElement(p, 'a', {href: url, target: '_blank'}, 'l’ouvrir dans un nouvel onglet')
+        dom.addText(p, '.')
 
       // l'iframe, mais on fait un cas particulier pour les urls en swf qui ne renvoient pas un DOMDocument
-      // ff aime pas et sort une erreur js Error: Permission denied to access property 'toString'
-      // chrome râle aussi parce que c'est pas un document
-      if (/^[^?]+.swf(\?.*)?$/.test(url)) { // faut pas prendre les truc.php?toto=truc.swf
-        log("C'est un swf, on ajoute un div et pas une iframe")
-        var swfId = 'swf' + (new Date()).getTime()
-        var swfOptions = {id: swfId}
+      // (car ff aime pas et sort une erreur js Permission denied to access property 'toString'
+      // et chrome râle aussi parce que c'est pas un document)
+      } else if (/^[^?]+.swf(\?.*)?$/.test(url)) { // faut pas prendre les truc.php?toto=truc.swf
+        const swfId = 'swf' + (new Date()).getTime()
+        const swfOptions = {id: swfId}
         if (params.hauteur) {
           args.height = params.hauteur
           swfOptions.hauteur = params.hauteur
@@ -93,79 +100,43 @@ module.exports = function urlDisplay (ressource, options, next) {
           args.width = params.largeur
           swfOptions.largeur = params.largeur
         }
-        var swfContainer = dom.addElement(divIframe, 'div', args)
-        log('On charge ' + url + ' dans #page avec', swfOptions)
+        const swfContainer = dom.addElement(divIframe, 'div', args)
+        log('C’est un swf, on ajoute un div et pas une iframe avec les options', swfOptions)
         // ne pas passer directement next en cb sinon il sera appelé avec un argument, qui sera interprété comme une erreur
         swf.load(swfContainer, url, swfOptions, function () {
           // on est appelé quand swfobject a mis l'object dans le dom, mais le swf est pas forcément chargé
           // on regarde la hauteur pour savoir si c'est fait
-          var $swfId = $('#' + swfId)
-          if ($swfId.innerHeight() > 10) {
-            isLoaded = true
-            next()
-          } else {
-            $swfId.on('load', function () {
-              isLoaded = true
-              next()
-            })
-          }
+          const $swfId = $('#' + swfId)
+          if ($swfId.innerHeight() > 10) next()
+          else $swfId.on('load', () => next())
           if (!swfOptions.largeur || !swfOptions.hauteur) page.autosize(swfId, [divIframeSrcId, 'titre'])
         })
-        /* */
+        return // car next appelé en async
+
+      // 2e cas particulier pour une image, pas besoin d'iframe pour ça
       } else if (/^[^?]+.(png|jpe?g|gif)(\?.*)?$/.test(url)) {
         // c'est un tag img
         if (params.hauteur > 100) args.height = params.hauteur
         if (params.largeur > 100) args.width = params.largeur
-        log("c'est une image, pas d'iframe mais un tag img", args, params)
-        var img = dom.addElement(divIframe, 'img', args)
-        afterLoading(img, next)
+        log('c’est une image, pas d’iframe mais un tag img', args, params)
+        const img = dom.addElement(divIframe, 'img', args)
         img.src = url
+
+      // cas "normal", on peut mettre une iframe vers une page
       } else {
-        // c'est bien une iframe, on regarde si on peut la charger
-        if (window.location.protocol === 'https:' && !/^https:/.test(url)) {
-          const p = dom.addElement(divIframe, 'p', {}, 'La page externe demandée ne peut être incorporée ici car elle n’est pas en https. Vous pouvez ')
-          dom.addElement(p, 'a', {href: url, target: '_blank'}, 'l’ouvrir dans un nouvel onglet')
-          dom.addText(p, '.')
-          next()
-        } else {
-          // on peut mettre une iframe, le texte sera écrasé à son chargement
-          var iframe = dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte,' +
-            ' votre navigateur ne supporte probablement pas les iframes')
-          // url source (non cliquable) en footer
-          const iframeAutosizeOptions = {
-            ...autosizeOptions,
-            minHeight: 300,
-            minWidth: 300,
-            offsetHeight: 80,
-            offsetWidth: 60
-          }
-          page.autosize(args.id, autosizeBlocs, [], iframeAutosizeOptions)
-          afterLoading(iframe, next)
-          iframe.src = url
+        args.src = url
+        dom.addElement(divIframe, 'iframe', args, 'Si vous lisez ce texte, votre navigateur ne supporte probablement pas les iframes et ne pourra afficher la page')
+        const iframeAutosizeOptions = {
+          ...autosizeOptions,
+          minHeight: 300,
+          minWidth: 300,
+          offsetHeight: 80,
+          offsetWidth: 60
         }
+        page.autosize(args.id, autosizeBlocs, [], iframeAutosizeOptions)
       }
+      next()
     } // addPage
-
-    /**
-     * Appelle next quand elt sera chargé (evt load)
-     * @param {HTMLElement} elt
-     * @param {simpleCallback} next
-     */
-    function afterLoading (elt, next) {
-      function loadListener () {
-        isLoaded = true
-        elt.removeEventListener('load', loadListener)
-        next()
-      }
-
-      if (elt && elt.addEventListener) {
-        elt.addEventListener('load', loadListener)
-      } else {
-        // pas de addEventListener, on la considère déjà chargée
-        isLoaded = true
-        next()
-      }
-    }
 
     /**
      * Envoie le résultat à resultatCallback
@@ -217,9 +188,9 @@ module.exports = function urlDisplay (ressource, options, next) {
       // init
       dom.addCss(options.pluginBase + 'url.css')
 
-      var hasConsigne = params.question_option !== 'off'
-      var hasReponse = params.answer_option !== 'off'
-      var isBasic = !hasConsigne && !hasReponse
+      const hasConsigne = params.question_option !== 'off'
+      const hasReponse = params.answer_option !== 'off'
+      const isBasic = !hasConsigne && !hasReponse
       // ni question ni réponse, pas grand chose à faire
       if (isBasic) {
         return addPage(url, params, () => {
@@ -228,6 +199,7 @@ module.exports = function urlDisplay (ressource, options, next) {
           // $(divIframeSelector).show()
           // on cherche pas à comprendre…
           $(divIframeSelector).removeClass('invisible')
+          isLoaded = true
           next()
         })
       }
