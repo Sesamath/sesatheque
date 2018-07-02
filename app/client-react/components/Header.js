@@ -1,4 +1,5 @@
 import React, {Fragment} from 'react'
+import {getContext} from 'recompose'
 import PropTypes from 'prop-types'
 import {NavLink} from 'react-router-dom'
 import {connect} from 'react-redux'
@@ -49,13 +50,13 @@ const getButtons = (personne) => {
 }
 
 const Header = ({
-  iframe,
+  isIframeLayout,
   personne,
   loginLink,
   logoutUrl,
   ssoLinks
 }) => {
-  if (iframe) return null
+  if (isIframeLayout) return null
 
   return (
     <header role="banner">
@@ -130,7 +131,7 @@ const Header = ({
 }
 
 Header.propTypes = {
-  iframe: PropTypes.bool,
+  isIframeLayout: PropTypes.bool,
   personne: PropTypes.object,
   logoutUrl: PropTypes.string,
   loginLink: PropTypes.object,
@@ -144,8 +145,7 @@ const mapStateToProps = ({session, iframe, router}) => ({
   // todo: add support for several links
   loginLink: session && session.loginLinks && session.loginLinks[0],
   ssoLinks: session && session.ssoLinks,
-  iframe,
   router
 })
 
-export default connect(mapStateToProps, {})(Header)
+export default getContext({isIframeLayout: PropTypes.bool})(connect(mapStateToProps, {})(Header))

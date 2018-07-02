@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {connect} from 'react-redux'
 import {Link} from 'react-router-dom'
+import {getContext} from 'recompose'
 import {version} from '../../../package'
 
-const Footer = ({iframe}) => {
-  if (iframe) return null
+const Footer = ({isIframeLayout}) => {
+  if (isIframeLayout) return null
 
   return (
     <footer>
@@ -25,11 +25,7 @@ const Footer = ({iframe}) => {
 }
 
 Footer.propTypes = {
-  iframe: PropTypes.bool
+  isIframeLayout: PropTypes.bool
 }
 
-const mapStateToProps = ({iframe}) => ({
-  iframe
-})
-
-export default connect(mapStateToProps, {})(Footer)
+export default getContext({isIframeLayout: PropTypes.bool})(Footer)
