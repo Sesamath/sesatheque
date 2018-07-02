@@ -36,7 +36,7 @@ class EditorUrl extends Component {
 
   render () {
     const httpsError = this.getHttpsAvert()
-    console.log('render')
+    console.log('render ', this.hasConsigne(), this.props.questionOption)
     return (
       <fieldset>
         <div className="grid-3">
@@ -70,7 +70,7 @@ class EditorUrl extends Component {
                 className="radio"
                 component="input"
                 type="radio"
-                value={value}
+                value={key}
               /> {value} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
             </label>
           ))}
@@ -94,7 +94,7 @@ class EditorUrl extends Component {
                 className="radio"
                 component="input"
                 type="radio"
-                value={value}
+                value={key}
               /> {value} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
             </label>
           ))}
@@ -105,14 +105,11 @@ class EditorUrl extends Component {
 }
 
 EditorUrl.propTypes = {
-  answerOption: PropTypes.string,
   url: PropTypes.string,
-  questionOption: PropTypes.string,
-  change: PropTypes.func
+  questionOption: PropTypes.string
 }
 
 const propsFromFormValues = {
-  answerOption: 'parametres[question_option]',
   questionOption: 'parametres[answer_option]',
   url: 'parametres[adresse]'
 }
