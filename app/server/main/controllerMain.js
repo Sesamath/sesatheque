@@ -35,6 +35,8 @@ const path = require('path')
 
 const config = require('../config')
 
+const envSesathequeConf = process.env.SESATHEQUE_CONF
+
 let homeContent
 
 const root = path.resolve(__dirname, '..', '..', '..')
@@ -63,33 +65,37 @@ module.exports = function (mainComponent) {
       fsPath: path.join(root, 'build'),
       maxAge: config.application.staticMaxAge || '7d'
     }
-    if (process.env.SESATHEQUE_CONF) expressOptions.fsPath = path.join(expressOptions.fsPath, process.env.SESATHEQUE_CONF)
+    if (envSesathequeConf) expressOptions.fsPath = path.join(expressOptions.fsPath, envSesathequeConf)
     this.serve('/', expressOptions)
     // et les ressources statiques qui bougent pas (CopyWebpackPlugin arrive pas à les copier, y'en a trop)
     expressOptions.fsPath = path.join(root, 'app', 'assets')
     this.serve('/', expressOptions)
 
-    /**
-     * La home
-     * @route GET /
-     */
-    this.get('/', function (context) {
-      context.layout = 'page'
-      let data = {
-        contentBloc: {
-          $view: 'react-config',
-          verbose: (config.application.staging !== 'prod'),
-          isDev: (config.application.staging !== 'prod'),
-          baseId: config.application.baseId,
-          sesatheques: config.sesatheques
-        },
-        jsBloc: {
-          $view: 'js',
-          jsFiles: ['/react.js']
+    const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
+    const reactPagePath = path.resolve(root, buildDir, 'index.html')
+    const reactPage = fs.readFileSync(reactPagePath)
+    // pour la page html react, c'est la même sur toutes les routes
+    const sendReactPage = (context) => {
+      const options = {
+        headers: {
+          'Content-Length': Buffer.byteLength(reactPage, 'utf8'),
+          'Content-Type': 'text/html'
         }
       }
-      context.html(data)
-    })
+      context.raw(reactPage, options)
+    }
+
+    // cf app/client-react/App.js pour ne pas en oublier
+    const reactRoutes = [
+      // '/', inutile car /build/index.html passe avant
+      '/mentionsLegales',
+      '/ressource/modifier/:oid',
+      '/ressource/apercevoir/:oid',
+      '/ressource/decrire/:oid',
+      '/ressource/rechercher'
+    ]
+
+    reactRoutes.forEach(route => this.get(route, sendReactPage))
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
     // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Médiathèque de ressources pour l'éducation">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" sizes="16x16" href="/favicon.png?<%= htmlWebpackPlugin.options.version %>">
+  <link rel="stylesheet" href="/page.css?<%= htmlWebpackPlugin.options.version %>">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<div id="root" role="document"></div>
+<script
+  type="application/javascript"
+  src="/react.js?<%= htmlWebpackPlugin.options.version %>"
+/>
+<script type="application/javascript">
+  window.options = {
+    isDev: <%= htmlWebpackPlugin.options.isDev %>,
+    verbose: <%= htmlWebpackPlugin.options.verbose %>,
+    baseId: '<%= htmlWebpackPlugin.options.baseId %>',
+    sesatheques: <%= htmlWebpackPlugin.options.sesatheques %>
+  }
+</script>
+</body>
+</html>
