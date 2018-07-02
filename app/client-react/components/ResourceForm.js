@@ -11,6 +11,7 @@ import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
 import EditorMathGraph from './EditorMathGraph'
 import EditorSimple from './EditorSimple'
+import EditorUrl from './EditorUrl'
 import GroupContainer from './GroupContainer'
 import aliasForker from '../hoc/aliasForker'
 import resourceLoader from '../hoc/resourceLoader'
@@ -27,7 +28,8 @@ const typeToData = {
   mathgraph: EditorMathGraph,
   mental: EditorSimple,
   poseur: EditorSimple,
-  tep: EditorSimple
+  tep: EditorSimple,
+  url: EditorUrl
 }
 
 const ResourceForm = ({
@@ -37,16 +39,14 @@ const ResourceForm = ({
   submitting,
   updateStoreFromEditor,
   setUpdateStoreFromEditor,
-  saveRessource,
-  history
+  saveRessource
 }) => {
   const Editor = typeToData[type] || EditorExternal
 
   return (
     <Fragment>
-      <h1 className="fl">Modifier la ressource « {titre} »</h1>
       <NavMenu
-        history={history}
+        titre={`Modifier la ressource « ${titre} »`}
         ressourceOid={ressourceOid}
       />
       <form>
@@ -84,8 +84,7 @@ ResourceForm.propTypes = {
   submitting: PropTypes.bool,
   updateStoreFromEditor: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func,
-  saveRessource: PropTypes.func,
-  history: PropTypes.object
+  saveRessource: PropTypes.func
 }
 
 export default flowRight([

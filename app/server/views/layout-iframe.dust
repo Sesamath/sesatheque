@@ -7,7 +7,8 @@
   {head|s}
 </head>
 <body class="iframe">
-<div id="main" role="document">
+<div id="root" role="document"></div>
+<div>
   {?error}<p class="error">{error}</p>{/error}
   {errors|s}
   {warnings|s}

@@ -3,6 +3,8 @@ import React, {Fragment} from 'react'
 import {Field} from 'redux-form'
 
 const SelectField = ({
+  children,
+  name,
   label,
   values,
   disabled = false,
@@ -11,12 +13,13 @@ const SelectField = ({
   <label className="select">
     {label}
     <Field
-      name="type"
+      name={name}
       component="select"
       disabled={disabled}
     >
+      {children}
       {optional ? (
-        <option>peu importe</option>
+        <option value="">peu importe</option>
       ) : null}
       {Object.keys(values).map(key => (
         <Fragment key={key.toString()}>
@@ -28,6 +31,8 @@ const SelectField = ({
 )
 
 SelectField.propTypes = {
+  children: PropTypes.node,
+  name: PropTypes.string,
   label: PropTypes.string,
   values: PropTypes.object,
   disabled: PropTypes.bool,

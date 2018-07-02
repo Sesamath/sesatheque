@@ -19,6 +19,7 @@ const CheckboxGroup = ({
       values.map(([value, label]) => (
         <label key={value}>
           <SingleCheckboxForGroups
+            name={name}
             value={value}
             inputValue={inputValue}
             onChange={onChange}

@@ -256,10 +256,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
       delete context.error // on vient de le traiter, pas la peine que lassi le fasse aussi
     } else {
       // erreur 404 ?
-      var isVide
-      if (isHtml) isVide = _.isEmpty(data.contentBloc) && _.isEmpty(data.blocs)
-      else if (isJson) isVide = _.isEmpty(data)
-      else isVide = false
+      const isVide = _.isEmpty(data)
       // log.debug('dans beforeTransport page isVide ' + isVide)
       if (!context.status && isVide && context.method !== 'options') {
         context.status = 404

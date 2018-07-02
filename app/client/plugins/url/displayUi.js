@@ -140,12 +140,14 @@ module.exports = function (ressource, options, next) {
        * @return {HTMLElement}
        */
       function getLienSuivant () {
-        return dom.getElement('img', {
+        const lien = dom.getElement('img', {
           'class': 'lienSuivant',
           src: options.pluginBase + 'images/forward.png',
           align: 'absmiddle',
           alt: 'suivant'
         })
+        if (etapes.hasNext()) $(lien).click(etapes.next)
+        return lien
       }
 
       /**
@@ -231,8 +233,8 @@ module.exports = function (ressource, options, next) {
          */
         const answer_option = ressource.parametres.answer_option || 'off'
 
+        // pas de question
         if (question_option === 'off') {
-          // pas de question, pour la réponse :
           if (answer_option === 'while') {
             etapes.liste = [[information, iframe, reponse]]
             etapes.titres = ['Visualisation du document et réponse']
@@ -242,10 +244,13 @@ module.exports = function (ressource, options, next) {
             etapes.titres = ['Visualisation du document', 'Réponse']
             information.setContent('Observe ce document puis clique sur ', getLienSuivant(), ' pour répondre.')
           } else {
+            // off (car pas de before possible pour la réponse)
             etapes.liste = [[iframe]]
             etapes.titres = ['Visualisation du document']
             hasInfo = false
           }
+
+        // question avant
         } else if (question_option === 'before') {
           // consigne puis page
           if (answer_option === 'off') {
@@ -260,12 +265,15 @@ module.exports = function (ressource, options, next) {
             etapes.liste = [[information, consigne], [iframe], [reponse]]
             etapes.titres = ['Lecture de la consigne', 'Visualisation du document', 'Réponse']
             information.setContent('Lis la consigne, clique sur ', getLienSuivant(), ' pour voir le document, puis encore une fois pour répondre.')
-          } else if (answer_option === 'question') {
+          } else {
+            // answer_option = question
             etapes.liste = [[information, consigne, reponse], [iframe]]
             etapes.titres = ['Lecture de la consigne et réponse', 'Visualisation du document']
             information.setContent('Réponds à la question, puis clique sur ', getLienSuivant(), ' pour voir le document.')
             // réponse avant l'info
           }
+
+        // question pendant
         } else if (question_option === 'while') {
           if (answer_option === 'after') {
             etapes.liste = [[information, consigne, iframe], [reponse]]
@@ -276,10 +284,13 @@ module.exports = function (ressource, options, next) {
             etapes.titres = ['Consigne, visualisation du document et réponse']
             information.setContent('Lis la consigne et observe bien le document avant de répondre.')
           } else {
+            // off
             etapes.liste = [[consigne, iframe]]
             etapes.titres = ['Consigne et visualisation du document']
             hasInfo = false
           }
+
+        // question après
         } else if (question_option === 'after') {
           if (answer_option === 'off') {
             etapes.liste = [[information, iframe], [consigne]]
@@ -290,12 +301,14 @@ module.exports = function (ressource, options, next) {
             etapes.titres = ['Visualisation du document', 'Lecture de la consigne', 'Réponse']
             information.setContent('Observe bien le document puis clique sur ', getLienSuivant(), ' pour lire la consigne et encore une fois pour répondre.')
           } else {
+            // while ou question
             etapes.liste = [[information, iframe], [consigne, reponse]]
             etapes.titres = ['Visualisation du document', 'Consigne et réponse']
             information.setContent('Observe bien le document puis clique sur ', getLienSuivant(), ' pour lire la consigne et répondre.')
           }
         }
-        // le seul cas où on veut pas l'info c'est si qqun a caché le lien
+
+        // les rares cas où_l'affichage de l'information n'a pas de sens sont ci-dessus avec hasInfo = false
         if (hasInfo) {
           $lienInfo.show()
           $information.dialog('open')
@@ -321,6 +334,7 @@ module.exports = function (ressource, options, next) {
         iframe.desactiver()
 
         // active les elts de l'etape en cours
+        log(`étape ${etapes.currentIndex}`, etapes)
         log(`étape ${etapes.currentIndex} (${etape.map(e => e.name).join('+')}) ${titre}`)
         etape.forEach(item => item.activer())
         // cache les boutons close
@@ -337,7 +351,6 @@ module.exports = function (ressource, options, next) {
         // le lien suivant éventuel
         if (etapes.hasNext()) {
           const lien = getLienSuivant()
-          $(lien).click(etapes.next)
           $filariane.append(lien)
         }
       } // showEtape
@@ -529,7 +542,7 @@ module.exports = function (ressource, options, next) {
         loadDependencies(function () {
           init()
           setEtapes()
-          log(`les etapes : ${etapes.liste.map(etape => etape.map(item => item.name).join('+')).join(' > ')}`, etapes.titres)
+          log(`les étapes : ${etapes.liste.map(etape => etape.map(item => item.name).join('+')).join(' > ')}`, etapes.titres)
           showEtape()
           next()
         })

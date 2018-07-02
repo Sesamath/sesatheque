@@ -18,19 +18,25 @@ const fs = require('fs')
 const path = require('path')
 
 // passer --debug pour ne pas avoir de minification
-const isProd = process.argv.indexOf('--debug') === -1
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true}) // allChunks sinon il en manque…
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+const appConfig = require('./app/server/config')
+const version = require('./package').version
+
+const isDebug = process.argv.includes('--debug')
+// prod d'après la conf (sauf --debug)
+const isProd = isDebug ? false : (appConfig.application.staging === 'production' || appConfig.application.staging === 'prod')
+
+// allChunks sinon il en manque
+const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true})
 const cssLoader = isProd ? 'css-loader?minimize' : 'css-loader'
 const extractCssLoader = extractCss.extract('style-loader', cssLoader)
 
-const appConfig = require('./app/server/config')
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
-
-// pour pouvoir compiler les js de plusieurs baseId dans le même dossier root de sésathèque
 
 // la conf identique dev/prod
 const conf = {
@@ -126,17 +132,35 @@ const conf = {
     // Nice colored output
     colors: true
   }
-} /* * /
+}
+
 if (isProd) {
   conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
-} /* */
+}
+
+// génération du html pour react
+// cf https://github.com/jantimon/html-webpack-plugin#options
+conf.plugins.push(new HtmlWebpackPlugin({
+  isDev: !isProd,
+  title: appConfig.application.name,
+  version: version,
+  verbose: isDebug,
+  baseId: appConfig.application.baseId,
+  sesatheques: JSON.stringify(appConfig.sesatheques),
+  template: './app/server/views/index.html',
+  filename: 'index.html',
+  // on ne veut pas qu'il génère de html, ni qu'il mette toutes nos entries en <head> ou <script>
+  inject: false
+}))
+
+// pour pouvoir compiler les js de plusieurs baseId dans des dossiers différents
+// (qui se retrouveront docroot si on passe le même env SESATHEQUE_CONF au lancement de l'appli)
 if (process.env.SESATHEQUE_CONF) {
   console.log(`Compilation avec urls absolues pour ${process.env.SESATHEQUE_CONF}`)
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
   conf.output.path = `build/${process.env.SESATHEQUE_CONF}/`
 }
-
 // on crée le dossier de build s'il n'existe pas encore
 const buildDir = path.resolve(__dirname, conf.output.path)
 try {

@@ -1,8 +1,0 @@
-<script type="application/javascript">
-  window.options = {
-    isDev: {?isDev}{isDev}{:else}false{/isDev},
-    verbose: {?verbose}{verbose}{:else}false{/verbose},
-    baseId: '{baseId}',
-    sesatheques: {sesatheques|jsd|s}
-  }
-</script>

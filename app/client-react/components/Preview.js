@@ -7,8 +7,10 @@ const Preview = ({
   ressource: {oid: ressourceOid, titre}
 }) => (
   <Fragment>
-    <h1 className="fl">Aperçu de la ressource {titre}</h1>
-    <NavMenu ressourceOid={ressourceOid} />
+    <NavMenu
+      ressourceOid={ressourceOid}
+      titre={`Aperçu de la ressource ${titre}`}
+    />
     <iframe src={`/ressource/voir/${ressourceOid}`} />
   </Fragment>
 )
