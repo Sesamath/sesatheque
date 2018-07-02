@@ -9,7 +9,6 @@ import {
   SelectField,
   SwitchField
 } from './fields'
-import ResourceList from './ResourceList'
 import history from '../history'
 import queryString from 'query-string'
 
@@ -18,9 +17,16 @@ class SearchForm extends Component {
     super(props)
   }
 
+  componentDidMount () {
+    const fields = queryString.parse(history.location.search)
+    Object.keys(fields).map(key => {
+      this.props.change(key, fields[key])
+    })
+  }
+
   updateQueryParams (query) {
     history.push({
-      pathname: '/ressource/rechercher',
+      pathname: '/ressources',
       search: queryString.stringify(query)
     })
   }
@@ -78,7 +84,6 @@ class SearchForm extends Component {
             </button>
           </div>
         </form>
-        <ResourceList />
       </Fragment>
     )
   }

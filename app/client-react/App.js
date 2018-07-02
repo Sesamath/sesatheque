@@ -9,6 +9,7 @@ import Description from './components/Description'
 import MentionsLegales from './components/MentionsLegales'
 import Preview from './components/Preview'
 import RessourceCreate from './components/RessourceCreate'
+import Resources from './components/Resources'
 import SearchForm from './components/SearchForm'
 import ResourceForm from './components/ResourceForm'
 import Notifications from './components/Notifications'
@@ -33,6 +34,7 @@ const App = () => (
             <Route exact path="/ressource/apercevoir/:ressourceOid" component={Preview} />
             <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />
             <Route exact path="/ressource/rechercher" component={SearchForm} />
+            <Route exact path="/ressources" component={Resources} />
           </Switch>
         </div>
         <Footer />

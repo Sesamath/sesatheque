@@ -25,22 +25,21 @@ const ResourceList = ({resources = []}) => (
           <td>{oid.toString()}</td>
           <td>{titre}</td>
           <td colSpan="4" className="links">
-            {$droits.includes('R') ? (
-              <Fragment>
-                <NavLink
-                  to={`/ressource/decrire/${oid}`}
-                  title="Description"
-                >Description {$droits}</NavLink>
-                <NavLink
-                  to={`/ressource/apercevoir/${oid}`}
-                  title="Aperçu"
-                >Aperçu</NavLink>
-                <NavLink
-                  to={`/ressource/voir/${oid}`}
-                  title="Modifier"
-                >Voir</NavLink>
-              </Fragment>
-            ) : null}
+            <Fragment>
+              <NavLink
+                to={`/ressource/decrire/${oid}`}
+                title="Description"
+              >Description</NavLink>
+              <NavLink
+                to={`/ressource/apercevoir/${oid}`}
+                title="Aperçu"
+              >Aperçu</NavLink>
+              <NavLink
+                to={`/ressource/voir/${oid}`}
+                title="Voir"
+                target="_blank"
+              >Voir</NavLink>
+            </Fragment>
             {$droits.includes('W') ? (
               <NavLink
                 to={`/ressource/modifier/${oid}`}
@@ -49,7 +48,7 @@ const ResourceList = ({resources = []}) => (
             ) : null}
             {$droits.includes('D') ? (
               <NavLink
-                to={`/ressource/modifier/${oid}`}
+                to={`/ressource/supprimer/${oid}`}
                 title="Supprimer"
               >Supprimer</NavLink>
             ) : null}
