@@ -25,7 +25,7 @@ class EditorUrl extends Component {
     const {url} = this.props
     if (url) {
       const isHttpsUrl = (url.indexOf('https://') === 0)
-      if (this.isOnHttps && !isHttpsUrl) return avertMessage
+      if (this.isOnHttps && !isHttpsUrl) return Error(avertMessage)
     }
     return null
   }
@@ -36,7 +36,6 @@ class EditorUrl extends Component {
 
   render () {
     const httpsError = this.getHttpsAvert()
-    console.log('render ', this.hasConsigne(), this.props.questionOption)
     return (
       <fieldset>
         <div className="grid-3">
@@ -110,7 +109,7 @@ EditorUrl.propTypes = {
 }
 
 const propsFromFormValues = {
-  questionOption: 'parametres[answer_option]',
+  questionOption: 'parametres[question_options]',
   url: 'parametres[adresse]'
 }
 
