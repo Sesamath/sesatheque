@@ -64,6 +64,11 @@ function notifyError (data) {
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
  * cela permet de mettre le résultat en cache et devrait être privilégié pour les ressources publiques)
+ *
+ * Tout ce qui renvoie une ressource (ou un oid pour du post) accepte en queryString
+ * - format=(ref|ressource|full) ref renvoie une ref (toujours avec les _droits), full ajoute la résolution des id (auteurs, relations, groupes…)
+ * - droits=1 pour ajouter une propriété _droits (string contenant des lettres parmi RWD)
+ *
  * @Controller controllerApi
  */
 module.exports = function (component) {
@@ -125,6 +130,8 @@ module.exports = function (component) {
       const pids = context.get.pids && context.get.pids.split(',').filter(pid => pid.indexOf('/') > 0)
       if (!pids) return $json.sendError(context, 'Argument pids manquant')
       if (!pids.length) return $json.sendError(context, 'Aucun auteur demandé')
+      const limit = ensure(context.get.limit, 'integer', listeMax)
+      const skip = ensure(context.get.skip, 'integer', 0)
       const retour = {warnings: []}
       const args = {
         filters: [{
@@ -152,6 +159,10 @@ module.exports = function (component) {
         iAuteurs++
         this()
       }).seq(function () {
+        $ressourceRepository.getListeCount('all', args, this)
+      }).seq(function (total) {
+        retour.total = total
+        if (!total) return $json.sendOk(context, retour)
         $ressourceRepository.getListe('all', args, this)
       }).seqEach(function (ressource) {
         nbRessources++
@@ -164,8 +175,11 @@ module.exports = function (component) {
       }).seq(function () {
         if (!retour.warnings.length) delete retour.warnings
         if (nbRessources === listeMax) {
-          const skip = context.get.skip || 0
-          retour.nextUrl = myBaseUrl + url.update(context.request.originalUrl, {skip})
+          retour.nextUrl = myBaseUrl + url.update(context.request.originalUrl, {skip: skip + limit})
+          if (context.get.skip > 0) {
+            const prevSkip = Math.max(skip - limit, 0)
+            retour.prevUrl = myBaseUrl + url.update(context.request.originalUrl, {skip: prevSkip})
+          }
         }
         $json.sendOk(context, retour)
       }).catch(function (error) {
@@ -183,7 +197,6 @@ module.exports = function (component) {
       context.timeout = 3000
       const pid = $accessControl.getCurrentUserPid(context)
       if (!pid) return $json.denied(context, 'Ressources personnelles inaccessibles (session expirée sur la Sésathèque), veuillez vous déconnecter et reconnecter')
-      const listeMax = configRessource.limites.listeMax
       const limit = ensure(context.get.limit, 'integer', listeMax)
       const skip = ensure(context.get.skip, 'integer', 0)
       /**
@@ -227,7 +240,7 @@ module.exports = function (component) {
         if (ressources.length) mesRessources = mesRessources.concat(ressources)
         this()
       }).seq(function () {
-        sendListe(context, null, mesRessources)
+        sendListe(context, null, mesRessources, nbOwnRessources)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -235,18 +248,16 @@ module.exports = function (component) {
 
     /**
      * Traite GET|POST /api/liste/prof
+     * À priori appelé par un utilisateur connecté, mais pas forcément avec des droits de correction…
      * @private
      * @param {Context} context
      */
     function getListeProf (context) {
       context.timeout = 3000
-      if ($accessControl.hasGenericPermission('correction', context)) {
-        grabListe(context, 'correction')
-      } else if ($accessControl.isAuthenticated(context)) {
-        $json.denied(context, "Vous n'avez pas les droits suffisants pour accéder aux corrigés")
-      } else {
-        $json.denied(context, 'Il faut être authentifié pour accéder aux corrigés')
-      }
+      let visibility = 'public'
+      if ($accessControl.hasGenericPermission('correction', context)) visibility = 'correction'
+      grabListe(context, visibility)
+      // @todo ajouter une visibility readableBy/xxx
     }
 
     /**
@@ -276,9 +287,14 @@ module.exports = function (component) {
         }
       }
       merge(args, context.post)
+      // @todo ajouter une clé de cache à partir de filter + visibility pour mettre le count en cache
       log.debug('grabListe ' + visibility, args)
-      $ressourceRepository.getListe(visibility, args, function (error, ressources) {
-        sendListe(context, error, ressources)
+      $ressourceRepository.getListeCount(visibility, args, function (error, total) {
+        if (error) return sendListe(context, error)
+        if (total === 0) return sendListe(context, error, [], 0)
+        $ressourceRepository.getListe(visibility, args, function (error, ressources) {
+          sendListe(context, error, ressources, total)
+        })
       })
     }
 
@@ -561,11 +577,12 @@ module.exports = function (component) {
      * @param error
      * @param ressources
      */
-    function sendListe (context, error, ressources) {
+    function sendListe (context, error, ressources, total) {
       if (error) return $json.send(context, error)
       const liste = []
-      const reponse = {liste}
+      const reponse = {liste, total}
       if (ressources && ressources.length) {
+        if (!total) reponse.total = ressources.length
         // construction de nextUrl
         if (ressources.length === listeMax) {
           const skip = context.get.skip || 0
@@ -600,28 +617,37 @@ module.exports = function (component) {
       if (error) return $json.send(context, error)
       if (!ressource) return $json.notFound(context, 'Cette ressource n’existe pas.')
       if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context)
-      const format = context.get.format
+      // on va renvoyer qq chose
+      const addDroits = (data) => {
+        data._droits = 'R'
+        if ($accessControl.hasPermission('update', context, ressource)) data._droits += 'W'
+        if ($accessControl.hasPermission('delete', context, ressource)) data._droits += 'D'
+      }
+      let {format, droits} = context.get
+      // ça vient de l'url donc toujours une string
+      if (['false', 'no', 'off', '0', 'undefined', 'null'].includes(droits)) droits = false
+      let data
       if (format === 'ref') {
-        const ref = new Ref(ressource)
-        // avec ajout des droits
-        ref.$droits = 'R'
-        if ($accessControl.hasPermission('update', context, ressource)) ref.$droits += 'W'
-        if ($accessControl.hasPermission('delete', context, ressource)) ref.$droits += 'D'
-        $json.send(context, null, ref)
+        data = new Ref(ressource)
+        droits = true
       } else if (format === 'full') {
-        $ressourceConverter.enhance(ressource, (error, ressource) => {
+        // ressource complète avec résolution des oid externes (auteurs, groupe…)
+        // c'est async, donc on sort pour éviter le send final
+        return $ressourceConverter.enhance(ressource, (error, ressource) => {
           if (error) return $json.send(context, error)
-          log.debug('ressource full', ressource, 'aVirer', {max: 10000})
+          if (droits) addDroits(ressource)
           $json.send(context, null, ressource)
         })
       } else {
-        $json.send(context, null, ressource)
+        data = ressource
       }
+      if (droits) addDroits(data)
+      $json.send(context, null, data)
     }
 
     /**
      * Si la ressource contient des erreurs les renvoie, sinon l'enregistre et sort avec oid et warnings éventuels
-     * ou le ?format= demandé (ref ou normalized, le reste donnant la ressource complète)
+     * ou le ?format= demandé (ref ou full, le reste donnant la ressource complète)
      * @private
      * @param {Context} context
      * @param ressource
@@ -1074,8 +1100,12 @@ module.exports = function (component) {
         limit: context.get.limit,
         skip: context.get.skip || 0
       }
-      $ressourceRepository.getListe('groupe/' + context.arguments.nom, options, function (error, ressources) {
-        sendListe(context, error, ressources)
+      const arg = `groupe/${context.arguments.nom}`
+      $ressourceRepository.getListeCount(arg, options, function (error, total) {
+        if (error || !total) return sendListe(context, error, [], 0)
+        $ressourceRepository.getListe(arg, options, function (error, ressources) {
+          sendListe(context, error, ressources, total)
+        })
       })
     })
 
@@ -1137,7 +1167,7 @@ module.exports = function (component) {
      */
 
     /**
-     * Retourne la ressource publique et publiée (sinon 404) d'après son oid, accepte ?format=(alias|normalized)
+     * Retourne la ressource publique et publiée (sinon 404) d'après son oid
      * Retourne {@link reponseListe}
      * @route GET /api/public/:oid
      * @param {Integer} :oid
@@ -1154,7 +1184,7 @@ module.exports = function (component) {
     })
 
     /**
-     * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine, accepte ?format=(alias|normalized)
+     * Retourne la ressource publique et publiée (sinon 404) d'après son id d'origine
      * Retourne {@link reponseRessource}
      * @route GET /api/public/:origine/:idOrigine
      * @param {string} :origine
@@ -1227,7 +1257,7 @@ module.exports = function (component) {
      */
 
     /**
-     * Retourne la ressource d'après son oid (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+     * Retourne la ressource d'après son oid (si on a les droit de lecture dessus)
      * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
      * @Route GET /api/ressource/:oid
      * @param {Integer} oid
@@ -1268,7 +1298,7 @@ module.exports = function (component) {
     })
 
     /**
-     * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus), accepte ?format=(alias|normalized)
+     * Retourne la ressource d'après son id d'origine (si on a les droit de lecture dessus)
      * Au format {@link reponseRessource} ou {@link Ref} si on le réclame avec ?format=ref
      * @route GET /api/ressource/:origine/:idOrigine
      * @param {string} :origine
