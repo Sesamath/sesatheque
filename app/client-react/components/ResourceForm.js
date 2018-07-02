@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {renameProp, getContext} from 'recompose'
+import {renameProp} from 'recompose'
 import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
