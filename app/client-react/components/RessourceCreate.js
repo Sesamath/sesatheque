@@ -32,6 +32,7 @@ const RessourceCreate = ({
                 name="titre" />
               <ResourceTypesField
                 label={labels.type}
+                editable
               >
                 <option value="">Choisir le type</option>
               </ResourceTypesField>

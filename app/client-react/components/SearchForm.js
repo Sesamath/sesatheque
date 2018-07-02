@@ -44,8 +44,9 @@ class SearchForm extends Component {
                 info="(Vous pouvez utiliser le symbole % comme caractère joker)"
                 name="titre" />
               <ResourceTypesField
-                label={labels.type}
-                optional />
+                label={labels.type}>
+                <option value="">peu importe</option>
+              </ResourceTypesField>
               <SwitchField
                 className="center"
                 label={labels.publie}
@@ -65,8 +66,9 @@ class SearchForm extends Component {
               <SelectField
                 label={labels.langue}
                 values={listes.langue}
-                name="langue"
-                optional />
+                name="langue">
+                <option value="">peu importe</option>
+              </SelectField>
               <SelectField
                 label={labels.restriction}
                 values={listes.restriction}

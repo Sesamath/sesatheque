@@ -7,8 +7,7 @@ const SelectField = ({
   name,
   label,
   values,
-  disabled = false,
-  optional = false
+  disabled = false
 }) => (
   <label className="select">
     {label}
@@ -18,9 +17,6 @@ const SelectField = ({
       disabled={disabled}
     >
       {children}
-      {optional ? (
-        <option value="">peu importe</option>
-      ) : null}
       {Object.keys(values).map(key => (
         <Fragment key={key.toString()}>
           <option value={key}>{values[key]}</option>
@@ -35,8 +31,7 @@ SelectField.propTypes = {
   name: PropTypes.string,
   label: PropTypes.string,
   values: PropTypes.object,
-  disabled: PropTypes.bool,
-  optional: PropTypes.bool
+  disabled: PropTypes.bool
 }
 
 export default SelectField
