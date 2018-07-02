@@ -115,23 +115,7 @@ class EditorEcjs extends Component {
   }
 
   render () {
-    // si on a rien, faut d'abord choisir le type d'exo
-    if (!this.props.parametres.fichierjs) {
-      return (
-        <label className="select">
-          Type d’exercice
-          <Field name="parametres[fichierjs]" component="select">
-            {typesEcjs.map(typeEcjs => (
-              <Fragment key={typeEcjs}>
-                <option value={typeEcjs}>{typeEcjs}</option>
-              </Fragment>
-            ))}
-          </Field>
-        </label>
-      )
-    }
-    // si y'a un type d'exo on peut afficher les options calculatice dans l'iframe
-    return (
+    const editor = this.props.parametres.fichierjs ? (
       <fieldset>
         <IframeHandler
           allowManualEdition
@@ -141,6 +125,24 @@ class EditorEcjs extends Component {
           setUpdateStoreFromEditor={this.props.setUpdateStoreFromEditor}
         />
       </fieldset>
+    ) : null
+
+    // et on retourne select + editor
+    return (
+      <Fragment>
+        <label className="select">
+          Type d’exercice
+          <Field name="parametres[fichierjs]" component="select">
+            <option value="">Choisir un type d’exercicesss</option>
+            {typesEcjs.map(typeEcjs => (
+              <Fragment key={typeEcjs}>
+                <option value={typeEcjs}>{typeEcjs}</option>
+              </Fragment>
+            ))}
+          </Field>
+        </label>
+        {editor}
+      </Fragment>
     )
   }
 }
