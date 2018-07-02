@@ -19,7 +19,6 @@ class EditorUrl extends Component {
     super(props)
     // on teste l'objet window car ce composant pourrait être utilisé pour du rendu coté serveur
     this.isOnHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
-    this.hasConsigne = props.questionOption !== 'off'
   }
 
   getHttpsAvert () {
@@ -31,8 +30,13 @@ class EditorUrl extends Component {
     return null
   }
 
+  hasConsigne () {
+    return this.props.questionOption !== 'off'
+  }
+
   render () {
     const httpsError = this.getHttpsAvert()
+    console.log('render')
     return (
       <fieldset>
         <div className="grid-3">
@@ -70,7 +74,7 @@ class EditorUrl extends Component {
               /> {value} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
             </label>
           ))}
-          {this.hasConsigne ? (
+          {this.hasConsigne() ? (
             <label>Texte de la consigne
               <Field
                 id="parametres-consigne"
