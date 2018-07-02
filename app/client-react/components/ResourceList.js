@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {NavLink} from 'react-router-dom'
+import resourceListProvider from '../hoc/resourceListProvider'
 
-const ResourceList = ({resources}) => (
+const ResourceList = ({resources = []}) => (
   <table className="table resourceList">
     <thead>
       <tr>
@@ -70,4 +71,4 @@ ResourceList.propTypes = {
   resources: PropTypes.array
 }
 
-export default ResourceList
+export default resourceListProvider(ResourceList)

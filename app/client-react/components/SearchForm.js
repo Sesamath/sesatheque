@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
 import {reduxForm} from 'redux-form'
 import {listes, labels} from '../../server/ressource/config'
-import {POST} from '../utils/httpMethods'
 import Classification from './Classification'
 import {
   InputField,
@@ -11,37 +10,26 @@ import {
   SwitchField
 } from './fields'
 import ResourceList from './ResourceList'
+import history from '../history'
+import queryString from 'query-string'
 
 class SearchForm extends Component {
   constructor (props) {
     super(props)
-
-    this.state = {
-      resourceList: []
-    }
   }
 
-  search (query) {
-    const filters = []
-    Object.keys(query).map((key, index) => {
-      if (!query[key] || query[key] === 'peu importe') return
-      const values = Array.isArray(query[key]) ? query[key] : [query[key]]
-      filters.push({index: key, values})
+  updateQueryParams (query) {
+    history.push({
+      pathname: '/ressource/rechercher',
+      search: queryString.stringify(query)
     })
-
-    POST(`/api/liste/prof`, {body: {
-      format: 'full',
-      filters
-    }})
-      .then((resourceList) => this.setState({resourceList: Object.values(resourceList.liste)}))
-      .catch(() => this.setState({resourceList: []}))
   }
 
   render () {
     return (
       <Fragment>
         <h1>Recherche de ressources</h1>
-        <form onSubmit={this.props.handleSubmit(this.search.bind(this))}>
+        <form onSubmit={this.props.handleSubmit(this.updateQueryParams.bind(this))}>
           <fieldset>
             <div className="grid-5">
               <InputField
@@ -65,6 +53,9 @@ class SearchForm extends Component {
               <InputField
                 label={labels.idOrigine}
                 name="idOrigine" />
+              <InputField
+                label={labels.auteurs}
+                name="auteurs" />
               <SelectField
                 label={labels.langue}
                 values={listes.langue}
@@ -87,7 +78,7 @@ class SearchForm extends Component {
             </button>
           </div>
         </form>
-        <ResourceList resources={this.state.resourceList} />
+        <ResourceList />
       </Fragment>
     )
   }
