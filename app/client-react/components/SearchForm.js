@@ -13,10 +13,6 @@ import history from '../history'
 import queryString from 'query-string'
 
 class SearchForm extends Component {
-  constructor (props) {
-    super(props)
-  }
-
   componentDidMount () {
     const fields = queryString.parse(history.location.search)
     Object.keys(fields).map(key => {
@@ -90,7 +86,8 @@ class SearchForm extends Component {
 }
 
 SearchForm.propTypes = {
-  handleSubmit: PropTypes.func
+  handleSubmit: PropTypes.func,
+  change: PropTypes.func
 }
 
 export default reduxForm({
