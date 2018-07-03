@@ -2,13 +2,14 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
 
-const SwitchField = ({className, label, name}) => (
+const SwitchField = ({checked, className, label, name}) => (
   <label className={className}>
     {label}
     <Field
       name={name}
       component="input"
       type="checkbox"
+      checked={checked}
       className="switch"
     />
   </label>
