@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, {Fragment} from 'react'
+import React from 'react'
 import {Field} from 'redux-form'
 
 const SelectField = ({
@@ -18,9 +18,9 @@ const SelectField = ({
     >
       {children}
       {Object.keys(values).map(key => (
-        <Fragment key={key.toString()}>
-          <option value={key}>{values[key]}</option>
-        </Fragment>
+        <option key={key} value={key}>
+          {values[key]}
+        </option>
       ))}
     </Field>
   </label>
