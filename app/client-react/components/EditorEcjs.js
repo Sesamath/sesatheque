@@ -122,7 +122,7 @@ class EditorEcjs extends Component {
     }
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
     // on appelle (en global dans l'iframe) load(ressource, cb) qui rappellera cb(getParametres)
-    this.iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
+    this.iframe.current.contentWindow.load({parametres}, this.props.getLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
   /**
@@ -184,7 +184,7 @@ class EditorEcjs extends Component {
 }
 
 EditorEcjs.propTypes = {
-  // ces deux props sont fournies par ResourceForm
+  // ces deux props sont fournies par resourceSaver
   change: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func,
   // ça c'est redux-form
@@ -192,8 +192,8 @@ EditorEcjs.propTypes = {
     PropTypes.object,
     PropTypes.string
   ]),
-  // iframeHelper ajoute ces deux props (la 2e est dans son state, mise par la première)
-  onLoadCb: PropTypes.func,
+  // iframeHelper ajoute ces deux props (la 2e est dans son state, affectée par loadCb)
+  getLoadCb: PropTypes.func,
   getParametres: PropTypes.func
 }
 

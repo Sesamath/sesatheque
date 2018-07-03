@@ -53,7 +53,9 @@ class IframeHandler extends Component {
     })
 
     if (toManual) {
+      // on met à jour le store d'après l'éditeur graphique
       this.props.updateStoreFromEditor()
+      // updateStoreFromEditor ne doit plus rien faire (au cas où qqun la rapellerait)
       this.props.setUpdateStoreFromEditor(() => {})
     }
   }

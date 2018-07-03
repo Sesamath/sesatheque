@@ -31,7 +31,7 @@ class EditorJ3p extends Component {
    */
   onIframeLoaded (iframe) {
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
-    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
+    iframe.current.contentWindow.load({parametres}, this.props.getLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
   render () {
@@ -55,7 +55,7 @@ EditorJ3p.propTypes = {
     PropTypes.object,
     PropTypes.string
   ]),
-  onLoadCb: PropTypes.func,
+  getLoadCb: PropTypes.func,
   getParametres: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func
 }

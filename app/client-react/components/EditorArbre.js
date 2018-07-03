@@ -41,7 +41,7 @@ class EditorArbre extends Component {
     }
     // @todo window.options should be in
     // GET /api/personne/current response
-    iframe.current.contentWindow.load(ressource, window.options, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
+    iframe.current.contentWindow.load(ressource, window.options, this.props.getLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
   render () {
@@ -69,7 +69,7 @@ EditorArbre.propTypes = {
   ]),
   rid: PropTypes.string,
   titre: PropTypes.string,
-  onLoadCb: PropTypes.func,
+  getLoadCb: PropTypes.func,
   getParametres: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func
 }

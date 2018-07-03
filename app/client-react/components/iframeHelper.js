@@ -3,7 +3,7 @@ import React, {Component} from 'react'
 import addNotifyToProps from '../utils/addNotifyToProps'
 
 /**
- * hoc qui ajoute les props onLoadCb et getParametres à WrappedComponent
+ * hoc qui ajoute les props getLoadCb et getParametres à WrappedComponent
  * (avec )
  * @param WrappedComponent
  */
@@ -17,11 +17,17 @@ const iframeHelper = (WrappedComponent) => {
     }
 
     /**
-     * Callback appelée par
-     * @param updateStoreFromEditor
-     * @return {Function}
+     * Callback à passer en 2e param de la fct load de l'iframe
+     * @callback loadEditorCb
+     * @param {Error} [error]
+     * @param {function} getParametres qui permettra de récupérer les paramètres de l'éditeur graphique
      */
-    onLoadCb (updateStoreFromEditor) {
+    /**
+     * Retourne une callback à passer à la fct load de l'iframe
+     * @param {function} updateStoreFromEditor La fonction qui met à jour parametres dans le store
+     * @return {loadEditorCb}
+     */
+    getLoadCb (updateStoreFromEditor) {
       return (error, getParametres) => {
         if (error) {
           return this.props.notify({
@@ -39,7 +45,7 @@ const iframeHelper = (WrappedComponent) => {
     render () {
       return (
         <WrappedComponent
-          onLoadCb={this.onLoadCb.bind(this)}
+          getLoadCb={this.getLoadCb.bind(this)}
           getParametres={this.state.getParametres}
           {...this.props}
         />
