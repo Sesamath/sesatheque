@@ -22,7 +22,6 @@ Chargement en cours</div>
         {?base}base: "{base}",{/base}
         {?isFormateur}isFormateur: {isFormateur},{/isFormateur}
         isDev :{?isDev}{isDev}{:else}false{/isDev},
-        {?sesatheques}sesatheques: {sesatheques|s},{/sesatheques}
         verbose :{?verbose}{verbose}{:else}false{/verbose},
       };
       if (window.location.hash === '#formateur') options.isFormateur = true

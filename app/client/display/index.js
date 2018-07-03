@@ -41,7 +41,7 @@ const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjt = require('sesajstools')
 const sjtUrl = require('sesajstools/http/url')
-const sesatheques = require('sesatheque-client/src/sesatheques')
+const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const xhr = require('sesajstools/http/xhr')
 
 const page = require('../page')
@@ -345,11 +345,12 @@ module.exports = function display (ressource, options, next) {
     // on accepte des baseId dans options.base
     if (typeof options.base === 'string' && options.base.substr(0, 4) !== 'http') {
       try {
-        options.base = sesatheques.getBaseUrl(options.base)
+        options.base = getBaseUrl(options.base)
       } catch (error) {
         return next(error)
       }
     }
+
     // on ajoute notifyError à options
     options.notifyError = notifyError
 

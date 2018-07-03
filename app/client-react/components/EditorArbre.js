@@ -3,12 +3,14 @@ import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from './iframeHelper'
+// cf webpackConfigLoader.js pour les valeurs exportées à un browser
+import config from '../../server/config'
 
 /**
  * Page contenant l'éditeur d'arbres
  * @type {string}
  */
-const iframeSrc = require('../../client/plugins/arbre/iframe.html')
+const iframeSrc = require('../../client/plugins/arbre/edit.html')
 
 class EditorArbre extends Component {
   /**
@@ -33,15 +35,18 @@ class EditorArbre extends Component {
     const enfants = typeof this.props.enfants === 'string' ? JSON.parse(this.props.enfants) : this.props.enfants
 
     const ressource = {
-      alias: this.props.aliasOf,
+      aliasOf: this.props.aliasOf,
       enfants,
       rid: this.props.rid,
       titre: this.props.titre,
       type: 'arbre'
     }
-    // @todo window.options should be in
-    // GET /api/personne/current response
-    iframe.current.contentWindow.load(ressource, window.options, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
+    const options = {
+      baseId: config.application.baseId
+    }
+    const onLoadResourceCb = this.props.onLoadCb(this.updateStoreFromEditor.bind(this))
+    // on peut appeler la méthode load de l'éditeur (pour charger la ressource dedans)
+    iframe.current.contentWindow.load(ressource, options, onLoadResourceCb)
   }
 
   render () {
