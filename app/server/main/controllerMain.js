@@ -89,6 +89,7 @@ module.exports = function (mainComponent) {
     const reactRoutes = [
       // '/', inutile car /build/index.html passe avant
       '/mentionsLegales',
+      '/ressource/ajouter',
       '/ressource/modifier/:oid',
       '/ressource/apercevoir/:oid',
       '/ressource/decrire/:oid',

@@ -5,10 +5,12 @@ const version = require('./package').version
  * exposées dans le browser
  */
 const safeConfig = {
-  bugsnag: config.bugsnag,
   application: {
     staging: config.application.staging
   },
+  baseId: config.application.baseId,
+  bugsnag: config.bugsnag,
+  sesatheques: config.sesatheques.map(({baseId, baseUrl}) => ({baseId, baseUrl})),
   version
 }
 

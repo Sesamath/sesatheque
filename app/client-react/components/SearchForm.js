@@ -33,20 +33,31 @@ class SearchForm extends Component {
         <h1>Recherche de ressources</h1>
         <form onSubmit={this.props.handleSubmit(this.updateQueryParams.bind(this))}>
           <fieldset>
-            <div className="grid-5">
+            <div className="grid-3">
               <InputField
-                className="col-3"
+                className="col-2"
                 label={labels.titre}
                 info="(Vous pouvez utiliser le symbole % comme caractère joker)"
                 name="titre" />
+              <SelectField
+                label={labels.langue}
+                values={listes.langue}
+                name="langue">
+                <option value="">peu importe</option>
+              </SelectField>
               <ResourceTypesField
                 label={labels.type}>
                 <option value="">peu importe</option>
               </ResourceTypesField>
+              <SelectField
+                label={labels.restriction}
+                values={listes.restriction}
+                name="restriction" />
               <SwitchField
                 className="center"
                 label={labels.publie}
                 name="publie" />
+
               <InputField
                 label={labels.oid}
                 name="oid" />
@@ -56,19 +67,11 @@ class SearchForm extends Component {
               <InputField
                 label={labels.idOrigine}
                 name="idOrigine" />
+
               <InputField
+                className="col-2"
                 label={labels.auteurs}
                 name="auteurs" />
-              <SelectField
-                label={labels.langue}
-                values={listes.langue}
-                name="langue">
-                <option value="">peu importe</option>
-              </SelectField>
-              <SelectField
-                label={labels.restriction}
-                values={listes.restriction}
-                name="restriction" />
             </div>
           </fieldset>
           <hr />
@@ -88,11 +91,11 @@ class SearchForm extends Component {
 }
 
 SearchForm.propTypes = {
-  handleSubmit: PropTypes.func,
-  change: PropTypes.func
+  change: PropTypes.func,
+  handleSubmit: PropTypes.func
 }
 
-export default reduxForm({
+const formDef = {
   form: 'searchForm',
   initialValues: {
     categories: [],
@@ -102,4 +105,6 @@ export default reduxForm({
     langue: 'fra',
     publie: true
   }
-})(SearchForm)
+}
+
+export default reduxForm(formDef)(SearchForm)

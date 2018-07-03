@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {renameProp} from 'recompose'
-import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
 import EditorArbre from './EditorArbre'
@@ -85,10 +84,12 @@ ResourceForm.propTypes = {
   saveRessource: PropTypes.func
 }
 
-export default flowRight([
-  resourceLoader,
-  aliasForker,
-  resourceSaver,
-  renameProp('ressource', 'initialValues'),
-  reduxForm({form: 'ressource'})
-])(ResourceForm)
+export default resourceLoader(
+  aliasForker(
+    resourceSaver(
+      renameProp('ressource', 'initialValues')(
+        reduxForm({form: 'ressource'})(ResourceForm)
+      )
+    )
+  )
+)

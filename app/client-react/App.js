@@ -22,6 +22,8 @@ import store from './store'
 
 store.dispatch(getCurrentSession())
 
+// ATTENTION à garder la liste des routes synchrones dans app/server/main/controllerMain.js
+
 const App = () => (
   <Provider store={store}>
     <ConnectedRouter history={history}>
@@ -46,11 +48,10 @@ const App = () => (
   </Provider>
 )
 
-export default withContext(
-  {
-    isIframeLayout: PropTypes.bool
-  },
-  () => ({
-    isIframeLayout: isIframeLayout
-  })
-)(App)
+const contextPropTypes = {
+  isIframeLayout: PropTypes.bool
+}
+
+const getContext = () => ({isIframeLayout})
+
+export default withContext(contextPropTypes, getContext)(App)

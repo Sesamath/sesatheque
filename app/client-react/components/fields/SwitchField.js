@@ -15,7 +15,6 @@ const SwitchField = ({className, label, name}) => (
 )
 
 SwitchField.propTypes = {
-  checked: PropTypes.bool,
   className: PropTypes.string,
   label: PropTypes.string,
   name: PropTypes.string
