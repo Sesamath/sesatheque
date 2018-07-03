@@ -127,7 +127,6 @@ module.exports = function (component) {
      */
     controller.get('urlProxy/:oid', function (context) {
       var oid = context.arguments.oid
-
       $ressourceRepository.load(oid, (error, ressource) => {
         if (error) {
           log.error(error)
@@ -135,7 +134,7 @@ module.exports = function (component) {
         } else if (ressource && ressource.type === 'url') {
           const url = ressource && ressource.parametres && ressource.parametres.adresse
           if (url && url.substr(0, 7) === 'http://') {
-            $ressourceFetch.fetchURL(url, `urlProxy${oid}`, context)
+            $ressourceFetch.fetchURL(url, context)
           } else {
             const msg = 'La ressource ' + oid + ' n’a pas d’adresse en http://…'
             log.error(msg)

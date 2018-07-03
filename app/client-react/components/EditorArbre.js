@@ -44,9 +44,9 @@ class EditorArbre extends Component {
     const options = {
       baseId
     }
-    const onLoadResourceCb = this.props.onLoadCb(this.updateStoreFromEditor.bind(this))
+    const loadCb = this.props.getLoadCb(this.updateStoreFromEditor.bind(this))
     // on peut appeler la méthode load de l'éditeur (pour charger la ressource dedans)
-    iframe.current.contentWindow.load(ressource, options, onLoadResourceCb)
+    iframe.current.contentWindow.load(ressource, options, loadCb)
   }
 
   render () {
@@ -74,7 +74,7 @@ EditorArbre.propTypes = {
   ]),
   rid: PropTypes.string,
   titre: PropTypes.string,
-  onLoadCb: PropTypes.func,
+  getLoadCb: PropTypes.func,
   getParametres: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func
 }

@@ -35,7 +35,7 @@ class IframeHandler extends Component {
   }
 
   /**
-   * Callback appelé au chargement de l'iframe
+   * Callback appelé au chargement de l'iframe, on passe alors l'iframe à props.onLoad
    */
   onLoad () {
     this.props.onLoad(this.iframe)
@@ -53,7 +53,9 @@ class IframeHandler extends Component {
     })
 
     if (toManual) {
+      // on met à jour le store d'après l'éditeur graphique
       this.props.updateStoreFromEditor()
+      // updateStoreFromEditor ne doit plus rien faire (au cas où qqun la rapellerait)
       this.props.setUpdateStoreFromEditor(() => {})
     }
   }
@@ -66,11 +68,11 @@ class IframeHandler extends Component {
             <button
               type="button"
               onClick={this.toggleManualEditor.bind(this, true)}
-              className={!this.state.manualEdition ? 'inactive' : ''}>Mode manuel</button>
+              className={!this.state.manualEdition ? 'inactive' : ''}>Mode texte</button>
             <button
               type="button"
               onClick={this.toggleManualEditor.bind(this, false)}
-              className={this.state.manualEdition ? 'inactive' : ''}>Éditeur</button>
+              className={this.state.manualEdition ? 'inactive' : ''}>Éditeur graphique</button>
           </nav>
         ) : null}
         {this.props.allowManualEdition && this.state.manualEdition ? (

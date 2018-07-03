@@ -35,11 +35,12 @@ let errors = []
 let consoleError
 
 /**
- * Démarre le spy (râle en console sans rien faire si c'est déjà le cas)
+ * Démarre le spy
+ * @param {boolean} [strict=false] passer true pour râler en console s'il tournait déjà
  */
-function start () {
+function start (strict = false) {
   if (consoleError) {
-    console.error(new Error('consoleErrorSpy is already running'))
+    if (strict) console.error(new Error('consoleErrorSpy is already running'))
     return
   }
   // stub console.error
@@ -65,7 +66,7 @@ function start () {
 function stop () {
   if (!consoleError) {
     console.error(new Error('consoleErrorSpy isn’t running'))
-    return
+    return []
   }
   console.error = consoleError
   consoleError = undefined
@@ -83,7 +84,7 @@ function flush () {
 }
 
 /**
- * Retourne les erreurs collectées depuis start
+ * Retourne les erreurs collectées depuis start | flush
  * @return {Error[]}
  */
 function getErrors () {

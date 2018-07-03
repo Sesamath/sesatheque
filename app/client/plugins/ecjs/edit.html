@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur Calcul@tice</title>
+  <link rel="stylesheet" href="/iframe.css">
+  <script type="application/javascript" src="/page.js"></script>
+  <script type="application/javascript" src="/display.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="application/javascript">
+  // ATTENTION, le code ci-dessous doit être de l'es5 car il ne passe pas par babel
+
+  // une fct en global que notre parent appellera quand il aura eu l'evt load sur l'iframe
+  window.load = function loadEcjsEditor (ressource, loadCb) {
+    const container = document.getElementById('root')
+    const options = {
+      container,
+      onLoadEditorCb: loadCb
+    }
+    // le parent nous file que les paramètres, faut au moins ajouter le type
+    ressource.type = 'ecjs'
+    if (typeof stdisplay === 'function') stdisplay(ressource, options)
+    else root.innerText = 'Problème de chargement de l’éditeur calcul@tice'
+  }
+</script>
+</body>
+</html>

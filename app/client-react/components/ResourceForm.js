@@ -4,6 +4,7 @@ import {renameProp} from 'recompose'
 import {reduxForm} from 'redux-form'
 import MetaForm from './MetaForm'
 import EditorArbre from './EditorArbre'
+import EditorEcjs from './EditorEcjs'
 import EditorExternal from './EditorExternal'
 import EditorIep from './EditorIep'
 import EditorJ3p from './EditorJ3p'
@@ -20,6 +21,7 @@ const typeToData = {
   arbre: EditorArbre,
   calkc: EditorSimple,
   ec2: EditorSimple,
+  ecjs: EditorEcjs,
   iep: EditorIep,
   j3p: EditorJ3p,
   mathgraph: EditorMathGraph,
