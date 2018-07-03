@@ -92,7 +92,9 @@ module.exports = function (mainComponent) {
       '/ressource/modifier/:oid',
       '/ressource/apercevoir/:oid',
       '/ressource/decrire/:oid',
-      '/ressource/rechercher'
+      '/ressource/rechercher',
+      '/ressource/ajouter',
+      '/ressources'
     ]
 
     reactRoutes.forEach(route => this.get(route, sendReactPage))
