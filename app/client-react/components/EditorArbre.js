@@ -4,7 +4,7 @@ import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from './iframeHelper'
 // cf webpackConfigLoader.js pour les valeurs exportées à un browser
-import config from '../../server/config'
+import {baseId} from '../../server/config'
 
 /**
  * Page contenant l'éditeur d'arbres
@@ -42,7 +42,7 @@ class EditorArbre extends Component {
       type: 'arbre'
     }
     const options = {
-      baseId: config.application.baseId
+      baseId
     }
     const onLoadResourceCb = this.props.onLoadCb(this.updateStoreFromEditor.bind(this))
     // on peut appeler la méthode load de l'éditeur (pour charger la ressource dedans)
