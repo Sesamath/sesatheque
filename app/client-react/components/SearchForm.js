@@ -85,6 +85,34 @@ const formDef = reduxForm({
   }))
 })
 
+const arrayValues = ['categories', 'niveaux', 'typePedagogiques', 'typeDocumentaires']
+
+const integerArrayValues = ['categories', 'typePedagogiques', 'typeDocumentaires']
+
+const parseQuery = (search) => {
+  const parsedQuery = queryString.parse(search)
+  const {publie} = parsedQuery
+  if (publie) {
+    parsedQuery.publie = (publie === 'true')
+  }
+
+  arrayValues.forEach(prop => {
+    const item = parsedQuery[prop]
+    if (item !== undefined && !Array.isArray(item)) {
+      parsedQuery[prop] = [item]
+    }
+  })
+
+  integerArrayValues.forEach(prop => {
+    const item = parsedQuery[prop]
+    if (item !== undefined) {
+      parsedQuery[prop] = item.map((str) => parseInt(str, 10))
+    }
+  })
+
+  return parsedQuery
+}
+
 const mapStateToProps = ({router: {location: {search}}}) => ({
   initialValues: Object.assign(
     {
@@ -95,7 +123,7 @@ const mapStateToProps = ({router: {location: {search}}}) => ({
       langue: 'fra',
       publie: true
     },
-    queryString.parse(search)
+    parseQuery(search)
   )
 })
 
