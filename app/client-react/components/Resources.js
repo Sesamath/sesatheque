@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import ResourceList from './ResourceList'
 import {NavLink} from 'react-router-dom'
@@ -8,8 +9,12 @@ const Resources = ({location}) => (
       <i className={`fa fa-edit`}></i> Modifier les filtres de recherche
     </NavLink>
     <h1>Ressources</h1>
-    <ResourceList />
+    <ResourceList perPage="10" />
   </Fragment>
 )
+
+Resources.propTypes = {
+  location: PropTypes.object
+}
 
 export default Resources

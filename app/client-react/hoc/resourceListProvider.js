@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {POST} from '../utils/httpMethods'
@@ -14,7 +15,10 @@ const resourceListProvider = (WrappedComponent) => {
   class ResourceListProvider extends Component {
     constructor (props) {
       super(props)
-      this.state = {resources: []}
+      this.state = {
+        resources: [],
+        total: 0
+      }
     }
 
     fetchList (query) {
@@ -27,10 +31,15 @@ const resourceListProvider = (WrappedComponent) => {
 
       POST(`/api/liste/prof`, {body: {
         format: 'full',
-        filters
+        filters,
+        limit: this.props.perPage,
+        skip: query['skip'] || 0
       }})
-        .then((resourceList) => this.setState({resources: Object.values(resourceList.liste)}))
-        .catch(() => this.setState({resources: []}))
+        .then((resourceList) => this.setState({
+          resources: Object.values(resourceList.liste),
+          total: resourceList.total
+        }))
+        .catch(() => this.setState({resources: [], total: 0}))
     }
 
     componentDidMount () {
@@ -45,9 +54,14 @@ const resourceListProvider = (WrappedComponent) => {
 
     render () {
       return (
-        <WrappedComponent {...this.props} resources={this.state.resources} />
+        <WrappedComponent {...this.props} resources={this.state.resources} total={this.state.total} />
       )
     }
+  }
+
+  ResourceListProvider.propTypes = {
+    query: PropTypes.string,
+    perPage: PropTypes.string
   }
 
   return connect(
