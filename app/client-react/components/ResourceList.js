@@ -104,6 +104,11 @@ const mapDispatchToProps = (dispatch, {parsedSearch, perPage}) => ({
   }
 })
 
+// we are nesting two connects because writing:
+// connect(mapStateToProps, mapDispatchToProps)
+// would not provide parsedSearch in
+// mapDispatchToProps ownProps parameter
+
 export default connect(mapStateToProps, {})(
   connect(null, mapDispatchToProps)(resourceListProvider(ResourceList)
   )
