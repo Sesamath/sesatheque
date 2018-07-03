@@ -635,7 +635,7 @@ module.exports = function (component) {
         // c'est async, donc on sort pour éviter le send final
         return $ressourceConverter.enhance(ressource, (error, ressource) => {
           if (error) return $json.send(context, error)
-          if (droits) addDroits(ressource)
+          addDroits(ressource)
           $json.send(context, null, ressource)
         })
       } else {

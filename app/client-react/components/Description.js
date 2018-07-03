@@ -32,6 +32,7 @@ const getRestriction = (restriction) => {
 
 const Description = ({
   ressource: {
+    _droits: droits,
     titre,
     oid,
     publie,
@@ -61,6 +62,7 @@ const Description = ({
 }) => (
   <Fragment>
     <NavMenu
+      droits={droits}
       ressourceOid={oid}
       titre={titre}
     />

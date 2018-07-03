@@ -4,10 +4,15 @@ import NavMenu from './NavMenu'
 import resourceLoader from '../hoc/resourceLoader'
 
 const Preview = ({
-  ressource: {oid: ressourceOid, titre}
+  ressource: {
+    _droits: droits,
+    oid: ressourceOid,
+    titre
+  }
 }) => (
   <Fragment>
     <NavMenu
+      droits={droits}
       ressourceOid={ressourceOid}
       titre={`Aperçu de la ressource ${titre}`}
     />
@@ -17,6 +22,7 @@ const Preview = ({
 
 Preview.propTypes = {
   ressource: PropTypes.shape({
+    _droits: PropTypes.string,
     oid: PropTypes.string,
     titre: PropTypes.string
   })

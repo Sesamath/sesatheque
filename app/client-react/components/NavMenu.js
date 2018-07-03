@@ -12,7 +12,8 @@ const NavMenu = ({
   ressourceOid,
   askClone,
   askDelete,
-  titre
+  titre,
+  droits
 }) => {
   if (isIframeLayout) {
     return <h1>{titre}</h1>
@@ -39,24 +40,28 @@ const NavMenu = ({
             icon="eye"
             target="_blank"
           />
-          <NavMenuItem
-            to={`/ressource/modifier/${ressourceOid}`}
-            title="Modifier"
-            icon="edit"
-            id="buttonEdit"
-          />
+          {droits.includes('W') ? (
+            <NavMenuItem
+              to={`/ressource/modifier/${ressourceOid}`}
+              title="Modifier"
+              icon="edit"
+              id="buttonEdit"
+            />
+          ) : null}
           <NavButton
             onClick={askClone.bind(null, ressourceOid)}
             title="Dupliquer"
             icon="copy"
             id="buttonDuplicate"
           />
-          <NavButton
-            onClick={askDelete.bind(null, ressourceOid)}
-            title="Supprimer"
-            icon="trash"
-            id="buttonDelete"
-          />
+          {droits.includes('D') ? (
+            <NavButton
+              onClick={askDelete.bind(null, ressourceOid)}
+              title="Supprimer"
+              icon="trash"
+              id="buttonDelete"
+            />
+          ) : null}
         </ul>
         <div className="clearfix"></div>
       </div>
@@ -65,9 +70,10 @@ const NavMenu = ({
 }
 
 NavMenu.propTypes = {
-  isIframeLayout: PropTypes.bool,
   askClone: PropTypes.func,
   askDelete: PropTypes.func,
+  droits: PropTypes.string,
+  isIframeLayout: PropTypes.bool,
   ressourceOid: PropTypes.string,
   titre: PropTypes.string
 }
