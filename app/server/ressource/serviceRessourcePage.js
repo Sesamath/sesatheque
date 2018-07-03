@@ -691,6 +691,12 @@ module.exports = function (component) {
           if (view === 'display') {
             addJsVars(data, ressource)
             data.contentBloc.isFormateur = $accessControl.hasRole('acces_correction', context)
+            // faut filer aussi les sésathèques pour le type arbre
+            if (ressource.type === 'arbre') {
+              // mais pas les tokens
+              const sts = appConfig.sesatheques.map(({baseId, baseUrl}) => ({baseId, baseUrl}))
+              data.contentBloc.sesatheques = JSON.stringify(sts)
+            }
 
             // pour describe il faut ajouter la résolution des refs externes (faite par enhance)
           } else if (view === 'describe' && ressource) {
