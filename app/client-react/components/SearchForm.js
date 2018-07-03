@@ -60,7 +60,7 @@ const SearchForm = ({handleSubmit}) => (
         </div>
       </fieldset>
       <hr />
-      <Classification detailled />
+      <Classification detailed />
       <div className="buttons-area">
         <button
           type="submit"
