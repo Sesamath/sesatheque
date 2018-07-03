@@ -69,6 +69,7 @@ const RessourceCreate = ({
                 values={listes.restriction} />
               <SwitchField
                 label={labels.publie}
+                checked
                 name="publie" />
             </div>
           </fieldset>
