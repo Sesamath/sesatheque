@@ -110,47 +110,74 @@ class EditorEcjs extends Component {
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
   onIframeLoaded (iframe) {
-    const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
-    // on appelle (en global dans l'iframe) load(ressource, cb) qui rappellera cb(getParametres)
-    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
     // on stocke une ref sur l'iframe
     this.iframe = iframe
+    this.loadResourceInEditor()
   }
 
-  onFichierJsChange () {
-    console.log('onFichierJsChange avec', this.props.parametres.fichierjs)
-    if (this.iframe) this.onIframeLoaded(this.iframe)
+  loadResourceInEditor () {
+    if (!this.iframe) {
+      console.error(Error(`Impossible de charger une ressource avant d'avoir chargé l'iframe`))
+      return
+    }
+    const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
+    // on appelle (en global dans l'iframe) load(ressource, cb) qui rappellera cb(getParametres)
+    this.iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
+  }
+
+  /**
+   * Retourne true s'il faut refaire un rendu (si fichierjs a changé)
+   * @see https://reactjs.org/docs/react-component.html#shouldcomponentupdate
+   * @param {object} nextProps
+   * @return {boolean}
+   */
+  shouldComponentUpdate (nextProps) {
+    return nextProps.parametres.fichierjs !== this.props.parametres.fichierjs
+    // Normalement le seul cas où il faut relancer un render, c'est si y'avait pas de fichierjs
+    // et qu'il va y en avoir un (le contraire devrait pas être possible mais renverrait true aussi)
+    // donc avec la condition ci-dessous
+    // return Boolean(nextProps.parametres.fichiersjs) !== Boolean(this.props.parametres.fichiersjs)
+
+    // car si fichierjs change d'une valeur à une autre c'est inutile de refaire un rendu de la même chose
+    // mais il faudrait appeler le load ici (et pas dans componentDidUpdate qui ne serait alors pas appelé) alors que les props n'ont pas encore été mise à jour
+    // on préfère gaspiller qq rendus pour appeler le load de l'iframe dans componentDidUpdate avec les props à jour
+  }
+
+  /**
+   * Appelé après une modif des props ou du state (après render s'il y en a eu un, mais pas après le 1er render)
+   * Rappelle la méthode load dans l'iframe si fichierjs a changé
+   * @see https://reactjs.org/docs/react-component.html#componentdidupdate
+   * @param prevProps
+   */
+  componentDidUpdate (prevProps) {
+    if (prevProps.parametres.fichierjs !== this.props.parametres.fichierjs) {
+      this.loadResourceInEditor()
+    }
   }
 
   render () {
-    console.log('render avec', this.props.parametres.fichierjs)
-    const editor = this.props.parametres.fichierjs ? (
-      <fieldset>
-        <IframeHandler
-          allowManualEdition
-          onLoad={this.onIframeLoaded.bind(this)}
-          src={iframeSrc}
-          updateStoreFromEditor={this.updateStoreFromEditor.bind(this)}
-          setUpdateStoreFromEditor={this.props.setUpdateStoreFromEditor}
-        />
-      </fieldset>
-    ) : null
-
     // et on retourne select + editor
+    let i = 0
     return (
       <Fragment>
         <label className="select">
           Type d’exercice
-          <Field name="parametres[fichierjs]" component="select" onChange={this.onFichierJsChange.bind(this)}>
-            <option value="">Choisir un type d’exercice</option>
-            {typesEcjs.map(typeEcjs => (
-              <Fragment key={typeEcjs}>
-                <option value={typeEcjs}>{typeEcjs}</option>
-              </Fragment>
-            ))}
+          <Field name="parametres[fichierjs]" component="select">
+            <option key={i++} value="">Choisir un type d’exercice</option>
+            {typesEcjs.map(typeEcjs => (<option key={i++} value={typeEcjs}>{typeEcjs}</option>))}
           </Field>
         </label>
-        {editor}
+        {this.props.parametres.fichierjs ? (
+          <fieldset>
+            <IframeHandler
+              allowManualEdition
+              onLoad={this.onIframeLoaded.bind(this)}
+              src={iframeSrc}
+              updateStoreFromEditor={this.updateStoreFromEditor.bind(this)}
+              setUpdateStoreFromEditor={this.props.setUpdateStoreFromEditor}
+            />
+          </fieldset>
+        ) : null}
       </Fragment>
     )
   }
