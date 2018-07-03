@@ -42,12 +42,13 @@ class SearchForm extends Component {
               <SelectField
                 label={labels.langue}
                 values={listes.langue}
-                name="langue"
-                optional />
-
+                name="langue">
+                <option value="">peu importe</option>
+              </SelectField>
               <ResourceTypesField
-                label={labels.type}
-                optional />
+                label={labels.type}>
+                <option value="">peu importe</option>
+              </ResourceTypesField>
               <SelectField
                 label={labels.restriction}
                 values={listes.restriction}

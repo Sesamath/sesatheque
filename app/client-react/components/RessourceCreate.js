@@ -36,6 +36,7 @@ const RessourceCreate = ({
 
               <ResourceTypesField
                 label={labels.type}
+                editable
               >
                 <option value="">Choisir le type</option>
               </ResourceTypesField>

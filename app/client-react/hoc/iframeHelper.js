@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import addNotifyToProps from '../utils/addNotifyToProps'
+import addNotifyToProps from './addNotifyToProps'
 
 const iframeHelper = (WrappedComponent) => {
   class IframeHelper extends Component {
