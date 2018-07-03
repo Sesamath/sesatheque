@@ -58,7 +58,7 @@ function filterOnBaseUrl (list) {
       if (item.baseUrl.substr(-1) !== '/') item.baseUrl += '/'
       if (reBaseUrl.test(item.baseUrl)) return item
     }
-    console.error('item sans baseUrl valide', item)
+    log.error(Error('sesatheque sans baseUrl valide'), item)
   }).filter((item) => item)
 }
 
@@ -269,11 +269,6 @@ if (!config.application.baseUrl) throw new Error('config.application.baseUrl man
 // on ajoute toujours un slash de fin à baseUrl
 if (config.application.baseUrl.substr(-1) !== '/') config.application.baseUrl += '/'
 
-// on ajoute notre sesatheque au registrar local, si elle est déjà connue :
-// - avec cette baseUrl ça renvoie false mais ne gêne pas
-// - avec une autre baseUrl ça throw
-addSesatheque(config.application.baseId, config.application.baseUrl)
-
 // on garanti que sesatheques est un tableau
 if (!config.sesatheques) config.sesatheques = []
 if (!Array.isArray(config.sesatheques)) {
@@ -287,10 +282,18 @@ if (config.sesatheques.length) {
   const errors = checkConfigSesatheques(config.sesatheques, true)
   // en cas d'erreur on throw pour arrêter le boot
   if (errors.length) {
-    errors.forEach(console.error)
-    throw new Error('config.sesatheques contient des erreurs')
+    errors.forEach(log.error)
+    throw new Error('il y a des erreurs dans les sésathèques en configuration')
   } else {
-    log(`config.sesatheques OK (${config.sesatheques.map(({baseId, baseUrl}) => `${baseId} : ${baseUrl}`).join(', ')})`)
+    // on s'ajoute à la liste
+    if (!config.sesatheques.some(st => st.baseId === config.application.baseId)) {
+      config.sesatheques.push({baseId: config.application.baseId, baseUrl: config.application.baseUrl})
+    }
+    // on ajoute chaque sésathèque au registrar, si elle est déjà connue :
+    // - avec cette baseUrl ça renvoie false mais ne gêne pas
+    // - avec une autre baseUrl ça throw
+    config.sesatheques.forEach(({baseId, baseUrl}) => addSesatheque(baseId, baseUrl))
+    log(`Sésathèques OK (${config.sesatheques.map(({baseId, baseUrl}) => `${baseId} : ${baseUrl}`).join(', ')})`)
   }
 }
 
