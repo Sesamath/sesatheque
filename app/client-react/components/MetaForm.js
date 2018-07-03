@@ -20,8 +20,7 @@ const MetaForm = () => (
         <SelectField
           label={labels.langue}
           values={listes.langue}
-          name="langue"
-          optional />
+          name="langue" />
 
         <ResourceTypesField
           label={labels.type}
