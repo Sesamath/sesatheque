@@ -1,7 +1,6 @@
 import {push} from 'connected-react-router'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {flowRight} from 'lodash'
 import {reduxForm} from 'redux-form'
 import Classification from './Classification'
 import {saveRessource} from '../actions/ressource'
@@ -27,18 +26,41 @@ const RessourceCreate = ({
         <Fragment>
           <fieldset>
             <div className="grid-3">
-              <InputField
+              <InputField className="col-2"
                 label={labels.titre}
                 name="titre" />
+              <SelectField
+                name="langue"
+                label={labels.langue}
+                values={listes.langue} />
+
               <ResourceTypesField
                 label={labels.type}
               >
                 <option value="">Choisir le type</option>
               </ResourceTypesField>
               <SelectField
-                name="langue"
-                label={labels.langue}
-                values={listes.langue} />
+                name="restriction"
+                label={labels.restriction}
+                values={listes.restriction} />
+              <SwitchField
+                className="center"
+                label={labels.publie}
+                checked
+                name="publie" />
+
+              <InputField
+                label={labels.origine}
+                info="(Laisser vide, sauf pour une origine externe connue)"
+                name="origine" />
+              <InputField
+                label={labels.idOrigine}
+                info="(uniquement pour une ressource externe)"
+                name="idOrigine" />
+            </div>
+          </fieldset>
+          <fieldset>
+            <div className="grid-3">
               <TextareaField
                 label={labels.resume}
                 name="resume" />
@@ -52,27 +74,6 @@ const RessourceCreate = ({
           </fieldset>
           <hr />
           <Classification detailed={false} />
-          <hr />
-          <fieldset>
-            <div className="grid-3">
-              <InputField
-                label={labels.origine}
-                name="origine"
-              />
-              <InputField
-                label={labels.idOrigine}
-                name="idOrigine"
-              />
-              <SelectField
-                name="restriction"
-                label={labels.restriction}
-                values={listes.restriction} />
-              <SwitchField
-                label={labels.publie}
-                checked
-                name="publie" />
-            </div>
-          </fieldset>
         </Fragment>
         <hr />
         <div className="buttons-area">
@@ -95,22 +96,19 @@ RessourceCreate.propTypes = {
   submitting: PropTypes.bool
 }
 
-export default flowRight([
-  reduxForm({
-    form: 'create-ressource',
-    initialValues: {
-      categories: [],
-      niveaux: [],
-      langue: 'fra',
-      restriction: '0'
-    },
-    onSubmit: (values, dispatch) => {
-      return dispatch(saveRessource(
-        values,
-        (oid) => {
-          dispatch(push(`/ressource/modifier/${oid}`))
-        }
-      ))
-    }
-  })
-])(RessourceCreate)
+const form = {
+  form: 'create-ressource',
+  initialValues: {
+    categories: [],
+    niveaux: [],
+    langue: 'fra',
+    publie: true,
+    restriction: '0'
+  },
+  onSubmit: (values, dispatch) => {
+    const onSave = (oid) => dispatch(push(`/ressource/modifier/${oid}`))
+    dispatch(saveRessource(values, onSave))
+  }
+}
+
+export default reduxForm(form)(RessourceCreate)

@@ -13,10 +13,6 @@ import history from '../history'
 import queryString from 'query-string'
 
 class SearchForm extends Component {
-  constructor (props) {
-    super(props)
-  }
-
   componentDidMount () {
     const fields = queryString.parse(history.location.search)
     Object.keys(fields).map(key => {
@@ -37,19 +33,30 @@ class SearchForm extends Component {
         <h1>Recherche de ressources</h1>
         <form onSubmit={this.props.handleSubmit(this.updateQueryParams.bind(this))}>
           <fieldset>
-            <div className="grid-5">
+            <div className="grid-3">
               <InputField
-                className="col-3"
+                className="col-2"
                 label={labels.titre}
                 info="(Vous pouvez utiliser le symbole % comme caractère joker)"
                 name="titre" />
+              <SelectField
+                label={labels.langue}
+                values={listes.langue}
+                name="langue"
+                optional />
+
               <ResourceTypesField
                 label={labels.type}
                 optional />
+              <SelectField
+                label={labels.restriction}
+                values={listes.restriction}
+                name="restriction" />
               <SwitchField
                 className="center"
                 label={labels.publie}
                 name="publie" />
+
               <InputField
                 label={labels.oid}
                 name="oid" />
@@ -59,18 +66,11 @@ class SearchForm extends Component {
               <InputField
                 label={labels.idOrigine}
                 name="idOrigine" />
+
               <InputField
+                className="col-2"
                 label={labels.auteurs}
                 name="auteurs" />
-              <SelectField
-                label={labels.langue}
-                values={listes.langue}
-                name="langue"
-                optional />
-              <SelectField
-                label={labels.restriction}
-                values={listes.restriction}
-                name="restriction" />
             </div>
           </fieldset>
           <hr />
@@ -90,10 +90,11 @@ class SearchForm extends Component {
 }
 
 SearchForm.propTypes = {
+  change: PropTypes.func,
   handleSubmit: PropTypes.func
 }
 
-export default reduxForm({
+let formDef = {
   form: 'searchForm',
   initialValues: {
     categories: [],
@@ -103,4 +104,6 @@ export default reduxForm({
     langue: 'fra',
     publie: true
   }
-})(SearchForm)
+}
+
+export default reduxForm(formDef)(SearchForm)
