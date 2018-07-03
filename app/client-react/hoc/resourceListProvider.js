@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {connect} from 'react-redux'
 import {POST} from '../utils/httpMethods'
-import queryString from 'query-string'
-
-const mapStateToProps = ({router: {location: {search}}}) => ({query: search})
 
 /**
  * High Order Component qui se base sur les query params pour enrichir le composant donné
@@ -43,12 +39,12 @@ const resourceListProvider = (WrappedComponent) => {
     }
 
     componentDidMount () {
-      this.fetchList(queryString.parse(this.props.query))
+      this.fetchList(this.props.parsedSearch)
     }
 
-    componentDidUpdate (oldProps) {
-      if (oldProps.query !== this.props.query) {
-        this.fetchList(queryString.parse(this.props.query))
+    componentDidUpdate ({parsedSearch}) {
+      if (parsedSearch !== this.props.parsedSearch) {
+        this.fetchList(this.props.parsedSearch)
       }
     }
 
@@ -60,14 +56,11 @@ const resourceListProvider = (WrappedComponent) => {
   }
 
   ResourceListProvider.propTypes = {
-    query: PropTypes.string,
+    parsedSearch: PropTypes.object,
     perPage: PropTypes.string
   }
 
-  return connect(
-    mapStateToProps,
-    {}
-  )(ResourceListProvider)
+  return ResourceListProvider
 }
 
 export default resourceListProvider

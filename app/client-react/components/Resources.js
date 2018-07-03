@@ -1,11 +1,18 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {connect} from 'react-redux'
 import ResourceList from './ResourceList'
 import {NavLink} from 'react-router-dom'
 
-const Resources = ({location}) => (
+const Resources = ({search}) => (
   <Fragment>
-    <NavLink to={'/ressource/rechercher' + location.search} className="fr edit-search">
+    <NavLink
+      to={{
+        pathname: '/ressource/rechercher',
+        search
+      }}
+      className="fr edit-search"
+    >
       <i className={`fa fa-edit`}></i> Modifier les filtres de recherche
     </NavLink>
     <h1>Ressources</h1>
@@ -14,7 +21,9 @@ const Resources = ({location}) => (
 )
 
 Resources.propTypes = {
-  location: PropTypes.object
+  search: PropTypes.string
 }
 
-export default Resources
+const mapStateToProps = ({router: {location: {search}}}) => ({search})
+
+export default connect(mapStateToProps, {})(Resources)
