@@ -106,6 +106,7 @@ EditorIep.propTypes = {
   notify: PropTypes.func
 }
 
-// on wrap dans reduxForm puis addNotify
-const formComponent = formValues({url: 'parametres[url]'})(EditorIep)
-export default addNotifyToProps(formComponent)
+// on extrait en props la valeur d'un champ
+// puis on wrappe dans addNotify:
+const urlToProps = formValues({url: 'parametres[url]'})(EditorIep)
+export default addNotifyToProps(urlToProps)
