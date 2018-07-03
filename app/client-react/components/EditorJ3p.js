@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
-import iframeHelper from './iframeHelper'
+import iframeHelper from '../hoc/iframeHelper'
 
 /**
  * Url de la page contenant l'éditeur de graphe J3P

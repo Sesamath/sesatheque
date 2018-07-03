@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
 import {IntegerField} from './fields'
-import addNotifyToProps from '../utils/addNotifyToProps'
+import addNotifyToProps from '../hoc/addNotifyToProps'
 import ShowError from './ShowError.js'
 
 const importErrorMessage = 'Une erreur s’est produite durant l’importation du script'
@@ -106,6 +106,7 @@ EditorIep.propTypes = {
   notify: PropTypes.func
 }
 
-// on wrap dans reduxForm puis addNotify
-const formComponent = formValues({url: 'parametres[url]'})(EditorIep)
-export default addNotifyToProps(formComponent)
+// on extrait en props la valeur d'un champ
+// puis on wrappe dans addNotify:
+const urlToProps = formValues({url: 'parametres[url]'})(EditorIep)
+export default addNotifyToProps(urlToProps)
