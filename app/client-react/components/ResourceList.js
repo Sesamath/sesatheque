@@ -9,81 +9,97 @@ import queryString from 'query-string'
 
 const ResourceList = ({
   handlePageClick,
+  parsedSearch,
   perPage,
   resources,
   total
-}) => (
-  <Fragment>
-    <table className="table resourceList">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Identifiant</th>
-          <th>Titre</th>
-          <th colSpan="4">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {resources.map(({
-          oid,
-          titre,
-          type,
-          $droits
-        }) => (
-          <tr key={oid.toString()}>
-            <td><img src={`/plugins/${type}/${type}.gif`} alt="thumbnail" /></td>
-            <td>{oid.toString()}</td>
-            <td>{titre}</td>
-            <td colSpan="4" className="links">
-              <NavLink
-                to={`/ressource/decrire/${oid}`}
-                title="Description"
-              >Description</NavLink>
-              <NavLink
-                to={`/ressource/apercevoir/${oid}`}
-                title="Aperçu"
-              >Aperçu</NavLink>
-              <NavLink
-                to={`/ressource/voir/${oid}`}
-                title="Voir"
-                target="_blank"
-              >Voir</NavLink>
-              {$droits.includes('W') ? (
-                <NavLink
-                  to={`/ressource/modifier/${oid}`}
-                  title="Modifier"
-                >Modifier</NavLink>
-              ) : null}
-              {$droits.includes('D') ? (
-                <NavLink
-                  to={`/ressource/supprimer/${oid}`}
-                  title="Supprimer"
-                >Supprimer</NavLink>
-              ) : null}
-            </td>
-          </tr>
-        ))}
-        {!resources.length ? (
+}) => {
+  if (!total) {
+    return (
+      <p>Aucune ressource ne correspond à vos critères de recherche</p>
+    )
+  }
+  const skip = Number(parsedSearch.skip) || 0
+  const limit = Number(perPage)
+  const last = Math.min(skip + limit, total)
+  const hasPages = skip > 0 || last < total
+  return (
+    <Fragment>
+      <p>Ressources de {skip + 1} à {last} sur {total}</p>
+      <table className="table resourceList">
+        <thead>
           <tr>
-            <td colSpan="7" className="empty">-</td>
+            <th></th>
+            <th>Identifiant</th>
+            <th>Titre</th>
+            <th colSpan="4">Actions</th>
           </tr>
-        ) : null}
-      </tbody>
-    </table>
-    <ReactPaginate
-      previousLabel={'<'}
-      nextLabel={'>'}
-      breakLabel={<a href="">...</a>}
-      pageCount={Math.ceil(total / perPage)}
-      onPageChange={handlePageClick}
-      containerClassName={'pagination'}
-      activeClassName={'active'} />
-  </Fragment>
-)
+        </thead>
+        <tbody>
+          {resources.map(({
+            oid,
+            titre,
+            type,
+            $droits
+          }) => (
+            <tr key={oid.toString()}>
+              <td><img src={`/plugins/${type}/${type}.gif`} alt="thumbnail" /></td>
+              <td>{oid.toString()}</td>
+              <td>{titre}</td>
+              <td colSpan="4" className="links">
+                <NavLink
+                  to={`/ressource/decrire/${oid}`}
+                  title="Description"
+                >Description</NavLink>
+                <NavLink
+                  to={`/ressource/apercevoir/${oid}`}
+                  title="Aperçu"
+                >Aperçu</NavLink>
+                <NavLink
+                  to={`/ressource/voir/${oid}`}
+                  title="Voir"
+                  target="_blank"
+                >Voir</NavLink>
+                {$droits.includes('W') ? (
+                  <NavLink
+                    to={`/ressource/modifier/${oid}`}
+                    title="Modifier"
+                  >Modifier</NavLink>
+                ) : null}
+                {$droits.includes('D') ? (
+                  <NavLink
+                    to={`/ressource/supprimer/${oid}`}
+                    title="Supprimer"
+                  >Supprimer</NavLink>
+                ) : null}
+              </td>
+            </tr>
+          ))}
+          {!resources.length ? (
+            <tr>
+              <td colSpan="7" className="empty">-</td>
+            </tr>
+          ) : null}
+        </tbody>
+      </table>
+      {hasPages && (
+        <ReactPaginate
+          previousLabel={'<'}
+          nextLabel={'>'}
+          breakLabel={<a href="">...</a>}
+          pageCount={Math.ceil(total / perPage)}
+          onPageChange={handlePageClick}
+          containerClassName={'pagination'}
+          activeClassName={'active'} />
+      )}
+    </Fragment>
+  )
+}
 
 ResourceList.propTypes = {
   resources: PropTypes.array,
   total: PropTypes.number,
+  parsedSearch: PropTypes.object,
   perPage: PropTypes.string,
   handlePageClick: PropTypes.func
 }
@@ -110,6 +126,7 @@ const mapDispatchToProps = (dispatch, {parsedSearch, perPage}) => ({
 // mapDispatchToProps ownProps parameter
 
 export default connect(mapStateToProps, {})(
-  connect(null, mapDispatchToProps)(resourceListProvider(ResourceList)
+  connect(null, mapDispatchToProps)(
+    resourceListProvider(ResourceList)
   )
 )

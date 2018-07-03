@@ -4,6 +4,8 @@ import {connect} from 'react-redux'
 import ResourceList from './ResourceList'
 import {NavLink} from 'react-router-dom'
 
+const perPage = '25'
+
 const Resources = ({search}) => (
   <Fragment>
     <NavLink
@@ -15,8 +17,8 @@ const Resources = ({search}) => (
     >
       <i className={`fa fa-edit`}></i> Modifier les filtres de recherche
     </NavLink>
-    <h1>Ressources</h1>
-    <ResourceList perPage="10" />
+    <h1>Résultat de la recherche</h1>
+    <ResourceList perPage={perPage} />
   </Fragment>
 )
 
