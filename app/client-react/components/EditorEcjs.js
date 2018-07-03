@@ -93,11 +93,12 @@ class EditorEcjs extends Component {
     let parametresPending = this.props.getParametres()
     if (!parametresPending) {
       // @todo Ajouter un gestionnaire d'erreur avec feedback
-      console.error(new Error('sesaeditgraphe ne remonte aucune info'))
+      console.error(new Error('l’éditeur graphique ne remonte aucune info'))
       return
     }
     // avec ecjs c'est une Promise
     parametresPending.then((parametres) => {
+      console.log('l’éditeur graphique ecjs renvoie les paramètres', parametres)
       this.props.change('parametres', parametres)
     }).catch((error) => {
       console.error(error)
@@ -112,9 +113,17 @@ class EditorEcjs extends Component {
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
     // on appelle (en global dans l'iframe) load(ressource, cb) qui rappellera cb(getParametres)
     iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
+    // on stocke une ref sur l'iframe
+    this.iframe = iframe
+  }
+
+  onFichierJsChange () {
+    console.log('onFichierJsChange avec', this.props.parametres.fichierjs)
+    if (this.iframe) this.onIframeLoaded(this.iframe)
   }
 
   render () {
+    console.log('render avec', this.props.parametres.fichierjs)
     const editor = this.props.parametres.fichierjs ? (
       <fieldset>
         <IframeHandler
@@ -132,8 +141,8 @@ class EditorEcjs extends Component {
       <Fragment>
         <label className="select">
           Type d’exercice
-          <Field name="parametres[fichierjs]" component="select">
-            <option value="">Choisir un type d’exercicesss</option>
+          <Field name="parametres[fichierjs]" component="select" onChange={this.onFichierJsChange.bind(this)}>
+            <option value="">Choisir un type d’exercice</option>
             {typesEcjs.map(typeEcjs => (
               <Fragment key={typeEcjs}>
                 <option value={typeEcjs}>{typeEcjs}</option>

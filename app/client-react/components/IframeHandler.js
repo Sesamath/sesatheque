@@ -66,11 +66,11 @@ class IframeHandler extends Component {
             <button
               type="button"
               onClick={this.toggleManualEditor.bind(this, true)}
-              className={!this.state.manualEdition ? 'inactive' : ''}>Mode manuel</button>
+              className={!this.state.manualEdition ? 'inactive' : ''}>Mode texte</button>
             <button
               type="button"
               onClick={this.toggleManualEditor.bind(this, false)}
-              className={this.state.manualEdition ? 'inactive' : ''}>Éditeur</button>
+              className={this.state.manualEdition ? 'inactive' : ''}>Éditeur graphique</button>
           </nav>
         ) : null}
         {this.props.allowManualEdition && this.state.manualEdition ? (
