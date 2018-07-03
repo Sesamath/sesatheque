@@ -94,7 +94,7 @@ SearchForm.propTypes = {
   handleSubmit: PropTypes.func
 }
 
-let formDef = {
+const formDef = {
   form: 'searchForm',
   initialValues: {
     categories: [],
