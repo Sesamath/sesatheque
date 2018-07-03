@@ -89,10 +89,13 @@ module.exports = function (mainComponent) {
     const reactRoutes = [
       // '/', inutile car /build/index.html passe avant
       '/mentionsLegales',
+      '/ressource/ajouter',
       '/ressource/modifier/:oid',
       '/ressource/apercevoir/:oid',
       '/ressource/decrire/:oid',
-      '/ressource/rechercher'
+      '/ressource/rechercher',
+      '/ressource/ajouter',
+      '/ressources'
     ]
 
     reactRoutes.forEach(route => this.get(route, sendReactPage))

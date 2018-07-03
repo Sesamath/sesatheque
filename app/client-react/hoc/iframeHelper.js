@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import addNotifyToProps from '../utils/addNotifyToProps'
+import addNotifyToProps from './addNotifyToProps'
 
 /**
  * hoc qui ajoute les props getLoadCb et getParametres à WrappedComponent

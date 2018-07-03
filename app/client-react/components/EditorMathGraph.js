@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Fragment, Component} from 'react'
 import {formValues, Field} from 'redux-form'
 import IframeHandler from './IframeHandler'
-import iframeHelper from './iframeHelper'
+import iframeHelper from '../hoc/iframeHelper'
 import {IntegerField} from './fields'
 
 /**

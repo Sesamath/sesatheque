@@ -37,6 +37,9 @@ import $ from 'jquery'
 import 'jstree'
 import { addSesatheques, exists, fetchPublicRef } from 'sesatheque-client/src/fetch'
 import { addNode, build, getEnfants } from 'sesatheque-client/src/jstree'
+import {sesatheques} from '../../../server/config'
+
+addSesatheques(sesatheques)
 
 // @todo Reste à ajouter un options.eachEnfant pour modifier à la volée les enfants sur l'arbre de destination et empêcher le chargement des arbres en aliasOf (sinon ça les intègre d'office), en ajoutant sur ces éléments un menu de clic droit "incorporer tout le contenu ici"
 
@@ -51,10 +54,7 @@ import { addNode, build, getEnfants } from 'sesatheque-client/src/jstree'
  * @param options
  * @param saveCallback
  */
-const edit = function (arbre, options, saveCallback) {
-  if (!options.sesatheques) throw new Error('Erreur interne, paramètre sesatheques manquant')
-  if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
-  const myBaseId = options.baseId
+function edit (arbre, options, saveCallback) {
   // nos fcts internes
   /**
    * Ajoute le lien aperçu aux links
@@ -272,7 +272,6 @@ const edit = function (arbre, options, saveCallback) {
     }
 
     // Main de loadDst
-
     const jstOptions = {
       check_callback: function (action, node, parent) {
         log('check_callback avec', arguments)
@@ -474,6 +473,8 @@ const edit = function (arbre, options, saveCallback) {
   // ###########
   // MAIN
   // ###########
+  if (!options.baseId) throw new Error('Erreur interne, paramètre baseId manquant')
+  const myBaseId = options.baseId
   // const $ = require('jquery')
   // require('jstree')
   if (!$.jstree) throw new Error('Problème de chargement jstree')
@@ -482,7 +483,7 @@ const edit = function (arbre, options, saveCallback) {
   // const { addSesatheques, exists, fetchPublicRef } = require('sesatheque-client/src/fetch')
   /* jshint jquery:true */
 
-  addSesatheques(options.sesatheques)
+  if (options.sesatheques) addSesatheques(options.sesatheques)
 
   // les containers (variables locales au module), qui seront affectés par initDom()
   let iframeApercu, container, srcGroup, inputRef, loadLink, searchInput, divSrcTree, divDstTree, dstTree
