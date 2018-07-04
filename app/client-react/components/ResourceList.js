@@ -8,6 +8,7 @@ import resourceListProvider from '../hoc/resourceListProvider'
 import queryString from 'query-string'
 
 const ResourceList = ({
+  // fourni par resourceListProvider
   handlePageClick,
   parsedSearch,
   perPage,
