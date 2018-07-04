@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
 import {Field, formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
-import iframeHelper from './iframeHelper'
+import iframeHelper from '../hoc/iframeHelper'
 
 /**
  * Url de la page contenant l'éditeur ecjs
