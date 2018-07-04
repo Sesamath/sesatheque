@@ -94,7 +94,6 @@ module.exports = function (mainComponent) {
       '/ressource/apercevoir/:oid',
       '/ressource/decrire/:oid',
       '/ressource/rechercher',
-      '/ressource/ajouter',
       '/ressources'
     ]
 

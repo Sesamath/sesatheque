@@ -32,7 +32,12 @@ const typeToData = {
 }
 
 const ResourceForm = ({
-  initialValues: {type, oid: ressourceOid, titre},
+  initialValues: {
+    type,
+    oid: ressourceOid,
+    titre,
+    _droits: droits
+  },
   handleSubmit,
   change,
   submitting,
@@ -47,6 +52,7 @@ const ResourceForm = ({
       <NavMenu
         titre={`Modifier la ressource « ${titre} »`}
         ressourceOid={ressourceOid}
+        droits={droits}
       />
       <form>
         <MetaForm />

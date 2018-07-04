@@ -1,5 +1,7 @@
+import {push} from 'connected-react-router'
 import PropTypes from 'prop-types'
-import React, {Component, Fragment} from 'react'
+import React, {Fragment} from 'react'
+import {connect} from 'react-redux'
 import {reduxForm} from 'redux-form'
 import {listes, labels} from '../../server/ressource/config'
 import Classification from './Classification'
@@ -9,102 +11,120 @@ import {
   SelectField,
   SwitchField
 } from './fields'
-import history from '../history'
 import queryString from 'query-string'
 
-class SearchForm extends Component {
-  componentDidMount () {
-    const fields = queryString.parse(history.location.search)
-    Object.keys(fields).map(key => {
-      this.props.change(key, fields[key])
-    })
-  }
+const SearchForm = ({handleSubmit}) => (
+  <Fragment>
+    <h1>Recherche de ressources</h1>
+    <form onSubmit={handleSubmit}>
+      <fieldset>
+        <div className="grid-3">
+          <InputField
+            className="col-2"
+            label={labels.titre}
+            info="(Vous pouvez utiliser le symbole % comme caractère joker)"
+            name="titre" />
+          <SelectField
+            label={labels.langue}
+            values={listes.langue}
+            name="langue">
+            <option value="">peu importe</option>
+          </SelectField>
+          <ResourceTypesField
+            label={labels.type}>
+            <option value="">peu importe</option>
+          </ResourceTypesField>
+          <SelectField
+            label={labels.restriction}
+            values={listes.restriction}
+            name="restriction" />
+          <SwitchField
+            className="center"
+            label={labels.publie}
+            name="publie" />
 
-  updateQueryParams (query) {
-    history.push({
-      pathname: '/ressources',
-      search: queryString.stringify(query)
-    })
-  }
+          <InputField
+            label={labels.oid}
+            name="oid" />
+          <InputField
+            label={labels.origine}
+            name="origine" />
+          <InputField
+            label={labels.idOrigine}
+            name="idOrigine" />
 
-  render () {
-    return (
-      <Fragment>
-        <h1>Recherche de ressources</h1>
-        <form onSubmit={this.props.handleSubmit(this.updateQueryParams.bind(this))}>
-          <fieldset>
-            <div className="grid-3">
-              <InputField
-                className="col-2"
-                label={labels.titre}
-                info="(Vous pouvez utiliser le symbole % comme caractère joker)"
-                name="titre" />
-              <SelectField
-                label={labels.langue}
-                values={listes.langue}
-                name="langue">
-                <option value="">peu importe</option>
-              </SelectField>
-              <ResourceTypesField
-                label={labels.type}>
-                <option value="">peu importe</option>
-              </ResourceTypesField>
-              <SelectField
-                label={labels.restriction}
-                values={listes.restriction}
-                name="restriction" />
-              <SwitchField
-                className="center"
-                label={labels.publie}
-                name="publie" />
-
-              <InputField
-                label={labels.oid}
-                name="oid" />
-              <InputField
-                label={labels.origine}
-                name="origine" />
-              <InputField
-                label={labels.idOrigine}
-                name="idOrigine" />
-
-              <InputField
-                className="col-2"
-                label={labels.auteurs}
-                name="auteurs" />
-            </div>
-          </fieldset>
-          <hr />
-          <Classification detailled />
-          <div className="buttons-area">
-            <button
-              type="submit"
-              className="btn--primary"
-            >
-            Rechercher
-            </button>
-          </div>
-        </form>
-      </Fragment>
-    )
-  }
-}
+          <InputField
+            className="col-2"
+            label={labels.auteurs}
+            name="auteurs" />
+        </div>
+      </fieldset>
+      <hr />
+      <Classification detailed />
+      <div className="buttons-area">
+        <button
+          type="submit"
+          className="btn--primary"
+        >
+        Rechercher
+        </button>
+      </div>
+    </form>
+  </Fragment>
+)
 
 SearchForm.propTypes = {
-  change: PropTypes.func,
   handleSubmit: PropTypes.func
 }
 
-const formDef = {
+const formDef = reduxForm({
   form: 'searchForm',
-  initialValues: {
-    categories: [],
-    niveaux: [],
-    typePedagogiques: [],
-    typeDocumentaires: [],
-    langue: 'fra',
-    publie: true
+  onSubmit: (query, dispatch) => dispatch(push({
+    pathname: '/ressources',
+    search: queryString.stringify(query)
+  }))
+})
+
+const arrayValues = ['categories', 'niveaux', 'typePedagogiques', 'typeDocumentaires']
+
+const integerArrayValues = ['categories', 'typePedagogiques', 'typeDocumentaires']
+
+const parseQuery = (search) => {
+  const parsedQuery = queryString.parse(search)
+  const {publie} = parsedQuery
+  if (publie) {
+    parsedQuery.publie = (publie === 'true')
   }
+
+  arrayValues.forEach(prop => {
+    const item = parsedQuery[prop]
+    if (item !== undefined && !Array.isArray(item)) {
+      parsedQuery[prop] = [item]
+    }
+  })
+
+  integerArrayValues.forEach(prop => {
+    const item = parsedQuery[prop]
+    if (item !== undefined) {
+      parsedQuery[prop] = item.map((str) => parseInt(str, 10))
+    }
+  })
+
+  return parsedQuery
 }
 
-export default reduxForm(formDef)(SearchForm)
+const mapStateToProps = ({router: {location: {search}}}) => ({
+  initialValues: Object.assign(
+    {
+      categories: [],
+      niveaux: [],
+      typePedagogiques: [],
+      typeDocumentaires: [],
+      langue: 'fra',
+      publie: true
+    },
+    parseQuery(search)
+  )
+})
+
+export default connect(mapStateToProps, {})(formDef(SearchForm))
