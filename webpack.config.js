@@ -151,7 +151,8 @@ const conf = {
   plugins: [
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
-      {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']}
+      {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']},
+      {from: 'app/assets/favicon.png'}
     ])
   ],
   stats: {
@@ -167,15 +168,10 @@ if (isProd) {
 // génération du html pour react
 // cf https://github.com/jantimon/html-webpack-plugin#options
 conf.plugins.push(new HtmlWebpackPlugin({
-  isDev: !isProd,
-  title: appConfig.application.name,
   version: version,
-  verbose: isDebug,
-  baseId: appConfig.application.baseId,
-  sesatheques: JSON.stringify(appConfig.sesatheques),
   template: './app/server/views/index.html',
   filename: 'index.html',
-  // on ne veut pas qu'il génère de html, ni qu'il mette toutes nos entries en <head> ou <script>
+  // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
   inject: false
 }))
 
