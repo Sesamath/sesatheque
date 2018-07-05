@@ -9,19 +9,19 @@ const CheckboxGroup = ({
   values,
   input: {
     name,
-    value: inputValue,
+    value,
     onChange
   }
 }) => (
   <div className="checkbox-group">
     <h3>{title}</h3>
     {
-      values.map(([value, label]) => (
-        <label key={value}>
+      values.map(([key, label]) => (
+        <label key={key}>
           <SingleCheckboxForGroups
             name={name}
-            value={value}
-            inputValue={inputValue}
+            value={key}
+            inputValue={value}
             onChange={onChange}
             parseValue={parseValue}
           />
