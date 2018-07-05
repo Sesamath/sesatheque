@@ -14,54 +14,49 @@ Pour le découpage des chunks
 Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
-const fs = require('fs')
 const path = require('path')
-
+const autoprefixer = require('autoprefixer')
 // passer --debug pour ne pas avoir de minification
 const webpack = require('webpack')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const appConfig = require('./app/server/config')
-const version = require('./package').version
+const {version} = require('./package')
 
 const isDebug = process.argv.includes('--debug')
 // prod d'après la conf (sauf --debug)
 const isProd = isDebug ? false : (appConfig.application.staging === 'production' || appConfig.application.staging === 'prod')
-
-// allChunks sinon il en manque
-const extractCss = new ExtractTextPlugin('[name].css', {allChunks: true})
-const cssLoader = isProd ? 'css-loader?minimize' : 'css-loader'
-const extractCssLoader = extractCss.extract('style-loader', cssLoader)
 
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
 
 // la conf identique dev/prod
 const conf = {
+  mode: isProd ? 'production' : 'development',
+  optimization: {
+    noEmitOnErrors: true
+  },
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     // apiClient: './app/client/apiClient.js',
-    client: ['sesatheque-client'],
-    // faut un array, sinon il râle dans les fichiers ayant du require(page) en disant
-    // Error: a dependency to an entry point is not allowed
-    page: ['./app/client/page/index.js'],
+    client: 'sesatheque-client',
+    page: './app/client/page/index.js',
     // juste pour compiler iframe.css
-    iframe: ['./app/srcStyles/iframe.scss'],
+    iframe: './app/srcStyles/iframe.scss',
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js',
     react: './app/client-react/index.js',
     // arbre passe par babel
-    editArbre: ['./app/client/plugins/arbre/edit.js']
+    editArbre: './app/client/plugins/arbre/edit.js'
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
-    path: 'build/',
+    path: path.resolve(__dirname, 'build'),
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
@@ -74,11 +69,23 @@ const conf = {
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
   },
-  devtool: 'source-map', // même en prod
+  // devtool: 'source-map', // même en prod
+  devServer: {
+    contentBase: './build',
+    port: 3001,
+    historyApiFallback: true,
+    proxy: {
+      '/api': 'http://localhost:3000',
+      '/groupe': 'http://localhost:3000'
+    }
+  },
   /* externals: {
     stePage: 'page',
     steDisplay: 'display'
   }, */
+  resolve: {
+    extensions: ['.js', '.json', '.jsx']
+  },
   // pour nos loaders perso
   resolveLoader: {
     alias: {
@@ -87,22 +94,54 @@ const conf = {
     }
   },
   module: {
-    loaders: [
-      {test: /app\/client\/.*\.js/, loader: 'babel'},
+    rules: [
+      {
+        test: /app\/client\/.*\.js/,
+        loader: 'babel-loader'
+      },
       {test: /app\/client-react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
-      // Pour la config qui contient des données sensibles, on passe par un loader qui filtre
+      // Pour lloadera config qui contient des données sensibles, on passe par un loader qui filtre
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
-      {test: /\.json$/, loader: 'json'},
-      {test: /app\/client\/.*\.html/, loader: 'file'},
+      // {test: /\.json$/, loader: 'json-loader'},
+      {test: /app\/client\/.*\.html/, loader: 'file-loader'},
       // editgraphe passe par babel
-      {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel'},
+      {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel'},
+      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel-loader'},
       // le statique
-      {test: /.*\.css(\?.*)?$/, loader: extractCssLoader},
-      {test: /\.scss$/, loaders: [extractCssLoader, 'css-loader', 'sass-loader']},
+      /* process CSS files */
+      {
+        test: /\.(css|scss)$/,
+        rules: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader'
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: () => [
+                autoprefixer({
+                  browsers: [
+                    'ie 11',
+                    'last 3 iOS versions',
+                    'last 3 Safari versions',
+                    'last 3 Android versions'
+                  ]
+                })
+              ]
+            }
+          },
+          {
+            test: /\.scss$/,
+            loader: 'sass-loader'
+          }
+        ]
+      },
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
@@ -110,23 +149,11 @@ const conf = {
     ]
   },
   plugins: [
-    // Avoid publishing files when compilation failed
-    new webpack.NoErrorsPlugin() /* */,
-    // la mise en commun, on met dans page ce qui est commun à ces 3 chunks
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'page',
-      minChunks: 2,
-      chunks: ['page', 'display', 'edit']
-    }),
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
       {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']}
-    ]),
-    extractCss
+    ])
   ],
-  watchOptions: {
-    ignored: ['/node_modules/', 'app/assets', 'app/srcStyles', 'app/client/plugins']
-  },
   stats: {
     // Nice colored output
     colors: true
@@ -159,17 +186,6 @@ if (process.env.SESATHEQUE_CONF) {
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
   conf.output.path = `build/${process.env.SESATHEQUE_CONF}/`
-}
-// on crée le dossier de build s'il n'existe pas encore
-const buildDir = path.resolve(__dirname, conf.output.path)
-try {
-  if (!fs.existsSync(buildDir)) fs.mkdirSync(buildDir, 0o775)
-  // on vérifie, au cas où ça existait sans être un dossier
-  const stats = fs.statSync(buildDir)
-  if (!stats.isDirectory()) throw new Error(`${buildDir} existe mais n’est pas un dossier`)
-} catch (error) {
-  console.error(`Impossible de créer le dossier ${buildDir}, ABANDON`, error)
-  process.exit(1)
 }
 
 module.exports = conf
