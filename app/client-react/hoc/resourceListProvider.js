@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {POST} from '../utils/httpMethods'
+import {stringify} from 'query-string'
 
 /**
  * High Order Component qui se base sur les query params pour enrichir le composant donné
@@ -43,7 +44,7 @@ const resourceListProvider = (WrappedComponent) => {
     }
 
     componentDidUpdate ({parsedSearch}) {
-      if (parsedSearch !== this.props.parsedSearch) {
+      if (stringify(parsedSearch) !== stringify(this.props.parsedSearch)) {
         this.fetchList(this.props.parsedSearch)
       }
     }
@@ -57,7 +58,7 @@ const resourceListProvider = (WrappedComponent) => {
 
   ResourceListProvider.propTypes = {
     parsedSearch: PropTypes.object,
-    perPage: PropTypes.string
+    perPage: PropTypes.number
   }
 
   return ResourceListProvider

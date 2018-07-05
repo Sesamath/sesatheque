@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import ResourceList from './ResourceList'
 import {NavLink} from 'react-router-dom'
 
-const perPage = '25'
+const perPage = 25
 
 const Resources = ({search}) => (
   <Fragment>

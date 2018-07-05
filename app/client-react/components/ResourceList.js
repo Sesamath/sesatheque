@@ -20,8 +20,7 @@ const ResourceList = ({
     )
   }
   const skip = Number(parsedSearch.skip) || 0
-  const limit = Number(perPage)
-  const last = Math.min(skip + limit, total)
+  const last = Math.min(skip + perPage, total)
   const hasPages = skip > 0 || last < total
   return (
     <Fragment>
@@ -100,7 +99,7 @@ ResourceList.propTypes = {
   resources: PropTypes.array,
   total: PropTypes.number,
   parsedSearch: PropTypes.object,
-  perPage: PropTypes.string,
+  perPage: PropTypes.number,
   handlePageClick: PropTypes.func
 }
 
