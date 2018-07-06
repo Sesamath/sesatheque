@@ -196,6 +196,40 @@ module.exports = function (component) {
     })
     controller.options('membre', optionsOk)
 
+    controller.get('perso', function (context) {
+      const pid = $accessControl.getCurrentUserPid(context)
+      if (!pid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
+      const res = {
+        groupes: {},
+        groupesAdmin: [],
+        groupesMembre: $accessControl.getCurrentUserGroupesMembre(context),
+        groupesSuivis: $accessControl.getCurrentUserGroupesSuivis(context)
+      }
+      const addGroupe = (groupe) => {
+        delete groupe.$loadState
+        res.groupes[groupe.nom] = groupe
+      }
+      flow().seq(function () {
+        $groupeRepository.getListManagedBy(pid, this)
+      }).seq(function (managedGroups) {
+        managedGroups.forEach((groupe) => {
+          addGroupe(groupe)
+          res.groupesAdmin.push(groupe.nom)
+        })
+        // les groupes qu'il faut aller chercher
+        const missing = new Set()
+        res.groupesMembre.concat(res.groupesSuivis).forEach(nom => {
+          if (!res.groupes[nom]) missing.add(nom)
+        })
+        if (!missing.size) return $json.sendOk(context, res)
+        $groupeRepository.fetchList(Array.from(missing), this)
+      }).seq(function (missingGroups) {
+        missingGroups.forEach(addGroupe)
+        $json.sendOk(context, res)
+      }).catch($json.sendError.bind(null, context))
+    })
+    controller.options('perso', optionsOk)
+
     /**
      * Récupère la liste des groupes suivis
      * @route GET /api/groupe/suivis

@@ -46,6 +46,17 @@ module.exports = function (component) {
     const $groupeRepository = {}
 
     /**
+     * @typedef groupeCallback
+     * @param {Error} [error]
+     * @param {Groupe} groupe
+     */
+    /**
+     * @typedef groupesCallback
+     * @param {Error} [error]
+     * @param {Groupe[]} groupes
+     */
+
+    /**
      * Récupère un groupe d'après son nom
      * @param {string} groupeNom
      * @param {groupeCallback} next
@@ -71,6 +82,28 @@ module.exports = function (component) {
           })
         }
       })
+    }
+
+    /**
+     * Récupère une liste de groupes
+     * @param {string[]} noms
+     * @param {groupesCallback} next
+     */
+    $groupeRepository.fetchList = function (noms, next) {
+      let groupes = []
+      flow(noms).seqEach(function (nom) {
+        $cacheGroupe.get(nom, this)
+      }).seq(function (cachedGroups) {
+        const missing = []
+        cachedGroups.forEach((groupe, index) => {
+          if (groupe) groupes.push(groupe)
+          else missing.push(noms[index])
+        })
+        if (!missing.length) return next(null, groupes)
+        EntityGroupe.match('nom').in(missing).grab(this)
+      }).seq(function (grps) {
+        next(null, groupes.concat(grps))
+      }).catch(next)
     }
 
     /**
