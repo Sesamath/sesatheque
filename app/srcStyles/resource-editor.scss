@@ -9,7 +9,7 @@ label {
     margin-top: 6px;
   }
 
-  input:not([type='checkbox']):not([type='radio']), select, textarea {
+  > input:not([type='checkbox']):not([type='radio']), select, textarea {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -23,7 +23,7 @@ label {
     font-size: 11pt;
   }
 
-  &.select::after {
+  > &.select::after {
     content: '';
     position: absolute;
     z-index:2;
@@ -42,18 +42,18 @@ label {
     min-height: 100px;
   }
 
-  input[type='checkbox'] {
+  > input[type='checkbox'] {
     display: block;
     margin-right: 5px;
     margin-top: 15px;
   }
 
-  input[type='radio'] {
+  > input[type='radio'] {
     -webkit-appearance: none;
     -moz-appearance: none;
   }
 
-  input.switch {
+  > input.switch {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -64,7 +64,7 @@ label {
     font-weight: normal;
   }
 
-  input:disabled, select:disabled {
+  > input:disabled, > select:disabled {
     background-color: #eee !important;
   }
 
