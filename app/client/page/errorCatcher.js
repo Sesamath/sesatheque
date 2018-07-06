@@ -51,12 +51,13 @@ function errorListener (errorEvent) {
 }
 
 /**
- * Démarre le spy (râle en console sans rien faire si c'est déjà le cas)
+ * Démarre le spy
+ * @param {boolean} [strict=false] passer true pour râler en console s'il tournait déjà
  */
-function start () {
+function start (strict = false) {
   if (typeof window === 'undefined') return
   if (isRunning) {
-    console.error(new Error('errorCatcher is already running'))
+    if (strict) console.error(new Error('errorCatcher is already running'))
     return
   }
   isRunning = true
@@ -72,7 +73,7 @@ function stop () {
   if (typeof window === 'undefined') return
   if (!isRunning) {
     console.error(new Error('errorCatcher isn’t running'))
-    return
+    return []
   }
   window.removeEventListener('error', errorListener)
   return flush()
@@ -89,7 +90,7 @@ function flush () {
 }
 
 /**
- * Retourne les erreurs collectées depuis start
+ * Retourne les erreurs collectées depuis start | flush
  * @return {Error[]}
  */
 function getErrors () {
@@ -99,6 +100,7 @@ function getErrors () {
 module.exports = {
   flush,
   getErrors,
+  isRunning: () => isRunning,
   start,
   stop
 }

@@ -61,7 +61,7 @@ class EditorMathGraph extends Component {
   onIframeLoaded (iframe) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
     const {parametres} = this.props
-    iframe.current.contentWindow.load({parametres}, this.props.onLoadCb(this.updateStoreFromEditor.bind(this)))
+    iframe.current.contentWindow.load({parametres}, this.props.getLoadCb(this.updateStoreFromEditor.bind(this)))
   }
 
   render () {
@@ -117,7 +117,7 @@ class EditorMathGraph extends Component {
 EditorMathGraph.propTypes = {
   change: PropTypes.func,
   parametres: PropTypes.object,
-  onLoadCb: PropTypes.func,
+  getLoadCb: PropTypes.func,
   getParametres: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func
 }

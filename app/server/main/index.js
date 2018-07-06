@@ -71,9 +71,7 @@ module.exports = function mainComponentFactory (lassi) {
     this.serve('doc', path.resolve(__dirname, '../../../documentation'))
   })
 
-  /**
-   * En dev on ajoute des routes de debug
-   */
+  // En dev on ajoute des routes pour debug
   if (!global.isProd) {
     require('./controllerDebug')(mainComponent)
   }

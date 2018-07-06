@@ -106,27 +106,23 @@ module.exports = function (component) {
       }
 
       const [baseId, id] = getComponents(mixedId)
-      if (baseId === myBaseId) {
-        $ressourceRepository.load(id, send)
-      } else if (exists(baseId)) {
-        // faut appeler son /api/getRid?id=xxx
-        const baseUrl = getBaseUrl(baseId)
-        var options = {
-          uri: baseUrl + 'api/public/getRid?id=' + id,
-          json: true,
-          timeout: 3000
-        }
-        request(options, function (error, response, data) {
-          if (error) return next(error)
-          if (response.statusCode === 200 && data && data.rid) return next(null, data.rid)
-          if (data && data.error) return next(new Error(data.error))
-          error = new Error(`${options.uri} ne retourne rien de compréhensible`)
-          log.error(error, data)
-          next(error)
-        })
-      } else {
-        $ressourceRepository.load(mixedId, send)
+      if (baseId === myBaseId) return $ressourceRepository.load(id, send)
+      if (!exists(baseId)) return $ressourceRepository.load(mixedId, send)
+      // c'est un rid externe, faut appeler son /api/getRid?id=xxx
+      const baseUrl = getBaseUrl(baseId)
+      var options = {
+        uri: baseUrl + 'api/public/getRid?id=' + id,
+        json: true,
+        timeout: 3000
       }
+      request(options, function (error, response, data) {
+        if (error) return next(error)
+        if (response.statusCode === 200 && data && data.rid) return next(null, data.rid)
+        if (data && data.error) return next(new Error(data.error))
+        error = new Error(`${options.uri} ne retourne rien de compréhensible`)
+        log.error(error, data)
+        next(error)
+      })
     }
 
     /**
@@ -155,47 +151,46 @@ module.exports = function (component) {
     }
 
     /**
-     * Récupère une donnée exterieur au site depuis une URL
+     * Récupère le contenu d'une url externe
      * @param url {string}
-     * @param cacheKey {string}
      * @param context {Context}
      */
-    function fetchURL (url, cacheKey, context) {
+    function fetchURL (url, context) {
       const options = {
         url,
         timeout: 5000,
         gzip: true
       }
+      const cacheKey = `copy${encodeURIComponent(url)}`
 
-      function sendRawHtml (body, contentType) {
-        context.raw(body, {
-          headers: {
-            'Content-Type': contentType
+      function sendRaw (page) {
+        const options = {}
+        if (page.contentType) options.headers = {'Content-Type': page.contentType}
+        context.raw(page.body, options)
+      }
+
+      $cache.get(cacheKey, (error, page) => {
+        if (error) console.error(error)
+        if (page) return sendRaw(page)
+
+        request(options, (error, response, body) => {
+          if (error || response.statusCode !== 200) {
+            if (error) log.error(error)
+            else log.error(Error(`Réponse ${response.statusCode} sur ${url}`))
+            return context.plain('Impossible de récupérer la page ' + url)
           }
+
+          // on met ça en cache pendant 10min
+          const page = {
+            body,
+            contentType: response.headers['content-type']
+          }
+          $cache.set(cacheKey, page, 600, (error) => {
+            if (error) log.error(error)
+          })
+
+          sendRaw(page)
         })
-      }
-
-      const page = $cache.get(cacheKey)
-      if (page && page.body) {
-        return sendRawHtml(page.body, page.contentType)
-      }
-
-      request(options, (error, response, body) => {
-        if (error || response.statusCode !== 200) {
-          console.log('error', error)
-          return context.plain('Impossible de récupérer la page ' + url)
-        }
-
-        // on met ça en cache pendant 10min
-        const page = {
-          body: body,
-          contentType: response.headers['content-type'] || 'text/html'
-        }
-        $cache.set(cacheKey, page, 600, (error) => {
-          if (error) log.error(error)
-        })
-
-        sendRawHtml(page.body, page.contentType)
       })
     }
 
