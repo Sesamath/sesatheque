@@ -94,7 +94,11 @@ if (process.env.SESATHEQUE_CONF) {
 }
 const localConfig = require(path.join.apply(this, privateConfPath))
 
-/** La config */
+const toBeConfigured = 'toBeConfigured'
+
+/**
+ * Config par défaut
+ */
 const config = {
   // dans localConf, sinon conf par défaut i.e. port 3000
   application: {
@@ -106,26 +110,27 @@ const config = {
     // le chemin par défaut des fichiers dust
     defaultViewsPath: 'app/server/views',
     // mis dans _private/config.js car dépendant de l'instance
-    baseId: 'notConfigured', // l'id de cette sésathèque
-    baseUrl: 'notConfigured',
+    baseId: toBeConfigured, // l'id de cette sésathèque
+    baseUrl: toBeConfigured,
     // mail: 'user@example.com',
     staging: staging
   },
-  /* dans _private aussi
   $entities: {
+    // mongo
     database: {
-      host...
+      host: 'localhost',
+      port: 27017
     }
   },
-  $server {
-    port:process.env.PORT || 3001
-  }
-   */
+  $server: {
+    host: 'localhost',
+    port: process.env.PORT || 3001
+  },
   $rail: {
     public: true,
     // compression : {},
     cookie: {
-      key: 'asqlSTsrl78lAsg'
+      key: toBeConfigured
     },
     // on veut pas du bodyParser de lassi
     // (on met les notres pour les limiter là où ils sont utiles)
@@ -136,7 +141,7 @@ const config = {
     },
     session: {
       // name: 'mySessName',
-      secret: 'asqlSTsrl78lAsg', // en mettre un autre dans _private/config !
+      secret: toBeConfigured,
       saveUninitialized: true,
       /* cookie : {
         httpOnly : false
@@ -264,6 +269,18 @@ if (!config.lassiLogger) {
 /**
  * À partir le là on a la conf locale, on vérifie et normalise un peu (autant signaler une erreur dès le boot)
  */
+const isConfigured = (obj, path = '') => {
+  if (typeof obj === 'object') {
+    return Object.keys(obj).every(prop => {
+      const value = obj[prop]
+      const currentPath = `${path}.${prop}`
+      if (typeof value === 'object') return isConfigured(value, currentPath)
+      if (value === toBeConfigured) throw new Error(`La propriété ${currentPath} doit être configurée`)
+    })
+  }
+}
+isConfigured(config)
+// on vérifie quand même ça aussi (au cas où ce serait une chaîne vide)
 if (!config.application.baseId) throw new Error('config.application.baseId manquant')
 if (!config.application.baseUrl) throw new Error('config.application.baseUrl manquant')
 // on ajoute toujours un slash de fin à baseUrl
@@ -369,6 +386,22 @@ if (config.sesalabs.length) {
   if (!config.extraModules.includes(name)) config.extraModules.push(name)
   if (!config.extraDependenciesLast) config.extraDependenciesLast = []
   if (!config.extraDependenciesLast.includes(name)) config.extraDependenciesLast.push(name)
+}
+
+// on indique à webpack s'il doit mettre un devServer et où
+if (staging === 'dev') {
+  // le port utilisé par le navigateur ne doit pas changer (pour que le sso fonctionne et ne
+  // pas avoir à changer baseUrl), on décale le port de node et on l'indique à devServer
+  if (typeof config.$server.port !== 'number') config.$server.port = Number(config.$server.port)
+  const frontPort = config.$server.port
+  if (!Number.isInteger(frontPort)) throw new Error('Il faut préciser un port dans config.$server.port')
+  const newNodePort = frontPort + 20 // arbitraire, en test on décale de 10
+  config.devServer = {
+    host: config.$server.host,
+    port: frontPort,
+    nodePort: newNodePort
+  }
+  config.$server.port = newNodePort
 }
 
 module.exports = config

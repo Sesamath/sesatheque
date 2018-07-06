@@ -70,15 +70,6 @@ const conf = {
     crossOriginLoading: 'anonymous'
   },
   // devtool: 'source-map', // même en prod
-  devServer: {
-    contentBase: './build',
-    port: 3001,
-    historyApiFallback: true,
-    proxy: {
-      '/api': 'http://localhost:3000',
-      '/groupe': 'http://localhost:3000'
-    }
-  },
   /* externals: {
     stePage: 'page',
     steDisplay: 'display'
@@ -149,31 +140,26 @@ const conf = {
     ]
   },
   plugins: [
+    // génération du html pour react
+    // cf https://github.com/jantimon/html-webpack-plugin#options
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
       {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']},
       {from: 'app/assets/favicon.png'}
-    ])
+    ]),
+    new HtmlWebpackPlugin({
+      version: version,
+      template: './app/server/views/index.html',
+      filename: 'index.html',
+      // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
+      inject: false
+    })
   ],
   stats: {
     // Nice colored output
     colors: true
   }
 }
-
-if (isProd) {
-  conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
-}
-
-// génération du html pour react
-// cf https://github.com/jantimon/html-webpack-plugin#options
-conf.plugins.push(new HtmlWebpackPlugin({
-  version: version,
-  template: './app/server/views/index.html',
-  filename: 'index.html',
-  // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
-  inject: false
-}))
 
 // pour pouvoir compiler les js de plusieurs baseId dans des dossiers différents
 // (qui se retrouveront docroot si on passe le même env SESATHEQUE_CONF au lancement de l'appli)
@@ -182,6 +168,27 @@ if (process.env.SESATHEQUE_CONF) {
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
   conf.output.path = `build/${process.env.SESATHEQUE_CONF}/`
+}
+
+if (isProd) {
+  conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
+}
+
+if (appConfig.devServer) {
+  const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
+  conf.devServer = {
+    contentBase: conf.output.path,
+    host: appConfig.devServer.host,
+    disableHostCheck: true, // au cas où host ne serait pas dans les dns
+    port: appConfig.devServer.port,
+    historyApiFallback: true,
+    proxy: {
+      '/api': nodeUrl,
+      '/groupe': nodeUrl,
+      '/sesasso': nodeUrl,
+      '/sesalabSso': nodeUrl
+    }
+  }
 }
 
 module.exports = conf

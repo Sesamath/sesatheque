@@ -34,7 +34,7 @@
     "start": "node app/server/start.js",
     "start:commun": "env SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm run start:commun & npm start",
-    "start:dev": "webpack-dev-server --host 0.0.0.0 --hot & npm start",
+    "start:dev": "webpack-dev-server --hot & npm start",
     "start:devcommun": "env SESATHEQUE_CONF=commun webpack -d --watch & env SESATHEQUE_CONF=commun npm start",
     "start:test": "env SESATHEQUE_CONF=test node app/server/start.js",
     "start:testBoth": "npm run start:test & npm run start:testCommun",
