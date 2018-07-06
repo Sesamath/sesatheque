@@ -190,7 +190,8 @@ if (appConfig.devServer) {
       '/vendor': nodeUrl,
       '/groupe': nodeUrl,
       '/sesasso': nodeUrl,
-      '/sesalabSso': nodeUrl
+      '/sesalabSso': nodeUrl,
+      '/ressource/voir': nodeUrl
     }
   }
 }
