@@ -187,9 +187,16 @@ module.exports = function (ressourceComponent) {
           if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant pour un des filtres')
           if (!Array.isArray(filter.values)) throw new Error(`values invalides (pas un tableau) pour filter ${filter.index}`)
           // on ne prend que ce que l'on connait, le filtre restriction est ignoré car c'est visibilite qui l'impose éventuellement
-          if (filter.index === 'restriction') log.error(new Error('le filtre restriction doit passer par le paramètre visibilité'))
-          else if (config.labels[filter.index]) filters.push(filter)
-          else log.error(new Error(`Index ${filter.index} non déclaré en config`))
+          if (filter.index === 'restriction') {
+            log.error(new Error('le filtre restriction doit passer par le paramètre visibilité'))
+          } else if (config.labels[filter.index]) {
+            filters.push(filter)
+          } else if (filter.index === 'fulltext') {
+            if (filter.values.length) filters.push(filter)
+            else log.error(new Error('filter fulltext sans values'))
+          } else {
+            log.error(new Error(`Index ${filter.index} non déclaré en config`))
+          }
         })
       } else {
         // donc pas de filtre, mais faut un argument à match
@@ -199,7 +206,12 @@ module.exports = function (ressourceComponent) {
       const query = EntityRessource.match() // sans argument ça retourne une EntityQuery vierge
       filters.forEach(function (filter) {
         // log.debug('getListe filter ' + filter.index)
-        if (filter.values) {
+        // fulltext à part
+        if (filter.index === 'fulltext') {
+          query.textSearch(filter.values.join(' '))
+
+        // les index ordinaires avec valeurs
+        } else if (filter.values) {
           switch (filter.values.length) {
             case 0:
               query.match(filter.index)
@@ -213,6 +225,8 @@ module.exports = function (ressourceComponent) {
             default:
               query.match(filter.index).in(filter.values)
           }
+
+        // et sans valeurs
         } else {
           query.match(filter.index)
         }
