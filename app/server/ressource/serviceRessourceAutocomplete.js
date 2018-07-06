@@ -43,15 +43,15 @@ const excluded = ['a', 'd', 'dans', 'de', 'du', 'et', 'est', 'l', 'le', 'la', 'p
  */
 module.exports = function (component) {
   component.service('$ressourceAutocomplete', function () {
+    // passe en minuscule, désaccentue et remplace les char non lettre/chiffre/espace par une espace
+    const sanitize = (value) => toAscii(value.toLowerCase()).replace(/[^a-z0-9 ]/g, ' ')
+
     // on construit un objet dont les props sont la liste des valeurs connues
     const knownValues = {}
     // on passe en revue tous les champs à valeurs controlées
     Object.entries(config.listes).forEach(([prop, liste]) => {
       Object.entries(liste).forEach(([key, value]) => {
-        // passe en minuscule et vire les accents
-        toAscii(value.toLowerCase())
-          // puis tous les char non ascii
-          .replace(/[^a-z0-9 ]/, ' ')
+        sanitize(value)
           // on découpe en mots
           .split(' ')
           // on vire les mots à exclure
@@ -88,11 +88,12 @@ module.exports = function (component) {
      */
     /**
      * Retourne les filtres de recherche qui peuvent correspondre à ce pattern
+     * (on nettoie et ne prend que le premier mot)
      * @memberOf $ressourceAutocomplete
      * @param {string} pattern
      * @return {searchFilter[]}
      */
-    const getFilters = (pattern) => patternToFilters[pattern] || []
+    const getFilters = (pattern) => patternToFilters[sanitize(pattern).replace(/ .*/, '')] || []
 
     return {
       getFilters
