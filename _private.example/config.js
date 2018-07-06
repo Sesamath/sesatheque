@@ -16,14 +16,13 @@ var path = require('path')
 module.exports = {
   application: {
     // utilisé en préfixe des message de log et dans qq messages
-    name: 'sesatheque', // OBLIGATOIRE
+    name: 'toBeConfigured', // OBLIGATOIRE
     // identifiant de cette sésathèque, utilisé pour les rid des ressources créées ici
-    baseId: 'localhost3001', // OBLIGATOIRE
-    baseUrl: 'http://localhost:3001/', // OBLIGATOIRE
+    baseId: 'toBeConfigured', // OBLIGATOIRE
+    baseUrl: 'toBeConfigured', // OBLIGATOIRE
     // pour les envois de notification (du système)
-    mail: '', // OBLIGATOIRE
+    mail: 'toBeConfigured', // OBLIGATOIRE
     // utilisé par le SSO (sesasso-bibli et sesalab-sso), prod|dev
-    staging: 'dev', // OBLIGATOIRE
     // délai de conservation en cache, peut être élevé car on change l'url à chaque publication de version
     staticMaxAge: '7d',
     maintenance: {
@@ -44,7 +43,7 @@ module.exports = {
   $entities: {
     database: {
       host: 'localhost',
-      port: '27017',
+      port: 27017,
       name: 'sesatheque',
       user: '',
       password: '',
@@ -60,11 +59,11 @@ module.exports = {
   $rail: {
     cookie: {
       // à préciser avec une chaîne aléatoire complexe
-      key: '' // OBLIGATOIRE
+      key: 'toBeConfigured' // OBLIGATOIRE
     },
     session: {
       // à préciser avec une chaîne aléatoire complexe
-      secret: '' // OBLIGATOIRE
+      secret: 'toBeConfigured' // OBLIGATOIRE
     }
   },
 
