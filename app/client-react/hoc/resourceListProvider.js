@@ -85,10 +85,14 @@ const resourceListProvider = (WrappedComponent) => {
     })
   }
 
+  /**
+   * Retourne l'objet query, qui ne contient que les critères de recherche non vide, avec le bon type
+   * @param {object} parsedSearch la queryString parsée
+   * @return {{lanque: string, publie: boolean, restriction: number}}
+   */
   const buildQuery = (parsedSearch) => {
     if (!parsedSearch) {
       return {
-        lanque: 'fra',
         publie: true,
         restriction: 0
       }
@@ -98,45 +102,41 @@ const resourceListProvider = (WrappedComponent) => {
     const query = {}
     // checkbox
     query.publie = ['true', '', undefined].includes(parsedSearch.publie)
-    // valeurs uniques (select ou input)
-    // langue fra par défaut (si pas de valeur connue fournie)
-    query.langue = listes.langue[parsedSearch.langue] ? parsedSearch.langue : 'fra'
     // restriction en int, 0 par défaut
     query.restriction = listes.restriction[parsedSearch.restriction] ? Number(parsedSearch.restriction) : 0
-    // pour les autres on récupère tel quel si c'est pas une string vide
-    ;['titre', 'type', 'oid', 'origine', 'idOrigine', 'auteurs'].forEach(prop => {
+    // pour les autres valeurs uniques (select ou input), on récupère tel quel si non vide
+    ;['titre', 'type', 'langue', 'oid', 'origine', 'idOrigine', 'auteurs'].forEach(prop => {
       if (parsedSearch[prop]) query[prop] = parsedSearch[prop]
     })
     // multiselect
     ;['categories', 'niveaux', 'typePedagogiques', 'typeDocumentaires'].forEach(prop => {
-      const value = parsedSearch[prop]
-      if (!value) return
+      let values = parsedSearch[prop]
+      if (!values) return
       // on veut un array…
-      if (Array.isArray(value)) {
-        const values = value.filter(v => v !== '')
-        if (values.length) query[prop] = values
-      } else {
-        query[prop] = [value]
-      }
+      if (!Array.isArray(values)) values = [values]
+      if (!values.length) return
       // … d'entiers (sauf pour niveaux), car ça vient de la queryString donc toutes les valeurs sont des strings
       if (prop === 'niveaux') {
         // on filtre sur les valeurs connues
-        const niveaux = value.filter(value => listes.niveaux[value])
+        const niveaux = values.filter(value => listes.niveaux[value])
         if (niveaux.length) query.niveaux = niveaux
-        else delete query.niveaux
       } else {
         // cast integer
-        const values = query[prop]
-          .filter(value => listes[prop][value])
-          .map(value => parseInt(value, 10))
+        values = values
+          .filter(value => listes[prop][value]) // la prop existe
+          .map(value => parseInt(value, 10)) // cast
         if (values.length) query[prop] = values
-        else delete query[prop]
       }
     })
 
     return query
   }
 
+  /**
+   * Normalise skip & limit d'après la queryString
+   * @param {object} parsedSearch la queryString parsée
+   * @return {{skip: number, limit: number}}
+   */
   const buildQueryOptions = (parsedSearch) => {
     if (!parsedSearch) return {skip: 0, limit: limitDefault}
     // on normalise skip et limit
@@ -160,10 +160,6 @@ const resourceListProvider = (WrappedComponent) => {
 
   // pour récupérer search d'après le router et construire query et queryOptions
   const mapStateToProps = ({router: {location: {search}}}) => {
-    /**
-     * Transforme une queryString en objet query (pour le form)
-     * @param {string} queryString
-     */
     if (!search) return {search: '', query: null}
     const parsedSearch = queryString.parse(search)
     const query = buildQuery(parsedSearch)

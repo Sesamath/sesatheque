@@ -11,7 +11,10 @@ class ResourceSearch extends Component {
     this.state = {
       isFormOpen: !props.query
     }
-    this.title = this.isFormOpen ? 'Recherche' : 'Résultat de la recherche'
+  }
+
+  getTitle () {
+    return this.state.isFormOpen ? 'Recherche' : 'Résultat de la recherche'
   }
 
   open () {
@@ -21,10 +24,25 @@ class ResourceSearch extends Component {
   render () {
     const {query} = this.props
     const {isFormOpen} = this.state
+    const defaultFormValues = {
+      categories: [],
+      niveaux: [],
+      typePedagogiques: [],
+      typeDocumentaires: [],
+      langue: 'fra',
+      publie: true,
+      restriction: 0
+    }
+    const initialValues = {...defaultFormValues, ...query}
     return (
       <Fragment>
-        <h1>{this.title}</h1>
-        <SearchForm isOpen={isFormOpen} open={this.open.bind(this)} query={query} />
+        <h1>{this.getTitle()}</h1>
+        <SearchForm
+          isOpen={isFormOpen}
+          open={this.open.bind(this)}
+          query={query}
+          initialValues={initialValues}
+        />
         {!isFormOpen && (<ResourceList {...this.props} />)}
       </Fragment>
     )

@@ -12,7 +12,8 @@ import {
 } from './fields'
 import queryString from 'query-string'
 
-const SearchForm = ({isOpen, open, query}) => {
+const SearchForm = (props) => {
+  const {isOpen, open, query} = props
   if (isOpen || !query) {
     return (
       <form>
@@ -73,7 +74,7 @@ const SearchForm = ({isOpen, open, query}) => {
   }
   // sinon on rappelle juste les critères
   return (
-    <ul>Critères de recherche <span onClick={open}>modifier</span>
+    <ul><a href="#" onClick={open}>Modifier</a> les critères de recherche actuels
       {Object.keys(query).map(key => (
         <li key={key}>{labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}</li>
       ))}
