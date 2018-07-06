@@ -148,6 +148,7 @@ const conf = {
       {from: 'app/assets/favicon.png'}
     ]),
     new HtmlWebpackPlugin({
+      title: appConfig.application.name,
       version: version,
       template: './app/server/views/index.html',
       filename: 'index.html',
@@ -184,6 +185,9 @@ if (appConfig.devServer) {
     historyApiFallback: true,
     proxy: {
       '/api': nodeUrl,
+      '/images': nodeUrl,
+      '/medias': nodeUrl,
+      '/vendor': nodeUrl,
       '/groupe': nodeUrl,
       '/sesasso': nodeUrl,
       '/sesalabSso': nodeUrl
