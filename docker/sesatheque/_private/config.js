@@ -59,7 +59,7 @@ if (fs.existsSync(configFile)) {
 try {
   // on doit avoir le bon port
   if (!config.$server) config.$server = {}
-  config.$server.port = 3000
+  config.$server.port = 3001
   // aussi dans baseUrl
   config.application.baseUrl = 'http://localhost:3001/'
   // avec un baseId qui colle

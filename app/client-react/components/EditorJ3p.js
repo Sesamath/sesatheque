@@ -3,6 +3,7 @@ import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from '../hoc/iframeHelper'
+// page de l'éditeur j3p à insérer en iframe
 import iframeSrc from '../../client/plugins/j3p/editgraphe.html'
 
 class EditorJ3p extends Component {

@@ -3,7 +3,9 @@ import {getContext} from 'recompose'
 import PropTypes from 'prop-types'
 import {NavLink} from 'react-router-dom'
 import {connect} from 'react-redux'
-import logo from '../../assets/images/sesatheque.png'
+import {version} from '../../../package'
+
+const logoUrl = `/images/sesatheque.png?${version}`
 
 const getButtons = (personne) => {
   const buttonSearch = {
@@ -59,7 +61,7 @@ const Header = ({
       <NavLink
         to="/"
       >
-        <img src={logo} width="250" height="48" alt="logo" />
+        <img src={logoUrl} width="250" height="48" alt="logo" />
       </NavLink>
       <nav
         className="navigation fr"

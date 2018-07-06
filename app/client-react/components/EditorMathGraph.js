@@ -4,6 +4,7 @@ import {formValues, Field} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from '../hoc/iframeHelper'
 import {IntegerField} from './fields'
+// page de l'éditeur mathgraph à insérer en iframe
 import iframeSrc from '../../client/plugins/mathgraph/mathgraph-editor.html'
 
 class EditorMathGraph extends Component {

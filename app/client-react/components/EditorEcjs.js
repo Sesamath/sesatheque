@@ -3,6 +3,7 @@ import React, {Component, Fragment} from 'react'
 import {Field, formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from '../hoc/iframeHelper'
+// page de l'éditeur ecjs à insérer en iframe
 import iframeSrc from '../../client/plugins/ecjs/edit.html'
 
 // récupérer cette liste avec (sur le site ressources)
