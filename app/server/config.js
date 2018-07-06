@@ -396,11 +396,12 @@ if (staging === 'dev') {
   const frontPort = config.$server.port
   if (!Number.isInteger(frontPort)) throw new Error('Il faut préciser un port dans config.$server.port')
   const newNodePort = frontPort + 20 // arbitraire, en test on décale de 10
-  config.devServer = {
+  const defaultDevServer = {
     host: config.$server.host,
     port: frontPort,
     nodePort: newNodePort
   }
+  config.devServer = Object.assign({}, defaultDevServer, config.devServer)
   config.$server.port = newNodePort
 }
 
