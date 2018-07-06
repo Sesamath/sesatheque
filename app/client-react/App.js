@@ -55,12 +55,12 @@ const contextPropTypes = {
 
 const getContext = () => ({isIframeLayout})
 
-export default withContext(contextPropTypes, getContext)(
-  lifecycle({
-    componentDidMount () {
-      store.dispatch(getCurrentSession())
-    }
-  })(
-    hot(module)(App)
+export default hot(module)(
+  withContext(contextPropTypes, getContext)(
+    lifecycle({
+      componentDidMount () {
+        store.dispatch(getCurrentSession())
+      }
+    })(App)
   )
 )
