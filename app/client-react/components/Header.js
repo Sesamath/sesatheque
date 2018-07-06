@@ -29,7 +29,7 @@ const getButtons = (personne) => {
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
-      to: `/ressources?auteurs=${personne.pid}`,
+      to: `/ressources/rechercher?auteurs=${personne.pid}`,
       icon: 'bookmark'
     },
     {
