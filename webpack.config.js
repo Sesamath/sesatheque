@@ -139,6 +139,8 @@ if (process.env.SESATHEQUE_CONF) {
 // on crée le dossier de build s'il n'existe pas encore
 const buildDir = path.resolve(__dirname, conf.output.path)
 try {
+  const buildRootDir = path.resolve(__dirname, 'build')
+  if (!fs.existsSync(buildRootDir)) fs.mkdirSync(buildRootDir, 0o775)
   if (!fs.existsSync(buildDir)) fs.mkdirSync(buildDir, 0o775)
   // on vérifie, au cas où ça existait sans être un dossier
   const stats = fs.statSync(buildDir)
