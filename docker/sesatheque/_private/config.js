@@ -91,6 +91,10 @@ try {
   if (!config.$rail.cookie.key) config.$rail.key = uuid()
   if (!config.$rail.session) config.$rail.session = {}
   if (!config.$rail.session.secret) config.$rail.session.secret = uuid()
+  // avec docker faut passer 0.0.0.0 comme host à devServer
+  config.devServer = {
+    host: '0.0.0.0'
+  }
 } catch (error) {
   error.message = `_private/config.js incomplet (${error.message})`
   throw error
