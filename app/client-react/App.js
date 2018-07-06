@@ -1,9 +1,10 @@
 import {ConnectedRouter} from 'connected-react-router'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {hot} from 'react-hot-loader'
 import {Provider} from 'react-redux'
 import {Route, Switch} from 'react-router-dom'
-import {withContext} from 'recompose'
+import {withContext, lifecycle} from 'recompose'
 import Header from './components/Header'
 import Home from './components/Home'
 import Footer from './components/Footer'
@@ -19,7 +20,7 @@ import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
 import store from './store'
 
-store.dispatch(getCurrentSession())
+import '../srcStyles/page.scss'
 
 // ATTENTION à garder la liste des routes synchrones dans app/server/main/controllerMain.js
 
@@ -52,4 +53,12 @@ const contextPropTypes = {
 
 const getContext = () => ({isIframeLayout})
 
-export default withContext(contextPropTypes, getContext)(App)
+export default hot(module)(
+  withContext(contextPropTypes, getContext)(
+    lifecycle({
+      componentDidMount () {
+        store.dispatch(getCurrentSession())
+      }
+    })(App)
+  )
+)
