@@ -22,7 +22,7 @@ class ResourceSearch extends Component {
   }
 
   render () {
-    const {query} = this.props
+    const {query, search} = this.props
     const {isFormOpen} = this.state
     const defaultFormValues = {
       categories: [],
@@ -43,7 +43,7 @@ class ResourceSearch extends Component {
           query={query}
           initialValues={initialValues}
         />
-        {!isFormOpen && (<ResourceList {...this.props} />)}
+        {!isFormOpen && search && (<ResourceList {...this.props} />)}
       </Fragment>
     )
   }

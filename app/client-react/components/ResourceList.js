@@ -9,7 +9,7 @@ import queryString from 'query-string'
 const ResourceList = ({
   // fourni par resourceListProvider
   handlePageClick,
-  queryOptions: {skip, limit},
+  queryOptions,
   resources,
   total
 }) => {
@@ -18,6 +18,8 @@ const ResourceList = ({
       <p>Aucune ressource ne correspond à vos critères de recherche</p>
     )
   }
+  if (!queryOptions) return null
+  const {skip, limit} = queryOptions
   const last = Math.min(skip + limit, total)
   const hasPages = skip > 0 || last < total
   const pagination = hasPages ? (
@@ -106,11 +108,11 @@ ResourceList.propTypes = {
   total: PropTypes.number.isRequired,
   handlePageClick: PropTypes.func.isRequired,
   // fourni par resourceListProvider
-  query: PropTypes.object.isRequired,
+  query: PropTypes.object,
   queryOptions: PropTypes.shape({
     skip: PropTypes.number.isRequired,
     limit: PropTypes.number.isRequired
-  }).isRequired
+  })
 }
 
 // pour ajouter le comportement du changement de page

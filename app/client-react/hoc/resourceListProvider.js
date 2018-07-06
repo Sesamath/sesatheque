@@ -29,11 +29,6 @@ const resourceListProvider = (WrappedComponent) => {
 
     fetchList () {
       const {query, queryOptions: {limit, skip}} = this.props
-      // sans query on fait rien
-      if (!query) {
-        this.this.setState(emptyState)
-        return
-      }
       const filters = Object.keys(query).map(key => {
         const value = query[key]
         const values = Array.isArray(value) ? value : [value]
@@ -63,7 +58,8 @@ const resourceListProvider = (WrappedComponent) => {
 
     componentDidUpdate ({search}) {
       if (search !== this.props.search) {
-        this.fetchList()
+        if (this.props.search) this.fetchList()
+        else this.setState(emptyState)
       }
     }
 
