@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {Field} from 'redux-form'
+import {JsonEditor} from './fields'
 
 class IframeHandler extends Component {
   constructor (props) {
@@ -81,10 +82,7 @@ class IframeHandler extends Component {
               <Field
                 name={this.props.name ||
                   'parametres'}
-                component="textarea"
-                cols="80"
-                rows="20"
-                format={this.formatTextarea}
+                component={JsonEditor}
               />
             </label>
           </div>
