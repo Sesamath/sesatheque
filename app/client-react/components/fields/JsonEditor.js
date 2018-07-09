@@ -8,6 +8,22 @@ import 'brace/ext/searchbox'
 
 import './JsonEditor.scss'
 
+/**
+ * Formate un objet en string json (pretty)
+ * @param {object|string} value Un objet (si string elle sera retournée telle quelle)
+ * @return {string} La chaîne de caractères formattée en "pretty" json ({} si value n'était pas un objet stringifiable)
+ */
+function formatJSON (value) {
+  if (typeof value === 'string') return value
+
+  try {
+    return JSON.stringify(value, null, 2)
+  } catch (error) {
+    console.error(error)
+    return '{}'
+  }
+}
+
 const JsonEditor = ({ input: { value, onChange, onBlur, onFocus } }) => (
   <AceEditor
     mode="json"
@@ -22,7 +38,7 @@ const JsonEditor = ({ input: { value, onChange, onBlur, onFocus } }) => (
     wrapEnabled
     maxLines={Infinity}
     tabSize={2}
-    value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+    value={formatJSON(value)}
     editorProps={{
       $blockScrolling: true
     }}

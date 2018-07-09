@@ -20,22 +20,6 @@ class IframeHandler extends Component {
   }
 
   /**
-   * Formate un objet en string json (pretty)
-   * @param {object|string} value Un objet (si string elle sera retournée telle quelle)
-   * @return {string} La chaîne de caractères formattée en "pretty" json ({} si value n'était pas un objet stringifiable)
-   */
-  formatTextarea (value) {
-    if (typeof value === 'string') return value
-
-    try {
-      return JSON.stringify(value, null, 2)
-    } catch (error) {
-      console.error(error)
-      return '{}'
-    }
-  }
-
-  /**
    * Callback appelé au chargement de l'iframe, on passe alors l'iframe à props.onLoad
    */
   onLoad () {
