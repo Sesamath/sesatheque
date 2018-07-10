@@ -12,9 +12,8 @@ import Description from './components/Description'
 import MentionsLegales from './components/MentionsLegales'
 import Preview from './components/Preview'
 import RessourceCreate from './components/RessourceCreate'
-import Resources from './components/Resources'
-import SearchForm from './components/SearchForm'
 import ResourceForm from './components/ResourceForm'
+import ResourceSearch from './components/ResourceSearch'
 import Notifications from './components/Notifications'
 import {getCurrentSession} from './actions/session'
 import isIframeLayout from './utils/isIframeLayout'
@@ -39,8 +38,7 @@ const App = () => (
             <Route exact path="/ressource/modifier/:ressourceOid" component={ResourceForm} />
             <Route exact path="/ressource/apercevoir/:ressourceOid" component={Preview} />
             <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />
-            <Route exact path="/ressource/rechercher" component={SearchForm} />
-            <Route exact path="/ressources" component={Resources} />
+            <Route exact path="/ressource/rechercher" component={ResourceSearch} />
           </Switch>
         </div>
         <Footer />
