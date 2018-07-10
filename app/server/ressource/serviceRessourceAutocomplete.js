@@ -46,7 +46,8 @@ module.exports = function (component) {
     // passe en minuscule, désaccentue et remplace les char non lettre/chiffre/espace par une espace
     const sanitize = (value) => toAscii(value.toLowerCase()).replace(/[^a-z0-9 ]/g, ' ')
 
-    // on construit un objet dont les props sont la liste des valeurs connues
+    // on construit un objet dont les props sont la liste des valeurs connues,
+    // et leur valeur la liste des searchFilter possibles
     const knownValues = {}
     // on passe en revue tous les champs à valeurs controlées
     Object.entries(config.listes).forEach(([prop, liste]) => {
@@ -59,7 +60,7 @@ module.exports = function (component) {
           .forEach((valueToIndex) => {
             if (!knownValues[valueToIndex]) knownValues[valueToIndex] = []
             // on ajoute sous la forme d'un filter de recherche
-            knownValues[valueToIndex].push({index: prop, values: [key]})
+            knownValues[valueToIndex].push({index: prop, value: key})
           })
       })
     })
@@ -84,7 +85,7 @@ module.exports = function (component) {
      * @typedef searchFilter
      * @type Object
      * @property {string} index La propriété de Ressource sur laquelle filtrer
-     * @property {string[]} values Le tableau des valeurs qui doivent matcher
+     * @property {string|number} value La valeur à chercher
      */
     /**
      * Retourne les filtres de recherche qui peuvent correspondre à ce pattern
