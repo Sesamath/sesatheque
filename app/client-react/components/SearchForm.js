@@ -103,6 +103,7 @@ const formDef = reduxForm({
 })
 
 SearchForm.propTypes = {
+  handleSubmit: PropTypes.func.isRequired,
   toggleForm: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   query: PropTypes.object

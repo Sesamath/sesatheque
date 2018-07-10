@@ -17,7 +17,7 @@ class ResourceSearch extends Component {
     return this.state.isFormOpen ? 'Recherche' : 'Résultat de la recherche'
   }
 
-  toggleForm() {
+  toggleForm () {
     this.setState({isFormOpen: !this.state.isFormOpen})
   }
 
