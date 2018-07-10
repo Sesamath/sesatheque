@@ -43,7 +43,7 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
             />
             <SelectField
               label={labels.restriction}
-              values={listes.restriction}
+              options={listes.restriction}
               name="restriction"/>
             <SwitchField
               className="center"
