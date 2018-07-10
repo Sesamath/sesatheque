@@ -72,7 +72,7 @@ function notifyError (data) {
  * @Controller controllerApi
  */
 module.exports = function (component) {
-  component.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote) {
+  component.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote, $ressourceAutocomplete) {
     /**
      * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
      * @private
@@ -1060,6 +1060,20 @@ module.exports = function (component) {
       } else {
         sendJsonJstreeArray(context, 'il faut fournir un id de ressource')
       }
+    })
+
+    /**
+     * Retourne une liste de filtres de recherche qui matchent pattern
+     * @route GET /api/autocomplete/:pattern
+     */
+    controller.get('autocomplete/:pattern', function (context) {
+      const {pattern} = context.arguments
+      if (pattern.length < 2) return $json.sendError(context, 'Il faut au moins deux caractères')
+      const filters = $ressourceAutocomplete.getFilters(context.arguments.pattern)
+      // ça change très rarement, pas grave si faut attendre 3j pour qu'une modif de valeur
+      // d'un champ contrôlé soit reflétée sur l'autocomplete
+      context.setPublicCache('3d')
+      $json.sendOk(context, {filters})
     })
 
     /**

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {formValues, Field} from 'redux-form'
-import {IntegerField} from './fields'
+import {formValues} from 'redux-form'
+import {IntegerField, InputField, TextareaField} from './fields'
 import addNotifyToProps from '../hoc/addNotifyToProps'
 import ShowError from './ShowError.js'
 
@@ -57,26 +57,24 @@ class EditorIep extends Component {
     return (
       <fieldset>
         <div className="grid-3">
-          <label>Largeur <i>(en pixel)</i>
-            <IntegerField
-              name="parametres[width]"
-            />
-          </label>
-          <label>Hauteur <i>(en pixel)</i>
-            <IntegerField
-              name="parametres[height]"
-            />
-          </label>
+          <IntegerField
+            label="Largeur"
+            info="(en pixel)"
+            name="parametres[width]"
+          />
+          <IntegerField
+            label="Hauteur"
+            info="(en pixel)"
+            name="parametres[height]"
+          />
         </div>
         <div className="grid-3">
-          <label>Url <i>(ira lire le script de cette url le champ xml est vide)</i>
-            <Field
-              id="parametres-url"
-              name="parametres[url]"
-              component="input"
-              type="url"
-            />
-          </label>
+          <InputField
+            label="Url"
+            info="(ira lire le script de cette url le champ xml est vide)"
+            name="parametres[url]"
+            type="url"
+          />
           <label>
             <br />
             <button type="button" onClick={this.importScript.bind(this)}>Importer le script</button>
@@ -84,17 +82,12 @@ class EditorIep extends Component {
           </label>
         </div>
         <ShowError error={httpsError} />
-        <div>
-          <label>Script instrumenpoche
-            <Field
-              id="parametres-xml"
-              name="parametres[xml]"
-              component="textarea"
-              cols="80"
-              rows="20"
-            />
-          </label>
-        </div>
+        <TextareaField
+          label="Script instrumenpoche"
+          name="parametres[xml]"
+          cols="80"
+          rows="20"
+        />
       </fieldset>
     )
   }

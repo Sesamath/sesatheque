@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {Field} from 'redux-form'
+import {JsonField} from './fields'
 
 class IframeHandler extends Component {
   constructor (props) {
@@ -15,22 +15,6 @@ class IframeHandler extends Component {
 
     this.state = {
       manualEdition: false
-    }
-  }
-
-  /**
-   * Formate un objet en string json (pretty)
-   * @param {object|string} value Un objet (si string elle sera retournée telle quelle)
-   * @return {string} La chaîne de caractères formattée en "pretty" json ({} si value n'était pas un objet stringifiable)
-   */
-  formatTextarea (value) {
-    if (typeof value === 'string') return value
-
-    try {
-      return JSON.stringify(value, null, 2)
-    } catch (error) {
-      console.error(error)
-      return '{}'
     }
   }
 
@@ -76,18 +60,11 @@ class IframeHandler extends Component {
           </nav>
         ) : null}
         {this.props.allowManualEdition && this.state.manualEdition ? (
-          <div>
-            <label>Script
-              <Field
-                name={this.props.name ||
-                  'parametres'}
-                component="textarea"
-                cols="80"
-                rows="20"
-                format={this.formatTextarea}
-              />
-            </label>
-          </div>
+          <JsonField
+            label="Script"
+            name={this.props.name ||
+              'parametres'}
+          />
         ) : (
           <iframe
             onLoad={this.onLoad.bind(this)}

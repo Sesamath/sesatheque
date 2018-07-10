@@ -39,6 +39,7 @@ module.exports = function ressourceComponentFactory (lassi) {
   require('./EntityRessource')(ressourceComponent)
 
   require('./serviceCacheRessource')(ressourceComponent)
+  require('./serviceRessourceAutocomplete')(ressourceComponent)
   require('./serviceRessourceRemote')(ressourceComponent)
   require('./serviceRoutes')(ressourceComponent)
   require('./serviceRessourceRepository')(ressourceComponent)
