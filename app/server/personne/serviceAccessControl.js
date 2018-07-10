@@ -38,11 +38,9 @@ const sjtObj = require('sesajstools/utils/object')
 const config = require('../config')
 const configRessource = require('../ressource/config')
 
-/**
- * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
- * à la jonction entre personne et ressource.
- * @service $accessControl
- */
+const defaultSearchLimit = 25
+const maxSearchLimit = 100
+
 module.exports = function (component) {
   component.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
     /**
@@ -765,16 +763,15 @@ module.exports = function (component) {
       if (!isAuthenticated(context)) return next(new Error('refreshCurrentUser appelé sans session'))
       const pid = getCurrentUserPid(context)
       $personneRepository.load(pid, function (error, user) {
-        if (error) {
-          next(error)
-        } else if (user) {
-          context.session.user = user
-          next(null, user)
-        } else {
-          error = new Error('L’utilisateur ' + pid + ' a été supprimé depuis l’ouverture de la session')
+        if (error) return next(error)
+        if (!user) {
+          error = new Error(`L’utilisateur ${pid} a été supprimé depuis l’ouverture de la session`)
           log.error(error)
-          next(error)
+          return next(error)
         }
+        // on a bien le user
+        context.session.user = user
+        next(null, user)
       })
     }
 
@@ -793,7 +790,12 @@ module.exports = function (component) {
       return context.session.user
     }
 
-    return {
+    /**
+     * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
+     * à la jonction entre personne et ressource.
+     * @service $accessControl
+     */
+    const $accessControl = {
       addToken,
       checkToken,
       checkPermission,
@@ -824,5 +826,10 @@ module.exports = function (component) {
       refreshCurrentUser,
       updateCurrentUser
     }
+
+    // on ajoute les méthodes isolées dans leur helper
+    $accessControl.sanitizeSearch = require('./serviceAccessControl.search')($accessControl)
+
+    return $accessControl
   })
 }

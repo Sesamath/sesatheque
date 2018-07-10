@@ -38,6 +38,7 @@ const {merge, update} = require('sesajstools/utils/object')
 const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
+const Ressource = require('../../constructors/Ressource')
 const {ensure} = require('../tools')
 const url = require('../tools/url')
 const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
@@ -240,7 +241,7 @@ module.exports = function (component) {
         if (ressources.length) mesRessources = mesRessources.concat(ressources)
         this()
       }).seq(function () {
-        sendListe(context, null, mesRessources, nbOwnRessources)
+        sendListe(context, null, mesRessources, {total: nbOwnRessources})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -291,9 +292,28 @@ module.exports = function (component) {
       log.debug('grabListe ' + visibility, args)
       $ressourceRepository.getListeCount(visibility, args, function (error, total) {
         if (error) return sendListe(context, error)
-        if (total === 0) return sendListe(context, error, [], 0)
+        if (total === 0) return sendListe(context, error, [], {total: 0})
         $ressourceRepository.getListe(visibility, args, function (error, ressources) {
-          sendListe(context, error, ressources, total)
+          sendListe(context, error, ressources, {total})
+        })
+      })
+    }
+
+    /**
+     * Récupère une liste de résulats de recherche
+     * @param {Context} context
+     * @param {object} params
+     * @param {object} params.query Les critères de recherche
+     * @param {object} params.queryOptions skip & limit
+     * @param {string[]} params.warnings si query a été modifié pour incohérence
+     */
+    function grabSearch (context, params) {
+      $ressourceRepository.grabSearchCount(params, function (error, total) {
+        if (error) return sendListe(context, error)
+        params.total = total
+        if (total === 0) return sendListe(context, null, [], params)
+        $ressourceRepository.grabSearch(params, function (error, ressources) {
+          sendListe(context, error, ressources, params)
         })
       })
     }
@@ -571,18 +591,23 @@ module.exports = function (component) {
     }
 
     /**
-     * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
+     * Envoie une liste de ressources (ajoute les droits)
      * @private
      * @param {Context} context
-     * @param error
-     * @param ressources
+     * @param {Error} [error]
+     * @param {EntityRessource[]} ressources La liste des ressources
+     * @param {object} listOptions
+     * @param {object} listOptions.query La query qui a donné cette liste
+     * @param {object} listOptions.queryOptions Les queryOptions (skip & limit) utilisés
+     * @param {number} listOptions.total
+     * @param {string[]} [listOptions.warnings]
      */
-    function sendListe (context, error, ressources, total) {
+    function sendListe (context, error, ressources, listOptions) {
       if (error) return $json.send(context, error)
       const liste = []
-      const reponse = {liste, total}
+      const reponse = listOptions
       if (ressources && ressources.length) {
-        if (!total) reponse.total = ressources.length
+        if (!reponse.total) reponse.total = ressources.length
         // construction de nextUrl
         if (ressources.length === listeMax) {
           const skip = context.get.skip || 0
@@ -591,15 +616,29 @@ module.exports = function (component) {
         // on regarde le format reçu en get ou post
         const format = context.post.format || context.get.format
         ressources.forEach(function (ressource) {
-          if (!$accessControl.hasReadPermission(context, ressource)) return log.debug(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
+          // vérif des droits
+          let droits = ''
+          if ($accessControl.hasReadPermission(context, ressource)) {
+            droits += 'R'
+            if ($accessControl.hasPermission('update', context, ressource)) droits += 'W'
+            if ($accessControl.hasPermission('delete', context, ressource)) droits += 'D'
+          } else {
+            // ça devrait pas arriver, mais au cas où on crée une ressource fake
+            // pour avoir le bon nb dans la liste et montrer le pb
+            log.error(`sendListe récupère la ressource ${ressource.oid} à envoyer à ${$accessControl.getCurrentUserPid(context)} alors qu’il n’a pas les droits de lecture dessus`, ressource)
+            ressource = new Ressource({
+              titre: 'Vous n’avez pas les droits suffisants pour voir cette ressource',
+              type: 'error'
+            })
+          }
+
+          // formatage
           const item = (format === 'full') ? ressource : new Ref(ressource)
           if (ressource.type === 'sequenceModele' && format !== 'full') {
             // on rajoute les parametres pour les sequenceModele
             item.parametres = ressource.parametres
           }
-          item.$droits = ''
-          if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
-          if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
+          item.$droits = droits
           liste.push(item)
         })
       }
@@ -1116,9 +1155,9 @@ module.exports = function (component) {
       }
       const arg = `groupe/${context.arguments.nom}`
       $ressourceRepository.getListeCount(arg, options, function (error, total) {
-        if (error || !total) return sendListe(context, error, [], 0)
+        if (error || !total) return sendListe(context, error, [], {total: 0})
         $ressourceRepository.getListe(arg, options, function (error, ressources) {
-          sendListe(context, error, ressources, total)
+          sendListe(context, error, ressources, {total})
         })
       })
     })
@@ -1179,6 +1218,17 @@ module.exports = function (component) {
      *   Access-Control-Allow-Methods: POST OPTIONS
      * @route OPTIONS /api/liste/public
      */
+
+    /**
+     * Récupère des résulats de recherche
+     * @route GET /api/search
+     */
+    controller.get('search', function (context) {
+      // on vérifie les paramètres pour construire query et queryOptions
+      const params = $accessControl.sanitizeSearch(context)
+      $json.sendOk(context, params)
+      // grabSearch(context, params)
+    })
 
     /**
      * Retourne la ressource publique et publiée (sinon 404) d'après son oid
