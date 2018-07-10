@@ -15,6 +15,7 @@ import RessourceCreate from './components/RessourceCreate'
 import ResourceForm from './components/ResourceForm'
 import ResourceSearch from './components/ResourceSearch'
 import Notifications from './components/Notifications'
+import Groupes from './components/Groupes'
 import {getCurrentSession} from './actions/session'
 import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
@@ -39,6 +40,7 @@ const App = () => (
             <Route exact path="/ressource/apercevoir/:ressourceOid" component={Preview} />
             <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />
             <Route exact path="/ressource/rechercher" component={ResourceSearch} />
+            <Route exact path="/groupe/perso" component={Groupes} />
           </Switch>
         </div>
         <Footer />
