@@ -155,14 +155,14 @@ header {
 
 @media (max-width: ($medium)) { // tiny et small
   .gt-medium-only,
-  header a span,
-    { display: none; }
+  header a span { 
+    display: none;
+  }
   .lt-medium-only { display: block; }
 }
 
 @media (min-width: ($medium + 1)) { // medium, large et au delà
   .gt-medium-only { display: block;}
-  header a span,
-    { display: inline;}
+  header a span { display: inline;}
   .lt-medium-only { display: none; }
 }

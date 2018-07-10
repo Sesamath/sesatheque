@@ -3,14 +3,10 @@ import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from '../hoc/iframeHelper'
+// page contenant l'éditeur d'arbre à insérer en iframe
+import iframeSrc from '../../client/plugins/arbre/edit.html'
 // cf webpackConfigLoader.js pour les valeurs exportées à un browser
 import {baseId} from '../../server/config'
-
-/**
- * Page contenant l'éditeur d'arbres
- * @type {string}
- */
-const iframeSrc = require('../../client/plugins/arbre/edit.html')
 
 class EditorArbre extends Component {
   /**

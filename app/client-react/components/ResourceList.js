@@ -4,28 +4,51 @@ import React, {Fragment} from 'react'
 import {connect} from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
-import resourceListProvider from '../hoc/resourceListProvider'
 import queryString from 'query-string'
 
 const ResourceList = ({
+  // fourni par resourceListProvider
   handlePageClick,
-  parsedSearch,
-  perPage,
+  queryOptions,
   resources,
   total
 }) => {
-  if (!total) {
+  // query et queryOptions vont toujours ensemble
+  if (!queryOptions) {
+    // pas très normal…
+    console.error(Error('ResourceList appelé sans query'))
     return (
-      <p>Aucune ressource ne correspond à vos critères de recherche</p>
+      <p>Aucun critère de recherche (<a href="#form">rechercher</a>).</p>
     )
   }
-  const skip = Number(parsedSearch.skip) || 0
-  const limit = Number(perPage)
+  if (!total) {
+    return (
+      <p>Aucune ressource ne correspond à vos critères de recherche (<a href="#form">modifier</a>).</p>
+    )
+  }
+  const {skip, limit} = queryOptions
   const last = Math.min(skip + limit, total)
   const hasPages = skip > 0 || last < total
+  const pagination = hasPages ? (
+    <ReactPaginate
+      previousLabel={'<'}
+      nextLabel={'>'}
+      breakLabel={<a href="">...</a>}
+      pageCount={Math.ceil(total / limit)}
+      onPageChange={handlePageClick}
+      containerClassName={'pagination'}
+      activeClassName={'active'} />
+  ) : null
+  const subNav = (
+    <Fragment>
+      <p className="fl">Ressources de {skip + 1} à {last} sur {total}</p>
+      {pagination}
+    </Fragment>
+  )
+
   return (
     <Fragment>
-      <p>Ressources de {skip + 1} à {last} sur {total}</p>
+      {subNav}
       <table className="table resourceList">
         <thead>
           <tr>
@@ -82,51 +105,38 @@ const ResourceList = ({
           ) : null}
         </tbody>
       </table>
-      {hasPages && (
-        <ReactPaginate
-          previousLabel={'<'}
-          nextLabel={'>'}
-          breakLabel={<a href="">...</a>}
-          pageCount={Math.ceil(total / perPage)}
-          onPageChange={handlePageClick}
-          containerClassName={'pagination'}
-          activeClassName={'active'} />
-      )}
+      {subNav}
     </Fragment>
   )
 }
 
 ResourceList.propTypes = {
-  resources: PropTypes.array,
-  total: PropTypes.number,
-  parsedSearch: PropTypes.object,
-  perPage: PropTypes.string,
-  handlePageClick: PropTypes.func
+  resources: PropTypes.array.isRequired,
+  total: PropTypes.number.isRequired,
+  handlePageClick: PropTypes.func.isRequired,
+  // fourni par resourceListProvider
+  query: PropTypes.object,
+  queryOptions: PropTypes.shape({
+    skip: PropTypes.number.isRequired,
+    limit: PropTypes.number.isRequired
+  })
 }
 
-const mapStateToProps = ({router: {location: {search}}}) => ({parsedSearch: queryString.parse(search)})
-
-const mapDispatchToProps = (dispatch, {parsedSearch, perPage}) => ({
+// pour ajouter le comportement du changement de page
+const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
+  // au clic sur un changement de pagination faut mettre à jour l'url
+  // (et resourceListProvider mettra à jour la liste resources)
   handlePageClick: (data) => {
     const params = {
-      ...parsedSearch,
-      skip: Math.ceil(data.selected * perPage)
+      ...query,
+      skip: (Math.round(data.selected) || 0) * queryOptions.limit
     }
 
     dispatch(push({
-      pathname: '/ressources',
+      pathname: '/ressource/rechercher',
       search: queryString.stringify(params)
     }))
   }
 })
 
-// we are nesting two connects because writing:
-// connect(mapStateToProps, mapDispatchToProps)
-// would not provide parsedSearch in
-// mapDispatchToProps ownProps parameter
-
-export default connect(mapStateToProps, {})(
-  connect(null, mapDispatchToProps)(
-    resourceListProvider(ResourceList)
-  )
-)
+export default connect(null, mapDispatchToProps)(ResourceList)
