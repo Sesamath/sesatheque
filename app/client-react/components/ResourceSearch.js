@@ -17,8 +17,8 @@ class ResourceSearch extends Component {
     return this.state.isFormOpen ? 'Recherche' : 'Résultat de la recherche'
   }
 
-  open () {
-    this.setState({isFormOpen: true})
+  toggleForm() {
+    this.setState({isFormOpen: !this.state.isFormOpen})
   }
 
   render () {
@@ -39,7 +39,7 @@ class ResourceSearch extends Component {
         <h1>{this.getTitle()}</h1>
         <SearchForm
           isOpen={isFormOpen}
-          open={this.open.bind(this)}
+          toggleForm={this.toggleForm.bind(this)}
           query={query}
           initialValues={initialValues}
         />

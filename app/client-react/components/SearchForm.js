@@ -13,10 +13,10 @@ import {
 import queryString from 'query-string'
 
 const SearchForm = (props) => {
-  const {isOpen, open, query} = props
+  const {handleSubmit, isOpen, toggleForm, query} = props
   if (isOpen || !query) {
     return (
-      <form>
+      <form onSubmit={handleSubmit}>
         <fieldset>
           <div className="grid-3">
             <InputField
@@ -74,7 +74,7 @@ const SearchForm = (props) => {
   }
   // sinon on rappelle juste les critères
   return (
-    <ul><a href="#" onClick={open}>Modifier</a> les critères de recherche actuels
+    <ul><a href="#" onClick={toggleForm}>Modifier</a> les critères de recherche actuels
       {Object.keys(query).map(key => (
         <li key={key}>{labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}</li>
       ))}
@@ -93,14 +93,17 @@ const queryToSearch = (query) => {
 // pour utiliser Field faut être un redux-form
 const formDef = reduxForm({
   form: 'searchForm',
-  onSubmit: (query, dispatch) => dispatch(push({
-    pathname: '/ressource/rechercher',
-    search: queryToSearch(query)
-  }))
+  onSubmit: (query, dispatch, {toggleForm}) => {
+    dispatch(push({
+      pathname: '/ressource/rechercher',
+      search: queryToSearch(query)
+    }))
+    toggleForm()
+  }
 })
 
 SearchForm.propTypes = {
-  open: PropTypes.func.isRequired,
+  toggleForm: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   query: PropTypes.object
 }
