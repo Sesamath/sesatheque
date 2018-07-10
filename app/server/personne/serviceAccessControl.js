@@ -30,23 +30,21 @@
  */
 
 'use strict'
-var dns = require('dns')
-var ip = require('ip')
-// var _ = require('lodash')
-var sjtObj = require('sesajstools/utils/object')
+const dns = require('dns')
+const ip = require('ip')
+// const _ = require('lodash')
+const sjtObj = require('sesajstools/utils/object')
 
-var config = require('../config')
-var configRessource = require('../ressource/config')
+const config = require('../config')
+const configRessource = require('../ressource/config')
 
+/**
+ * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
+ * à la jonction entre personne et ressource.
+ * @service $accessControl
+ */
 module.exports = function (component) {
   component.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
-    /**
-     * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
-     * à la jonction entre personne et ressource.
-     * @service $accessControl
-     */
-    var $accessControl = {}
-
     /**
      * Helper de checkAccess pour la permission correction
      * @private
@@ -55,7 +53,7 @@ module.exports = function (component) {
      * @returns {string} Le message d'interdiction éventuel (string vide sinon)
      */
     function getCorrectionDeniedMessage (context, ressource) {
-      var user = $accessControl.getCurrentUser(context)
+      const user = getCurrentUser(context)
       if (!user || !user.permissions) return 'Vous devez être authentifié pour visualiser une correction'
       if (!user.permissions.correction) return "Vous n'avez pas de droits suffisants pour visualiser cette correction"
       return ''
@@ -69,7 +67,7 @@ module.exports = function (component) {
      * @returns {string} Le message d'interdiction éventuel (string vide sinon)
      */
     function getCreateDeniedMessage (context, ressource) {
-      var user = $accessControl.getCurrentUser(context)
+      const user = getCurrentUser(context)
       if (!user || !user.permissions) return 'Vous devez être authentifié pour créer une ressource'
       if (!user.permissions.create) return 'Vous n’avez pas de droits suffisants pour créer une ressource'
       if (user.permissions.createAll) return ''
@@ -84,7 +82,7 @@ module.exports = function (component) {
      * @returns {string} Le message d'interdiction éventuel (string vide sinon)
      */
     function getCreateAllDeniedMessage (context) {
-      var user = $accessControl.getCurrentUser(context)
+      const user = getCurrentUser(context)
       if (!user.permissions.createAll) return 'Vous n’avez pas de droits suffisants pour créer une ressource'
       return ''
     }
@@ -97,7 +95,7 @@ module.exports = function (component) {
      * @returns {string} Le message d'interdiction éventuel (string vide sinon)
      */
     function getDeleteDeniedMessage (context, ressource) {
-      if ($accessControl.isAuteur(context, ressource)) {
+      if (isAuteur(context, ressource)) {
         // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
         // (sinon d'autres peuvent s'en servir)
         if (ressource.auteurs.length > 1) return 'Vous êtes auteur de cette ressource mais n’êtes pas le seul, vous ne pouvez pas la supprimer'
@@ -123,7 +121,7 @@ module.exports = function (component) {
      * @returns {string} Le message d'interdiction éventuel (string vide sinon)
      */
     function getIndexDeniedMessage (context, ressource) {
-      const user = $accessControl.getCurrentUser(context)
+      const user = getCurrentUser(context)
       if (!user || !user.permissions) return 'Vous devez être authentifié pour indexer une ressource'
       if (user.permissions.index) return ''
       return 'Vous n’avez pas de droits suffisants pour indexer une ressource'
@@ -143,7 +141,7 @@ module.exports = function (component) {
      */
     function getClientIp (context) {
       // on regarde si par hasard ce serait pas l'ip du proxy
-      var ipClient = context.request.ip
+      let ipClient = context.request.ip
       // à priori varnish ou nginx devrait renseigner ça
       if (context.request.headers['x-real-ip']) ipClient = context.request.headers['x-real-ip']
       // sinon on prend la 1re de x-forwarded-for, pas très safe car ça peut être forgé,
@@ -167,9 +165,9 @@ module.exports = function (component) {
       // nos ips ont le droit de tout lire via l'api
       if (hasAllRights(context)) return ''
       if (ressource.publie) {
-        var restriction = $settings.get('components.ressource.constantes.restriction')
+        const restriction = $settings.get('components.ressource.constantes.restriction')
         if (ressource.restriction === restriction.aucune) return ''
-        if (!$accessControl.isAuthenticated(context)) return 'Vous devez être authentifié pour consulter cette ressource'
+        if (!isAuthenticated(context)) return 'Vous devez être authentifié pour consulter cette ressource'
         switch (ressource.restriction) {
           // public
           case restriction.aucune:
@@ -182,17 +180,17 @@ module.exports = function (component) {
 
           // réservée au groupe
           case restriction.groupe:
-            if ($accessControl.isAuteur(context, ressource)) return ''
-            if ($accessControl.isContributeur(context, ressource)) return ''
-            if ($accessControl.isInGroupes(context, ressource)) return ''
-            if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
+            if (isAuteur(context, ressource)) return ''
+            if (isContributeur(context, ressource)) return ''
+            if (isInGroupes(context, ressource)) return ''
+            if (isInGroupesAuteurs(context, ressource)) return ''
             return 'Ressource restreinte'
 
           // privée
           case restriction.prive:
-            if ($accessControl.isAuteur(context, ressource)) return
-            if ($accessControl.isContributeur(context, ressource)) return
-            if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
+            if (isAuteur(context, ressource)) return
+            if (isContributeur(context, ressource)) return
+            if (isInGroupesAuteurs(context, ressource)) return ''
             return 'Ressource privée'
 
           default:
@@ -219,9 +217,9 @@ module.exports = function (component) {
       // (ça le forkerait, faut pas le faire pour les types non éditables)
       if (ressource.aliasOf && !configRessource.editable[ressource.type]) return `Les alias de type ${ressource.type} ne sont pas modifiables`
       if (hasAllRights(context)) return
-      if ($accessControl.isAuteur(context, ressource)) return ''
-      if ($accessControl.isContributeur(context, ressource)) return ''
-      if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
+      if (isAuteur(context, ressource)) return ''
+      if (isContributeur(context, ressource)) return ''
+      if (isInGroupesAuteurs(context, ressource)) return ''
       // pour le moment tout le reste est interdit
       return 'Vous n’avez pas de droits suffisants pour modifier cette ressource'
     }
@@ -235,8 +233,8 @@ module.exports = function (component) {
      */
     function getUpdateAuteursDeniedMessage (context, ressource) {
       if (ressource.aliasOf) throw new Error('Modifier les groupes qui peuvent modifier un alias n’a pas de sens')
-      if ($accessControl.isAuteur(context, ressource)) return ''
-      if ($accessControl.isInGroupesAuteurs(context, ressource)) return ''
+      if (isAuteur(context, ressource)) return ''
+      if (isInGroupesAuteurs(context, ressource)) return ''
       return 'Vous ne pouvez pas modifier les auteurs ou contributeur si vous n’êtes pas auteur de la ressource'
     }
 
@@ -265,8 +263,8 @@ module.exports = function (component) {
      *                      (ne rien passer ici ni à checkToken permet juste de vérifier sa présence)
      * @returns {boolean|string} false si y'avait pas de user connecté, le token sinon
      */
-    $accessControl.addToken = function addToken (context, token, value) {
-      var retour = $accessControl.isAuthenticated(context)
+    function addToken (context, token, value) {
+      let retour = isAuthenticated(context)
       if (retour) {
         if (!value) value = true // avec undefined la property n’existe pas, mettre false n'a pas de sens, true parce qu'on veut juste vérifier sa présence
         if (!token) token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)
@@ -284,8 +282,8 @@ module.exports = function (component) {
      * @param {*} [value=true] La valeur qu'il doit avoir (celle qu'on avait passé à addToken précédemment)
      * @returns {boolean}
      */
-    $accessControl.checkToken = function (context, token, value) {
-      var retour
+    function checkToken (context, token, value) {
+      let retour
       if (!value) value = true
       if (context && token) {
         try {
@@ -307,7 +305,7 @@ module.exports = function (component) {
      * @param {errorCallback} next appelé avec (error, ressource) où error est une string si y'a un pb de droit (rien sinon)
      * @memberOf $accessControl
      */
-    $accessControl.checkPermission = function (permission, context, ressource, next) {
+    function checkPermission (permission, context, ressource, next) {
       if (
         // pas la peine de continuer si c'est pour voir une ressource publique
         (permission === 'read' && ressource.restriction === 0) ||
@@ -319,8 +317,8 @@ module.exports = function (component) {
         // rien à faire
         next(null, ressource)
       } else {
-        var errorMsg
-        if ($accessControl.isAuthenticated(context)) {
+        let errorMsg
+        if (isAuthenticated(context)) {
           // on regarde donc ce user pour cette ressource
           switch (permission) {
             // sinon on délègue suivant la permission
@@ -347,23 +345,23 @@ module.exports = function (component) {
     }
 
     /**
-     * Retourne le pid du user courant ou undefined
-     * @param {Context} context
-     * @returns {Integer} L'oid
-     * @memberOf $accessControl
-     */
-    $accessControl.getCurrentUserPid = function (context) {
-      if (context.session.user) return context.session.user.pid
-    }
-
-    /**
      * Retourne le user courant ou undefined
      * @param {Context} context
      * @return {Personne|undefined} Le user
      * @memberOf $accessControl
      */
-    $accessControl.getCurrentUser = function (context) {
+    function getCurrentUser (context) {
       if (context.session.user && context.session.user.pid) return context.session.user
+    }
+
+    /**
+     * Retourne le pid du user courant ou undefined
+     * @param {Context} context
+     * @returns {Integer} L'oid
+     * @memberOf $accessControl
+     */
+    function getCurrentUserPid (context) {
+      if (context.session.user) return context.session.user.pid
     }
 
     /**
@@ -372,11 +370,10 @@ module.exports = function (component) {
      * @return {string[]} La liste des noms des groupes dont on est membre
      * @memberOf $accessControl
      */
-    $accessControl.getCurrentUserGroupesMembre = function (context) {
-      var groupes = []
-      if (context.session.user && context.session.user.groupesMembre) groupes = context.session.user.groupesMembre
-
-      return groupes
+    function getCurrentUserGroupesMembre (context) {
+      return (context.session.user && context.session.user.groupesMembre)
+        ? context.session.user.groupesMembre
+        : []
     }
 
     /**
@@ -385,11 +382,10 @@ module.exports = function (component) {
      * @return {string[]} La liste des noms des groupes que l'on suit (tableau vide si aucun ou pas identifié)
      * @memberOf $accessControl
      */
-    $accessControl.getCurrentUserGroupesSuivis = function (context) {
-      var groupes = []
-      if (context.session.user && context.session.user.groupesSuivis) groupes = context.session.user.groupesSuivis
-
-      return groupes
+    function getCurrentUserGroupesSuivis (context) {
+      return (context.session.user && context.session.user.groupesSuivis)
+        ? context.session.user.groupesSuivis
+        : []
     }
 
     /**
@@ -401,7 +397,7 @@ module.exports = function (component) {
      * @returns {string} Le message d'interdiction éventuel (string vide sinon)
      * @memberOf $accessControl
      */
-    $accessControl.getDeniedMessage = function (permission, context, ressource) {
+    function getDeniedMessage (permission, context, ressource) {
       // bypass sauf pour update d'alias
       if (permission !== 'update' || !ressource.aliasOf) {
         if (hasGenericPermission(permission, context)) return ''
@@ -443,8 +439,8 @@ module.exports = function (component) {
      * @param {string} token
      * @returns {*} La valeur stockée ou undefined si le token n'était pas en session
      */
-    $accessControl.getTokenValue = function getTokenValue (context, token) {
-      var value
+    function getTokenValue (context, token) {
+      let value
       if (context && token && context.session.tokens && context.session.tokens.hasOwnProperty(token)) {
         value = context.session.tokens[token]
         delete context.session.tokens[token]
@@ -460,8 +456,8 @@ module.exports = function (component) {
      * @param {Context} context
      * @memberOf $accessControl
      */
-    $accessControl.hasAllRights = function (context) {
-      if ($accessControl.hasRole('admin', context)) return true
+    function hasAllRights (context) {
+      if (hasRole('admin', context)) return true
       // sinon faut regarder un peu mieux le contexte
       const token = decodeURIComponent(context.request.header('X-ApiToken') || '')
       if (token && context.request.originalUrl.indexOf('/api/') === 0) {
@@ -469,10 +465,10 @@ module.exports = function (component) {
         if ($settings.get('apiTokens', []).includes(token)) {
           log.debug('token api ok')
           // token ok donc retour ok si le client a une ip connue
-          var ip = getClientIp(context)
+          const ip = getClientIp(context)
           if (config.apiIpsAllowed && config.apiIpsAllowed.indexOf(ip) !== -1) return true
           // ou est local
-          if ($accessControl.isLanClient(context)) return true
+          if (isLanClient(context)) return true
           log.error('token ok depuis une ip non autorisée ' + ip)
         } else {
           log.error(`token ${token} non autorisé`)
@@ -481,8 +477,6 @@ module.exports = function (component) {
 
       return false
     }
-    // alias
-    var hasAllRights = $accessControl.hasAllRights
 
     /**
      * Retourne true si le user en session a la permission générique demandée
@@ -499,22 +493,6 @@ module.exports = function (component) {
         context.session.user.permissions[permission]
     }
 
-    $accessControl.hasGenericPermission = hasGenericPermission
-
-    /**
-     *
-     * @param role
-     * @param context
-     * @returns {*|data.roles|{}|settings.components.personne.roles|{admin, editeur, indexateur, formateur, acces_correction, eleve}|Object}
-     */
-    $accessControl.hasRole = function (role, context) {
-      return context &&
-        context.session &&
-        context.session.user &&
-        context.session.user.roles &&
-        context.session.user.roles[role]
-    }
-
     /**
      * Retourne true si l'utilisateur courant a la permission demandée sur cette ressource
      * (ou sur toutes les ressources si ressource n'est pas fournie)
@@ -524,17 +502,17 @@ module.exports = function (component) {
      * @returns {boolean}
      * @memberOf $accessControl
      */
-    $accessControl.hasPermission = function (permission, context, ressource) {
+    function hasPermission (permission, context, ressource) {
       // cas particulier sur l'update d'un alias, faut pas de bypass
-      if (permission === 'update' && ressource.aliasOf && $accessControl.isAuthenticated(context)) return !$accessControl.getDeniedMessage(permission, context, ressource)
+      if (permission === 'update' && ressource.aliasOf && isAuthenticated(context)) return !getDeniedMessage(permission, context, ressource)
       if (hasGenericPermission(permission, context)) return true
       if (hasAllRights(context)) return true
       if (!ressource) return false
 
       // read n'a pas forcément besoin de session, ça dépend de la ressource
-      if (permission === 'read') return $accessControl.hasReadPermission(context, ressource)
+      if (permission === 'read') return hasReadPermission(context, ressource)
 
-      if ($accessControl.isAuthenticated(context)) return !$accessControl.getDeniedMessage(permission, context, ressource)
+      if (isAuthenticated(context)) return !getDeniedMessage(permission, context, ressource)
       return false
     }
 
@@ -546,12 +524,26 @@ module.exports = function (component) {
      * @returns {boolean}
      * @memberOf $accessControl
      */
-    $accessControl.hasReadPermission = function (context, ressource) {
+    function hasReadPermission (context, ressource) {
       if (!ressource.restriction) return true
       if (hasAllRights(context)) return true
-      if (!$accessControl.isAuthenticated(context)) return false
+      if (!isAuthenticated(context)) return false
       if (hasGenericPermission('read', context) && ressource.publie) return true
       return (!getReadDeniedMessage(context, ressource))
+    }
+
+    /**
+     *
+     * @param role
+     * @param context
+     * @returns {*|data.roles|{}|settings.components.personne.roles|{admin, editeur, indexateur, formateur, acces_correction, eleve}|Object}
+     */
+    function hasRole (role, context) {
+      return context &&
+        context.session &&
+        context.session.user &&
+        context.session.user.roles &&
+        context.session.user.roles[role]
     }
 
     /**
@@ -560,7 +552,7 @@ module.exports = function (component) {
      * @returns {boolean}
      * @memberOf $accessControl
      */
-    $accessControl.isAuthenticated = function (context) {
+    function isAuthenticated (context) {
       return !!(context && context.session && context.session.user && context.session.user.oid && context.session.user.oid !== -1) // id=-1 avec une ip locale et un token
     }
 
@@ -570,8 +562,8 @@ module.exports = function (component) {
      * @param {Ressource} ressource
      * @returns {boolean|undefined}
      */
-    $accessControl.isAuteur = function (context, ressource) {
-      const pid = $accessControl.getCurrentUserPid(context)
+    function isAuteur (context, ressource) {
+      const pid = getCurrentUserPid(context)
       return (ressource && ressource.auteurs && ressource.auteurs.indexOf(pid) !== -1)
     }
 
@@ -581,8 +573,8 @@ module.exports = function (component) {
      * @param {Ressource} ressource
      * @returns {boolean|undefined}
      */
-    $accessControl.isContributeur = function (context, ressource) {
-      const pid = $accessControl.getCurrentUserPid(context)
+    function isContributeur (context, ressource) {
+      const pid = getCurrentUserPid(context)
       return (ressource && ressource.contributeurs && ressource.contributeurs.indexOf(pid) !== -1)
     }
 
@@ -593,7 +585,7 @@ module.exports = function (component) {
      * @param {string} groupeNom Le nom du groupe
      * @returns {boolean}
      */
-    $accessControl.isGroupeMembre = function (context, groupeNom) {
+    function isGroupeMembre (context, groupeNom) {
       const nom = groupeNom.toLowerCase()
       return context.session.user &&
         context.session.user.groupesMembre &&
@@ -608,7 +600,7 @@ module.exports = function (component) {
      * @param {string|Groupe} groupe Le groupe ou son nom
      * @returns {boolean}
      */
-    $accessControl.isGroupeSuivi = function (context, groupeNom) {
+    function isGroupeSuivi (context, groupeNom) {
       const nom = groupeNom.toLowerCase()
       return context.session.user &&
         context.session.user.groupesSuivis &&
@@ -622,9 +614,9 @@ module.exports = function (component) {
      * @param {Ressource} ressource
      * @returns {boolean}
      */
-    $accessControl.isInGroupes = function (context, ressource) {
+    function isInGroupes (context, ressource) {
       if (ressource && ressource.groupes && ressource.groupes.length) {
-        return ressource.groupes.find(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
+        return ressource.groupes.find(groupeNom => isGroupeMembre(context, groupeNom))
       }
       return false
     }
@@ -635,9 +627,9 @@ module.exports = function (component) {
      * @param {Ressource} ressource
      * @returns {boolean}
      */
-    $accessControl.isInGroupesAuteurs = function (context, ressource) {
+    function isInGroupesAuteurs (context, ressource) {
       if (ressource && ressource.groupesAuteurs && ressource.groupesAuteurs.length) {
-        return ressource.groupesAuteurs.find(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
+        return ressource.groupesAuteurs.find(groupeNom => isGroupeMembre(context, groupeNom))
       }
       return false
     }
@@ -647,8 +639,8 @@ module.exports = function (component) {
      * @param context
      * @returns {boolean}
      */
-    $accessControl.isLanClient = function (context) {
-      var ipClient = getClientIp(context)
+    function isLanClient (context) {
+      const ipClient = getClientIp(context)
       // log.debug("isLanClient analyse l'ip " + ipClient)
       return ip.isPrivate(ipClient)
     }
@@ -658,7 +650,7 @@ module.exports = function (component) {
      * @param {Ressource|Ref} ressource
      * @returns {boolean}
      */
-    $accessControl.isPublic = function isPublic (ressource) {
+    function isPublic (ressource) {
       if (ressource.public) return true
       if (ressource.publie && !ressource.restriction) return true
       return false
@@ -670,18 +662,18 @@ module.exports = function (component) {
      * @param {Context} context
      * @param {function} next
      */
-    $accessControl.isSesamathClient = function (context, next) {
-      var isSesamathClient = $accessControl.isLanClient(context)
+    function isSesamathClient (context, next) {
+      const isSesamathClient = isLanClient(context)
       if (isSesamathClient) {
         next(null, true)
       } else {
-        var ipClient = getClientIp(context)
+        const ipClient = getClientIp(context)
         dns.reverse(ipClient, function (error, hostnames) {
           if (error) {
             log.error(error)
             next(new Error('La recherche du reverse de ' + ipClient + ' a échoué'))
           } else {
-            var isSesamath = false
+            let isSesamath = false
             hostnames.forEach(function (hostname) {
               if (/^([^.]+\.)?(dev)?sesamath.net$/.test(hostname)) isSesamath = true
             })
@@ -698,7 +690,7 @@ module.exports = function (component) {
      * @param {personneCallback}  next
      * @memberOf $accessControl
      */
-    $accessControl.login = function (context, personne, next) {
+    function login (context, personne, next) {
       function setSession (error, personne) {
         // met en session le user ou un objet {oid:0} pour mettre en session le fait qu'on est pas authentifié
         if (personne) context.session.user = personne
@@ -718,7 +710,7 @@ module.exports = function (component) {
      * @param {personneCallback}  next
      * @memberOf $accessControl
      */
-    $accessControl.loginFromSesalab = function (context, sesalabUser, baseId, next) {
+    function loginFromSesalab (context, sesalabUser, baseId, next) {
       function setSession (error, personne) {
         log.debug('setSession error', error)
         log.debug('setSession personne', personne)
@@ -733,7 +725,7 @@ module.exports = function (component) {
          * @private
          * @type {Personne}
          */
-        var personne = {
+        const personne = {
           nom: sesalabUser.nom,
           prenom: sesalabUser.prenom,
           email: sesalabUser.mail,
@@ -759,24 +751,9 @@ module.exports = function (component) {
      * @param {Context} context
      * @memberOf $accessControl
      */
-    $accessControl.logout = function (context) {
+    function logout (context) {
       log.debug('déconnexion')
       context.session.user = {}
-    }
-
-    /**
-     * Met à jour le user en session
-     * @param {Context} context
-     * @param {Personne} personne
-     * @return {Personne|undefined} Le user mis à jour (ou l'ancien si les oid correspondait pas)
-     * @memberOf $accessControl
-     */
-    $accessControl.updateCurrentUser = function (context, personne) {
-      var old = $accessControl.getCurrentUser(context)
-      if (old && personne && old.oid === personne.oid) context.session.user = personne
-      else log.error(new Error('updateCurrentUser appelé avec un user qui différent de celui en session'))
-
-      return context.session.user
     }
 
     /**
@@ -784,9 +761,9 @@ module.exports = function (component) {
      * @param {Context}          context
      * @param {personneCallback} next
      */
-    $accessControl.refreshCurrentUser = function (context, next) {
-      if (!$accessControl.isAuthenticated(context)) return next(new Error('refreshCurrentUser appelé sans session'))
-      var pid = $accessControl.getCurrentUserPid(context)
+    function refreshCurrentUser (context, next) {
+      if (!isAuthenticated(context)) return next(new Error('refreshCurrentUser appelé sans session'))
+      const pid = getCurrentUserPid(context)
       $personneRepository.load(pid, function (error, user) {
         if (error) {
           next(error)
@@ -801,6 +778,51 @@ module.exports = function (component) {
       })
     }
 
-    return $accessControl
+    /**
+     * Met à jour le user en session
+     * @param {Context} context
+     * @param {Personne} personne
+     * @return {Personne|undefined} Le user mis à jour (ou l'ancien si les oid correspondait pas)
+     * @memberOf $accessControl
+     */
+    function updateCurrentUser (context, personne) {
+      const old = getCurrentUser(context)
+      if (old && personne && old.oid === personne.oid) context.session.user = personne
+      else log.error(new Error('updateCurrentUser appelé avec un user qui différent de celui en session'))
+
+      return context.session.user
+    }
+
+    return {
+      addToken,
+      checkToken,
+      checkPermission,
+      getCurrentUser,
+      getCurrentUserPid,
+      getCurrentUserGroupesMembre,
+      getCurrentUserGroupesSuivis,
+      getDeniedMessage,
+      getTokenValue,
+      hasAllRights,
+      hasGenericPermission,
+      hasPermission,
+      hasReadPermission,
+      hasRole,
+      isAuthenticated,
+      isAuteur,
+      isContributeur,
+      isGroupeMembre,
+      isGroupeSuivi,
+      isInGroupes,
+      isInGroupesAuteurs,
+      isLanClient,
+      isPublic,
+      isSesamathClient,
+      login,
+      loginFromSesalab,
+      logout,
+      refreshCurrentUser,
+      updateCurrentUser
+    }
   })
 }
