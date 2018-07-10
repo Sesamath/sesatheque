@@ -29,7 +29,7 @@ class ResourceSearch extends Component {
       niveaux: [],
       typePedagogiques: [],
       typeDocumentaires: [],
-      langue: 'fra',
+      langue: '',
       publie: true,
       restriction: 0
     }

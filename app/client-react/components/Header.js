@@ -19,6 +19,7 @@ const getButtons = (personne) => {
   }
 
   return [
+    // @todo vérifier les droits avant de mettre ce bouton
     {
       id: 'buttonAdd',
       title: 'Ajouter une ressource',
@@ -26,6 +27,7 @@ const getButtons = (personne) => {
       icon: 'plus-circle'
     },
     buttonSearch,
+    // @todo idem, ces deux boutons existent sur commun mais pas forcément sur bibli
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
@@ -56,11 +58,16 @@ const Header = ({
     return str.replace('((s))', currentUrl)
   }
 
+  const loginButton = loginLink ? (
+    <a href={setRedirect(loginLink.href)} title="Connexion">
+      <i className="fa fa-sign-in-alt"></i>
+      <span>Connexion</span>
+    </a>
+  ) : null
+
   return (
     <header role="banner">
-      <NavLink
-        to="/"
-      >
+      <NavLink to="/">
         <img src={logoUrl} width="250" height="48" alt="logo" />
       </NavLink>
       <nav
@@ -84,18 +91,9 @@ const Header = ({
           </NavLink>
         ))}
         <div className="auth">
-          {personne === null ? (
-            loginLink ? (
-              <a href={setRedirect(loginLink.href)} title="Connexion">
-                <i className="fa fa-sign-in-alt"></i>
-                <span>Connexion</span>
-              </a>
-            ) : null
-          ) : (
+          {personne === null ? loginButton : (
             <Fragment>
-              <NavLink
-                to="#"
-              >
+              <NavLink to="#">
                 <i className="fa fa-user"></i>
                 <i className="fa fa-ellipsis-v"></i>
               </NavLink>

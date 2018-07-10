@@ -12,8 +12,7 @@ import {
 } from './fields'
 import queryString from 'query-string'
 
-const SearchForm = (props) => {
-  const {handleSubmit, isOpen, toggleForm, query} = props
+const SearchForm = ({handleSubmit, isOpen, toggleForm, query}) => {
   if (isOpen || !query) {
     return (
       <form onSubmit={handleSubmit}>
