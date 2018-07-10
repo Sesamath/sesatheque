@@ -12,8 +12,8 @@ import {
 } from './fields'
 import queryString from 'query-string'
 
-const SearchForm = ({handleSubmit, isOpen, toggleForm, query}) => {
-  if (isOpen || !query) {
+const SearchForm = ({handleSubmit, isOpen, query}) => {
+  if (isOpen) {
     return (
       <form onSubmit={handleSubmit}>
         <fieldset>
@@ -61,19 +61,14 @@ const SearchForm = ({handleSubmit, isOpen, toggleForm, query}) => {
         <hr/>
         <Classification detailed/>
         <div className="buttons-area">
-          <button
-            type="submit"
-            className="btn--primary"
-          >
-            Rechercher
-          </button>
+          <button type="submit" className="btn--primary">Rechercher</button>
         </div>
       </form>
     )
   }
   // sinon on rappelle juste les critères
   return (
-    <ul><a href="#" onClick={toggleForm}>Modifier</a> les critères de recherche actuels
+    <ul><a href="#form">Modifier</a> les critères de recherche actuels
       {Object.keys(query).map(key => (
         <li key={key}>{labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}</li>
       ))}
@@ -91,19 +86,21 @@ const queryToSearch = (query) => {
 
 // pour utiliser Field faut être un redux-form
 const formDef = reduxForm({
+  // cf https://redux-form.com/7.4.2/docs/api/reduxform.md/#-code-enablereinitialize-boolean-code-optional-
+  // sinon le form garde son état interne entre clic sur "mes ressources" puis "rechercher"
+  enableReinitialize: true,
   form: 'searchForm',
-  onSubmit: (query, dispatch, {toggleForm}) => {
+  onSubmit: (query, dispatch) => {
     dispatch(push({
       pathname: '/ressource/rechercher',
+      hash: '#results',
       search: queryToSearch(query)
     }))
-    toggleForm()
   }
 })
 
 SearchForm.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
-  toggleForm: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   query: PropTypes.object
 }

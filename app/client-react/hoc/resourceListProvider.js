@@ -72,6 +72,7 @@ const resourceListProvider = (WrappedComponent) => {
 
   ResourceListProvider.propTypes = {
     // fourni par le connect mapStateToProps (ça vient du router)
+    hash: PropTypes.string,
     search: PropTypes.string,
     // construit à partir du précédent
     query: PropTypes.object,
@@ -155,8 +156,8 @@ const resourceListProvider = (WrappedComponent) => {
   }
 
   // pour récupérer search d'après le router et construire query et queryOptions
-  const mapStateToProps = ({router: {location: {search}}}) => {
-    if (!search) return {search: '', query: null}
+  const mapStateToProps = ({router: {location: {search, hash}}}) => {
+    if (!search) return {hash, search: '', query: null}
     const parsedSearch = queryString.parse(search)
     const query = buildQuery(parsedSearch)
     const queryOptions = buildQueryOptions(parsedSearch)
@@ -164,7 +165,7 @@ const resourceListProvider = (WrappedComponent) => {
     // s'il faut mettre à jour les résultats)
     search = queryString.stringify({...query, ...queryOptions})
 
-    return {query, queryOptions, search}
+    return {hash, query, queryOptions, search}
   }
 
   return connect(mapStateToProps, {})(ResourceListProvider)

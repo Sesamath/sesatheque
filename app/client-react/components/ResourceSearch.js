@@ -1,63 +1,53 @@
 import PropTypes from 'prop-types'
-import React, {Component, Fragment} from 'react'
+import React, {Fragment} from 'react'
 import SearchForm from './SearchForm'
 import ResourceList from './ResourceList'
 import resourceListProvider from '../hoc/resourceListProvider'
 
-class ResourceSearch extends Component {
-  constructor (props) {
-    super(props)
-    // un flag, initialement on affiche la liste si on a une query
-    this.state = {
-      isFormOpen: !props.query
-    }
+const ResourceSearch = (props) => {
+  const {hash, query} = props
+  const defaultFormValues = {
+    categories: [],
+    niveaux: [],
+    typePedagogiques: [],
+    typeDocumentaires: [],
+    langue: '',
+    publie: true,
+    restriction: 0
   }
+  const initialValues = {...defaultFormValues, ...query}
+  // c'est le hash qui impose form / liste, ou à défaut la présence d'une query
+  const isFormOpen = hash === '#form' || (hash !== '#results' && !query)
+  const title = isFormOpen ? 'Recherche' : 'Résultat de la recherche'
 
-  getTitle () {
-    return this.state.isFormOpen ? 'Recherche' : 'Résultat de la recherche'
-  }
-
-  toggleForm () {
-    this.setState({isFormOpen: !this.state.isFormOpen})
-  }
-
-  render () {
-    const {query, search} = this.props
-    const {isFormOpen} = this.state
-    const defaultFormValues = {
-      categories: [],
-      niveaux: [],
-      typePedagogiques: [],
-      typeDocumentaires: [],
-      langue: '',
-      publie: true,
-      restriction: 0
-    }
-    const initialValues = {...defaultFormValues, ...query}
-    return (
-      <Fragment>
-        <h1>{this.getTitle()}</h1>
-        <SearchForm
-          isOpen={isFormOpen}
-          toggleForm={this.toggleForm.bind(this)}
-          query={query}
-          initialValues={initialValues}
-        />
-        {!isFormOpen && search && (<ResourceList {...this.props} />)}
-      </Fragment>
-    )
-  }
+  return (
+    <Fragment>
+      <h1>{title}</h1>
+      <SearchForm
+        isOpen={isFormOpen}
+        query={query}
+        initialValues={initialValues}
+      />
+      {!isFormOpen && (<ResourceList {...props} />)}
+    </Fragment>
+  )
 }
 
 ResourceSearch.propTypes = {
-  // fourni par resourceListProvider
+  /** fourni par le router (hoc resourceListProvider) */
+  hash: PropTypes.string,
+  /** fourni par hoc resourceListProvider (construit à partir de search) */
   query: PropTypes.object,
+  /** fourni par hoc resourceListProvider (construit à partir de search) */
   queryOptions: PropTypes.shape({
     skip: PropTypes.number,
     limit: PropTypes.number
   }),
+  /** fourni par hoc resourceListProvider (qui dispatch le fetch) */
   resources: PropTypes.array,
+  /** La queryString fournie par le router (hoc resourceListProvider) */
   search: PropTypes.string,
+  /** fourni par hoc resourceListProvider (set au retour de l'api) */
   total: PropTypes.number
 }
 

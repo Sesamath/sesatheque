@@ -11,7 +11,7 @@ const getButtons = (personne) => {
   const buttonSearch = {
     id: 'buttonSearch',
     title: 'Recherche',
-    to: '/ressource/rechercher',
+    to: '/ressource/rechercher#form',
     icon: 'search'
   }
   if (personne === null) {
@@ -31,7 +31,7 @@ const getButtons = (personne) => {
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
-      to: `/ressource/rechercher?auteurs=${personne.pid}`,
+      to: `/ressource/rechercher?auteurs=${personne.pid}#results`,
       icon: 'bookmark'
     },
     {

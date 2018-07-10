@@ -13,12 +13,19 @@ const ResourceList = ({
   resources,
   total
 }) => {
-  if (!total) {
+  // query et queryOptions vont toujours ensemble
+  if (!queryOptions) {
+    // pas très normal…
+    console.error(Error('ResourceList appelé sans query'))
     return (
-      <p>Aucune ressource ne correspond à vos critères de recherche</p>
+      <p>Aucun critère de recherche (<a href="#form">rechercher</a>).</p>
     )
   }
-  if (!queryOptions) return null
+  if (!total) {
+    return (
+      <p>Aucune ressource ne correspond à vos critères de recherche (<a href="#form">modifier</a>).</p>
+    )
+  }
   const {skip, limit} = queryOptions
   const last = Math.min(skip + limit, total)
   const hasPages = skip > 0 || last < total
