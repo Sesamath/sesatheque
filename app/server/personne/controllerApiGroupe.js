@@ -52,6 +52,20 @@ module.exports = function (component) {
     const controller = this
 
     /**
+     * Récupère les détails d'un groupe
+     * @route GET /api/groupe/decrire/:nom
+     */
+    controller.get('decrire/:nom', function (context) {
+      flow().seq(function () {
+        $groupeRepository.load(context.arguments.nom, this)
+      }).seq(function (groupe) {
+        $json.sendOk(context, groupe)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+    })
+
+    /**
      * Create un groupe
      * @route GET /api/groupe/add/:nom
      */
