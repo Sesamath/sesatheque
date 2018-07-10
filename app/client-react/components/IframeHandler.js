@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {Field} from 'redux-form'
-import {JsonEditor} from './fields'
+import {JsonField} from './fields'
 
 class IframeHandler extends Component {
   constructor (props) {
@@ -61,15 +60,11 @@ class IframeHandler extends Component {
           </nav>
         ) : null}
         {this.props.allowManualEdition && this.state.manualEdition ? (
-          <div>
-            <label>Script
-              <Field
-                name={this.props.name ||
-                  'parametres'}
-                component={JsonEditor}
-              />
-            </label>
-          </div>
+          <JsonField
+            label="Script"
+            name={this.props.name ||
+              'parametres'}
+          />
         ) : (
           <iframe
             onLoad={this.onLoad.bind(this)}

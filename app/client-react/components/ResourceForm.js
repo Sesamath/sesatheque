@@ -16,6 +16,7 @@ import aliasForker from '../hoc/aliasForker'
 import resourceLoader from '../hoc/resourceLoader'
 import resourceSaver from '../hoc/resourceSaver'
 import NavMenu from './NavMenu'
+import validate from '../utils/validate'
 
 const typeToData = {
   arbre: EditorArbre,
@@ -96,7 +97,7 @@ export default resourceLoader(
   aliasForker(
     resourceSaver(
       renameProp('ressource', 'initialValues')(
-        reduxForm({form: 'ressource'})(ResourceForm)
+        reduxForm({form: 'ressource', validate})(ResourceForm)
       )
     )
   )

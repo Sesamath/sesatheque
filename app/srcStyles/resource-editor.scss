@@ -23,19 +23,19 @@ label {
     font-size: 11pt;
   }
 
-  > &.select::after {
+  &.select::after {
     content: '';
     position: absolute;
-    z-index:2;
-    right:8px;
-    top:50%;
+    z-index: 2;
+    right: 8px;
+    top: 30px;
     margin-top: 8px;
-    height:0;
-    width:0;
-    border-top:6px solid #777;
-    border-left:6px solid transparent;
-    border-right:6px solid transparent;
-    pointer-events:none;
+    height: 0;
+    width: 0;
+    border-top: 6px solid #777;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    pointer-events: none;
   }
 
   textarea {

@@ -1,23 +1,20 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
+import Input from './inputs/Input'
+import addLabel from './hoc/addLabel'
 
-const SwitchField = ({className, label, name}) => (
-  <label className={className}>
-    {label}
-    <Field
-      name={name}
-      component="input"
-      type="checkbox"
-      className="switch"
-    />
-  </label>
+const SwitchField = ({name}) => (
+  <Field
+    name={name}
+    component={Input}
+    type="checkbox"
+    className="switch"
+  />
 )
 
 SwitchField.propTypes = {
-  className: PropTypes.string,
-  label: PropTypes.string,
   name: PropTypes.string
 }
 
-export default SwitchField
+export default addLabel(SwitchField)

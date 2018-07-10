@@ -1,37 +1,37 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
+import MultiSelectInput from './inputs/MultiSelectInput'
+import addLabel from './hoc/addLabel'
 
 const SelectField = ({
-  children,
-  name,
+  disabled,
   label,
-  values,
-  disabled = false
+  multi,
+  name,
+  options,
+  placeholder
 }) => (
-  <label className="select">
-    {label}
-    <Field
-      name={name}
-      component="select"
-      disabled={disabled}
-    >
-      {children}
-      {Object.keys(values).map(key => (
-        <option key={key} value={key}>
-          {values[key]}
-        </option>
-      ))}
-    </Field>
-  </label>
+  <Field
+    placeholder={placeholder || label}
+    name={name}
+    options={options}
+    multi={multi}
+    component={MultiSelectInput}
+    disabled={disabled}
+  />
 )
 
 SelectField.propTypes = {
-  children: PropTypes.node,
-  name: PropTypes.string,
+  disabled: PropTypes.bool,
   label: PropTypes.string,
-  values: PropTypes.object,
-  disabled: PropTypes.bool
+  multi: PropTypes.bool,
+  name: PropTypes.string,
+  options: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.node,
+    label: PropTypes.string
+  })),
+  placeholder: PropTypes.string
 }
 
-export default SelectField
+export default addLabel(SelectField)
