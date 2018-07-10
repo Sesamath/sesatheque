@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
 import React, {Fragment, Component} from 'react'
-import {formValues, Field} from 'redux-form'
+import {formValues} from 'redux-form'
 import IframeHandler from './IframeHandler'
 import iframeHelper from '../hoc/iframeHelper'
-import {IntegerField} from './fields'
+import {IntegerField, SwitchField} from './fields'
 // page de l'éditeur mathgraph à insérer en iframe
 import iframeSrc from '../../client/plugins/mathgraph/mathgraph-editor.html'
 
@@ -65,27 +65,22 @@ class EditorMathGraph extends Component {
       <Fragment>
         <fieldset>
           <div className="grid-3">
-            <label>Largeur imposée <i>laisser vide pour s&apos;adapter à l&apos;écran de l&apos;utilisateur</i>
-              <IntegerField
-                name="parametres[width]"
-                min="300"
-              />
-            </label>
-            <label>Hauteur imposée <i>laisser vide pour s&apos;adapter à l&apos;écran de l&apos;utilisateur</i>
-              <IntegerField
-                name="parametres[height]"
-                min="200"
-              />
-            </label>
-            <label>
-              Affichage adapté &laquo;dys&raquo;
-              <Field
-                name="parametres[dys]"
-                component="input"
-                type="checkbox"
-                className="switch"
-              />
-            </label>
+            <IntegerField
+              label="Largeur imposée"
+              info="laisser vide pour s'adapter à l'écran de l'utilisateur"
+              name="parametres[width]"
+              min="300"
+            />
+            <IntegerField
+              label="Hauteur imposée"
+              info="laisser vide pour s'adapter à l'écran de l'utilisateur"
+              name="parametres[height]"
+              min="200"
+            />
+            <SwitchField
+              label="Affichage adapté &laquo;dys&raquo;"
+              name="parametres[dys]"
+            />
           </div>
           {this.state.showReloadMessage ? (
             <span className="alert--warning">

@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
+import Input from './inputs/Input'
+import addLabel from './hoc/addLabel'
 
 const normalize = (value, previousValue = null) => {
   if (value === '') {
@@ -19,7 +21,7 @@ const IntegerField = ({
   <Field
     name={name}
     normalize={normalize}
-    component="input"
+    component={Input}
     type="number"
     {...otherProps}
   />
@@ -29,4 +31,4 @@ IntegerField.propTypes = {
   name: PropTypes.string
 }
 
-export default IntegerField
+export default addLabel(IntegerField)

@@ -5,6 +5,7 @@ import 'brace'
 import 'brace/mode/json'
 import 'brace/theme/github'
 import 'brace/ext/searchbox'
+import showInvalidField from '../hoc/showInvalidField'
 
 import './JsonEditor.scss'
 
@@ -57,4 +58,4 @@ JsonEditor.propTypes = {
   })
 }
 
-export default JsonEditor
+export default showInvalidField(JsonEditor)

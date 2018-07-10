@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
-import {Field, formValues} from 'redux-form'
+import {formValues} from 'redux-form'
+import {SelectField} from './fields'
 import IframeHandler from './IframeHandler'
 import iframeHelper from '../hoc/iframeHelper'
 // page de l'éditeur ecjs à insérer en iframe
@@ -153,16 +154,17 @@ class EditorEcjs extends Component {
 
   render () {
     // et on retourne select + editor
-    let i = 0
     return (
       <Fragment>
-        <label className="select">
-          Type d’exercice
-          <Field name="parametres[fichierjs]" component="select">
-            <option key={i++} value="">Choisir un type d’exercice</option>
-            {typesEcjs.map(typeEcjs => (<option key={i++} value={typeEcjs}>{typeEcjs}</option>))}
-          </Field>
-        </label>
+        <SelectField
+          label="Type d’exercice"
+          name="parametres[fichierjs]"
+          options={typesEcjs.map(typeEcjs => ({
+            label: typeEcjs,
+            value: typeEcjs
+          }))}
+          placeholder="Choisir un type d’exercice"
+        />
         {this.props.parametres.fichierjs ? (
           <fieldset>
             <IframeHandler

@@ -3,15 +3,23 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {connect} from 'react-redux'
 import {reduxForm} from 'redux-form'
-import {listes, labels} from '../../server/ressource/config'
+import {labels} from '../../server/ressource/config'
+import listes from '../utils/listesFromConfig'
 import Classification from './Classification'
 import {
-  InputField,
-  ResourceTypesField,
   SelectField,
+  InputField,
   SwitchField
 } from './fields'
 import queryString from 'query-string'
+
+const anyOption = {
+  value: '',
+  label: 'peu importe'
+}
+
+const langue = [anyOption, ...listes.langue]
+const type = [anyOption, ...listes.type]
 
 const SearchForm = ({handleSubmit}) => (
   <Fragment>
@@ -26,23 +34,24 @@ const SearchForm = ({handleSubmit}) => (
             name="titre" />
           <SelectField
             label={labels.langue}
-            values={listes.langue}
-            name="langue">
-            <option value="">peu importe</option>
-          </SelectField>
-          <ResourceTypesField
-            label={labels.type}>
-            <option value="">peu importe</option>
-          </ResourceTypesField>
+            name="langue"
+            options={langue}
+          />
+          <SelectField
+            label={labels.type}
+            name="type"
+            options={type}
+          />
           <SelectField
             label={labels.restriction}
-            values={listes.restriction}
-            name="restriction" />
+            name="restriction"
+            options={listes.restriction}
+          />
           <SwitchField
             className="center"
             label={labels.publie}
-            name="publie" />
-
+            name="publie"
+          />
           <InputField
             label={labels.oid}
             name="oid" />

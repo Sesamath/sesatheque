@@ -153,6 +153,15 @@ header {
   }
 }
 
+.alert--danger, .alert--warning {
+  padding: 5px 10px;
+
+  i {
+    margin-right: 5px;
+    color: white;
+  }
+}
+
 @media (max-width: ($medium)) { // tiny et small
   .gt-medium-only,
   header a span,

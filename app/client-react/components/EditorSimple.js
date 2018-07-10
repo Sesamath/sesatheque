@@ -1,15 +1,12 @@
 import React from 'react'
-import {Field} from 'redux-form'
-import {JsonEditor} from './fields'
+import {JsonField} from './fields'
 
 const EditorSimple = () => (
   <fieldset>
-    <label>Paramètres
-      <Field
-        name="parametres"
-        component={JsonEditor}
-      />
-    </label>
+    <JsonField
+      label="Paramètres"
+      name="parametres"
+    />
   </fieldset>
 )
 
