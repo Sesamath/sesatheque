@@ -4288,9 +4288,9 @@ knacss@^7.0.5:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/knacss/-/knacss-7.0.6.tgz#6dd2e3610db586248c742350adad0d30f5a9b276"
 
-"lassi@git+https://framagit.org/Sesamath/lassi.git#2.3.2":
-  version "2.3.2"
-  resolved "git+https://framagit.org/Sesamath/lassi.git#c90d8a550db411ec5139e366bdfc60ff1d5a4e21"
+"lassi@git+https://framagit.org/Sesamath/lassi.git#259c10d":
+  version "2.3.5"
+  resolved "git+https://framagit.org/Sesamath/lassi.git#259c10dc78d8f077cccd47e256e79900d91db5da"
   dependencies:
     ajv "^6.1.1"
     ajv-errors "^1.0.0"
@@ -4313,7 +4313,7 @@ knacss@^7.0.5:
     progress "^2.0.0"
     redis "^2.8.0"
     serve-static "^1.13.1"
-    sesajstools Sesamath/sesajstools
+    sesajstools "git+https://framagit.org/Sesamath/sesajstools.git"
 
 latest-version@^3.0.0:
   version "3.1.0"

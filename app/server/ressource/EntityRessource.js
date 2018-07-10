@@ -129,6 +129,14 @@ module.exports = function (component) {
       .defineIndex('dateCreation', 'date')
       .defineIndex('dateMiseAJour', 'date')
 
+    // les champs à indexer pour le fulltext
+    EntityRessource.defineTextSearchFields([
+      ['titre', 5],
+      ['resume', 2],
+      'description', // poid de 1 par défaut
+      'commentaires' // idem
+    ])
+
     // beforeStore était dans $ressourceRepository, pour des questions de cycle d'injection de dépendances
     // on le ramène ici pour vérifier l'intégrité "interne" de l'entity, en laissant là-bas un beforeSave
     // pour vérifier l'intégrité des relations
