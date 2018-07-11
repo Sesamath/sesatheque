@@ -38,8 +38,8 @@
 
 'use strict'
 /* eslint-env mocha */
-import fakeRessource from '../helpers/fakeRessource'
-import fakePersonne from '../helpers/fakePersonne'
+import fakeRessource from '../fixtures/fakeRessource'
+import fakePersonne from '../fixtures/fakePersonne'
 import flow from 'an-flow'
 
 import boot from './boot'

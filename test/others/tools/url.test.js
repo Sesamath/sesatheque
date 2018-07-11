@@ -34,7 +34,7 @@
 /* global describe,it */
 
 var assert = require('assert')
-var url = require('../../app/server/tools/url')
+var url = require('../../../app/server/tools/url')
 
 // @todo tester toutes les méthodes de url
 

@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom'
 import {getContext} from 'recompose'
 import {version} from '../../../package'
 
-const Footer = ({isIframeLayout}) => {
+export const Footer = ({isIframeLayout}) => {
   if (isIframeLayout) return null
 
   return (

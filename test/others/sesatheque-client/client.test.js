@@ -54,11 +54,11 @@ import ClientItem from 'sesatheque-client/dist/ClientItem'
 
 import {XMLHttpRequest} from 'xmlhttprequest'
 
-import boot from '../boot'
+import boot from '../../server/boot'
 import config from '../../../app/server/config'
 import configRessource from '../../../app/server/ressource/config'
-import {addRessource, getRandomRessource, populate, purge} from '../populate'
-import fakeRessource from '../../helpers/fakeRessource'
+import {addRessource, getRandomRessource, populate, purge} from '../../server/populate'
+import fakeRessource from '../../fixtures/fakeRessource'
 
 chai.use(sinonChai)
 
@@ -149,15 +149,16 @@ describe('sesatheque-client', () => {
 
   // on populate une fois au début, et on purge à la fin
   // inutile ici de le faire à chaque test, c'est le client qu'on teste
-  before(() => boot()
-    .then(({testsDone}) => {
+  before(function () {
+    this.timeout(20000)
+    return boot().then(({testsDone}) => {
       after(purge)
       after(testsDone)
       log.setLogLevel('error')
       sesathequeClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
       return populate()
     })
-  )
+  })
 
   beforeEach(() => {
     consoleErrorSpy = sinon.spy(console, 'error')
