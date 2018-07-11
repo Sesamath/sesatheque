@@ -108,3 +108,31 @@
  * @property {string} name
  * @property {string} value
  */
+
+/**
+ * Une liste de critères de recherche.
+ *
+ * Chaque propriété est l'index sur lequel faire la recherche,
+ * Sa valeur doit toujours être un tableau. S'il est vide on match simplement l'index
+ * (non null dans mongo), sinon les valeurs demandées.
+ * S'il n'y a qu'une valeur de type string et qu'elle contient % on fera du like (à éviter car gourmand, préféren fulltext)
+ *
+ * La clé fulltext est particulière, ça lance un textSearch lassi, en concaténant toutes les valeurs
+ * (donc ['foo', 'bar'] revient au même que ['foo bar'], passer ['"foo bar"'] pour une recherche exacte sur plusieurs mots)
+ * @typedef {Object} searchQuery
+ */
+/**
+ * Options de recherche (skip, limit & orderBy)
+ * @typedef {Object} searchQueryOptions
+ * @param {number} [skip=0] Offset
+ * @param {number} [limit=25] Le nombre max de ressources à remonter
+ * @param {orderByParam[]} [orderBy] La liste éventuelle des clés de tri
+ */
+/**
+ * Indication de tri (on accepte une string pour un tri ascendant)
+ * @typedef orderByParam
+ * @type {Array|string}
+ * @property {string} 0 la clé sur laquelle trier
+ * @property {string} [1=asc] passer 'desc' pour un tri inversé
+ */
+

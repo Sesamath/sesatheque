@@ -134,14 +134,14 @@ function update (url, args, options) {
   if (!args) return url
   if (typeof args !== 'object') return errorHandler('url.update veut un objet en 2e argument', isStrict, url)
   // args ok mais rien à faire
-  if (!Object.keys(args).length) return url
+  if (!options.replace && !Object.keys(args).length) return url
   // faut analyser
   const [base, qs, anchor] = split(url)
   if (options.replace || !qs) return join([base, querystring.stringify(args), anchor])
   // faut un merge
-  const oldParams = querystring.parse(qs)
-  const allParams = Object.assign(oldParams, args)
-  return join([base, querystring.stringify(allParams), anchor])
+  const params = querystring.parse(qs)
+  Object.assign(params, args)
+  return join([base, querystring.stringify(params), anchor])
 }
 
 module.exports = {

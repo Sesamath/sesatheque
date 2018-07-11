@@ -79,10 +79,10 @@ module.exports = function ($accessControl) {
    */
   const sanitizeSearchGroupes = (context, query, warnings) => {
     const wantedGroupes = context.get.groupes
-    const myGroups = getCurrentUserGroupesMembre(context)
-    const canReadAll = hasGenericPermission('read', context)
     // on regarde si y'a un filtre sur des groupes
     if (wantedGroupes) {
+      const myGroups = getCurrentUserGroupesMembre(context)
+      const canReadAll = hasGenericPermission('read', context)
       const groupes = (Array.isArray(wantedGroupes) ? wantedGroupes : wantedGroupes.split(','))
         .map(groupe => groupe.trim())
       if (groupes.length) {
@@ -116,13 +116,13 @@ module.exports = function ($accessControl) {
   const sanitizeSearchPublie = (context, canGrabPrivate, query, warnings) => {
     const wantedPublie = context.get.publie
     if (canGrabPrivate) {
-      if (wantedPublie) query.publie = (wantedPublie === 'true')
+      if (wantedPublie) query.publie = [(wantedPublie === 'true')]
       // sinon on peut ne rien préciser
-    } else if (wantedPublie === 'true') {
-      query.publie = true
     } else {
-      warnings.push('Vous ne pouvez pas chercher de ressources non publiées si vous n’en êtes ni auteur ni contributeur')
-      query.publie = true
+      if (wantedPublie && wantedPublie !== 'true') {
+        warnings.push('Vous ne pouvez pas chercher de ressources non publiées si vous n’en êtes ni auteur ni contributeur')
+      }
+      query.publie = [true]
     }
   }
 
@@ -135,58 +135,50 @@ module.exports = function ($accessControl) {
    * @param {string[]} warnings pour en ajouter le cas échéant
    */
   const sanitizeSearchRestriction = (context, canGrabPrivate, query, warnings) => {
-    const wantedRestriction = context.get.restriction
+    const wantedRestrictions = context.get.restriction
     const canReadCorrection = hasGenericPermission('correction', context)
     // un raccourci d'écriture, obj prop => value (integer)
     const r = configRessource.constantes.restriction
     const defaultRestriction = canGrabPrivate
-      ? r.prive
-      : canReadCorrection ? r.correction : r.aucune
+      ? [] // toutes les valeurs sont permises
+      : canReadCorrection ? [r.aucune, r.correction] : [r.aucune]
     const setDefault = () => {
       if (!canGrabPrivate) query.restriction = defaultRestriction
     }
 
-    switch (wantedRestriction) {
-      case undefined:
-      case '':
-        setDefault()
-        break
+    if (!wantedRestrictions) return setDefault()
+    if (Array.isArray(wantedRestrictions)) throw new Error('restriction n’est pas un tableau')
+    if (!wantedRestrictions.length) return setDefault()
 
-      case `${r.aucune}`:
-        query.restriction = r.aucune
-        break
+    // faut analyser, on passe par un set pour dedup
+    const restrictions = new Set()
+    wantedRestrictions.forEach(wantedRestriction => {
+      switch (wantedRestriction) {
+        case `${r.aucune}`:
+          restrictions.add(r.aucune)
+          break
 
-      case `${r.correction}`:
-        if (canReadCorrection) {
-          query.restriction = r.correction
-        } else {
-          warnings.push('Vous ne pouvez pas consulter les corrections')
-          query.restriction = r.aucune
-        }
-        break
+        case `${r.correction}`:
+          if (canReadCorrection) restrictions.add(r.correction)
+          else warnings.push('Vous ne pouvez pas consulter les corrections')
+          break
 
-      case `${r.groupe}`:
-        if (canGrabPrivate) {
-          query.restriction = r.groupe
-        } else {
-          warnings.push('Vous ne pouvez pas consulter toutes les ressources de tous les groupes, vous devez restreindre aux votres')
-          query.restriction = defaultRestriction
-        }
-        break
+        case `${r.groupe}`:
+          if (canGrabPrivate) restrictions.add(r.groupe)
+          else warnings.push('Vous ne pouvez pas consulter toutes les ressources de tous les groupes, vous devez restreindre aux votres')
+          break
 
-      case `${r.prive}`:
-        if (canGrabPrivate) {
-          query.restriction = r.prive
-        } else {
-          warnings.push('Vous ne pouvez pas consulter de ressource privée autre que les votres (vous devez ajouter un critère pour restreindre à vos ressources)')
-          query.restriction = defaultRestriction
-        }
-        break
+        case `${r.prive}`:
+          if (canGrabPrivate) restrictions.add(r.prive)
+          else warnings.push('Vous ne pouvez pas consulter de ressource privée autre que les votres (vous devez ajouter un critère pour restreindre à vos ressources)')
+          break
 
-      default:
-        warnings.push(`Restriction ${wantedRestriction} inconnue`)
-        setDefault()
-    }
+        default:
+          warnings.push(`Restriction ${wantedRestriction} inconnue`)
+      }
+    })
+    if (restrictions.size) query.restriction = Array.from(restrictions)
+    else setDefault() // la liste passée était foireuse, y'a déjà les warnings
   }
 
   /**
@@ -195,6 +187,14 @@ module.exports = function ($accessControl) {
    * @return {{query, queryOptions: {limit: number, skip: number}, warnings: string[]}}
    */
   const sanitizeSearch = (context) => {
+    function getStringValues (prop) {
+      let values = context.get[prop]
+      if (!values) return
+      if (Array.isArray(values)) return values
+      // forcément une string (c'est du get), donc falsy => string vide
+      return values.split(',').map(value => value.trim()).filter(v => v)
+    }
+
     const warnings = []
     const query = {}
     const queryOptions = getQueryOptions(context, warnings)
@@ -215,25 +215,17 @@ module.exports = function ($accessControl) {
     sanitizeSearchPublie(context, canGrabPrivate, query, warnings)
     sanitizeSearchRestriction(context, canGrabPrivate, query, warnings)
 
-    // auteurs et contributeurs
-    ;['auteurs', 'contributeurs'].forEach(prop => {
-      const wanted = context.get[prop]
-      if (!wanted) return
-      query[prop] = (Array.isArray(wanted) ? wanted : wanted.split(','))
-        .map(pid => pid.trim())
-    })
-    // input single value (tous en string)
-    ;['titre', 'oid', 'origine', 'idOrigine', 'type', 'langue'].forEach(prop => {
-      const value = context.get[prop]
-      if (value) query[prop] = value
-    })
-    // multi
-    ;['categories', 'niveaux', 'typePedagogiques', 'typeDocumentaires'].forEach(prop => {
-      let values = context.get[prop]
+    // input string (à priori single value pour les premiers, multiple autorisé)
+    ;['titre', 'oid', 'origine', 'idOrigine', 'type', 'langue', 'auteurs', 'contributeurs', 'niveaux'].forEach(prop => {
+      const values = getStringValues(prop)
       if (!values) return
-      if (!Array.isArray(values)) values = values.split(',').map(value => value.trim())
-      // niveaux est le seul dont les valeurs sont des string
-      if (prop !== 'niveaux') values = values.map(value => Number(value)).filter(value => Number.isInteger(value))
+      query[prop] = values
+    })
+    // cast en number
+    ;['categories', 'typePedagogiques', 'typeDocumentaires'].forEach(prop => {
+      let values = getStringValues(prop)
+      if (!values) return
+      values = values.map(value => Number(value)).filter(value => Number.isInteger(value))
       if (values.length) query[prop] = values
     })
 

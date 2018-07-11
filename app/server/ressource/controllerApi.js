@@ -47,6 +47,9 @@ const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConv
 const myBaseId = config.application.baseId
 const myBaseUrl = config.application.baseUrl
 
+const {listeMax, listeNbDefault } = configRessource.limites
+if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
+
 /**
  * Ajoute une erreur dans les logs
  * @param {Object} data Si propriété rid ira dans dataError.log (error.log sinon)
@@ -295,25 +298,6 @@ module.exports = function (component) {
         if (total === 0) return sendListe(context, error, [], {total: 0})
         $ressourceRepository.getListe(visibility, args, function (error, ressources) {
           sendListe(context, error, ressources, {total})
-        })
-      })
-    }
-
-    /**
-     * Récupère une liste de résulats de recherche
-     * @param {Context} context
-     * @param {object} params
-     * @param {object} params.query Les critères de recherche
-     * @param {object} params.queryOptions skip & limit
-     * @param {string[]} params.warnings si query a été modifié pour incohérence
-     */
-    function grabSearch (context, params) {
-      $ressourceRepository.grabSearchCount(params, function (error, total) {
-        if (error) return sendListe(context, error)
-        params.total = total
-        if (total === 0) return sendListe(context, null, [], params)
-        $ressourceRepository.grabSearch(params, function (error, ressources) {
-          sendListe(context, error, ressources, params)
         })
       })
     }
@@ -598,23 +582,28 @@ module.exports = function (component) {
      * @param {EntityRessource[]} ressources La liste des ressources
      * @param {object} listOptions
      * @param {object} listOptions.query La query qui a donné cette liste
-     * @param {object} listOptions.queryOptions Les queryOptions (skip & limit) utilisés
+     * @param {object} listOptions.queryOptions Les queryOptions (skip, limit, orderBy) utilisés
      * @param {number} listOptions.total
      * @param {string[]} [listOptions.warnings]
      */
     function sendListe (context, error, ressources, listOptions) {
       if (error) return $json.send(context, error)
+      if (!listOptions) listOptions = {}
+      const query = listOptions.query || {}
+      const queryOptions = listOptions.queryOptions || {}
       const liste = []
       const reponse = listOptions
+      reponse.liste = liste
       if (ressources && ressources.length) {
         if (!reponse.total) reponse.total = ressources.length
         // construction de nextUrl
-        if (ressources.length === listeMax) {
-          const skip = context.get.skip || 0
-          reponse.nextUrl = myBaseUrl + url.update(context.request.originalUrl, {skip})
+        const limit = queryOptions.limit || Number(context.get.limit) || listeNbDefault
+        if (ressources.length === limit) {
+          const skip = (queryOptions.skip || Number(context.get.skip) || 0) + limit
+          reponse.nextUrl = myBaseUrl + (url.update(context.request.originalUrl, {...listOptions.query, skip})).substr(1)
         }
         // on regarde le format reçu en get ou post
-        const format = context.post.format || context.get.format
+        const format = context.post.format || context.get.format || 'ref'
         ressources.forEach(function (ressource) {
           // vérif des droits
           let droits = ''
@@ -751,9 +740,6 @@ module.exports = function (component) {
      } /* */
 
     const controller = this
-
-    const listeMax = configRessource.limites.listeMax
-    if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
 
     /**
      * Passe au suivant pour toutes les requetes OPTIONS (traitées par le middleware cors)
@@ -1226,8 +1212,14 @@ module.exports = function (component) {
     controller.get('search', function (context) {
       // on vérifie les paramètres pour construire query et queryOptions
       const params = $accessControl.sanitizeSearch(context)
-      $json.sendOk(context, params)
-      // grabSearch(context, params)
+      $ressourceRepository.grabSearchCount(params.query, function (error, total) {
+        if (error) return sendListe(context, error)
+        params.total = total
+        if (total === 0) return sendListe(context, null, [], params)
+        $ressourceRepository.grabSearch(params.query, params.queryOptions, function (error, ressources) {
+          sendListe(context, error, ressources, params)
+        })
+      })
     })
 
     /**
