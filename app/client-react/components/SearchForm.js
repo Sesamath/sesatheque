@@ -2,15 +2,23 @@ import {push} from 'connected-react-router'
 import PropTypes from 'prop-types'
 import React from 'react'
 import {reduxForm} from 'redux-form'
-import {listes, labels} from '../../server/ressource/config'
+import {labels} from '../../server/ressource/config'
+import listes from '../utils/listesFromConfig'
 import Classification from './Classification'
 import {
   InputField,
-  ResourceTypesField,
   SelectField,
   SwitchField
 } from './fields'
 import queryString from 'query-string'
+
+const anyOption = {
+  value: '',
+  label: 'peu importe'
+}
+
+const langue = [anyOption, ...listes.langue]
+const type = [anyOption, ...listes.type]
 
 const SearchForm = ({handleSubmit, isOpen, query}) => {
   if (isOpen) {
@@ -22,20 +30,20 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
               className="col-2"
               label={labels.titre}
               info="(Vous pouvez utiliser le symbole % comme caractère joker)"
-              name="titre"/>
+              name="titre" />
             <SelectField
               label={labels.langue}
-              values={listes.langue}
-              name="langue">
-              <option value="">peu importe</option>
-            </SelectField>
-            <ResourceTypesField
-              label={labels.type}>
-              <option value="">peu importe</option>
-            </ResourceTypesField>
+              name="langue"
+              options={langue}
+            />
+            <SelectField
+              label={labels.type}
+              name="type"
+              options={type}
+            />
             <SelectField
               label={labels.restriction}
-              values={listes.restriction}
+              options={listes.restriction}
               name="restriction"/>
             <SwitchField
               className="center"

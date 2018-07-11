@@ -1,12 +1,13 @@
 import React, {Fragment} from 'react'
 import Classification from './Classification'
-import {listes, labels} from '../../server/ressource/config'
+import {labels} from '../../server/ressource/config'
+import listes from '../utils/listesFromConfig'
 import {
-  InputField,
-  ResourceTypesField,
+  DateField,
   SelectField,
   SwitchField,
-  TextareaField
+  TextareaField,
+  InputField
 } from './fields'
 
 const MetaForm = () => (
@@ -16,50 +17,59 @@ const MetaForm = () => (
         <InputField
           className="col-2"
           label={labels.titre}
-          name="titre" />
+          name="titre"
+        />
         <SelectField
           label={labels.langue}
-          values={listes.langue}
-          name="langue" />
-
-        <ResourceTypesField
+          name="langue"
+          options={listes.langue}
+        />
+        <SelectField
           label={labels.type}
-          disabled />
+          name="type"
+          disabled
+          options={listes.type}
+        />
         <SelectField
           label={labels.restriction}
-          values={listes.restriction}
-          name="restriction" />
+          name="restriction"
+          options={listes.restriction}
+        />
         <SwitchField
           className="center"
           label={labels.publie}
-          name="publie" />
-
+          name="publie"
+        />
         <InputField
           label={labels.oid}
           name="oid"
-          disabled />
+          disabled
+        />
         <InputField
           label={labels.origine}
           name="origine"
-          disabled />
+          disabled
+        />
         <InputField
           label={labels.idOrigine}
           name="idOrigine"
-          disabled />
-
+          disabled
+        />
         <InputField
           label={labels.version}
           name="version"
-          disabled />
-        <InputField
+          disabled
+        />
+        <DateField
           label={labels.dateCreation}
           name="dateCreation"
-          disabled />
-        <InputField
+          disabled
+        />
+        <DateField
           label={labels.dateMiseAJour}
           name="dateMiseAJour"
-          disabled />
-
+          disabled
+        />
         <TextareaField
           label={labels.resume}
           name="resume" />

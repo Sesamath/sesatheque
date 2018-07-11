@@ -43,7 +43,7 @@ import faker from 'faker/locale/fr'
 // import Ressource from '../../../app/constructors/Ressource'
 import {getRandomPersonne, getRandomRessource, getRessources, populate, purge} from '../populate'
 import boot from '../boot'
-import fakeRessource from '../../helpers/fakeRessource'
+import fakeRessource from '../../fixtures/fakeRessource'
 import configRessource from '../../../app/server/ressource/config'
 
 // const {clone} = require('sesajstools/utils/object')

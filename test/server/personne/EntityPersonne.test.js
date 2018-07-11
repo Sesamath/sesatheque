@@ -42,7 +42,7 @@
 import {expect} from 'chai'
 import boot from '../boot'
 import flow from 'an-flow'
-import fakePersonne from '../../helpers/fakePersonne'
+import fakePersonne from '../../fixtures/fakePersonne'
 import {getRandomPersonne, populate, purge} from '../populate'
 
 describe('EntityPersonne', () => {

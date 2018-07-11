@@ -1,4 +1,4 @@
 --colors
---require babel-core/register
+--require ./test/initMocha.js
 --reporter spec
 --slow 1500

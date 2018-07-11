@@ -31,17 +31,18 @@
     "lint": "eslint .",
     "maj": "git pull && npm install && npm run build",
     "mongo": "./scripts/mongoApp",
-    "start": "node app/server/start.js",
-    "start:commun": "env SESATHEQUE_CONF=commun node app/server/start.js",
+    "start": "env NODE_ENV=production node app/server/start.js",
+    "start:commun": "env NODE_ENV=production SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm run start:commun & npm start",
-    "start:dev": "webpack-dev-server --hot & npm start",
-    "start:devcommun": "env SESATHEQUE_CONF=commun webpack -d --watch & env SESATHEQUE_CONF=commun npm start",
+    "start:dev": "webpack-dev-server --hot & env NODE_ENV=dev node app/server/start.js",
+    "start:devcommun": "env SESATHEQUE_CONF=commun webpack-dev-server --hot & env NODE_ENV=dev SESATHEQUE_CONF=commun node app/server/start.js",
     "start:test": "env SESATHEQUE_CONF=test node app/server/start.js",
     "start:testBoth": "npm run start:test & npm run start:testCommun",
     "start:testCommun": "env SESATHEQUE_CONF=testCommun node app/server/start.js",
-    "test": "mocha 'test/**/*.test.js'",
-    "test:app": "mocha 'test/app/**/*.test.js'",
-    "test:tools": "mocha --recursive test/tools",
+    "test": "BABEL_ENV=test mocha 'test/**/*.test.js'",
+    "test:react": "BABEL_ENV=test mocha 'test/react/**/*.test.js'",
+    "test:server": "mocha 'test/server/**/*.test.js'",
+    "test:others": "mocha 'test/others/**/*.test.js'",
     "test:watch": "npm test -- --watch",
     "dev": "./scripts/run -sd",
     "prod": "./scripts/run -sp",
@@ -49,6 +50,14 @@
     "watch": "./scripts/run -swl"
   },
   "babel": {
+    "env": {
+      "test": {
+        "presets": [
+          "env",
+          "react"
+        ]
+      }
+    },
     "presets": [
       [
         "env",
@@ -92,6 +101,7 @@
     "morgan": "1.9.0",
     "query-string": "^6.1.0",
     "react": "^16.4.0",
+    "react-ace": "^6.1.4",
     "react-dom": "^16.4.0",
     "react-hot-loader": "^4.3.3",
     "react-paginate": "^5.2.3",
@@ -131,7 +141,6 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-react": "^7.8.2",
     "eslint-plugin-standard": "^3.1.0",
-    "extract-text-webpack-plugin": "^3.0.2",
     "faker": "^3.1.0",
     "file-loader": "^1.1.11",
     "ink-docstrap": "^1.3.0",
@@ -140,11 +149,13 @@
     "jsdoc": "^3.5.5",
     "json-loader": "^0.5.7",
     "jstree": "3.3.4",
-    "mocha": "^5.1.0",
+    "mocha": "^5.2.0",
     "node-sass": "^4.9.0",
     "nodemon": "^1.12.4",
     "postcss-loader": "^2.1.5",
     "pre-push": "^0.1.1",
+    "react-test-renderer": "^16.4.1",
+    "redux-mock-store": "^1.5.3",
     "sass-loader": "^7.0.1",
     "sinon": "^4.5.0",
     "sinon-chai": "^3.0.0",

@@ -31,12 +31,12 @@
 'use strict'
 /* global describe, it */
 
-import Ref from '../../app/constructors/Ref'
-import fakeRef from '../helpers/fakeRef'
-import fakeRessource from '../helpers/fakeRessource'
+import Ref from '../../../app/constructors/Ref'
+import fakeRef from '../../fixtures/fakeRef'
+import fakeRessource from '../../fixtures/fakeRessource'
 // cf http://chaijs.com/api/bdd/
 import {expect} from 'chai'
-import configRessource from '../../app/server/ressource/config'
+import configRessource from '../../../app/server/ressource/config'
 
 const types = Object.keys(configRessource.listes.type)
 // vérif que deux objets sont identiques
