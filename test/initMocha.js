@@ -34,14 +34,15 @@
 // on peut mettre dans mocha.opts un
 // --require babel-core/register
 // mais il faut lui passer des options, on le fait ici et remplace la ligne précédente par
-// --require ./initMocha
+// --require ./test/initMocha
 
 // on veut exclure les node_modules sauf sesatheque-client/src
+// faut retourner true pour que babel ignore le fichier
 const babelIgnoreFilter = (file) => {
   if (/\/node_modules\//.test(file)) {
-    return /\/sesatheque-client\/src\//.test(file)
+    return !/\/sesatheque-client\/src\//.test(file)
   }
-  return true
+  return false
 }
 require('babel-core/register')({
   // faut pas qu'il lise les preset du package.json, sinon ça donne du
@@ -49,11 +50,11 @@ require('babel-core/register')({
   babelrc: false,
   // notre filtre sur les fichiers à traiter
   ignore: babelIgnoreFilter,
+  presets: ['react'],
   // et les plugins qu'il doit utiliser pour que mocha soit content
   plugins: [
     'transform-es2015-modules-commonjs',
     'transform-object-rest-spread',
     'transform-object-assign'
   ]
-  // mais ça plante toujours…
 })

@@ -44,7 +44,7 @@ const getButtons = (personne) => {
   ]
 }
 
-const Header = ({
+export const Header = ({
   isIframeLayout,
   personne,
   loginLink,

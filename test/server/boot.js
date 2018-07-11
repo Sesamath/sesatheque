@@ -42,7 +42,7 @@
 // Ce jeu de test de l'appli est lancé avec les paramètres de _private/test.js
 // (c'est app/config.js qui détecte mocha et utilise ce fichier)
 
-import app from '../../app/server/index'
+import app from '../../app/server'
 import config from '../../app/server/config'
 import anLog from 'an-log'
 // si on a pas de link vers le module on peut pas aller dans src
