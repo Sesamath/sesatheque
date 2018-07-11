@@ -66,8 +66,8 @@ module.exports = function (component) {
     })
 
     /**
-     * Create un groupe
-     * @route GET /api/groupe/add/:nom
+     * Create un groupe en donnant seulement le nom
+     * @route GET /api/groupe/ajouter/:nom
      */
     controller.get('ajouter/:nom', function (context) {
       /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
@@ -210,6 +210,11 @@ module.exports = function (component) {
     })
     controller.options('membre', optionsOk)
 
+    /**
+     * Retourne la liste de tous les groupes du user courant, sous la forme d'un objet
+     * {groupes: {nom: groupe},groupesAdmin: string[], groupesMembre: string[], groupesSuivis: string[]}
+     * @route /api/groupe/perso
+     */
     controller.get('perso', function (context) {
       const pid = $accessControl.getCurrentUserPid(context)
       if (!pid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
