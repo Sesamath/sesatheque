@@ -68,6 +68,7 @@ module.exports = function personneComponentFactory (lassi) {
   require('./controllerGroupe')(personneComponent)
   // pour api/personne
   require('./controllerApiPersonne')(personneComponent)
-  // pour api/groupe
+  // pour api/groupe et api/groupes
   require('./controllerApiGroupe')(personneComponent)
+  require('./controllerApiGroupes')(personneComponent)
 }

@@ -1,7 +1,7 @@
 import {GET} from '../utils/httpMethods'
 
 export const loadGroupes = () => dispatch =>
-  GET('/api/groupe/perso')
+  GET('/api/groupes/perso')
     .then(({success, error, ...groupes}) => {
       if (success) {
         return dispatch({
@@ -14,7 +14,7 @@ export const loadGroupes = () => dispatch =>
     })
 
 export const addGroupe = () => dispatch =>
-  GET('/api/groupe/perso')
+  GET('/api/groupes/perso')
     .then(({success, error, ...groupes}) => {
       if (success) {
         return dispatch({

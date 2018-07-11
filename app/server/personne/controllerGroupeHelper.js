@@ -57,13 +57,9 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @returns {string} undefined si groupe n'est ni une string ni un objet avec une propriété nom
    */
   function getNom (groupe) {
-    var nom
-    if (groupe) {
-      if (groupe.nom) nom = groupe.nom
-      else if (typeof groupe === 'string') nom = groupe
-    }
-    if (!nom) log.error('getNom appelé avec un paramètre incorrect', groupe)
-    return nom
+    if (typeof groupe === 'string') return groupe
+    if (groupe && groupe.nom) return groupe.nom
+    log.error('getNom appelé avec un paramètre incorrect', groupe)
   }
 
   /**

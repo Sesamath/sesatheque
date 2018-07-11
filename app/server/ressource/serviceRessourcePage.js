@@ -83,7 +83,7 @@ module.exports = function (component) {
       // on boucle sur les groupes voulus
       flow(allGroupes).seqEach(function (groupeNom) {
         var suivant = this
-        $groupeRepository.load(groupeNom, function (error, groupe) {
+        $groupeRepository.loadByNom(groupeNom, function (error, groupe) {
           try {
             if (error) {
               log.error(error)
@@ -283,7 +283,7 @@ module.exports = function (component) {
         // auteurs ou contributeurs ou groupes
         _.each(selectedValues, function (value) {
           if (key === 'groupes') {
-            $groupeRepository.load(value, function (error, groupe) {
+            $groupeRepository.loadByNom(value, function (error, groupe) {
               if (error) log.error(error)
               if (groupe) addChoice(groupe.nom, value)
             })
