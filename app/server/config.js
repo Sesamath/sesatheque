@@ -72,6 +72,7 @@ if (typeof window !== 'undefined') {
 /**
  * L'environnement d'execution est récupéré par NODE_ENV
  * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
+ * (ou test si on est lancé par mocha)
  */
 const staging = (process.env.NODE_ENV === 'production') ? 'prod' : (process.argv[1].indexOf('mocha') !== -1) ? 'test' : 'dev'
 

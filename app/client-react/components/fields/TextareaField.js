@@ -1,19 +1,21 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
+import addLabel from './hoc/addLabel'
 
-const TextareaField = ({label, name}) => (
-  <label>
-    {label}
-    <Field
-      name={name}
-      component="textarea" />
-  </label>
+const TextareaField = ({name, label, ...otherProps}) => (
+  <Field
+    name={name}
+    component="textarea"
+    placeholder={label}
+    {...otherProps}
+  />
 )
 
 TextareaField.propTypes = {
-  label: PropTypes.string,
-  name: PropTypes.string
+  otherProps: PropTypes.object,
+  name: PropTypes.string,
+  label: PropTypes.string
 }
 
-export default TextareaField
+export default addLabel(TextareaField)
