@@ -32,9 +32,7 @@
 'use strict'
 
 const flow = require('an-flow')
-const Ref = require('../../constructors/Ref')
 const {getNormalizedGrabOptions} = require('../lib/grab')
-const {update: urlUpdate} = require('../lib/url')
 const baseUrl = require('../lib/config')
 
 /**
@@ -74,7 +72,13 @@ module.exports = function (component) {
         initRessourceRepository()
         $ressourceRepository.fetchPublishedInGroup(groupe.nom, {limit, skip}, this)
       }).seq(function ({ressources}) {
-        data.ressources = ressources.map(r => new Ref(r))
+        data.ressources = ressources.map(
+          ({oid, titre, type}) => ({
+            oid,
+            titre,
+            type
+          })
+        )
         // on ajoute les liens suivant et précédent
         const url = `${baseUrl}api/liste/groupe/${encodeURIComponent(data.nom)}`
         if (ressources.length === limit) {

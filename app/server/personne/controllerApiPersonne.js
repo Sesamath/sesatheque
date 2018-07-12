@@ -128,6 +128,7 @@ module.exports = function (component) {
       const response = {}
       if ($accessControl.isAuthenticated(context)) {
         const {
+          oid,
           pid,
           nom,
           prenom,
@@ -135,6 +136,7 @@ module.exports = function (component) {
           groupesSuivis
         } = $accessControl.getCurrentUser(context)
         response.personne = {
+          oid,
           pid,
           nom,
           prenom,

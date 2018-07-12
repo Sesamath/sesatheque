@@ -198,7 +198,6 @@ module.exports = function (component) {
      * @route GET /api/groupes/ouverts
      */
     controller.get('ouverts', function (context) {
-      var groupesAdmin = []
       var pid = $accessControl.getCurrentUserPid(context)
       if (pid) {
         flow().seq(function () {
@@ -220,7 +219,6 @@ module.exports = function (component) {
      * @route GET /api/groupes/publics
      */
     controller.get('publics', function (context) {
-      var groupesAdmin = []
       var pid = $accessControl.getCurrentUserPid(context)
       if (pid) {
         flow().seq(function () {

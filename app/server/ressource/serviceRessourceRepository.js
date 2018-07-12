@@ -58,7 +58,7 @@ const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 module.exports = function (ressourceComponent) {
   ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
     // on applique toujours un limit
-    const {listeMax, listeNbDefault} = config.limites
+    const {listeMax} = config.limites
     if (!listeMax) throw new Error('ressource.limites.listeMax manquant en configuration')
 
     /**
