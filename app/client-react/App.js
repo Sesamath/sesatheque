@@ -18,6 +18,8 @@ import Notifications from './components/Notifications'
 import Groupes from './components/Groupes'
 import GroupeEdition from './components/GroupeEdition'
 import GroupeDescription from './components/GroupeDescription'
+import GroupesOuverts from './components/GroupesOuverts'
+import GroupesPublics from './components/GroupesPublics'
 import {getCurrentSession} from './actions/session'
 import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
@@ -46,6 +48,8 @@ const App = () => (
             <Route exact path="/groupe/editer" component={GroupeEdition} />
             <Route exact path="/groupe/voir/:groupe" component={GroupeDescription} />
             <Route exact path="/groupe/editer/:groupe" component={GroupeEdition} />
+            <Route exact path="/groupe/ouvert" component={GroupesOuverts} />
+            <Route exact path="/groupe/public" component={GroupesPublics} />
           </Switch>
         </div>
         <Footer />

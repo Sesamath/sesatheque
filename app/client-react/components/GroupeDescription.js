@@ -3,11 +3,13 @@ import React, {Fragment} from 'react'
 import groupeLoader from '../hoc/groupeLoader'
 
 const GroupeDescription = ({
-  description,
-  gestionnaires,
-  nom,
-  public: publique,
-  ouvert
+  groupe: {
+    description,
+    gestionnaires,
+    nom,
+    public: publique,
+    ouvert
+  }
 }) => (
   <Fragment>
     <h1>Description du groupe</h1>

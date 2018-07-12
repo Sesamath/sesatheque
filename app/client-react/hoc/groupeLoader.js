@@ -32,7 +32,7 @@ const groupeLoader = (WrappedComponent) => {
       if (this.state === null) return null
 
       return (
-        <WrappedComponent {...this.props} {...this.state}/>
+        <WrappedComponent {...this.props} groupe={this.state}/>
       )
     }
   }
