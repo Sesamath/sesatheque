@@ -201,11 +201,13 @@ module.exports = function (component) {
      */
     controller.get('byNom/:nom', function (context) {
       const {nom} = context.arguments
+      const isFullFormat = context.get.format === 'full'
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (groupe) {
         if (!groupe) return $json.notFound(context, `Le groupe « ${nom} » n’existe pas`)
-        $json.sendOk(context, groupe)
+        if (isFullFormat) addInfos(context, groupe)
+        else $json.sendOk(context, groupe)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
