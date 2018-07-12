@@ -31,44 +31,28 @@
 
 'use strict'
 
-/* global describe,it */
+const {listeMax, listeNbDefault} = require('./config')
 
-var assert = require('assert')
-var CounterMulti = require('../../app/server/lib/CounterMulti')
+/**
+ * Normalise {skip, limit} et le retourne
+ * @param {Object} [options]
+ * @param {number} [options.limit]
+ * @param {number} [options.skip]
+ * @return {{limit: number, skip: number}}
+ */
+function getNormalizedGrabOptions (options) {
+  if (!options || typeof options !== 'object') return {limit: listeNbDefault, skip: 0}
+  const grabOptions = {}
+  // on peut nous passer des strings
+  const limit = Number(options.limit)
+  const skip = Number(options.skip)
 
-describe('CounterMulti', function () {
-  var cm = new CounterMulti()
-  it('construct retourne un objet avec une propriété length de 0', function () {
-    assert.strictEqual(0, cm.length)
-  })
-  it('inc incrémente ', function () {
-    cm.inc('foo')
-    cm.inc('foo')
-    cm.inc('bar')
-    assert.strictEqual(2, cm.length)
-    assert.strictEqual(2, cm.foo)
-    assert.strictEqual(1, cm.bar)
-  })
-  it('dec décrémente ', function () {
-    cm.dec('foo')
-    cm.dec('baz')
-    assert.strictEqual(3, cm.length)
-    assert.strictEqual(1, cm.foo)
-    assert.strictEqual(-1, cm.baz)
-  })
-  it('delete efface ', function () {
-    cm.delete('foo')
-    assert.strictEqual(2, cm.length)
-    assert.strictEqual(undefined, cm.foo)
-  })
-  it('resetLength recalcule la longueur si on ajoute manuellement des compteurs', function () {
-    cm.foo = 4
-    cm.resetLength()
-    assert.strictEqual(3, cm.length)
-  })
-  it('total additionne tout', function () {
-    assert.strictEqual(4, cm.total())
-    cm.delete('baz')
-    assert.strictEqual(5, cm.total())
-  })
-})
+  grabOptions.limit = (Number.isInteger(limit) && limit > 0 && limit < listeMax) ? limit : listeNbDefault
+  grabOptions.skip = (Number.isInteger(skip) && skip >= 0) ? skip : 0
+
+  return grabOptions
+}
+
+module.exports = {
+  getNormalizedGrabOptions
+}

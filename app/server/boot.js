@@ -32,7 +32,7 @@
 'use strict'
 const lassi = require('lassi')
 const config = require('./config')
-const log = require('./tools/log.js')
+const log = require('./lib/log.js')
 const {merge} = require('sesajstools/utils/object')
 
 let lassiInstance

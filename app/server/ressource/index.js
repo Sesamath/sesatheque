@@ -55,6 +55,7 @@ module.exports = function ressourceComponentFactory (lassi) {
   require('./controllerPublic')(ressourceComponent)
   // l'api json
   require('./controllerApi')(ressourceComponent)
+  require('./controllerApiListe')(ressourceComponent)
 
   // import calculatice
   require('./controllerImportEc')(ressourceComponent)
