@@ -18,14 +18,15 @@ const groupeLoader = (WrappedComponent) => {
     componentDidMount () {
       const {match: {params: {groupe}}} = this.props
       if (!groupe) {
+        const {oid} = this.props.personne
         return this.setState({
           ouvert: false,
           public: true,
-          gestionnaires: ['me']
+          gestionnaires: [oid]
         })
       }
 
-      GET(`/api/groupe/byNom/${groupe}`)
+      GET(`/api/groupe/byNom/${groupe}?format=full`)
         .then((groupe) => this.setState(groupe))
         .catch(error => console.log(error))
     }
@@ -40,7 +41,8 @@ const groupeLoader = (WrappedComponent) => {
   }
 
   GroupeLoader.propTypes = {
-    match: PropTypes.shape({})
+    match: PropTypes.shape({}),
+    personne: PropTypes.object
   }
 
   return GroupeLoader

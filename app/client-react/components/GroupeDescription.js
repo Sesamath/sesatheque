@@ -1,14 +1,17 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {NavLink} from 'react-router-dom'
 import groupeLoader from '../hoc/groupeLoader'
 
 const GroupeDescription = ({
   groupe: {
     description,
     gestionnaires,
+    gestionnairesNames,
     nom,
-    public: publique,
-    ouvert
+    public: publicStatus,
+    ouvert,
+    ressources
   }
 }) => (
   <Fragment>
@@ -32,7 +35,7 @@ const GroupeDescription = ({
           </Fragment>)}
         </li>
         <li>Public :&nbsp;
-          {publique ? (<Fragment>
+          {publicStatus ? (<Fragment>
             oui <span className="remarque">(tout le monde peut suivre les publications)</span>
           </Fragment>) : (<Fragment>
             non <span className="remarque">(seuls les membres peuvent suivre les publications)</span>
@@ -42,8 +45,8 @@ const GroupeDescription = ({
           <ul>
             Gestionnaire(s) :&nbsp;
             <span className="remarque">Les gestionnaires peuvent modifier les propriétés du groupe et y ajouter des membres</span>
-            {gestionnaires.map(pid => (
-              <li key={pid}>Fill complete name <span className="remarque">{pid}</span>
+            {gestionnaires.map((pid, index) => (
+              <li key={pid}>{gestionnairesNames[index]} <span className="remarque">{pid}</span>
               </li>
             ))}
           </ul>
@@ -51,12 +54,37 @@ const GroupeDescription = ({
         <li>
           Ressources publiées dans ce groupe
           <ul className="liste">
-            <p>To be done!!</p>
+            {(ressources.length && ressources.map(({
+              titre,
+              type,
+              oid
+            }) => (
+              <li key={oid}>
+                <img src={`/plugins/${type}/${type}.gif`} />{oid} : {titre}
+                <span className="links">
+                  (
+                  <NavLink to={`/ressource/decrire/${oid}`}>
+                    description
+                  </NavLink>,
+                  <NavLink to={`/ressource/apercevoir/${oid}`}>
+                    aperçu
+                  </NavLink>,
+                  <NavLink to={`/ressource/voir/${oid}`} target="_blank">
+                    voir en pleine page
+                  </NavLink>
+                  )
+                </span>
+              </li>
+            ))) || (<p>Aucune ressource</p>)}
           </ul>
         </li>
       </ul>
     </div>
   </Fragment>
 )
+
+GroupeDescription.propTypes = {
+  groupe: PropTypes.shape({})
+}
 
 export default groupeLoader(GroupeDescription)

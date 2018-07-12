@@ -5,6 +5,23 @@ import groupesLoader from '../hoc/groupesLoader'
 
 import './Groupes.scss'
 
+const toDetailedList = (groupes = [], ref, pid) => {
+  const res = []
+  groupes.forEach(nom => {
+    const groupe = ref[nom]
+    if (pid) {
+      res.push({
+        ...groupe,
+        owned: groupe.gestionnaires.includes(pid)
+      })
+    } else {
+      res.push(groupe)
+    }
+  })
+
+  return res
+}
+
 const Groupes = ({pid, groupes: {
   groupesAdmin,
   groupesMembre,
@@ -22,25 +39,22 @@ const Groupes = ({pid, groupes: {
       </NavLink>
     </p>
     <ul className="liste">
-      {(groupesAdmin || []).map(
-        nom => {
-          const {
-            description,
-            ouvert,
-            public: publicStatus
-          } = groupes[nom]
-
-          return (
-            <li key={nom}> {nom} ({ouvert ? 'ouvert' : 'fermé'} {publicStatus ? 'public' : 'privé'})
-              <span className="links">
-                <NavLink to={`/groupe/editer/${nom}`}>Modifier</NavLink>
-                <NavLink to={`/groupe/supprimer/${nom}`}>Supprimer</NavLink>
-                <NavLink to={`/groupe/voir/${nom}`}>Voir</NavLink>
-              </span>
-              <pre>{description}</pre>
-            </li>
-          )
-        }
+      {(toDetailedList(groupesAdmin, groupes)).map(
+        ({
+          nom,
+          description,
+          ouvert,
+          public: publicStatus
+        }) => (
+          <li key={nom}> {nom} ({ouvert ? 'ouvert' : 'fermé'} {publicStatus ? 'public' : 'privé'})
+            <span className="links">
+              <NavLink to={`/groupe/editer/${encodeURIComponent(nom)}`}>Modifier</NavLink>
+              <NavLink to={`/groupe/supprimer/${encodeURIComponent(nom)}`}>Supprimer</NavLink>
+              <NavLink to={`/groupe/voir/${encodeURIComponent(nom)}`}>Voir</NavLink>
+            </span>
+            <pre>{description}</pre>
+          </li>
+        )
       )}
     </ul>
     <h2>Groupes dont je suis membre</h2>
@@ -49,30 +63,26 @@ const Groupes = ({pid, groupes: {
       <span className="remarque">(pour éventuellement en devenir membre)</span>
     </p>
     <ul className="liste">
-      {(groupesMembre || []).map(
-        nom => {
-          const {
-            description,
-            gestionnaires
-          } = groupes[nom]
-
-          const owned = gestionnaires.includes(pid)
-
-          return (
-            <li key={nom}> {nom}
-              <span className="links">
-                {owned ? (<Fragment>
-                  <NavLink to={`/groupe/editer/${nom}`}>Modifier</NavLink>
-                  <NavLink to={`/groupe/supprimer/${nom}`}>Supprimer</NavLink>
-                </Fragment>) : (<NavLink
-                  to={`/groupe/quitter/${nom}`}>Quitter
-                </NavLink>)}
-                <NavLink to={`/groupe/voir/${nom}`}>Voir</NavLink>
-              </span>
-              <pre>{description}</pre>
-            </li>
-          )
-        }
+      {(toDetailedList(groupesMembre, groupes, pid)).map(
+        ({
+          nom,
+          description,
+          gestionnaires,
+          owned
+        }) => (
+          <li key={nom}> {nom}
+            <span className="links">
+              {owned ? (<Fragment>
+                <NavLink to={`/groupe/editer/${encodeURIComponent(nom)}`}>Modifier</NavLink>
+                <NavLink to={`/groupe/supprimer/${encodeURIComponent(nom)}`}>Supprimer</NavLink>
+              </Fragment>) : (<NavLink
+                to={`/groupe/quitter/${encodeURIComponent(nom)}`}>Quitter
+              </NavLink>)}
+              <NavLink to={`/groupe/voir/${encodeURIComponent(nom)}`}>Voir</NavLink>
+            </span>
+            <pre>{description}</pre>
+          </li>
+        )
       )}
     </ul>
     <h2>Groupes suivis</h2>
@@ -82,21 +92,18 @@ const Groupes = ({pid, groupes: {
       </span>
     </p>
     <ul className="liste">
-      {(groupesSuivis || []).map(
-        nom => {
-          const {
-            description
-          } = groupes[nom]
-
-          return (
-            <li key={nom}> {nom}
-              <span className="links">
-                <NavLink to={`/groupe/voir/${nom}`}>Voir</NavLink>
-              </span>
-              <pre>{description}</pre>
-            </li>
-          )
-        }
+      {(toDetailedList(groupesSuivis, groupes)).map(
+        ({
+          nom,
+          description
+        }) => (
+          <li key={nom}> {nom}
+            <span className="links">
+              <NavLink to={`/groupe/voir/${encodeURIComponent(nom)}`}>Voir</NavLink>
+            </span>
+            <pre>{description}</pre>
+          </li>
+        )
       )}
     </ul>
   </Fragment>)

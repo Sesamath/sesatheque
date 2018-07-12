@@ -1,44 +1,21 @@
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {renameProp} from 'recompose'
-import {reduxForm, Field, FieldArray, formValues} from 'redux-form'
+import {reduxForm} from 'redux-form'
 import {
   SwitchField,
   InputField,
-  TextareaField
+  TextareaField,
+  SelectField
 } from './fields'
+import ensureLogged from '../hoc/ensureLogged'
 import groupeLoader from '../hoc/groupeLoader'
-
-const renderMembers = ({
-  fields,
-  meta: { error, submitFailed },
-  grou,
-  initial
-}) => (
-  <ul>
-    <button type="button" onClick={() => fields.push('')}>
-      Ajouter un gestionnaire
-    </button>
-    {fields.map((member, index) => (
-      <li key={index}>
-        <h4>Gestionnaire #{index + 1}</h4>
-        <Field
-          name={member}
-          type="text"
-          component="input"
-          disabled={initial[index]}
-        />
-      </li>
-    ))}
-  </ul>
-)
-
 
 const GroupeEdition = ({
   initialValues: {oid, gestionnaires},
   handleSubmit,
   submitting,
-  grou
+  personne
 }) => (
   <Fragment>
     <h1>{oid ? 'Modifier un groupe' : 'Ajouter un groupe'}</h1>
@@ -65,16 +42,24 @@ const GroupeEdition = ({
             name="public"
             label="Public"
           />
-          <span className="remarque">(Tout le monde pourra s'inscrire au suivi des publications du groupe)</span>
+          <span className="remarque">(Tout le monde pourra s&apos;inscrire au suivi des publications du groupe)</span>
         </div>
         <label>
           Ajouter des gestionnaires
-          <span className="remarque">(L'ajout est irrévocable. Entrer un ou des identifiants séparés par des espaces, la confirmation sera demandée sur la page suivante avec les noms affichés)</span>
-          <FieldArray
+          <span className="remarque">(L&apos;ajout est irrévocable. Entrer un ou des identifiants séparés par des espaces, la confirmation sera demandée sur la page suivante avec les noms affichés)</span>
+
+          <SelectField
+            clearable={false}
             name="gestionnaires"
-            component={renderMembers}
-            initial={gestionnaires}
-            current={grou}
+            options={[{
+              value: personne.oid,
+              label: `${personne.nom} ${personne.prenom} (${personne.oid})`,
+              clearableValue: false
+            }, {
+              value: 'sfsfee43ewrsf',
+              label: 'Marie Totote (wewedaa3434)'
+            }]}
+            multi
           />
         </label>
       </fieldset>
@@ -92,13 +77,22 @@ const GroupeEdition = ({
   </Fragment>
 )
 
-export default groupeLoader(
-  renameProp('groupe', 'initialValues')(
-    reduxForm({
-      form: 'groupe-edition',
-      onSubmit: (values) => {console.log(values)}
-    })(
-      formValues({grou: 'gestionnaires'})(GroupeEdition)
+GroupeEdition.propTypes = {
+  initialValues: PropTypes.object,
+  handleSubmit: PropTypes.func,
+  submitting: PropTypes.bool,
+  personne: PropTypes.object
+}
+
+export default ensureLogged(
+  groupeLoader(
+    renameProp('groupe', 'initialValues')(
+      reduxForm({
+        form: 'groupe-edition',
+        onSubmit: (values) => { console.log(values) }
+      })(
+        GroupeEdition
+      )
     )
   )
 )
