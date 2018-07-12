@@ -304,14 +304,14 @@ module.exports = function (component) {
      * @route GET /api/liste/all
      * @param {requeteListe}
      */
-    controller.get('liste/all', getListeAll)
+    controller.get('all', getListeAll)
     /**
      * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
      * Retourne {@link reponseListe}
      * @route POST /api/liste/all
      * @param {requeteListe}
      */
-    controller.post('liste/all', getListeAll)
+    controller.post('all', getListeAll)
     /**
      * Ajoute aux headers cors habituels le header
      * Access-Control-Allow-Methods', 'POST, OPTIONS'
@@ -324,21 +324,20 @@ module.exports = function (component) {
      * @route GET /api/liste/auteurs
      * @param {string} pids la liste de pids séparés par des virgules
      */
-    controller.get('liste/auteurs', getListeAuteurs)
+    controller.get('auteurs', getListeAuteurs)
 
     /**
      * Récupère la liste des ressources d'un groupe
      * Retourne {@link reponseListe}
      * @route GET /api/liste/groupe/:nom
      */
-    controller.get('liste/groupe/:nom', function (context) {
+    controller.get('groupe/:nom', function (context) {
       const {nom} = context.arguments
       const options = getNormalizedGrabOptions(context.get)
-      $ressourceRepository.fetchPublishedInGroup(nom, options, (error, {total, ressources}) => {
-        if (error || !total) return sendListe(context, error, [], 0)
-        $ressourceRepository.getListe(arg, options, function (error, ressources) {
-          sendListe(context, error, ressources, total)
-        })
+      $ressourceRepository.fetchPublishedInGroup(nom, options, (error, data) => {
+        if (error) return sendListe(context, error, [], 0)
+        const {total, ressources} = data
+        sendListe(context, error, ressources, total)
       })
     })
 
@@ -348,13 +347,13 @@ module.exports = function (component) {
      * @route GET /api/liste/perso
      * @param {requeteListe}
      */
-    controller.get('liste/perso', getListePerso)
+    controller.get('perso', getListePerso)
     /**
      * Cherche parmi les ressources du user courant (qui doit être connecté avant), retourne {@link reponseListe}
      * @route POST /api/liste/perso
      * @param {requeteListe}
      */
-    controller.post('liste/perso', getListePerso)
+    controller.post('perso', getListePerso)
     /**
      * Pour le preflight, ajoute les headers allow… si autorisé
      * @route OPTIONS /api/liste/perso
@@ -366,13 +365,13 @@ module.exports = function (component) {
      * @route GET /api/liste/prof
      * @param {requeteListe}
      */
-    controller.get('liste/prof', getListeProf)
+    controller.get('prof', getListeProf)
     /**
      * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
      * @route POST /api/liste/prof
      * @param {requeteListe}
      */
-    controller.post('liste/prof', getListeProf)
+    controller.post('prof', getListeProf)
     /**
      * Pour le preflight, ajoute aux headers cors habituels le header
      *   Access-Control-Allow-Methods:POST OPTIONS
@@ -384,13 +383,13 @@ module.exports = function (component) {
      * @route GET /api/liste/public
      * @param {requeteListe}
      */
-    controller.get('liste/public', getListePublic)
+    controller.get('public', getListePublic)
     /**
      * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
      * @route POST /api/liste/public
      * @param {requeteListe}
      */
-    controller.post('liste/public', function (context) {
+    controller.post('public', function (context) {
       grabListe(context, 'public')
     })
     /**
