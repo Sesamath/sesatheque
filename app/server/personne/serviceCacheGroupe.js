@@ -32,7 +32,6 @@
 'use strict'
 
 const flow = require('an-flow')
-const _ = require('lodash')
 const tools = require('../lib/tools')
 
 module.exports = function (component) {
@@ -48,18 +47,9 @@ module.exports = function (component) {
       // si on tombait un jour sur une clé sortie de sanitizeHashKey qui plaisait pas à memcache,
       // utiliser un md5 du nom avec
       // key = crypto.createHash('md5').update(data).digest('hex')
-      if (_.isString(groupe)) key = 'groupe_' + tools.sanitizeHashKey(groupe)
+      if (typeof groupe === 'string') key = 'groupe_' + tools.sanitizeHashKey(groupe)
       else if (groupe && groupe.nom) key = 'groupe_' + tools.sanitizeHashKey(groupe.nom)
       return key
-    }
-
-    /**
-     * Une callback qui ne fait rien sinon logguer une éventuelle erreur
-     * @param {Error} [error]
-     * @private
-     */
-    function logIfError (error) {
-      if (error) log.error(error)
     }
 
     const ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
@@ -103,13 +93,13 @@ module.exports = function (component) {
      * @param {errorCallback} [next]
      * @memberOf $cacheGroupe
      */
-    function set (groupe, next = logIfError) {
+    function set (groupe, next = log.ifError) {
       if (groupe && groupe.nom) {
         // ça plante sur certains noms, try/catch sert à rien car async
         const key = getKey(groupe)
         flow().seq(function () {
           $cache.set(key, groupe, ttl, this)
-          if (groupe.oid) $cache.set(`groupe_${groupe.oid}`, groupe, ttl, logIfError)
+          if (groupe.oid) $cache.set(`groupe_${groupe.oid}`, groupe, ttl, log.ifError)
         }).seq(function () {
           if (next) next()
         }).catch(function (error) {
@@ -131,7 +121,7 @@ module.exports = function (component) {
      * @param {errorCallback} [next]
      * @memberOf $cacheGroupe
      */
-    function deleteGroupe (groupe, next = logIfError) {
+    function deleteGroupe (groupe, next = log.ifError) {
       const key = getKey(groupe)
       if (key) $cache.delete(key, next)
       else next(new Error('groupe invalide'))

@@ -308,6 +308,14 @@ log.error = function (message, objectToDump, filter) {
 }
 
 /**
+ * log.error si error, rien sinon
+ * @param {Error|string} [error]
+ */
+log.ifError = function (error) {
+  if (error) log.error(error)
+}
+
+/**
  * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données (config.logs.dataError)
  * @memberOf log
  * @param message
