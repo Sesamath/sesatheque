@@ -6,7 +6,7 @@ import config from '../../server/config'
 const MESSAGE_CHANNEL = 'message'
 const SOURCE = config.application && config.application.baseUrl
 
-class IframeHandler extends Component {
+class IframeWithMessageHandler extends Component {
   constructor (props) {
     super(props)
 
@@ -130,7 +130,7 @@ class IframeHandler extends Component {
   }
 }
 
-IframeHandler.propTypes = {
+IframeWithMessageHandler.propTypes = {
   allowManualEdition: PropTypes.bool,
   // onMessage: PropTypes.func,
   src: PropTypes.string,
@@ -140,4 +140,4 @@ IframeHandler.propTypes = {
   manualEdition: PropTypes.bool
 }
 
-export default IframeHandler
+export default IframeWithMessageHandler
