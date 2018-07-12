@@ -32,7 +32,7 @@
 
 const flow = require('an-flow')
 const request = require('request')
-const {getAllParams, getParam} = require('../../tools/url')
+const {getAllParams, getParam} = require('../../lib/url')
 const {refreshArbres} = require('../../cli/refreshArbres')
 
 const name = 'Essaie de remplacer les pages externes vers une visionneuse par la ressource quand elle existe (puis màj arbres)'

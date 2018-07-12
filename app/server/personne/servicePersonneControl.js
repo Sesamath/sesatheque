@@ -33,7 +33,7 @@
 var flow = require('an-flow')
 var _ = require('lodash')
 var sjt = require('sesajstools')
-var rTools = require('../tools/ressource')
+var rTools = require('../lib/ressource')
 
 module.exports = function (component) {
   component.service('$personneControl', function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {

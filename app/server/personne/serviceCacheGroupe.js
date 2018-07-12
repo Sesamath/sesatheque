@@ -33,7 +33,7 @@
 
 const flow = require('an-flow')
 const _ = require('lodash')
-const tools = require('../tools/index')
+const tools = require('../lib/tools')
 
 module.exports = function (component) {
   component.service('$cacheGroupe', function ($cache, $settings) {

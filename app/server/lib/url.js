@@ -34,6 +34,8 @@
 // @see https://nodejs.org/dist/latest-v8.x/docs/api/querystring.html
 // (et on préfère son comportement sur les params multiples)
 const querystring = require('querystring')
+const {getNormalizedGrabOptions} = require('./grab')
+const {baseUrl} = require('./config')
 
 // fonctions privées
 
@@ -89,6 +91,15 @@ function getAllParams (url, options) {
 }
 
 /**
+ * Retourne l'url absolue de la requête courante
+ * @param {Contexte} context
+ * @return {string}
+ */
+function getMyUrl (context) {
+  return baseUrl + context.request.originalUrl.substr(1)
+}
+
+/**
  * Réuni les morceaux d'une url
  * @param {urlParts} parts
  * @return {string}
@@ -98,6 +109,53 @@ function join (parts) {
   if (parts[1]) url += `?${parts[1]}`
   if (parts[2]) url += `#${parts[2]}`
   return url
+}
+
+/**
+ * Incrémente skip (et ajoute limit s'il n'y était pas) dans la queryString
+ * @param url
+ * @param {Object} [options]
+ * @param {boolean} [options.replace=false] Passer true pour ne conserver que skip & limit dans la queryString
+ * @param {boolean} [options.strict=true] Passer false pour ne pas planter sur des erreurs d'arguments
+ * @return {string} L'url de la page suivante
+ */
+function pageNext (url, options) {
+  const params = getAllParams(url, options)
+  const {limit, skip} = getNormalizedGrabOptions(params)
+  return update(url, {limit, skip: skip + limit}, options)
+}
+/**
+ * Retourne l'url courante avec limit et skip incrémenté
+ * @param {Context} context
+ */
+function pageNextFromContext (context) {
+  const myUrl = getMyUrl(context)
+  const {limit, skip} = getNormalizedGrabOptions(context.get)
+  return update(myUrl, {limit, skip: skip + limit})
+}
+
+/**
+ * Décrémente skip (et ajoute limit s'il n'y était pas) dans la queryString
+ * @param url
+ * @param {Object} [options]
+ * @param {boolean} [options.replace=false] Passer true pour ne conserver que skip & limit dans la queryString
+ * @param {boolean} [options.strict=true] Passer false pour ne pas planter sur des erreurs d'arguments
+ * @return {string} L'url de la page précédente (peut être la même si on avait déjà skip = 0)
+ */
+function pagePrevious (url, options) {
+  const params = getAllParams(url, options)
+  const {limit, skip} = getNormalizedGrabOptions(params)
+  return update(url, {limit, skip: Math.max(0, skip - limit)}, options)
+}
+
+/**
+ * Retourne l'url courante avec limit et skip décrémenté
+ * @param {Context} context
+ */
+function pagePreviousFromContext (context) {
+  const myUrl = getMyUrl(context)
+  const {limit, skip} = getNormalizedGrabOptions(context.get)
+  return update(myUrl, {limit, skip: Math.max(0, skip - limit)})
 }
 
 /**
@@ -147,7 +205,12 @@ function update (url, args, options) {
 module.exports = {
   getParam,
   getAllParams,
+  getMyUrl,
   join,
+  pageNext,
+  pageNextFromContext,
+  pagePrevious,
+  pagePreviousFromContext,
   split,
   update
 }
@@ -155,7 +218,7 @@ module.exports = {
 /**
  * 3 morceaux d'une url
  * @typedef {string[]} urlParts
- * @property {string} urlParts[0] base
+ * @property {string} urlParts[0] base (absolue ou relative)
  * @property {string} urlParts[1] queryString
  * @property {string} urlParts[2] anchor
  */

@@ -31,44 +31,18 @@
 
 'use strict'
 
-/* global describe,it */
+const appConfig = require('../config')
+const ressourceConfig = require('../ressource/config')
 
-var assert = require('assert')
-var CounterMulti = require('../../app/server/lib/CounterMulti')
-
-describe('CounterMulti', function () {
-  var cm = new CounterMulti()
-  it('construct retourne un objet avec une propriété length de 0', function () {
-    assert.strictEqual(0, cm.length)
-  })
-  it('inc incrémente ', function () {
-    cm.inc('foo')
-    cm.inc('foo')
-    cm.inc('bar')
-    assert.strictEqual(2, cm.length)
-    assert.strictEqual(2, cm.foo)
-    assert.strictEqual(1, cm.bar)
-  })
-  it('dec décrémente ', function () {
-    cm.dec('foo')
-    cm.dec('baz')
-    assert.strictEqual(3, cm.length)
-    assert.strictEqual(1, cm.foo)
-    assert.strictEqual(-1, cm.baz)
-  })
-  it('delete efface ', function () {
-    cm.delete('foo')
-    assert.strictEqual(2, cm.length)
-    assert.strictEqual(undefined, cm.foo)
-  })
-  it('resetLength recalcule la longueur si on ajoute manuellement des compteurs', function () {
-    cm.foo = 4
-    cm.resetLength()
-    assert.strictEqual(3, cm.length)
-  })
-  it('total additionne tout', function () {
-    assert.strictEqual(4, cm.total())
-    cm.delete('baz')
-    assert.strictEqual(5, cm.total())
-  })
-})
+/**
+ * Réexporte à plat des éléments de configuration d'origine variée
+ * @module
+ * @type {{baseId: string, baseUrl: string, listeMax: number, listeNbDefault: number, sesatheques: Array}}
+ */
+module.exports = {
+  baseId: appConfig.application.baseId,
+  baseUrl: appConfig.application.baseUrl,
+  listeMax: ressourceConfig.limites.listeMax,
+  listeNbDefault: ressourceConfig.limites.listeNbDefault,
+  sesatheques: appConfig.sesatheques
+}

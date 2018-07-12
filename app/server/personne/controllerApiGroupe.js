@@ -32,6 +32,10 @@
 'use strict'
 
 const flow = require('an-flow')
+const Ref = require('../../constructors/Ref')
+const {getNormalizedGrabOptions} = require('../lib/grab')
+const {update: urlUpdate} = require('../lib/url')
+const baseUrl = require('../lib/config')
 
 /**
  * Répond sur certaines requetes OPTIONS
@@ -129,6 +133,7 @@ module.exports = function (component) {
         })
       }
     })
+    controller.options('', optionsOk)
 
     /**
      * Récupère un groupe (ce serait plus logique sur GET /api/groupe/:oid mais on a déjà plein de route /api/groupe/actionQcq)
@@ -137,6 +142,8 @@ module.exports = function (component) {
     controller.get(':oid', function (context) {
       const {oid} = context.arguments
       const isFullFormat = context.get.format === 'full'
+      const {limit, skip} = getNormalizedGrabOptions(context.get)
+      let data
       flow().seq(function () {
         $groupeRepository.load(oid, this)
       }).seq(function (groupe) {
@@ -144,8 +151,19 @@ module.exports = function (component) {
         if (!isFullFormat) return $json.sendOk(context, groupe)
         this(null, groupe)
       }).seq(function (groupe) {
-        // faut ajouter la liste des ressources publiées
-
+        // faut ajouter la liste des ressources publiées dans ce groupe
+        data = groupe
+        $ressourceRepository.fetchPublishedInGroup(groupe.nom, {limit, skip}, this)
+      }).seq(function (ressources) {
+        data.ressources = ressources.map(r => new Ref(r))
+        // on ajoute les liens suivant et précédent
+        const url = `${baseUrl}api/liste/groupe/${encodeURIComponent(data.nom)}`
+        if (ressources.length === limit) {
+          data.ressourcesNextUrl = `${url}?limit=${limit}&skip=${skip + limit}`
+        }
+        if (skip > 0) {
+          data.ressourcesPreviousUrl = `${url}?limit=${limit}&skip=${Math.max(0, skip - limit)}`
+        }
       }).catch(function (error) {
         $json.sendError(context, error)
       })

@@ -34,7 +34,7 @@
 /* global describe,it */
 
 var assert = require('assert')
-var tools = require('../../app/server/tools')
+var tools = require('../../app/server/lib/tools')
 global.log = require('sesajstools/utils/log')
 
 describe('tools', function () {
