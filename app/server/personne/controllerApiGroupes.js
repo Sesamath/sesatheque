@@ -192,5 +192,49 @@ module.exports = function (component) {
       }
     })
     controller.options('suivis', optionsOk)
+
+    /**
+     * Récupère la liste des groupes ouverts
+     * @route GET /api/groupes/ouverts
+     */
+    controller.get('ouverts', function (context) {
+      var groupesAdmin = []
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (pid) {
+        flow().seq(function () {
+          $groupeRepository.loadOuvert(this)
+        }).seq(function (groupesOuverts) {
+          $json.sendOk(context, {groupes: groupesOuverts})
+        }).catch(function (error) {
+          console.error(error)
+          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        })
+      } else {
+        $json.denied(context, "Il faut s'authentifier avant pour récupérer les groupes ouverts")
+      }
+    })
+    controller.options('ouverts', optionsOk)
+
+    /**
+     * Récupère la liste des groupes publics
+     * @route GET /api/groupes/publics
+     */
+    controller.get('publics', function (context) {
+      var groupesAdmin = []
+      var pid = $accessControl.getCurrentUserPid(context)
+      if (pid) {
+        flow().seq(function () {
+          $groupeRepository.loadPublic(this)
+        }).seq(function (groupesPublics) {
+          $json.sendOk(context, {groupes: groupesPublics})
+        }).catch(function (error) {
+          console.error(error)
+          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        })
+      } else {
+        $json.denied(context, "Il faut s'authentifier avant pour récupérer les groupes ouverts")
+      }
+    })
+    controller.options('publics', optionsOk)
   })
 }
