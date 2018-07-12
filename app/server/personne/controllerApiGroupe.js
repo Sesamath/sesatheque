@@ -57,13 +57,54 @@ module.exports = function (component) {
     const controller = this
 
     let $ressourceRepository
+    const initRessourceRepository = () => {
+      if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
+    }
+
+    /**
+     * Ajoute les ressources publiées dans le groupe et les noms des gestionnaires du groupe
+     * @param context
+     * @param groupe
+     */
+    const addInfos = (context, groupe) => {
+      const data = groupe
+      const {limit, skip} = getNormalizedGrabOptions(context.get)
+      flow().seq(function () {
+        // faut ajouter la liste des ressources publiées dans ce groupe
+        initRessourceRepository()
+        $ressourceRepository.fetchPublishedInGroup(groupe.nom, {limit, skip}, this)
+      }).seq(function (ressources) {
+        data.ressources = ressources.map(r => new Ref(r))
+        // on ajoute les liens suivant et précédent
+        const url = `${baseUrl}api/liste/groupe/${encodeURIComponent(data.nom)}`
+        if (ressources.length === limit) {
+          data.ressourcesNextUrl = `${url}?limit=${limit}&skip=${skip + limit}`
+        }
+        if (skip > 0) {
+          data.ressourcesPreviousUrl = `${url}?limit=${limit}&skip=${Math.max(0, skip - limit)}`
+        }
+        // on veut aussi les noms des gestionnaires
+        if (!groupe.gestionnaires || !groupe.gestionnaires.length) return this(null, {})
+        $personneRepository.loadByPids(groupe.gestionnaires, this)
+      }).seq(function ({personnes, missing}) {
+        if (personnes && personnes.length) {
+          groupe.gestionnairesNames = personnes.map(p => `${p.prenom} ${p.nom}`)
+        }
+        if (missing && missing.length) {
+          if (!groupe.warnings) groupe.warnings = []
+          groupe.warnings = groupe.warnings.concat(missing.map(pid => `Le gestionnaire ${pid} n’existe plus`))
+        }
+        context.rest(groupe)
+      }).catch(function (error) {
+        context.restKo(error)
+      })
+    }
 
     /**
      * Crée ou update un groupe
      * @route POST /api/groupe
      */
     controller.post('', function (context) {
-      if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
       const data = context.post
       const myPid = $accessControl.getCurrentUserPid(context)
       const sendInternalError = (error) => $json.sendError(context, error)
@@ -88,6 +129,7 @@ module.exports = function (component) {
           flow().seq(function () {
             $personneRepository.renameGroup(groupeBdd.nom, data.nom, this)
           }).seq(function () {
+            initRessourceRepository()
             $ressourceRepository.renameGroup(groupeBdd.nom, data.nom, this)
           }).seq(function () {
             // maj personne & ressource ok, on peut changer le nom du groupe
@@ -142,28 +184,12 @@ module.exports = function (component) {
     controller.get(':oid', function (context) {
       const {oid} = context.arguments
       const isFullFormat = context.get.format === 'full'
-      const {limit, skip} = getNormalizedGrabOptions(context.get)
-      let data
       flow().seq(function () {
         $groupeRepository.load(oid, this)
       }).seq(function (groupe) {
         if (!groupe) return $json.notFound(context, `Le groupe d’identifiant ${oid} n’existe pas`)
-        if (!isFullFormat) return $json.sendOk(context, groupe)
-        this(null, groupe)
-      }).seq(function (groupe) {
-        // faut ajouter la liste des ressources publiées dans ce groupe
-        data = groupe
-        $ressourceRepository.fetchPublishedInGroup(groupe.nom, {limit, skip}, this)
-      }).seq(function (ressources) {
-        data.ressources = ressources.map(r => new Ref(r))
-        // on ajoute les liens suivant et précédent
-        const url = `${baseUrl}api/liste/groupe/${encodeURIComponent(data.nom)}`
-        if (ressources.length === limit) {
-          data.ressourcesNextUrl = `${url}?limit=${limit}&skip=${skip + limit}`
-        }
-        if (skip > 0) {
-          data.ressourcesPreviousUrl = `${url}?limit=${limit}&skip=${Math.max(0, skip - limit)}`
-        }
+        if (isFullFormat) addInfos(context, groupe)
+        else $json.sendOk(context, groupe)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
