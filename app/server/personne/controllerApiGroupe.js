@@ -73,7 +73,7 @@ module.exports = function (component) {
         // faut ajouter la liste des ressources publiées dans ce groupe
         initRessourceRepository()
         $ressourceRepository.fetchPublishedInGroup(groupe.nom, {limit, skip}, this)
-      }).seq(function (ressources) {
+      }).seq(function ({ressources}) {
         data.ressources = ressources.map(r => new Ref(r))
         // on ajoute les liens suivant et précédent
         const url = `${baseUrl}api/liste/groupe/${encodeURIComponent(data.nom)}`

@@ -563,7 +563,7 @@ module.exports = function (ressourceComponent) {
           data.ressources = []
           return next(null, data)
         }
-        EntityRessource.match('groupes').equals(nom).grab(grabOptions, next)
+        EntityRessource.match('groupes').equals(nom).grab(grabOptions, this)
       }).seq(function (ressources) {
         data.ressources = ressources
         next(null, data)
