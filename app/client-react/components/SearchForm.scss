@@ -1,0 +1,37 @@
+@import "../styles/config.scss";
+@import "~knacss/sass/components/_tags";
+
+.search-box {
+  border: 1px dashed #ccc;
+  padding: 5px;
+  margin-bottom: 15px;
+
+  .fr {
+    padding: 0px 6px;
+    float: right;
+    margin-top: 8px;
+    margin-bottom: 15px;
+  }
+
+  ul.tags {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 0;
+
+    li {
+      display: inline-block;
+      margin: 5px;
+
+      span.tag--info {
+        background-color: rgba(0, 126, 255, 0.08);
+        border-radius: 2px;
+        border: 1px solid #c2e0ff;
+        border: 1px solid rgba(0, 126, 255, 0.24);
+        color: #007eff;
+        display: inline-block;
+        font-size: 0.9em;
+        line-height: 1.4;
+      }
+    }
+  }
+}

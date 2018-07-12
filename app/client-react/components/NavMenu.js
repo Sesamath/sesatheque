@@ -6,6 +6,7 @@ import {getContext} from 'recompose'
 import {deleteRessource, cloneRessource} from '../actions/ressource'
 import NavMenuItem from './NavMenuItem'
 import NavButton from './NavButton'
+import './NavMenu.scss'
 
 const NavMenu = ({
   isIframeLayout,
@@ -21,7 +22,6 @@ const NavMenu = ({
 
   return (
     <Fragment>
-      <h1 className="fl">{titre}</h1>
       <div id="actions">
         <ul>
           <NavMenuItem
@@ -63,6 +63,7 @@ const NavMenu = ({
             />
           ) : null}
         </ul>
+        <h1 className="fl">{titre}</h1>
         <div className="clearfix"></div>
       </div>
     </Fragment>

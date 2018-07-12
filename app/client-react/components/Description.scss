@@ -1,0 +1,20 @@
+.ressource {
+  margin-top: 20px;
+
+  & > span {
+    margin-top: -7px;
+    margin-left: 10px;
+  }
+
+  section {
+    grid-gap: 0.8rem !important;
+
+    ul {
+      margin: 0;
+    }
+
+    .txtright {
+      font-weight: bold;
+    }
+  }
+}
