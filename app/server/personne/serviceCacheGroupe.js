@@ -110,7 +110,6 @@ module.exports = function (component) {
      */
     function set (groupe, next = log.ifError) {
       if (groupe && groupe.nom) {
-        // ça plante sur certains noms, try/catch sert à rien car async
         const key = getKey(groupe)
         flow().seq(function () {
           $cache.set(key, groupe, ttl, this)
