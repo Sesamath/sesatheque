@@ -4,6 +4,13 @@ import {labels} from '../../server/ressource/config'
 import listes from '../utils/listesFromConfig'
 import {SelectField} from './fields'
 
+/**
+ * Pure component pour afficher les select multiples categories, niveaux, typePedagogiques, typeDocumentaires.
+ * Doit être dans un redux-form
+ * @type {PureComponent}
+ * @param {object} props
+ * @param {boolean} props.detailed
+ */
 const Classification = ({detailed}) => (
   <fieldset>
     <div className="grid-4">
@@ -40,7 +47,11 @@ const Classification = ({detailed}) => (
 )
 
 Classification.propTypes = {
+  /** Si true, affiche typePedagogiques et typeDocumentaires */
   detailed: PropTypes.bool
+}
+Classification.defaultProps = {
+  detailed: false
 }
 
 export default Classification

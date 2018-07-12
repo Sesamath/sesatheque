@@ -31,6 +31,9 @@ const getRestriction = (restriction) => {
   return `${labels.restriction} : ${restrictionToString[restriction] || 'inconnue'}`
 }
 
+/**
+ * Page de description d'une ressource
+ */
 const Description = ({
   ressource: {
     _droits: droits,
@@ -219,7 +222,8 @@ const Description = ({
 )
 
 Description.propTypes = {
-  ressource: PropTypes.shape({})
+  /** La ressource dont on veut afficher la description */
+  ressource: PropTypes.object
 }
 
 export default resourceLoader(Description)
