@@ -1,0 +1,25 @@
+@import './config.scss';
+
+/* Texte secondaire sur fond foncé primaire */
+@mixin cartouche() {
+  background-color: $color-primary;
+  color: $secondary-color-light;
+  a { color: $secondary-color-light}
+  a:hover {
+    color: $secondary-color-link;
+  }
+}
+
+/* Couleurs */
+@mixin avert($icon) {
+  @include fa-icon;
+  @extend .fa;
+  background-color: $background-base;
+  margin: 1rem;
+  padding: 1rem;
+  border: thin solid;
+  &:before {
+    margin-right: 1rem;
+    content: fa-content($icon);
+  }
+}

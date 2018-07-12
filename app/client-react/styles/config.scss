@@ -9,7 +9,7 @@ $secondary-color-light : #f17045;
 $primary-color-light : #2a4095;
 $primary-color-lighter : #3047a7;
 $secondary-color-link: #f17045;
-$secondary-color-link-hover: #f17045;
+$secondary-color-link-hover: lighten($secondary-color-light, 5%);
 $border-primary: #2a4095;
 
 // Warning: you should use your own values, regardless of the devices

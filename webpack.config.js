@@ -45,8 +45,6 @@ const conf = {
     // apiClient: './app/client/apiClient.js',
     client: 'sesatheque-client',
     page: './app/client/page/index.js',
-    // juste pour compiler iframe.css
-    iframe: './app/srcStyles/iframe.scss',
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js',

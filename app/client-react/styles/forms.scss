@@ -59,7 +59,7 @@ label {
     appearance: none;
   }
 
-  i {
+  > i {
     color: #888;
     font-weight: normal;
   }
@@ -121,26 +121,29 @@ hr {
   margin-top: 8px;
 }
 
-ul.pagination {
-  display: block;
-  padding-left: 15px;
-  padding-right: 15px;
-  text-align: center;
+/* Écrase le style du select de react-select */
+.Select-control {
+  border: 0 !important;
+  padding: 5px;
+}
 
-  li {
-    display: inline-block;
-    padding: 5px;
+.Select--multi .Select-control {
+  padding: 2px;
+  border-radius: 3px !important;
+  background-color: #f8f9fb !important;
+  border: 1px solid #eaeaec !important;
+  color: #757575 !important;
+}
 
-    a {
-      cursor: pointer;
-    }
+.Select-placeholder, .Select--single > .Select-control .Select-value {
+  border-radius: 3px !important;
+  background-color: #f8f9fb !important;
+  border: 1px solid #eaeaec !important;
+  color: #757575 !important;
+}
 
-    &.active {
-      font-weight: bold;
-    }
-  }
-
-  .break a {
-    cursor: default;
-  }
+.Select-placeholder,.Select-multi-value-wrapper, .Select--single > .Select-control .Select-value {
+  font-weight: 400;
+  padding-top: 5px;
+  width: 100%;
 }
