@@ -766,6 +766,53 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Renomme un groupe chez toutes les ressources qui l'ont en groupes ou groupesAuteurs
+     * @param oldName
+     * @param newName
+     * @param next
+     */
+    function renameGroup (oldName, newName, next) {
+      const limit = 100
+      const modifier = (nom) => nom === oldName ? newName : nom
+
+      const updateGroupes = () => {
+        flow().seq(function () {
+          EntityRessource.match('groupes').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (ressource) {
+          ressource.groupes = ressource.groupes.map(modifier)
+          ressource.groupesAuteurs = ressource.groupesAuteurs.map(modifier)
+          save(ressource, this)
+        }).seq(function (ressources) {
+          if (ressources.length < limit) {
+            // on a fini
+            offset = 0
+            return updateGroupesAuteurs()
+          }
+          // faut refaire un tour
+          offset += limit
+          updateGroupes()
+        }).done(next)
+      }
+
+      const updateGroupesAuteurs = () => {
+        flow().seq(function () {
+          // pour ceux qui suivaient sans être membre
+          EntityRessource.match('groupesAuteurs').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (ressource) {
+          ressource.groupesAuteurs = ressource.groupesAuteurs.map(modifier)
+          save(ressource, this)
+        }).seq(function (ressources) {
+          if (ressources.length < limit) return next()
+          offset += limit
+          updateGroupesAuteurs()
+        }).done(next)
+      }
+
+      let offset = 0
+      updateGroupes()
+    }
+
+    /**
      * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin),
      * met à jour le cache (interne + varnish) et toutes les relations (passe en revue tous les éventuels
      * arbres qui référencent cette ressource)
@@ -870,6 +917,7 @@ module.exports = function (ressourceComponent) {
       loadByCle,
       loadByOrigin,
       remove,
+      renameGroup,
       save,
       saveDeferred,
       updateParent

@@ -61,7 +61,7 @@ module.exports = function (component) {
       var isGroupeAuteur = options.isGroupeAuteur || false
       var whiteList = options.whiteList || []
       if (!Array.isArray(ressource.groupes)) ressource.groupes = []
-      $groupeRepository.load(groupeNom, function (error, groupe) {
+      $groupeRepository.loadByNom(groupeNom, function (error, groupe) {
         if (error) return next(error)
         if (groupe) {
           if (_.includes(whiteList, groupe.nom)) {
@@ -82,17 +82,10 @@ module.exports = function (component) {
         } else if (shouldBeNew) {
           // il est nouveau et on voulait justement l'ajouter
           var currentUser = $accessControl.getCurrentUser(context)
-          // à priori on récupère une Personne de la session mais pas une EntityPersonne, on teste quand même au cas où ça évoluerait
-          if (!currentUser.store) currentUser = EntityPersonne.create(currentUser)
-          $personneRepository.addGroupe(currentUser, groupeNom, function (error, groupe) {
-            if (error) {
-              next(error)
-            } else if (groupe) {
-              ressource.groupes.push(groupe.nom)
-              next()
-            } else {
-              next(new Error('Erreur interne (addGroupe)'))
-            }
+          $personneRepository.addGroupe(currentUser, groupeNom, function (error) {
+            if (error) return next(error)
+            ressource.groupes.push(groupe.nom)
+            next()
           })
         } else {
           // il est nouveau et c'est pas normal

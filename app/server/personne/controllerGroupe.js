@@ -126,7 +126,7 @@ module.exports = function (component) {
       let groupe
       // chargement du groupe existant
       flow().seq(function () {
-        $groupeRepository.load(nom, this)
+        $groupeRepository.loadByNom(nom, this)
 
         // update avec le post
       }).seq(function (grp) {
@@ -226,7 +226,7 @@ module.exports = function (component) {
       var newGroupe = $accessControl.getTokenValue(context, formPosted.token)
       if (!newGroupe || newGroupe.nom !== nom) throw new Error('Données corrompues')
       flow().seq(function () {
-        $groupeRepository.load(nom, this)
+        $groupeRepository.loadByNom(nom, this)
       }).seq(function (groupe) {
         sjtObj.updateIfExists(groupe, newGroupe)
         $groupeRepository.save(groupe, this)
@@ -249,7 +249,7 @@ module.exports = function (component) {
       var formPosted = context.post
       // pas besoin de confirmation
       flow().seq(function () {
-        $groupeRepository.load(nom, this)
+        $groupeRepository.loadByNom(nom, this)
       }).seq(function (groupeBdd) {
         if (!groupeBdd || groupeBdd.nom !== nom) {
           this(new Error('Erreur interne, le nom du groupe récupéré en base de donnée ne correspond pas (' + nom + '≠' + groupeBdd.nom + ')'))
@@ -350,7 +350,7 @@ module.exports = function (component) {
       var groupe
       flow().seq(function () {
         // chargement du groupe
-        $groupeRepository.load(nom, this)
+        $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
         // vérifs de base
         if (!grp) return this(`Le groupe ${nom} n’existe pas`)
@@ -443,7 +443,7 @@ module.exports = function (component) {
         var groupeBdd
         // on peut continuer, faut vérifier qu'il n’existe pas déjà
         flow().seq(function () {
-          $groupeRepository.load(nom, this)
+          $groupeRepository.loadByNom(nom, this)
         }).seq(function (groupeBdd) {
           if (groupeBdd) this('Le groupe « ' + groupeBdd.nom + ' » existe déjà')
           else this()
@@ -520,7 +520,7 @@ module.exports = function (component) {
 
         flow().seq(function () {
           // chargement du groupe
-          $groupeRepository.load(nom, this)
+          $groupeRepository.loadByNom(nom, this)
         }).seq(function (groupeBdd) {
           // on regarde si on est gestionnaire
           if (groupeBdd) {
@@ -777,7 +777,7 @@ module.exports = function (component) {
     controllerGroupe.get('rejoindre/:nom', function (context) {
       var nom = context.arguments.nom
       flow().seq(function () {
-        $groupeRepository.load(nom, this)
+        $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
         var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou n'est pas ouvert"
         if (grp) {
@@ -819,7 +819,7 @@ module.exports = function (component) {
     controllerGroupe.get('suivre/:nom', function (context) {
       var nom = context.arguments.nom
       flow().seq(function () {
-        $groupeRepository.load(nom, this)
+        $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
         var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou n'est pas public"
         if (grp) {
@@ -888,7 +888,7 @@ module.exports = function (component) {
         } else {
           // on demande confirmation
           flow().seq(function () {
-            $groupeRepository.load(nom, this)
+            $groupeRepository.loadByNom(nom, this)
           }).seq(function (grp) {
             if (grp && h.isManaged(context, grp)) this(null, grp)
             else this('Le groupe ' + nom + " n’existe pas ou vous n'en êtes pas gestionnaire")

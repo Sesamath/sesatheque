@@ -17,13 +17,15 @@ const groupeLoader = (WrappedComponent) => {
 
     componentDidMount () {
       const {match: {params: {groupe}}} = this.props
-      if (!groupe) return this.setState({
-        ouvert: false,
-        public: true,
-        gestionnaires: ['me']
-      })
+      if (!groupe) {
+        return this.setState({
+          ouvert: false,
+          public: true,
+          gestionnaires: ['me']
+        })
+      }
 
-      GET(`/api/groupe/decrire/${groupe}`)
+      GET(`/api/groupe/byNom/${groupe}`)
         .then((groupe) => this.setState(groupe))
         .catch(error => console.log(error))
     }

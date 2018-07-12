@@ -120,7 +120,9 @@ module.exports = function (component) {
       .defineIndex('iPids', 'string', function () {
         return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
       })
+      // les groupes chez qui la ressource est publiée
       .defineIndex('groupes', 'string')
+      // les groupes qui ont un droit d'écriture sur la ressource
       .defineIndex('groupesAuteurs', 'string')
       .defineIndex('langue', 'string')
       .defineIndex('publie', 'boolean')
