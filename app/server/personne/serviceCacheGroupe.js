@@ -32,46 +32,53 @@
 'use strict'
 
 const flow = require('an-flow')
-const _ = require('lodash')
 const tools = require('../lib/tools')
 
 module.exports = function (component) {
   component.service('$cacheGroupe', function ($cache, $settings) {
+    // on peut pas le mettre en dépendance car il nous utilise
+    let EntityGroupe
+
     /**
-     * Retourne la clé de cache d'un groupe (memcache est pénible, tools.sanitizeHashKey suffit pas)
+     * TTL du cache des groupes, mis idem personne si c'est en conf, 20min par défaut
+     * @type number
+     */
+    const ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
+
+    const prefix = 'groupe_'
+
+    /**
+     * Retourne la clé de cache d'un groupe, construite d'après son nom
      * @private
      * @param {string|Groupe} groupe
      * @returns {string}
      */
-    function getKey (groupe) {
+    const getKey = (groupe) => {
       let key
       // si on tombait un jour sur une clé sortie de sanitizeHashKey qui plaisait pas à memcache,
-      // utiliser un md5 du nom avec
+      // utiliser un md5 du nom, mais c'est bcp plus gourmand
       // key = crypto.createHash('md5').update(data).digest('hex')
-      if (_.isString(groupe)) key = 'groupe_' + tools.sanitizeHashKey(groupe)
-      else if (groupe && groupe.nom) key = 'groupe_' + tools.sanitizeHashKey(groupe.nom)
+      if (groupe) {
+        const nom = typeof groupe === 'string' ? groupe : groupe.nom
+        if (nom) key = prefix + tools.sanitizeHashKey(nom)
+      }
       return key
     }
 
     /**
-     * Une callback qui ne fait rien sinon logguer une éventuelle erreur
-     * @param {Error} [error]
+     * Enrobe next pour passer le groupe retourné du cache par EntityGroupe.create
      * @private
+     * @param {groupeCallback} next
+     * @return {groupeCallback}
      */
-    function logIfError (error) {
-      if (error) log.error(error)
-    }
-
-    const ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
     const getWrapper = (next) => {
+      if (!EntityGroupe) EntityGroupe = lassi.service('EntityGroupe')
       return (error, groupe) => {
         if (error) return next(error)
-        if (groupe) return next(null, EntityGroupe.create(groupe))
-        next()
+        if (!groupe) return next()
+        next(null, EntityGroupe.create(groupe))
       }
     }
-
-    let EntityGroupe
 
     /**
      * Récupère un groupe dans le cache, d'après son oid
@@ -80,8 +87,7 @@ module.exports = function (component) {
      * @memberOf $cacheGroupe
      */
     function get (oid, next) {
-      if (!EntityGroupe) EntityGroupe = lassi.service('EntityGroupe')
-      $cache.get(`groupe_${oid}`, getWrapper(next))
+      $cache.get(prefix + oid, getWrapper(next))
     }
 
     /**
@@ -91,10 +97,9 @@ module.exports = function (component) {
      * @memberOf $cacheGroupe
      */
     function getByNom (nom, next) {
-      if (!EntityGroupe) EntityGroupe = lassi.service('EntityGroupe')
       const key = getKey(nom)
-      if (key) $cache.get(key, getWrapper(next))
-      else next(new Error('Nom de groupe vide'))
+      if (!key) return next(Error('Nom manquant'))
+      $cache.get(key, getWrapper(next))
     }
 
     /**
@@ -103,13 +108,12 @@ module.exports = function (component) {
      * @param {errorCallback} [next]
      * @memberOf $cacheGroupe
      */
-    function set (groupe, next = logIfError) {
+    function set (groupe, next = log.ifError) {
       if (groupe && groupe.nom) {
-        // ça plante sur certains noms, try/catch sert à rien car async
         const key = getKey(groupe)
         flow().seq(function () {
           $cache.set(key, groupe, ttl, this)
-          if (groupe.oid) $cache.set(`groupe_${groupe.oid}`, groupe, ttl, logIfError)
+          if (groupe.oid) $cache.set(prefix + groupe.oid, groupe, ttl, log.ifError)
         }).seq(function () {
           if (next) next()
         }).catch(function (error) {
@@ -131,7 +135,7 @@ module.exports = function (component) {
      * @param {errorCallback} [next]
      * @memberOf $cacheGroupe
      */
-    function deleteGroupe (groupe, next = logIfError) {
+    function deleteGroupe (groupe, next = log.ifError) {
       const key = getKey(groupe)
       if (key) $cache.delete(key, next)
       else next(new Error('groupe invalide'))

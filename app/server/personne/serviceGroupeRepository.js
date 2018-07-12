@@ -103,7 +103,8 @@ module.exports = function (component) {
       }).seq(function (cachedGroups) {
         const missing = []
         cachedGroups.forEach((groupe, index) => {
-          if (groupe) groupes.push(groupe)
+          // FIXME y'a un bug dans flow().seqEach qui transforme undefined en []
+          if (groupe && !Array.isArray(groupe)) groupes.push(groupe)
           else missing.push(noms[index])
         })
         if (!missing.length) return next(null, groupes)
