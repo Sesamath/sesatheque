@@ -73,45 +73,6 @@ module.exports = function (component) {
     }
 
     /**
-     * Retourne une liste de gestionnaires
-     * @private
-     * @param {string|string[]} pids Liste de pid (array ou string avec séparateur virgule ou ; ou espace)
-     * @param next callback appelée avec ({Error}, {Personne[]}, string[]), le dernier étant les pids en erreur
-     */
-    function loadGestionnaires (pids, next) {
-      if (!Array.isArray(pids)) return next(new Error('pids n’est pas un tableau'))
-      const gestionnaires = []
-      const pids404 = []
-      let i = 0
-      flow(pids).seqEach(function (pid) {
-        $personneRepository.load(pid, this)
-      }).seqEach(function (personne) {
-        if (personne && personne.oid) gestionnaires.push(personne)
-        else pids404.push(pids[i])
-        i++
-        this()
-      }).seq(function () {
-        next(null, gestionnaires, pids404)
-      }).catch(function (error) {
-        log.error(error)
-        next(error)
-      })
-    }
-
-    /**
-     * Retourne une liste de gestionnaires (prénom nom)
-     * @private
-     * @param {string[]} pids Liste de pid (array ou string avec séparateur virgule ou ; ou espace)
-     * @param next callback appelée avec ({Error}, {string[]}, string[]), le dernier étant les pids en erreur
-     */
-    function loadGestionnairesNames (pids, next) {
-      loadGestionnaires(pids, function (error, gestionnaires, pids404) {
-        const names = gestionnaires.map(g => `${g.prenom} ${g.nom}`)
-        next(error, names, pids404)
-      })
-    }
-
-    /**
      * Helper de POST /groupe/modifier/:nom dans le cas où il y a une confirmation à demander
      * @private
      * @param context
@@ -136,20 +97,20 @@ module.exports = function (component) {
         groupe.ouvert = (formPosted.ouvert === 'true')
         groupe.public = (formPosted.public === 'true')
         if (formPosted.newGestionnaires) {
-          const newPids = formPosted.newGestionnaires.split(/[\s;,:|]+/).filter(pid => typeof pid === 'string' && pid.indexOf('/') !== -1)
-          if (newPids.length) loadGestionnaires(newPids, this)
+          const newPids = formPosted.newGestionnaires.split(/[\s;,:|]+/).filter(pid => typeof pid === 'string' && pid.includes('/'))
+          if (newPids.length) $personneRepository.loadByPids(newPids, this)
           else this()
         } else {
           this()
         }
 
         // modif des gestionnaires (ajout des nouveaux ou ne plus être gestionnaire)
-      }).seq(function (newGestionnaires, pids404) {
+      }).seq(function ({personnes, missing}) {
         // nouveaux gestionnaires
-        if (newGestionnaires && newGestionnaires.length) {
+        if (personnes && personnes.length) {
           const itemsNewG = []
-          newGestionnaires.forEach(function (personne) {
-            if (_.includes(groupe.gestionnaires, personne.pid)) {
+          personnes.forEach(function (personne) {
+            if (groupe.gestionnaires.includes(personne.pid)) {
               $flashMessages.add(context, `${personne.prenom} ${personne.nom} était déjà gestionnaire et n’a pas été ajouté`)
             } else {
               groupe.gestionnaires.push(personne.pid)
@@ -165,9 +126,9 @@ module.exports = function (component) {
         }
 
         // pids foireux
-        if (pids404 && pids404.length) {
-          const pl = pids404.length > 1 ? 's' : ''
-          $flashMessages.add(context, `Le${pl} gestionnaire${pl} d'identifiant${pl} ${pids404.join(', ')} n’existe${(pl ? 'nt' : '')} pas`)
+        if (missing && missing.length) {
+          const pl = missing.length > 1 ? 's' : ''
+          $flashMessages.add(context, `Le${pl} gestionnaire${pl} d'identifiant${pl} ${missing.join(', ')} n’existe${(pl ? 'nt' : '')} pas`)
         }
 
         // ne plus être gestionnaire
@@ -320,9 +281,9 @@ module.exports = function (component) {
      * @param groupe
      */
     function printGroupe (context, groupe) {
-      loadGestionnaires(groupe.gestionnaires, function (error, gestionnaires, pids404) {
+      $personneRepository.loadByPids(groupe.gestionnaires, function (error, {personnes, missing}) {
         if (error) return $page.printError(context, error)
-        if (pids404.length) pids404.forEach(pid => $flashMessages.add(`Le gestionnaire ${pid} n’existe pas`))
+        if (missing.length) missing.forEach(pid => $flashMessages.add(`Le gestionnaire ${pid} n’existe pas`))
         var isManaged = h.isManaged(context, groupe)
         // les actions, modif
         if (isManaged) addUrlModif(groupe)
@@ -334,7 +295,7 @@ module.exports = function (component) {
         else if (isManaged || groupe.public) addUrlFollow(groupe)
         var contentBloc = groupe
         contentBloc.$view = 'displayGroupe'
-        contentBloc.gestionnaires = gestionnaires.map(g => ({name: `${g.prenom} ${g.nom}`, pid: g.pid}))
+        contentBloc.gestionnaires = personnes.map(g => ({name: `${g.prenom} ${g.nom}`, pid: g.pid}))
         $page.print(context, 'Description du groupe', contentBloc)
       })
     }
@@ -552,19 +513,20 @@ module.exports = function (component) {
                 label: 'Me retirer des gestionnaires de ce groupe'
               })
             }
-            loadGestionnairesNames(groupeBdd.gestionnaires, this)
-          }).seq(function (gestionnairesNames, pids404) {
+            $personneRepository.loadByPids(groupeBdd.gestionnaires, this)
+          }).seq(function ({personnes, missing}) {
             // gestionnaires disparus
-            if (pids404.length) pids404.forEach(pid => $flashMessages.add(`Le gestionnaire ${pid} n’existe pas`))
+            if (missing.length) missing.forEach(pid => $flashMessages.add(`Le gestionnaire ${pid} n’existe pas`))
             // on va stocker dans tokenValue {nom, gestionnairesNames} pour éviter de retourner chercher la liste
             var tokenValue = {nom: nom}
-            tokenValue.gestionnairesNames = gestionnairesNames
+            const names = personnes.map(p => `${p.prenom} ${p.nom}`)
+            tokenValue.gestionnairesNames = names
             // gestionnaires ok
             blocList.push({
               partialView: '../contents',
               liste: {
                 titre: 'Gestionnaires de ce groupe',
-                items: gestionnairesNames
+                items: names
               }
             })
             var token = $accessControl.addToken(context, null, tokenValue)

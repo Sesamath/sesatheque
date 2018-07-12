@@ -129,6 +129,28 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne une liste de personnes d'apres une liste de pids
+     * @param {string[]} pids Liste de pid
+     * @param next callback appelée avec (error, {personnes: Personne[], missing: string[]}) (missing étant les pids inconnus en bdd)
+     */
+    function loadByPids (pids, next) {
+      if (!Array.isArray(pids)) return next(Error('arguments invalides'))
+      const personnes = []
+      // @todo add $cachePersonne.getByPid()
+      flow().seq(function () {
+        EntityPersonne.match('pid').in(pids).grab(this)
+      }).seqEach(function (personne) {
+        if (personne && personne.oid) personnes.push(personne)
+        this()
+      }).seq(function () {
+        const missing = pids.filter(pid => !personnes.some(p => p.pid === pid))
+        next(null, {personnes, missing})
+      }).catch(function (error) {
+        next(error)
+      })
+    }
+
+    /**
      * Efface un groupe chez toutes les personnes qui en sont membre ou qui le suivent
      * @param {string}            groupName Nom du groupe
      * @param {errorCallback} next      Avec la liste des personnes (ou un tableau vide)
@@ -262,6 +284,7 @@ module.exports = function (component) {
       addGroupe,
       delete: deletePersonne,
       load,
+      loadByPids,
       removeGroup,
       renameGroup,
       save,
