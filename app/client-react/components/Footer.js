@@ -3,8 +3,9 @@ import React from 'react'
 import {Link} from 'react-router-dom'
 import {getContext} from 'recompose'
 import {version} from '../../../package'
+import './Footer.scss'
 
-const Footer = ({isIframeLayout}) => {
+export const Footer = ({isIframeLayout}) => {
   if (isIframeLayout) return null
 
   return (

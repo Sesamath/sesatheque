@@ -5,6 +5,7 @@ import {NavLink} from 'react-router-dom'
 import resourceLoader from '../hoc/resourceLoader'
 import NavMenu from './NavMenu'
 import {formats, listes, labels} from '../../server/ressource/config'
+import './Description.scss'
 
 const {jour: dateFormat} = formats
 
@@ -30,6 +31,9 @@ const getRestriction = (restriction) => {
   return `${labels.restriction} : ${restrictionToString[restriction] || 'inconnue'}`
 }
 
+/**
+ * Page de description d'une ressource
+ */
 const Description = ({
   ressource: {
     _droits: droits,
@@ -67,8 +71,8 @@ const Description = ({
       titre={titre}
     />
     <div className="block ressource">
-      <span className="publie btn">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
-      <span className="restriction btn">{getRestriction(restriction)}</span>
+      <span className="publie btn fr tag">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
+      <span className="restriction btn fr tag">{getRestriction(restriction)}</span>
 
       <section className="grid-5 has-gutter">
         <div className="txtright">Oid :</div>
@@ -143,9 +147,9 @@ const Description = ({
                   </li>
                 ))}
               </ul>
-              <p>{labels.enfants} :
+              <div>{labels.enfants} :
                 <pre>{JSON.stringify(_enfants)}</pre>
-              </p>
+              </div>
             </div>
           </Fragment>
         ) : null}
@@ -218,7 +222,8 @@ const Description = ({
 )
 
 Description.propTypes = {
-  ressource: PropTypes.shape({})
+  /** La ressource dont on veut afficher la description */
+  ressource: PropTypes.object
 }
 
 export default resourceLoader(Description)

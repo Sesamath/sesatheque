@@ -28,35 +28,25 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+
 'use strict'
-/* eslint-env mocha */
 
-// on peut mettre dans mocha.opts un
-// --require babel-core/register
-// mais il faut lui passer des options, on le fait ici et remplace la ligne précédente par
-// --require ./test/initMocha
+/* global describe,it */
 
-// on veut exclure les node_modules sauf sesatheque-client/src
-// faut retourner true pour que babel ignore le fichier
-const babelIgnoreFilter = (file) => {
-  if (/\/node_modules\//.test(file)) {
-    return !/\/sesatheque-client\/src\//.test(file)
-  }
-  return false
-}
+const assert = require('assert')
+const tools = require('../../../app/server/tools')
+global.log = require('sesajstools/utils/log')
 
-require('ignore-styles')
-require('babel-core/register')({
-  // faut pas qu'il lise les preset du package.json, sinon ça donne du
-  // Error: Options {"loose":true} passed to  /home/sesamath/projets/git/sesatheque/node_modules/babel-preset-env/lib/index.js which does not accept options. (While processing preset: …
-  babelrc: false,
-  // notre filtre sur les fichiers à traiter
-  ignore: babelIgnoreFilter,
-  presets: ['react'],
-  // et les plugins qu'il doit utiliser pour que mocha soit content
-  plugins: [
-    'transform-es2015-modules-commonjs',
-    'transform-object-rest-spread',
-    'transform-object-assign'
-  ]
+describe('tools', function () {
+  describe('encadre', function () {
+    it("retourne la valeur fournie si dans l'intervalle", function () {
+      assert.strictEqual(42, tools.encadre(42, -2, 48))
+    })
+    it('retourne la borne inf si trop petit', function () {
+      assert.strictEqual(42, tools.encadre(-2, 42, 48))
+    })
+    it('retourne la borne sup si trop grand', function () {
+      assert.strictEqual(42, tools.encadre(52, 2, 42))
+    })
+  })
 })

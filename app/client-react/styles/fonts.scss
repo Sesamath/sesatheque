@@ -1,0 +1,17 @@
+/* ----------------------------- */
+/* Font awesome                  */
+/* ----------------------------- */
+$fa-font-path: "~@fortawesome/fontawesome-free-webfonts/webfonts";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free-webfonts/scss/fa-solid";
+
+/* ----------------------------- */
+/* Roboto                        */
+/* ----------------------------- */
+$roboto-font-path: "~roboto-fontface/fonts";
+@import "~roboto-fontface/css/roboto/sass/roboto-fontface-regular";
+@import "~roboto-fontface/css/roboto/sass/roboto-fontface-light";
+@import "~roboto-fontface/css/roboto/sass/roboto-fontface-thin";
+@import "~roboto-fontface/css/roboto/sass/roboto-fontface-medium";
+@import "~roboto-fontface/css/roboto/sass/roboto-fontface-bold";
+@import "~roboto-fontface/css/roboto/sass/roboto-fontface-black";

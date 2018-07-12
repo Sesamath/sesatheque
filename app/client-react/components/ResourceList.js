@@ -5,9 +5,9 @@ import {connect} from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
 import queryString from 'query-string'
+import './ResourceList.scss'
 
-const ResourceList = ({
-  // fourni par resourceListProvider
+export const ResourceList = ({
   handlePageClick,
   queryOptions,
   resources,

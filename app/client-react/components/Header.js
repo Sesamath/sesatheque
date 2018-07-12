@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import {NavLink} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {version} from '../../../package'
+import './Header.scss'
 
 const logoUrl = `/images/sesatheque.png?${version}`
 
@@ -11,7 +12,10 @@ const getButtons = (personne) => {
   const buttonSearch = {
     id: 'buttonSearch',
     title: 'Recherche',
-    to: '/ressource/rechercher#form',
+    to: {
+      pathname: `/ressource/rechercher`,
+      hash: `#form`
+    },
     icon: 'search'
   }
   if (personne === null) {
@@ -31,7 +35,11 @@ const getButtons = (personne) => {
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
-      to: `/ressource/rechercher?auteurs=${personne.pid}#results`,
+      to: {
+        pathname: `/ressource/rechercher`,
+        search: `?auteurs=${personne.pid}`,
+        hash: `#results`
+      },
       icon: 'bookmark'
     },
     {
@@ -43,7 +51,7 @@ const getButtons = (personne) => {
   ]
 }
 
-const Header = ({
+export const Header = ({
   isIframeLayout,
   personne,
   loginLink,
@@ -74,16 +82,21 @@ const Header = ({
         role="navigation"
       >
         {getButtons(personne).map(({
+          id,
           icon,
           title,
           to,
           target
         }) => (
           <NavLink
-            key={to}
+            key={id}
             to={to}
             title={title}
             target={target}
+            isActive={(match, location) => {
+              if (to.hash) return location.pathname + location.hash === to.pathname + to.hash
+              return location.pathname + location.hash === to
+            }}
           >
             <i className={`fa fa-${icon}`}></i>
             <span>{title}</span>

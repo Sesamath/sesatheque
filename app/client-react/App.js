@@ -25,7 +25,7 @@ import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
 import store from './store'
 
-import '../srcStyles/page.scss'
+import './App.scss'
 
 // ATTENTION à garder la liste des routes synchrones dans app/server/main/controllerMain.js
 

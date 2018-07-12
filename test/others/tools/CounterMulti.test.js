@@ -28,35 +28,47 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+
 'use strict'
-/* eslint-env mocha */
 
-// on peut mettre dans mocha.opts un
-// --require babel-core/register
-// mais il faut lui passer des options, on le fait ici et remplace la ligne précédente par
-// --require ./test/initMocha
+/* global describe,it */
 
-// on veut exclure les node_modules sauf sesatheque-client/src
-// faut retourner true pour que babel ignore le fichier
-const babelIgnoreFilter = (file) => {
-  if (/\/node_modules\//.test(file)) {
-    return !/\/sesatheque-client\/src\//.test(file)
-  }
-  return false
-}
+var assert = require('assert')
+var CounterMulti = require('../../../app/server/tools/CounterMulti')
 
-require('ignore-styles')
-require('babel-core/register')({
-  // faut pas qu'il lise les preset du package.json, sinon ça donne du
-  // Error: Options {"loose":true} passed to  /home/sesamath/projets/git/sesatheque/node_modules/babel-preset-env/lib/index.js which does not accept options. (While processing preset: …
-  babelrc: false,
-  // notre filtre sur les fichiers à traiter
-  ignore: babelIgnoreFilter,
-  presets: ['react'],
-  // et les plugins qu'il doit utiliser pour que mocha soit content
-  plugins: [
-    'transform-es2015-modules-commonjs',
-    'transform-object-rest-spread',
-    'transform-object-assign'
-  ]
+describe('CounterMulti', function () {
+  var cm = new CounterMulti()
+  it('construct retourne un objet avec une propriété length de 0', function () {
+    assert.strictEqual(0, cm.length)
+  })
+  it('inc incrémente ', function () {
+    cm.inc('foo')
+    cm.inc('foo')
+    cm.inc('bar')
+    assert.strictEqual(2, cm.length)
+    assert.strictEqual(2, cm.foo)
+    assert.strictEqual(1, cm.bar)
+  })
+  it('dec décrémente ', function () {
+    cm.dec('foo')
+    cm.dec('baz')
+    assert.strictEqual(3, cm.length)
+    assert.strictEqual(1, cm.foo)
+    assert.strictEqual(-1, cm.baz)
+  })
+  it('delete efface ', function () {
+    cm.delete('foo')
+    assert.strictEqual(2, cm.length)
+    assert.strictEqual(undefined, cm.foo)
+  })
+  it('resetLength recalcule la longueur si on ajoute manuellement des compteurs', function () {
+    cm.foo = 4
+    cm.resetLength()
+    assert.strictEqual(3, cm.length)
+  })
+  it('total additionne tout', function () {
+    assert.strictEqual(4, cm.total())
+    cm.delete('baz')
+    assert.strictEqual(5, cm.total())
+  })
 })

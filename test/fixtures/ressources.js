@@ -1,0 +1,40 @@
+module.exports = [
+  {
+    oid: '1',
+    origine: 'localhost3001',
+    idOrigine: '5b432d6486c85400b844a05b',
+    type: 'iep',
+    titre: 'Mon exercice IEP',
+    resume: '',
+    description: '',
+    commentaires: '',
+    parametres: {},
+    niveaux: [],
+    categories: [7],
+    typePedagogiques: [9, 2],
+    typeDocumentaires: [9],
+    relations: [],
+    dateCreation: (new Date()).toString(),
+    dateMiseAJour: (new Date()).toString(),
+    $droits: 'RWD'
+  },
+  {
+    oid: '2',
+    origine: 'localhost3001',
+    idOrigine: '5b432d6486c85400b844a05c',
+    type: 'arbre',
+    titre: 'Mon exercice ARBRE',
+    resume: '',
+    description: '',
+    commentaires: '',
+    parametres: {},
+    niveaux: [],
+    categories: [5],
+    typePedagogiques: [3],
+    typeDocumentaires: [6],
+    relations: [],
+    dateCreation: (new Date()).toString(),
+    dateMiseAJour: (new Date()).toString(),
+    $droits: 'RD'
+  }
+]

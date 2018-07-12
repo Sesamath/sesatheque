@@ -3,6 +3,9 @@ import React from 'react'
 import {connect} from 'react-redux'
 import {addGroupe} from '../actions/session'
 
+/**
+ * Input pour ajouter un groupe
+ */
 const AddGroupe = ({
   saveGroupe
 }) => {
@@ -29,6 +32,7 @@ const AddGroupe = ({
 }
 
 AddGroupe.propTypes = {
+  /** dispatch l'actionCreator addGroupe (fourni par connect(mapDispatchToProps)) */
   saveGroupe: PropTypes.func
 }
 

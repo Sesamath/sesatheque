@@ -1,0 +1,24 @@
+@import '../styles/mixins.scss';
+
+footer {
+  @include cartouche();
+  clear: both;
+  background-color: #237;
+
+  ul {
+    margin: 0;
+
+    li {
+      margin: 10px;
+      color: $secondary-color-light;
+
+      a {
+        color: $secondary-color-light;
+
+        &:hover {
+          color: $secondary-color-link-hover;
+        }
+      }
+    }
+  }
+}

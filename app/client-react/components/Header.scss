@@ -1,0 +1,98 @@
+@import '../styles/mixins.scss';
+@import "~knacss/sass/components/_buttons";
+
+header {
+  @include cartouche();
+  padding: 10px;
+
+  nav {
+    z-index: 15;
+    margin-top: 8px;
+
+    button, a {
+      @extend .btn;
+      padding: 0.5rem 1rem;
+      margin: 0 1rem;
+      background-color: $primary-color-light;
+      text-align: center;
+      text-decoration: none;
+      color: $secondary-color-link;
+      line-height: 21px;
+    }
+
+    a {
+      &:hover, &:focus, &.active {
+        background-color: $primary-color-lighter;
+        color: darken($secondary-color-link, 10%);
+      }
+
+      .fa {
+        margin-right: 0;
+      }
+    }
+
+    @media (min-width: $medium)  {
+        a .fa {margin-right: 1rem;}
+    }
+
+    .auth {
+      float: right;
+
+      ul {
+        display: none;
+        position: absolute; // pour qu'il n'agrandisse pas le header quand il s'ouvre
+        top: 3rem; // pour démarrer à ras des boutons
+        right: 0;
+        padding-top: 2rem;
+        list-style: none;
+
+        div {
+          padding: 0.2rem;
+          text-align: center;
+          background-color: $color-primary;
+        }
+
+        ul {
+          padding: 0.5rem;
+        }
+
+        li {
+          width: 100%;
+          padding: 0.5rem;
+          margin: 0;
+          background-color: $color-primary;
+        }
+
+        li a {
+          width: 100%;
+          margin-right: $spacer-tiny;
+          text-align: left;
+        }
+      }
+
+      &:hover {
+        ul {
+          display: block;
+        }
+      }
+
+      ul {
+        z-index: 10;
+      }
+    }
+  }
+}
+
+@media (max-width: ($medium)) { // tiny et small
+  .gt-medium-only,
+  header a span {
+    display: none;
+  }
+  .lt-medium-only { display: block; }
+}
+
+@media (min-width: ($medium + 1)) { // medium, large et au delà
+  .gt-medium-only { display: block;}
+  header a span { display: inline;}
+  .lt-medium-only { display: none; }
+}

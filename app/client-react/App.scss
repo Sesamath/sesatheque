@@ -1,0 +1,112 @@
+@import "styles/common.scss";
+
+#main {
+  padding: 2rem;
+
+  h1 {
+    margin-bottom: 0;
+    color: $primary-color-light;
+  }
+
+  /* ----------------------------- */
+  /* Pagination                    */
+  /* ----------------------------- */
+  ul.pagination {
+    display: block;
+    padding-left: 15px;
+    padding-right: 15px;
+    text-align: center;
+
+    li {
+      display: inline-block;
+      padding: 5px;
+
+      a {
+        cursor: pointer;
+      }
+
+      &.active {
+        font-weight: bold;
+      }
+    }
+
+    .break a {
+      cursor: default;
+    }
+  }
+
+/* --------------------------------------------- */
+/* Écrase le style de knackcss sur les alertes   */
+/* --------------------------------------------- */
+  .alert--danger, .alert--warning {
+    padding: 5px 10px;
+
+    i {
+      margin-right: 5px;
+      color: white;
+    }
+  }
+}
+
+/* ------------------------------------------- */
+/* Ajout d'une icône sur les liens externes    */
+/* ------------------------------------------- */
+a[target="_blank"] {
+  &:before {
+    @include fa-icon;
+    @extend .fa;
+    margin-right: 0.5rem;
+    vertical-align: 0.15rem;
+    font-size: 11px;
+    content: fa-content($fa-var-external-link-alt);
+  }
+}
+
+/* ----------------------------- */
+/* Notifications                 */
+/* ----------------------------- */
+.notifications {
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: 500px;
+
+  .notification {
+    pointer-events: auto;
+    cursor: pointer;
+    border-radius: 10px;
+
+    &.alert--danger:hover {
+      background-color: darken(#D9534F, 5%);
+    }
+    &.alert--info:hover {
+      background-color: darken(#5BC0DE, 5%);
+    }
+
+    div {
+      position: relative;
+      .left {
+        top: 50%;
+        position: absolute;
+        transform: translateY(-50%);
+      }
+      .right {
+        position: absolute;
+        top: -2px;
+        right: 0px;
+      }
+      p {
+        margin-left: 25px;
+        margin-right: 20px;
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: $tiny) {
+  .notifications {
+    width: 90%;
+  }
+}
