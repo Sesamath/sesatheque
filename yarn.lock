@@ -260,6 +260,10 @@ amdefine@>=0.0.4, amdefine@^1.0.1:
   version "2.0.8"
   resolved "git://src.sesamath.net/an-flow#3aa74ba5ba7c6470774e3c6955414c7a0f51c9fa"
 
+"an-flow@git://src.sesamath.net/an-flow#d976984":
+  version "3.0.0"
+  resolved "git://src.sesamath.net/an-flow#d9769845b077877678e6778bd55d967667f835d7"
+
 "an-format-date@git://src.sesamath.net/an-format-date#a76218a":
   version "2.0.2"
   resolved "git://src.sesamath.net/an-format-date#a76218a71134029ac10b33398ba96510cef962cd"
@@ -3926,6 +3930,10 @@ iferr@^0.1.5:
 ignore-by-default@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ignore-by-default/-/ignore-by-default-1.0.1.tgz#48ca6d72f6c6a3af00a9ad4ae6876be3889e2b09"
+
+ignore-styles@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/ignore-styles/-/ignore-styles-5.0.1.tgz#b49ef2274bdafcd8a4880a966bfe38d1a0bf4671"
 
 ignore-walk@^3.0.1:
   version "3.0.1"

@@ -86,7 +86,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free-webfonts": "^1.0.9",
     "an-ansi": "git://src.sesamath.net/an-ansi#369cba2",
-    "an-flow": "git://src.sesamath.net/an-flow#3aa74ba",
+    "an-flow": "git://src.sesamath.net/an-flow#d976984",
     "an-format-date": "git://src.sesamath.net/an-format-date#a76218a",
     "an-log": "git://src.sesamath.net/an-log#55ea104",
     "an-uuid": "git://src.sesamath.net/an-uuid#4ba4304",
