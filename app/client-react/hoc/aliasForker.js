@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {forkAlias} from '../actions/ressource'
+import history from '../history'
 
 const mapDispatchToProps = {
   forkAlias
@@ -25,8 +26,12 @@ const aliasForker = (ResourceForm) => {
     }
 
     ensuresIsForked () {
-      if (this.props.ressource.aliasOf) {
+      if (!this.props.ressource.aliasOf) return
+
+      if (confirm('Cette ressource est un alias, une copie va donc être créée, voulez-vous continuer ?')) {
         this.props.forkAlias(this.props.ressource.oid)
+      } else {
+        history.goBack()
       }
     }
 
