@@ -57,7 +57,7 @@ export const Header = ({
   personne,
   loginLink,
   logoutUrl,
-  ssoLinks,
+  sso,
   currentUrl
 }) => {
   if (isIframeLayout) return null
@@ -72,8 +72,6 @@ export const Header = ({
       <span>Connexion</span>
     </a>
   ) : null
-
-  const sesamathLink = ssoLinks && ssoLinks[0]
 
   return (
     <header role="banner">
@@ -113,7 +111,7 @@ export const Header = ({
                 <i className="fa fa-ellipsis-v"></i>
               </NavLink>
               <ul>
-                <div>{`${personne.prenom} ${personne.nom} (${personne.pid})`}</div>
+                <div>{`${personne.prenom} ${personne.nom}`}</div>
                 <li>
                   <NavLink
                     key="compte"
@@ -124,12 +122,14 @@ export const Header = ({
                     <span>Mes informations personnelles</span>
                   </NavLink>
                 </li>
-                <li>
-                  <a href={setRedirect(sesamathLink.href)} title={sesamathLink.value}>
-                    <i className={`fa fa-${sesamathLink.icon}`}></i>
-                    <span>{sesamathLink.value}</span>
-                  </a>
-                </li>
+                {sso && sso.links && sso.links.length > 1 && sso.links.slice(1).map(link => (
+                  <li key={link.href}>
+                    <a href={setRedirect(link.href)} title={link.value} target="_blank" rel="noopener noreferrer">
+                      {link.icon && (<i className={`fa fa-${link.icon}`}></i>)}
+                      <span>{link.value}</span>
+                    </a>
+                  </li>
+                ))}
                 <li>
                   <a href={setRedirect(logoutUrl)} title="Déconnexion">
                     <i className="fa fa-sign-out-alt"></i>
@@ -150,7 +150,10 @@ Header.propTypes = {
   personne: PropTypes.object,
   logoutUrl: PropTypes.string,
   loginLink: PropTypes.object,
-  ssoLinks: PropTypes.arrayOf(PropTypes.object),
+  sso: PropTypes.shape({
+    links: PropTypes.arrayOf(PropTypes.object),
+    name: PropTypes.string
+  }),
   currentUrl: PropTypes.string
 }
 
@@ -175,7 +178,7 @@ const mapStateToProps = ({
   // we suppose that loginLinks is a singleton
   // todo: add support for several links
   loginLink: session && session.loginLinks && session.loginLinks[0],
-  ssoLinks: session && session.ssoLinks,
+  sso: session && session.sso,
   currentUrl: getCurrentUrl(location)
 })
 
