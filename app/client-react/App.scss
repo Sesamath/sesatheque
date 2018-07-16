@@ -43,7 +43,6 @@
 
     i {
       margin-right: 5px;
-      color: white;
     }
   }
 }
@@ -78,10 +77,10 @@ a[target="_blank"] {
     border-radius: 10px;
 
     &.alert--danger:hover {
-      background-color: darken(#D9534F, 5%);
+      background-color: darken($color-danger, 5%);
     }
     &.alert--info:hover {
-      background-color: darken(#5BC0DE, 5%);
+      background-color: darken($color-info, 5%);
     }
 
     div {
