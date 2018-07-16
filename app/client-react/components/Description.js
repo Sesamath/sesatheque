@@ -68,11 +68,14 @@ const Description = ({
     <NavMenu
       droits={droits}
       ressourceOid={oid}
-      titre={titre}
+      titre={titre + (aliasOf ? ' (alias)' : '')}
     />
     <div className="block ressource">
-      <span className="publie btn fr tag">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
-      <span className="restriction btn fr tag">{getRestriction(restriction)}</span>
+      <span className="btn fr tag">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
+      <span className="btn fr tag">{
+        // Pour un alias public et sans restriction on force l'affichage en "Public"
+        getRestriction(aliasOf && publie && !restriction ? null : restriction)
+      }</span>
 
       <section className="grid-5 has-gutter">
         <div className="txtright">Oid :</div>
@@ -99,26 +102,30 @@ const Description = ({
           </Fragment>
         ) : null}
 
-        <div className="txtright">{labels.dateCreation} :</div>
-        <div className="col-4">{moment(dateCreation).format(dateFormat)}</div>
+        {!aliasOf ? (
+          <Fragment>
+            <div className="txtright">{labels.dateCreation} :</div>
+            <div className="col-4">{moment(dateCreation).format(dateFormat)}</div>
 
-        <div className="txtright">{labels.dateMiseAJour} :</div>
-        <div className="col-4">{moment(dateMiseAJour).format(dateFormat)}</div>
+            <div className="txtright">{labels.dateMiseAJour} :</div>
+            <div className="col-4">{moment(dateMiseAJour).format(dateFormat)}</div>
 
-        <div className="txtright">{labels.langue} :</div>
-        <div className="col-4">{listes.langue[langue]}</div>
+            <div className="txtright">{labels.langue} :</div>
+            <div className="col-4">{listes.langue[langue]}</div>
 
-        <div className="txtright">{labels.niveaux} :</div>
-        <div className="col-4">{niveaux.map((niveau) => listes.niveaux[niveau]).join(', ')}</div>
+            <div className="txtright">{labels.niveaux} :</div>
+            <div className="col-4">{niveaux.map((niveau) => listes.niveaux[niveau]).join(', ')}</div>
+
+            <div className="txtright">{labels.typePedagogiques} :</div>
+            <div className="col-4">{typePedagogiques.map((typePedagogique) => listes.typePedagogiques[typePedagogique]).join(', ')}</div>
+
+            <div className="txtright">{labels.typeDocumentaires} :</div>
+            <div className="col-4">{typeDocumentaires.map((typeDocumentaire) => listes.typeDocumentaires[typeDocumentaire]).join(', ')}</div>
+          </Fragment>
+        ) : null}
 
         <div className="txtright">{labels.categories} :</div>
         <div className="col-4">{categories.map((categorie) => listes.categories[categorie]).join(', ')}</div>
-
-        <div className="txtright">{labels.typePedagogiques} :</div>
-        <div className="col-4">{typePedagogiques.map((typePedagogique) => listes.typePedagogiques[typePedagogique]).join(', ')}</div>
-
-        <div className="txtright">{labels.typeDocumentaires} :</div>
-        <div className="col-4">{typeDocumentaires.map((typeDocumentaire) => listes.typeDocumentaires[typeDocumentaire]).join(', ')}</div>
 
         <div className="txtright">{labels.resume} :</div>
         <div className="col-4">{nl2br(resume)}</div>
@@ -154,7 +161,7 @@ const Description = ({
           </Fragment>
         ) : null}
 
-        {_auteurs.length ? (
+        {!aliasOf && _auteurs.length ? (
           <Fragment>
             <div className="txtright">{labels.auteurs} :</div>
             <div className="col-4">
