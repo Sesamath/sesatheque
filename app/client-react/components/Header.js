@@ -73,6 +73,8 @@ export const Header = ({
     </a>
   ) : null
 
+  const sesamathLink = ssoLinks && ssoLinks[0]
+
   return (
     <header role="banner">
       <NavLink to="/">
@@ -112,18 +114,22 @@ export const Header = ({
               </NavLink>
               <ul>
                 <div>{`${personne.prenom} ${personne.nom} (${personne.pid})`}</div>
-                {ssoLinks ? ssoLinks.map(({
-                  href,
-                  icon,
-                  value
-                }) => (
-                  <li key={href}>
-                    <a href={setRedirect(href)} title={value}>
-                      <i className={`fa fa-${icon}`}></i>
-                      <span>{value}</span>
-                    </a>
-                  </li>
-                )) : null}
+                <li>
+                  <NavLink
+                    key="compte"
+                    to="/compte"
+                    title="Mes informations personnelles"
+                  >
+                    <i className={`fa fa-user`}></i>
+                    <span>Mes informations personnelles</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <a href={setRedirect(sesamathLink.href)} title={sesamathLink.value}>
+                    <i className={`fa fa-${sesamathLink.icon}`}></i>
+                    <span>{sesamathLink.value}</span>
+                  </a>
+                </li>
                 <li>
                   <a href={setRedirect(logoutUrl)} title="Déconnexion">
                     <i className="fa fa-sign-out-alt"></i>
@@ -162,7 +168,6 @@ const getCurrentUrl = ({
 
 const mapStateToProps = ({
   session,
-  iframe,
   router: {location}
 }) => ({
   personne: session && session.personne,
