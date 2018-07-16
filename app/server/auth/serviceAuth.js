@@ -238,6 +238,16 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne le nom du client (pour affichage à l'utilisateur)
+     * @param context
+     * @return {AuthClient|String}
+     */
+    function getName (context) {
+      const client = getClient(context)
+      return client && client.name
+    }
+
+    /**
      * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée
      * @memberOf $auth
      * @param {Context} context
@@ -308,6 +318,7 @@ module.exports = function (component) {
       getAuthBloc,
       getLogoutUrl,
       getLoginLinks,
+      getName,
       getSsoLinks,
       login,
       logout
