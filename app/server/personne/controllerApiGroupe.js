@@ -291,7 +291,7 @@ module.exports = function (component) {
       }).seq(function () {
         addInfos(context, groupe, this)
       }).seq(function () {
-        $json.sendOk(context)
+        $json.sendOk(context, groupe)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -315,7 +315,7 @@ module.exports = function (component) {
       }).seq(function () {
         addInfos(context, groupe, this)
       }).seq(function () {
-        $json.sendOk(context)
+        $json.sendOk(context, groupe)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
