@@ -71,12 +71,10 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @returns {boolean}
    */
   function isManaged (context, groupe) {
-    var myOid = $accessControl.getCurrentUserOid(context)
-    var retour = false
-    if (groupe && groupe.gestionnaires) {
-      retour = _.includes(groupe.gestionnaires, myOid)
-    }
-    return retour
+    if (!groupe || !groupe.gestionnaires) throw Error('groupe invalide')
+    const oid = $accessControl.getCurrentUserOid(context)
+    if (!oid) return false
+    return groupe.gestionnaires.includes(oid)
   }
 
   /**
@@ -214,8 +212,12 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
       $personneRepository.loadByOids(groupe.gestionnaires, this)
     }).seq(function (personnes) {
       if (personnes && personnes.length) {
-        groupe.gestionnairesNames = personnes.map(p => {
-          if (p === null) return null
+        groupe.gestionnairesNames = personnes.map((p, i) => {
+          if (!p) {
+            const oid = groupe.gestionnaires[i]
+            log.dataError(Error(`Le gestionnaire ${oid} du groupe ${groupe.oid} n’existe plus`))
+            return `${oid} inconnu`
+          }
           return `${p.prenom} ${p.nom}`
         })
       }
