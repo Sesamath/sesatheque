@@ -46,6 +46,13 @@ const getOptions = (input, callback) => {
 //   ? 'tout le monde peut suivre les publications du groupe'
 //   : 'il faut être membre pour suivre les publications du groupe'
 
+/**
+ * Formulaire d'édition de groupe
+ * Doit être dans un redux-form
+ * @type {PureComponent}
+ * @param {object} props
+ * @param {boolean} props.detailed
+ */
 const GroupeEdition = ({
   initialValues: {oid, gestionnaires},
   handleSubmit,
@@ -110,17 +117,7 @@ GroupeEdition.propTypes = {
   submitting: PropTypes.bool
 }
 
-const onSubmit = ({gestionnaires, ...others}, dispatch) => {
-  const groupe = {
-    ...others,
-    gestionnaires: gestionnaires.map(({value}) => value)
-  }
-  const onSaveSuccess = () => dispatch(push('/groupe/perso'))
-  const action = saveGroupe(groupe, onSaveSuccess)
-  dispatch(action)
-}
-
-const buildInitialValues = ({groupe}) => {
+const getInitialValues = ({groupe}) => {
   const {gestionnaires, gestionnairesNames, ...others} = groupe
   const gestionnairesItems = gestionnaires.map((oid, index) => ({
     value: oid,
@@ -134,13 +131,25 @@ const buildInitialValues = ({groupe}) => {
   return {initialValues}
 }
 
+const onSubmit = ({gestionnaires, ...others}, dispatch) => {
+  const groupe = {
+    ...others,
+    gestionnaires: gestionnaires.map(({value}) => value)
+  }
+  const onSaveSuccess = () => dispatch(push('/groupe/perso'))
+  const action = saveGroupe(groupe, onSaveSuccess)
+  dispatch(action)
+}
+
+const formDefinition = {
+  form: 'groupe-edition',
+  onSubmit
+}
+
 export default ensureLogged(
   groupeLoader(
-    withProps(buildInitialValues)(
-      reduxForm({
-        form: 'groupe-edition',
-        onSubmit
-      })(GroupeEdition)
+    withProps(getInitialValues)(
+      reduxForm(formDefinition)(GroupeEdition)
     )
   )
 )
