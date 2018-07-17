@@ -281,7 +281,10 @@ module.exports = function (ressourceComponent) {
         }
         stCalled.add(baseId)
         $ressourceRemote.externalUpdate(baseId, ref, this)
-      }).catch(log.error)
+      })
+        // faut vider la pile sinon an-flow râle parce qu'on appelle un seq qui n'existe pas avec des data
+        .empty()
+        .catch(log.error)
     }
 
     /**
