@@ -7,12 +7,12 @@ const mapStateToProps = ({session}) => ({
 })
 
 /**
- * High Order Component qui ne rend rien si
- * la session ne contient pas un utilisateur
- * (si on l'avait pas déjà dans le state)
- * @param {Component} WrappedComponent
- * @return {Component} Le composant enrichi
- */
+* High Order Component qui ne rend rien si
+* la session ne contient pas un utilisateur
+* (si on ne l'avait pas déjà dans le state)
+* @param {Component} WrappedComponent
+* @return {Component} Le composant enrichi
+*/
 const ensureLogged = (WrappedComponent) => {
   class EnsureLogged extends Component {
     render () {

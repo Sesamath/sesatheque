@@ -256,6 +256,10 @@ amdefine@>=0.0.4, amdefine@^1.0.1:
   version "2.0.4"
   resolved "git://src.sesamath.net/an-ansi#369cba247330cb088a5640707c8ca5bd515f4f0d"
 
+"an-flow@git://src.sesamath.net/an-flow#118c528":
+  version "3.0.1"
+  resolved "git://src.sesamath.net/an-flow#118c52817e521ca6bb2e7a7b3e2a7b2063084237"
+
 "an-flow@git://src.sesamath.net/an-flow#3aa74ba":
   version "2.0.8"
   resolved "git://src.sesamath.net/an-flow#3aa74ba5ba7c6470774e3c6955414c7a0f51c9fa"
@@ -4646,15 +4650,15 @@ knacss@^7.0.5:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/knacss/-/knacss-7.0.6.tgz#6dd2e3610db586248c742350adad0d30f5a9b276"
 
-"lassi@git+https://framagit.org/Sesamath/lassi.git#259c10d":
-  version "2.3.5"
-  resolved "git+https://framagit.org/Sesamath/lassi.git#259c10dc78d8f077cccd47e256e79900d91db5da"
+"lassi@git+https://framagit.org/Sesamath/lassi.git#2.3.7":
+  version "2.3.7"
+  resolved "git+https://framagit.org/Sesamath/lassi.git#4b6123b77eacab4d7876384e65b50f71e86c5f3a"
   dependencies:
     ajv "^6.1.1"
     ajv-errors "^1.0.0"
     ajv-i18n "^3.0.0"
     ajv-keywords "^3.1.0"
-    an-flow "git://src.sesamath.net/an-flow#3aa74ba"
+    an-flow "git://src.sesamath.net/an-flow#118c528"
     an-log "git://src.sesamath.net/an-log#55ea104"
     colors "^1.1.2"
     compression "^1.7.1"

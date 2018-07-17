@@ -86,7 +86,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free-webfonts": "^1.0.9",
     "an-ansi": "git://src.sesamath.net/an-ansi#369cba2",
-    "an-flow": "git://src.sesamath.net/an-flow#3aa74ba",
+    "an-flow": "git://src.sesamath.net/an-flow#118c528",
     "an-format-date": "git://src.sesamath.net/an-format-date#a76218a",
     "an-log": "git://src.sesamath.net/an-log#55ea104",
     "an-uuid": "git://src.sesamath.net/an-uuid#4ba4304",
@@ -97,7 +97,7 @@
     "html-webpack-plugin": "^3.2.0",
     "ip": "^1.1.5",
     "knacss": "^7.0.5",
-    "lassi": "git+https://framagit.org/Sesamath/lassi.git#259c10d",
+    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.3.7",
     "lodash": "4.17.5",
     "moment": "2.19.3",
     "morgan": "1.9.0",

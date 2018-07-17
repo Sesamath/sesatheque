@@ -118,7 +118,7 @@ module.exports = function (component) {
      * Retourne un objet
      * {
      *   user: {pid, nom, prenom},
-     *   ssoLinks: link[], // si le sso propose des liens pour gérer son compte ou autre
+     *   sso: {links: link[], name: string} // links peut être vide si le sso ne propose pas de liens (ça devrait pas arriver mais rien ne l'y oblige)
      *   logoutUrl: string, // si on est authentifié
      *   loginLinks: link[]
      * }
@@ -146,7 +146,10 @@ module.exports = function (component) {
           groupesSuivis
         }
         response.logoutUrl = $auth.getLogoutUrl(context)
-        response.ssoLinks = $auth.getSsoLinks(context)
+        response.sso = {
+          links: $auth.getSsoLinks(context),
+          name: $auth.getName(context)
+        }
       } else {
         response.personne = null
         response.loginLinks = $auth.getLoginLinks(context)
