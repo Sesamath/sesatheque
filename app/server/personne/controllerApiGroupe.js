@@ -112,6 +112,8 @@ module.exports = function (component) {
           }
           groupeBdd.store(this)
         }).seq(function (groupe) {
+          addInfos(context, groupe, this)
+        }).seq(function (groupe) {
           $json.sendOk(context, groupe)
         }).catch(sendInternalError)
 
@@ -138,6 +140,8 @@ module.exports = function (component) {
             joinGroup(context, groupe.nom, this)
           }).seq(function () {
             followGroup(context, groupe.nom, this)
+          }).seq(function () {
+            addInfos(context, groupe, this)
           }).seq(function () {
             $json.sendOk(context, groupe)
           }).catch(sendInternalError)
