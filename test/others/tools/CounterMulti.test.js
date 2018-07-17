@@ -33,11 +33,11 @@
 
 /* global describe,it */
 
-var assert = require('assert')
-var CounterMulti = require('../../../app/server/tools/CounterMulti')
+const assert = require('assert')
+const CounterMulti = require('../../../app/server/lib/CounterMulti')
 
 describe('CounterMulti', function () {
-  var cm = new CounterMulti()
+  const cm = new CounterMulti()
   it('construct retourne un objet avec une propriété length de 0', function () {
     assert.strictEqual(0, cm.length)
   })
