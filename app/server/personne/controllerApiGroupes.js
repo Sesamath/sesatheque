@@ -57,25 +57,22 @@ module.exports = function (component) {
      * @route GET /api/groupes/admin
      */
     controller.get('admin', function (context) {
-      var groupesAdmin = []
-      var pid = $accessControl.getCurrentUserPid(context)
-      if (pid) {
-        flow().seq(function () {
-          $groupeRepository.getListManagedBy(pid, this)
-        }).seq(function (groupesManaged) {
-          if (groupesManaged && groupesManaged.length) {
-            groupesManaged.forEach(function (groupe) {
-              groupesAdmin.push({name: groupe.nom, admin: true})
-            })
-          }
-          $json.sendOk(context, {groupesAdmin: groupesAdmin})
-        }).catch(function (error) {
-          console.error(error)
-          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
-        })
-      } else {
-        $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
-      }
+      const groupesAdmin = []
+      const oid = $accessControl.getCurrentUserOid(context)
+      if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
+      flow().seq(function () {
+        $groupeRepository.getListManagedBy(oid, this)
+      }).seq(function (groupesManaged) {
+        if (groupesManaged && groupesManaged.length) {
+          groupesManaged.forEach(function (groupe) {
+            groupesAdmin.push({name: groupe.nom, admin: true})
+          })
+        }
+        $json.sendOk(context, {groupesAdmin: groupesAdmin})
+      }).catch(function (error) {
+        console.error(error)
+        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+      })
     })
     controller.options('admin', optionsOk)
 
@@ -84,33 +81,30 @@ module.exports = function (component) {
      * @route GET /api/groupes/membre
      */
     controller.get('membre', function (context) {
-      var groupesMembre = []
-      var done = {}
-      var pid = $accessControl.getCurrentUserPid(context)
-      if (pid) {
-        flow().seq(function () {
-          $groupeRepository.getListManagedBy(pid, this)
-        }).seq(function (groupesManaged) {
-          if (groupesManaged && groupesManaged.length) {
-            groupesManaged.forEach(function (groupe) {
-              groupesMembre.push({name: groupe.nom, admin: true})
-              done[groupe.nom] = true
-            })
-          }
-          $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
-            if (!done[groupeName]) {
-              groupesMembre.push({name: groupeName, member: true})
-              done[groupeName] = true
-            }
+      const groupesMembre = []
+      const done = {}
+      const oid = $accessControl.getCurrentUserOid(context)
+      if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
+      flow().seq(function () {
+        $groupeRepository.getListManagedBy(oid, this)
+      }).seq(function (groupesManaged) {
+        if (groupesManaged && groupesManaged.length) {
+          groupesManaged.forEach(function (groupe) {
+            groupesMembre.push({name: groupe.nom, admin: true})
+            done[groupe.nom] = true
           })
-          $json.sendOk(context, {groupesMembre: groupesMembre})
-        }).catch(function (error) {
-          console.error(error)
-          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        }
+        $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
+          if (!done[groupeName]) {
+            groupesMembre.push({name: groupeName, member: true})
+            done[groupeName] = true
+          }
         })
-      } else {
-        $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
-      }
+        $json.sendOk(context, {groupesMembre: groupesMembre})
+      }).catch(function (error) {
+        console.error(error)
+        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+      })
     })
     controller.options('membre', optionsOk)
 
@@ -168,40 +162,38 @@ module.exports = function (component) {
      * @route GET /api/groupes/suivis
      */
     controller.get('suivis', function (context) {
-      var groupesSuivis = []
-      var done = {}
-      var pid = $accessControl.getCurrentUserPid(context)
-      if (pid) {
-        flow().seq(function () {
-          $groupeRepository.getListManagedBy(pid, this)
-        }).seq(function (groupesManaged) {
-          if (groupesManaged && groupesManaged.length) {
-            groupesManaged.forEach(function (groupe) {
-              groupesSuivis.push({name: groupe.nom, admin: true})
-              done[groupe.nom] = true
-            })
+      const groupesSuivis = []
+      const done = {}
+      const oid = $accessControl.getCurrentUserOid(context)
+      if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes suivis")
+
+      flow().seq(function () {
+        $groupeRepository.getListManagedBy(oid, this)
+      }).seq(function (groupesManaged) {
+        if (groupesManaged && groupesManaged.length) {
+          groupesManaged.forEach(function (groupe) {
+            groupesSuivis.push({name: groupe.nom, admin: true})
+            done[groupe.nom] = true
+          })
+        }
+        $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
+          if (!done[groupeName]) {
+            groupesSuivis.push({name: groupeName, member: true})
+            done[groupeName] = true
           }
-          $accessControl.getCurrentUserGroupesMembre(context).forEach(function (groupeName) {
-            if (!done[groupeName]) {
-              groupesSuivis.push({name: groupeName, member: true})
-              done[groupeName] = true
-            }
-          })
-          $accessControl.getCurrentUserGroupesSuivis(context).forEach(function (groupeName) {
-            if (!done[groupeName]) {
-              // on ajoute les urls pour ne plus suivre
-              groupesSuivis.push({name: groupeName, follower: true})
-              done[groupeName] = true
-            }
-          })
-          $json.sendOk(context, {groupesSuivis: groupesSuivis})
-        }).catch(function (error) {
-          console.error(error)
-          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
         })
-      } else {
-        $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes suivis")
-      }
+        $accessControl.getCurrentUserGroupesSuivis(context).forEach(function (groupeName) {
+          if (!done[groupeName]) {
+            // on ajoute les urls pour ne plus suivre
+            groupesSuivis.push({name: groupeName, follower: true})
+            done[groupeName] = true
+          }
+        })
+        $json.sendOk(context, {groupesSuivis: groupesSuivis})
+      }).catch(function (error) {
+        console.error(error)
+        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+      })
     })
     controller.options('suivis', optionsOk)
 
