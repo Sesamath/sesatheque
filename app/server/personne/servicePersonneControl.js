@@ -44,10 +44,10 @@ module.exports = function (component) {
      * @param {Context} context
      * @param {Ressource} ressource
      * @param {string} groupeNom
-     * @param {object} options  peut contenir les propriétés
-     *                            shouldBeNew (boolean) Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
-     *                            isGroupeAuteur (boolean) Ajouter le groupe à groupesAuteurs et pas groupes
-     *                            whiteList (Array) Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
+     * @param {object} [options]
+     * @param {boolean} [options.shouldBeNew] Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
+     * @param {boolean} [options.isGroupeAuteur] Ajouter le groupe à groupesAuteurs et pas groupes
+     * @param {string[]} [options.whiteList] Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
      * @param {errorCallback} next
      */
     function checkGroupe (context, ressource, groupeNom, options, next) {
