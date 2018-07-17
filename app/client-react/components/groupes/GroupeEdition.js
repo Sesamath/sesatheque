@@ -38,11 +38,18 @@ const getOptions = (input, callback) => {
   debouncedGET(input, callback)
 }
 
+// @todo rendre les remarques ouvert / public conditionnelles
+// remarqueOuvert = ouvert
+//   ? 'Tout le monde pourra devenir membre du groupe'
+//   : 'Seul un gestionnaire pourra ajouter un membre'}
+// remarquePublic = public
+//   ? 'tout le monde peut suivre les publications du groupe'
+//   : 'il faut être membre pour suivre les publications du groupe'
+
 const GroupeEdition = ({
   initialValues: {oid, gestionnaires},
   handleSubmit,
-  submitting,
-  personne
+  submitting
 }) => (
   <Fragment>
     <h1>{oid ? 'Modifier un groupe' : 'Ajouter un groupe'}</h1>
@@ -62,18 +69,18 @@ const GroupeEdition = ({
             name="ouvert"
             label="Ouvert à tous"
           />
-          <span className="remarque">(Tout le monde pourra devenir membre du groupe)</span>
+          <span className="remarque">(tout le monde pourra devenir membre du groupe)</span>
         </div>
         <div>
           <SwitchField
             name="public"
             label="Public"
           />
-          <span className="remarque">(Tout le monde pourra s&apos;inscrire au suivi des publications du groupe)</span>
+          <span className="remarque">(tout le monde peut suivre les publications du groupe)</span>
         </div>
         <label>
           Ajouter des gestionnaires
-          <span className="remarque"> (L&apos;ajout est irrévocable. Saisir l&apos;oid d&apos;un utilisateur)</span>
+          <span className="remarque"> (saisir l’identifiant d’un utilisateur, ATTENTION l’ajout est irrévocable)</span>
 
           <AsyncSelectField
             placeholder="Saisir un oid"
@@ -100,40 +107,40 @@ const GroupeEdition = ({
 GroupeEdition.propTypes = {
   initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  submitting: PropTypes.bool,
-  personne: PropTypes.object
+  submitting: PropTypes.bool
 }
 
-const mapGestionnairesNames = ({
-  gestionnaires,
-  gestionnairesNames,
-  ...others
-}) => ({
-  ...others,
-  gestionnaires: gestionnaires.map((oid, index) => ({
+const onSubmit = ({gestionnaires, ...others}, dispatch) => {
+  const groupe = {
+    ...others,
+    gestionnaires: gestionnaires.map(({value}) => value)
+  }
+  const onSaveSuccess = () => dispatch(push('/groupe/perso'))
+  const action = saveGroupe(groupe, onSaveSuccess)
+  dispatch(action)
+}
+
+const buildInitialValues = ({groupe}) => {
+  const {gestionnaires, gestionnairesNames, ...others} = groupe
+  const gestionnairesItems = gestionnaires.map((oid, index) => ({
     value: oid,
     label: `${gestionnairesNames[index]} (${oid})`,
     clearableValue: false
   }))
-})
+  const initialValues = {
+    ...others,
+    gestionnaires: gestionnairesItems
+  }
+  return {initialValues}
+}
 
 export default ensureLogged(
   groupeLoader(
-    withProps(({groupe}) => ({
-      initialValues: mapGestionnairesNames(groupe)
-    }))(
+    withProps(buildInitialValues)(
       reduxForm({
         form: 'groupe-edition',
-        onSubmit: ({gestionnaires, ...others}, dispatch) => dispatch(saveGroupe(
-          {
-            ...others,
-            gestionnaires: gestionnaires.map(({value}) => value)
-          },
-          () => dispatch(push('/groupe/perso'))
-        ))
-      })(
-        GroupeEdition
-      )
+        onSubmit
+      })(GroupeEdition)
     )
   )
 )

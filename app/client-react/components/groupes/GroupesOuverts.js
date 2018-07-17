@@ -67,8 +67,10 @@ GroupesOuverts.propTypes = {
 const mapStateToProps = ({session}) => ({
   groupesMembre: (session && session.personne && session.personne.groupesMembre) || []
 })
-
+const mapDispatchToProps = {
+  joinGroupe,
+  leaveGroupe
+}
 export default groupesListeLoader('/api/groupes/ouverts')(
-  connect(mapStateToProps, {joinGroupe, leaveGroupe})(GroupesOuverts
-  )
+  connect(mapStateToProps, mapDispatchToProps)(GroupesOuverts)
 )
