@@ -32,8 +32,6 @@
 'use strict'
 
 const flow = require('an-flow')
-const {getNormalizedGrabOptions} = require('../lib/grab')
-const baseUrl = require('../lib/config')
 
 /**
  * Répond sur certaines requetes OPTIONS
@@ -47,7 +45,7 @@ function optionsOk (context) {
 module.exports = function (component) {
   component.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
     const helper = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
-    const {addGroup, ignoreGroup, isFollowed, isManaged, quitGroup} = helper
+    const {addGroup, addInfos, ignoreGroup, isFollowed, isManaged, joinGroup, quitGroup, followGroup} = helper
     /**
      * Controleur de la route /api/groupe/
      * @Controller controllerApiGroupe
@@ -60,59 +58,14 @@ module.exports = function (component) {
     }
 
     /**
-     * Ajoute les ressources publiées dans le groupe et les noms des gestionnaires du groupe
-     * @param context
-     * @param groupe
-     */
-    const addInfos = (context, groupe) => {
-      const data = groupe
-      const {limit, skip} = getNormalizedGrabOptions(context.get)
-      flow().seq(function () {
-        // faut ajouter la liste des ressources publiées dans ce groupe
-        initRessourceRepository()
-        $ressourceRepository.fetchPublishedInGroup(groupe.nom, {limit, skip}, this)
-      }).seq(function ({ressources}) {
-        data.ressources = ressources.map(
-          ({oid, titre, type}) => ({
-            oid,
-            titre,
-            type
-          })
-        )
-        // on ajoute les liens suivant et précédent
-        const url = `${baseUrl}api/liste/groupe/${encodeURIComponent(data.nom)}`
-        if (ressources.length === limit) {
-          data.ressourcesNextUrl = `${url}?limit=${limit}&skip=${skip + limit}`
-        }
-        if (skip > 0) {
-          data.ressourcesPreviousUrl = `${url}?limit=${limit}&skip=${Math.max(0, skip - limit)}`
-        }
-        // on veut aussi les noms des gestionnaires
-        if (!groupe.gestionnaires || !groupe.gestionnaires.length) return this(null, {})
-        $personneRepository.loadByPids(groupe.gestionnaires, this)
-      }).seq(function ({personnes, missing}) {
-        if (personnes && personnes.length) {
-          groupe.gestionnairesNames = personnes.map(p => `${p.prenom} ${p.nom}`)
-        }
-        if (missing && missing.length) {
-          if (!groupe.warnings) groupe.warnings = []
-          groupe.warnings = groupe.warnings.concat(missing.map(pid => `Le gestionnaire ${pid} n’existe plus`))
-        }
-        context.rest(groupe)
-      }).catch(function (error) {
-        context.restKo(error)
-      })
-    }
-
-    /**
      * Crée ou update un groupe
      * @route POST /api/groupe
      */
     controller.post('', function (context) {
       const data = context.post
-      const myPid = $accessControl.getCurrentUserPid(context)
+      const myOid = $accessControl.getCurrentUserOid(context)
       const sendInternalError = (error) => $json.sendError(context, error)
-      if (!myPid) return $json.denied(context, 'Vous devez être authentifié pour créer des groupes')
+      if (!myOid) return $json.denied(context, 'Vous devez être authentifié pour créer des groupes')
       if (!data.nom) return $json.sendError(context, 'Impossible de créer un groupe sans nom')
       // on init les éventuelles valeurs manquantes par nos valeurs par défaut
 
@@ -151,7 +104,7 @@ module.exports = function (component) {
           // et les gestionnaires
           if (Array.isArray(data.gestionnaires) && data.gestionnaires.length) {
             // le seul gestionnaire qu'on peut enlever est soi-même
-            if (!data.gestionnaires.includes(myPid)) groupeBdd.gestionnaires = groupeBdd.gestionnaires.filter(pid => pid !== myPid)
+            if (!data.gestionnaires.includes(myOid)) groupeBdd.gestionnaires = groupeBdd.gestionnaires.filter(oid => oid !== myOid)
             // le reste ne peut être que des ajouts
             data.gestionnaires.forEach(g => {
               if (!groupeBdd.gestionnaires.includes(g)) groupeBdd.gestionnaires.push(g)
@@ -167,15 +120,27 @@ module.exports = function (component) {
         if (!$accessControl.hasGenericPermission('createGroupe', context)) {
           return $json.denied(context, 'Vous n’avez pas les droits suffisants pour créer un groupe')
         }
+        const gestionnaires = data.gestionnaires || []
+        if (!gestionnaires.includes(myOid)) gestionnaires.push(myOid)
+
         const groupe = {
           nom: data.nom,
           ouvert: data.hasOwnProperty('ouvert') ? Boolean(data.ouvert) : false,
           public: data.hasOwnProperty('public') ? Boolean(data.public) : true,
-          gestionnaires: [myPid]
+          description: data.description,
+          gestionnaires
         }
+        // il manque une clé unique sur le nom?
         EntityGroupe.create(groupe).store((error, groupe) => {
           if (error) return $json.sendError(context, error)
-          $json.sendOk(context, groupe)
+
+          flow().seq(function () {
+            joinGroup(context, groupe.nom, this)
+          }).seq(function () {
+            followGroup(context, groupe.nom, this)
+          }).seq(function () {
+            $json.sendOk(context, groupe)
+          }).catch(sendInternalError)
         })
       }
     })
@@ -192,8 +157,10 @@ module.exports = function (component) {
         $groupeRepository.load(oid, this)
       }).seq(function (groupe) {
         if (!groupe) return $json.notFound(context, `Le groupe d’identifiant ${oid} n’existe pas`)
-        if (isFullFormat) addInfos(context, groupe)
-        else $json.sendOk(context, groupe)
+        if (isFullFormat) addInfos(context, groupe, this)
+        else this(groupe)
+      }).seq(function (groupe) {
+        $json.sendOk(context, groupe)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -201,7 +168,7 @@ module.exports = function (component) {
 
     /**
      * Récupère les détails d'un groupe
-     * @route GET /api/groupe/decrire/:nom
+     * @route GET /api/groupe/byNom/:nom
      */
     controller.get('byNom/:nom', function (context) {
       const {nom} = context.arguments
@@ -210,8 +177,10 @@ module.exports = function (component) {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (groupe) {
         if (!groupe) return $json.notFound(context, `Le groupe « ${nom} » n’existe pas`)
-        if (isFullFormat) addInfos(context, groupe)
-        else $json.sendOk(context, groupe)
+        if (isFullFormat) addInfos(context, groupe, this)
+        else this(groupe)
+      }).seq(function (groupe) {
+        $json.sendOk(context, groupe)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -271,7 +240,7 @@ module.exports = function (component) {
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
-        var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
+        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous ne le suivez pas`
         if (grp && isFollowed(context, nom)) ignoreGroup(context, nom, this)
         else this(deniedMsg)
       }).seq(function () {
@@ -290,14 +259,106 @@ module.exports = function (component) {
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
-        var deniedMsg = 'Le groupe ' + nom + " n’existe pas ou vous n'en faite pas partie"
+        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous n'en faites pas partie`
         if (grp && $accessControl.isGroupeMembre(context, nom)) quitGroup(context, nom, this)
         else this(deniedMsg)
       }).seq(function () {
-        $json.send(context, 'Vous avez quitté le groupe ' + nom)
+        $json.sendOk(context)
       }).catch(function (error) {
         $json.sendError(context, error)
       })
     })
+
+    /**
+     * Abonne le user courant au groupe
+     * @route GET /groupe/suivre/:nom
+     */
+    controller.get('suivre/:nom', function (context) {
+      var nom = context.arguments.nom.toLowerCase()
+      let groupe
+      flow().seq(function () {
+        $groupeRepository.loadByNom(nom, this)
+      }).seq(function (grp) {
+        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous y êtes déjà abonné`
+        if (grp && (isManaged(context, grp) || (grp.ouvert && !$accessControl.isGroupeSuivi(context, nom)))) {
+          groupe = grp
+          followGroup(context, nom, this)
+        } else this(deniedMsg)
+      }).seq(function () {
+        addInfos(context, groupe, this)
+      }).seq(function () {
+        $json.sendOk(context)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+    })
+
+    /**
+     * Ajoute le user courant au groupe
+     * @route GET /groupe/rejoindre/:nom
+     */
+    controller.get('rejoindre/:nom', function (context) {
+      var nom = context.arguments.nom.toLowerCase()
+      let groupe
+      flow().seq(function () {
+        $groupeRepository.loadByNom(nom, this)
+      }).seq(function (grp) {
+        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous en êtes déjà membre`
+        if (grp && (isManaged(context, grp) || (grp.public && !$accessControl.isGroupeMembre(context, nom)))) {
+          groupe = grp
+          joinGroup(context, nom, this)
+        } else this(deniedMsg)
+      }).seq(function () {
+        addInfos(context, groupe, this)
+      }).seq(function () {
+        $json.sendOk(context)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+    })
+
+    /**
+     * Efface un groupe d'après son nom, appellera denied ou sendJson avec error ou deleted:nom
+     * @private
+     * @param {Context} context
+     * @param nom
+     */
+    function deleteAndSend (context, nom) {
+      log.debug('dans cb api deleteGroupe ' + nom)
+      const myOid = $accessControl.getCurrentUserOid(context)
+      // faut charger le groupe pour vérifier si l'utilisateur est admin (elle est probablement en cache)
+      $groupeRepository.loadByNom(nom, function (error, groupe) {
+        if (error) return $json.sendError(context, error)
+        if (!groupe) return $json.notFound(context, `Le groupe ${nom} n’existe pas`)
+        if (!groupe.gestionnaires.includes(myOid)) return $json.denied(context, `Vous n’avez pas le droit de supprimer ce groupe`)
+        $groupeRepository.delete(nom, function (error) {
+          if (error) return $json.sendError(context, error)
+          $json.sendOk(context, {deleted: nom})
+        })
+      })
+    }
+
+    /**
+     * Répond ok pour les options delete
+     * @private
+     * @param {Context} context
+     */
+    function optionsDeleteOk (context) {
+      context.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS')
+      // context.setHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept')
+      // et on laisse le middleware CORS faire son boulot
+      context.next(null, 'OK') // ne pas renvoyer de chaîne vide sinon 404
+    }
+
+    /**
+     * Delete groupe par nom, retourne {@link reponseDeleted}
+     * @route DELETE /api/groupe/:
+     * @param {String} nom
+     */
+    controller.delete(':nom', function (context) {
+      deleteAndSend(context, context.arguments.nom)
+    })
+
+    controller.options(':nom', optionsDeleteOk)
   })
 }

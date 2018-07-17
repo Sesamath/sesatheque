@@ -31,8 +31,10 @@
 
 'use strict'
 
+const flow = require('an-flow')
+
 module.exports = function (component) {
-  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl) {
+  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json) {
     /**
      * Controleur de la route /api/personne/
      * @Controller controllerApiPersonne
@@ -115,11 +117,11 @@ module.exports = function (component) {
      * Renvoie le user courant et les liens pour le SSO
      * Retourne un objet
      * {
-   *   user: {pid, nom, prenom},
-   *   ssoLinks: link[], // si le sso propose des liens pour gérer son compte ou autre
-   *   logoutUrl: string, // si on est authentifié
-   *   loginLinks: link[]
-   * }
+     *   user: {pid, nom, prenom},
+     *   ssoLinks: link[], // si le sso propose des liens pour gérer son compte ou autre
+     *   logoutUrl: string, // si on est authentifié
+     *   loginLinks: link[]
+     * }
      * un link est de la forme {href: string, icon: string, value: string}
      * @route GET /api/personne/current
      */
@@ -150,6 +152,29 @@ module.exports = function (component) {
         response.loginLinks = $auth.getLoginLinks(context)
       }
       sendJson(context, null, response)
+    })
+
+    /**
+     * Récupère le nom d'un utilisateur
+     * depuis son oid
+     * @route GET /api/personne/byOid/:oid
+     */
+    this.get('byOid/:oid', function (context) {
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) return $json.denied(context, 'Vous devez être authentifié pour chercher des utilisateurs')
+
+      const {oid} = context.arguments
+      flow().seq(function () {
+        $personneRepository.load(oid, this)
+      }).seq(function (personne) {
+        if (!personne) return $json.sendOk(context, {user: null})
+        else {
+          const {nom, oid, prenom} = personne
+          $json.sendOk(context, {user: {nom, oid, prenom}})
+        }
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
     })
   })
 }

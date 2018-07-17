@@ -382,7 +382,7 @@ module.exports = function (component) {
     })
 
     /**
-     * Traitement du formulaire d'ajout de ressource, réaffiche le form avec une erreur éventuelle ou
+     * Traitement du formulaire d'ajout de groupe, réaffiche le form avec une erreur éventuelle ou
      * redirige vers le form d'édition (pour ajouter ce qui dépend du type choisi)
      * @route POST /groupe/ajouter
      */

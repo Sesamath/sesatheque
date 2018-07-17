@@ -66,12 +66,6 @@ const GroupeDescription = ({
                   <NavLink to={`/ressource/decrire/${oid}`}>
                     description
                   </NavLink>,
-                  <NavLink to={`/ressource/apercevoir/${oid}`}>
-                    aperçu
-                  </NavLink>,
-                  <NavLink to={`/ressource/voir/${oid}`} target="_blank">
-                    voir en pleine page
-                  </NavLink>
                   )
                 </span>
               </li>

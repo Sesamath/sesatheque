@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {loadGroupes} from '../actions/groupes'
+import {loadGroupes} from '../../../actions/groupes'
 
 const mapDispatchToProps = {
   loadGroupes
@@ -9,11 +9,11 @@ const mapDispatchToProps = {
 
 const mapStateToProps = ({groupes, session}) => ({
   groupes,
-  pid: session && session.personne && session.personne.pid
+  oid: session && session.personne && session.personne.oid
 })
 
 /**
- * High Order Component qui charge les groupes avant de les passer à WrappedComponent
+ * Higher Order Component qui charge les groupes avant de les passer à WrappedComponent
  * (si on l'avait pas déjà dans le state)
  * @param {Component} WrappedComponent
  * @return {Component} Le composant enrichi
@@ -22,13 +22,13 @@ const groupesLoader = (WrappedComponent) => {
   class GroupesLoader extends Component {
     // lors du 1er mount du component on charge la ressource
     componentDidMount () {
-      if (this.props.pid !== null && this.props.groupes === null) {
+      if (this.props.oid !== null && this.props.groupes === null) {
         this.props.loadGroupes()
       }
     }
 
     componentDidUpdate () {
-      if (this.props.pid !== null && this.props.groupes === null) {
+      if (this.props.oid !== null && this.props.groupes === null) {
         this.props.loadGroupes()
       }
     }
@@ -43,7 +43,7 @@ const groupesLoader = (WrappedComponent) => {
 
   GroupesLoader.propTypes = {
     loadGroupes: PropTypes.func,
-    pid: PropTypes.string,
+    oid: PropTypes.string,
     groupes: PropTypes.shape({})
   }
 

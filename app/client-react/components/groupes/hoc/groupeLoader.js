@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {GET} from '../utils/httpMethods'
+import {GET} from '../../../utils/httpMethods'
 
 /**
- * High Order Component qui charge un groupe avant de les passer à WrappedComponent
+ * Higher Order Component qui charge un groupe avant de les passer à WrappedComponent
  * (si on l'avait pas déjà dans le state)
  * @param {Component} WrappedComponent
  * @return {Component} Le composant enrichi
@@ -18,11 +18,12 @@ const groupeLoader = (WrappedComponent) => {
     componentDidMount () {
       const {match: {params: {groupe}}} = this.props
       if (!groupe) {
-        const {oid} = this.props.personne
+        const {oid, nom, prenom} = this.props.personne
         return this.setState({
           ouvert: false,
           public: true,
-          gestionnaires: [oid]
+          gestionnaires: [oid],
+          gestionnairesNames: [`${prenom} ${nom}`]
         })
       }
 

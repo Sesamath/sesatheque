@@ -31,6 +31,7 @@
 /* global log */
 'use strict'
 
+const flow = require('an-flow')
 var _ = require('lodash')
 
 /**
@@ -45,8 +46,8 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {groupeListCallback} next
    */
   function loadMyGroupesManaged (context, next) {
-    var myPid = $accessControl.getCurrentUserPid(context)
-    if (myPid) $groupeRepository.getListManagedBy(myPid, next)
+    var myOid = $accessControl.getCurrentUserPid(context)
+    if (myOid) $groupeRepository.getListManagedBy(myOid, next)
     else next()
   }
 
@@ -70,10 +71,10 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @returns {boolean}
    */
   function isManaged (context, groupe) {
-    var myPid = $accessControl.getCurrentUserPid(context)
+    var myOid = $accessControl.getCurrentUserOid(context)
     var retour = false
     if (groupe && groupe.gestionnaires) {
-      retour = _.includes(groupe.gestionnaires, myPid)
+      retour = _.includes(groupe.gestionnaires, myOid)
     }
     return retour
   }
@@ -113,13 +114,6 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
         next(null, me)
       } else {
         me[prop].push(nom)
-        // si c'est un ajout de groupesMembre, faut aussi mettre groupesSuivis
-        if (!isFollow) {
-          // c'est lui qui fera la mise à jour en bdd et en cache, puis appelera next
-          addGroup(context, nom, true, next)
-          // on arrête donc là (et avec 2 lignes jslint râle plus pour une tail recursion inutile)
-          return
-        }
         // màj session
         $accessControl.updateCurrentUser(context, me)
         // màj user en bdd
@@ -207,8 +201,31 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
     removeGroup(context, nom, true, next)
   }
 
+  /**
+   * Ajoute les noms des gestionnaires du groupe
+   * @param {Context} context
+   * @param groupe
+   * @param {callback} next
+   */
+  const addInfos = (context, groupe, next) => {
+    flow().seq(function () {
+      // on veut les noms des gestionnaires
+      if (!groupe.gestionnaires || !groupe.gestionnaires.length) return this(null, {})
+      $personneRepository.loadByOids(groupe.gestionnaires, this)
+    }).seq(function (personnes) {
+      if (personnes && personnes.length) {
+        groupe.gestionnairesNames = personnes.map(p => {
+          if (p === null) return null
+          return `${p.prenom} ${p.nom}`
+        })
+      }
+      next(null, groupe)
+    }).catch(next)
+  }
+
   return {
     addGroup: addGroup,
+    addInfos: addInfos,
     followGroup: followGroup,
     ignoreGroup: ignoreGroup,
     isFollowed: isFollowed,

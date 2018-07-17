@@ -1,15 +1,42 @@
+import {push} from 'connected-react-router'
+import {debounce} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {renameProp} from 'recompose'
+import {withProps} from 'recompose'
 import {reduxForm} from 'redux-form'
+import {GET} from '../../utils/httpMethods'
 import {
   SwitchField,
   InputField,
   TextareaField,
-  SelectField
-} from './fields'
-import ensureLogged from '../hoc/ensureLogged'
-import groupeLoader from '../hoc/groupeLoader'
+  AsyncSelectField
+} from '../fields'
+import {saveGroupe} from '../../actions/groupes'
+import ensureLogged from '../../hoc/ensureLogged'
+import groupeLoader from './hoc/groupeLoader'
+
+const debouncedGET = debounce((input, callback) => {
+  GET(`/api/personne/byOid/${input}`)
+    .then(({user}) => {
+      if (user === null) { return callback(null, ({ options: [] })) }
+      const {oid, prenom, nom} = user
+
+      return callback(null, {
+        options: [
+          {
+            value: oid,
+            label: `${prenom} ${nom} (${oid})`
+          }
+        ]
+      })
+    })
+    .catch(error => callback(error, null))
+}, 500)
+
+const getOptions = (input, callback) => {
+  if (!input) return callback(null, ({ options: [] }))
+  debouncedGET(input, callback)
+}
 
 const GroupeEdition = ({
   initialValues: {oid, gestionnaires},
@@ -46,19 +73,12 @@ const GroupeEdition = ({
         </div>
         <label>
           Ajouter des gestionnaires
-          <span className="remarque">(L&apos;ajout est irrévocable. Entrer un ou des identifiants séparés par des espaces, la confirmation sera demandée sur la page suivante avec les noms affichés)</span>
+          <span className="remarque"> (L&apos;ajout est irrévocable. Saisir l&apos;oid d&apos;un utilisateur)</span>
 
-          <SelectField
-            clearable={false}
+          <AsyncSelectField
+            placeholder="Saisir un oid"
             name="gestionnaires"
-            options={[{
-              value: personne.oid,
-              label: `${personne.nom} ${personne.prenom} (${personne.oid})`,
-              clearableValue: false
-            }, {
-              value: 'sfsfee43ewrsf',
-              label: 'Marie Totote (wewedaa3434)'
-            }]}
+            loadOptions={getOptions}
             multi
           />
         </label>
@@ -84,12 +104,33 @@ GroupeEdition.propTypes = {
   personne: PropTypes.object
 }
 
+const mapGestionnairesNames = ({
+  gestionnaires,
+  gestionnairesNames,
+  ...others
+}) => ({
+  ...others,
+  gestionnaires: gestionnaires.map((oid, index) => ({
+    value: oid,
+    label: `${gestionnairesNames[index]} (${oid})`,
+    clearableValue: false
+  }))
+})
+
 export default ensureLogged(
   groupeLoader(
-    renameProp('groupe', 'initialValues')(
+    withProps(({groupe}) => ({
+      initialValues: mapGestionnairesNames(groupe)
+    }))(
       reduxForm({
         form: 'groupe-edition',
-        onSubmit: (values) => { console.log(values) }
+        onSubmit: ({gestionnaires, ...others}, dispatch) => dispatch(saveGroupe(
+          {
+            ...others,
+            gestionnaires: gestionnaires.map(({value}) => value)
+          },
+          () => dispatch(push('/groupe/perso'))
+        ))
       })(
         GroupeEdition
       )

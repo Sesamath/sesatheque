@@ -119,13 +119,33 @@ module.exports = function (component) {
         this()
       }).seq(function () {
         // on va chercher en bdd
-        const key = (id.substr('/') === -1) ? 'oid' : 'pid'
+        const key = id.includes('/') ? 'pid' : 'oid'
         EntityPersonne.match(key).equals(id).grabOne(this)
       }).seq(function (personne) {
         if (!personne) return next()
         $cachePersonne.set(personne)
         next(null, personne)
       }).catch(next)
+    }
+
+    /**
+     * Retourne une liste de personnes d'apres une liste de oids
+     * @param {string[]} oids Liste de oid
+     * @param next callback appelée avec (error, personnes) (personnes étant un array de personne || null si l'oid est inconnu en bdd)
+     */
+    function loadByOids (oids, next) {
+      if (!Array.isArray(oids)) return next(Error('arguments invalides'))
+      // @todo add $cachePersonne.getByPid()
+      flow().seq(function () {
+        EntityPersonne.match('oid').in(oids).grab(this)
+      }).seq(function (personnesArray) {
+        const personnes = oids.map(refOid => {
+          return personnesArray.find(({oid}) => oid === refOid) || null
+        })
+        next(null, personnes)
+      }).catch(function (error) {
+        next(error)
+      })
     }
 
     /**
@@ -284,6 +304,7 @@ module.exports = function (component) {
       addGroupe,
       delete: deletePersonne,
       load,
+      loadByOids,
       loadByPids,
       removeGroup,
       renameGroup,

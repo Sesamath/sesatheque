@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
-import {GET} from '../utils/httpMethods'
+import {GET} from '../../../utils/httpMethods'
 
 /**
- * High Order Component qui charge les groupes ouverts avant de les passer à WrappedComponent
+ * Higher Order Component qui charge les groupes ouverts avant de les passer à WrappedComponent
  * (si on l'avait pas déjà dans le state)
  * @param {Component} WrappedComponent
  * @return {Component} Le composant enrichi

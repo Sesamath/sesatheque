@@ -115,13 +115,13 @@ module.exports = function (component) {
     }
 
     /**
-     * Récupère une liste de groupes dont le pid fourni est gestionnaire
-     * @param {string} pid
+     * Récupère une liste de groupes dont le oid fourni est gestionnaire
+     * @param {string} oid
      * @param {groupeListCallback} next
      * @memberOf $groupeRepository
      */
-    function getListManagedBy (pid, next) {
-      EntityGroupe.match('gestionnaires').equals(pid).sort('nom').grab(next)
+    function getListManagedBy (oid, next) {
+      EntityGroupe.match('gestionnaires').equals(oid).sort('nom').grab(next)
     }
 
     /**

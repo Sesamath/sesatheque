@@ -43,7 +43,9 @@ function optionsOk (context) {
 }
 
 module.exports = function (component) {
-  component.controller('api/groupes', function (EntityGroupe, $groupeRepository, $accessControl, $json) {
+  component.controller('api/groupes', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
+    const {addInfos} = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
+
     /**
      * Controleur de la route /api/groupe/
      * @Controller controllerApiGroupe
@@ -118,20 +120,22 @@ module.exports = function (component) {
      * @route GET /api/groupes/perso
      */
     controller.get('perso', function (context) {
-      const pid = $accessControl.getCurrentUserPid(context)
-      if (!pid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
+      const oid = $accessControl.getCurrentUserOid(context)
+      if (!oid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
       const res = {
         groupes: {},
         groupesAdmin: [],
         groupesMembre: $accessControl.getCurrentUserGroupesMembre(context),
         groupesSuivis: $accessControl.getCurrentUserGroupesSuivis(context)
       }
+      const groupSet = new Set()
       const addGroupe = (groupe) => {
         delete groupe.$loadState
         res.groupes[groupe.nom] = groupe
+        groupSet.add(groupe)
       }
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(pid, this)
+        $groupeRepository.getListManagedBy(oid, this)
       }).seq(function (managedGroups) {
         managedGroups.forEach((groupe) => {
           addGroupe(groupe)
@@ -142,10 +146,18 @@ module.exports = function (component) {
         res.groupesMembre.concat(res.groupesSuivis).forEach(nom => {
           if (!res.groupes[nom]) missing.add(nom)
         })
-        if (!missing.size) return $json.sendOk(context, res)
-        $groupeRepository.fetchList(Array.from(missing), this)
-      }).seq(function (missingGroups) {
-        missingGroups.forEach(addGroupe)
+        if (!missing.size) return this()
+
+        const next = this
+        flow().seq(function () {
+          $groupeRepository.fetchList(Array.from(missing), this)
+        }).seq(function (missingGroups) {
+          missingGroups.forEach(addGroupe)
+          next(null, Array.from(groupSet))
+        }).catch(next)
+      }).seqEach(function (groupe) {
+        addInfos(context, groupe, this)
+      }).seq(function () {
         $json.sendOk(context, res)
       }).catch($json.sendError.bind(null, context))
     })
@@ -202,11 +214,13 @@ module.exports = function (component) {
       if (pid) {
         flow().seq(function () {
           $groupeRepository.loadOuvert(this)
+        }).seqEach(function (groupe) {
+          addInfos(context, groupe, this)
         }).seq(function (groupesOuverts) {
           $json.sendOk(context, {groupes: groupesOuverts})
         }).catch(function (error) {
           console.error(error)
-          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+          $json.sendError(context, 'Une erreur est survenue lors de la récupération des groupes ouverts')
         })
       } else {
         $json.denied(context, "Il faut s'authentifier avant pour récupérer les groupes ouverts")
@@ -223,11 +237,13 @@ module.exports = function (component) {
       if (pid) {
         flow().seq(function () {
           $groupeRepository.loadPublic(this)
+        }).seqEach(function (groupe) {
+          addInfos(context, groupe, this)
         }).seq(function (groupesPublics) {
           $json.sendOk(context, {groupes: groupesPublics})
         }).catch(function (error) {
           console.error(error)
-          $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+          $json.sendError(context, 'Une erreur est survenue lors de la récupération des groupes publics')
         })
       } else {
         $json.denied(context, "Il faut s'authentifier avant pour récupérer les groupes ouverts")

@@ -347,9 +347,19 @@ module.exports = function (component) {
     }
 
     /**
-     * Retourne le pid du user courant ou undefined
+     * Retourne l'oid du user courant ou undefined
      * @param {Context} context
      * @returns {Integer} L'oid
+     * @memberOf $accessControl
+     */
+    $accessControl.getCurrentUserOid = function (context) {
+      if (context.session.user) return context.session.user.oid
+    }
+
+    /**
+     * Retourne le pid du user courant ou undefined
+     * @param {Context} context
+     * @returns {Integer} Le pid
      * @memberOf $accessControl
      */
     $accessControl.getCurrentUserPid = function (context) {

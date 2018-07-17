@@ -2,7 +2,7 @@ import {GET} from '../utils/httpMethods'
 
 const receiveCurrentSession = session => ({
   type: 'RECEIVE_CURRENT_SESSION',
-  session
+  payload: {session}
 })
 
 export const getCurrentSession = () => dispatch =>
@@ -17,7 +17,7 @@ export const addGroupe = (groupe) => dispatch =>
       if (success) {
         return dispatch({
           type: 'ADD_GROUPES',
-          groupe
+          payload: {groupe}
         })
       }
 
