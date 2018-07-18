@@ -618,31 +618,37 @@ module.exports = function (component) {
       if (!ressource) return $json.notFound(context, 'Cette ressource n’existe pas.')
       if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context)
       // on va renvoyer qq chose
+
       const addDroits = (data) => {
         data._droits = 'R'
         if ($accessControl.hasPermission('update', context, ressource)) data._droits += 'W'
         if ($accessControl.hasPermission('delete', context, ressource)) data._droits += 'D'
       }
+
+      const send = (data) => {
+        if (droits) addDroits(data)
+        $json.send(context, null, data)
+      }
+
       let {format, droits} = context.get
-      // ça vient de l'url donc toujours une string
+
+      // init droits, ça vient de l'url donc toujours une string
       if (['false', 'no', 'off', '0', 'undefined', 'null'].includes(droits)) droits = false
-      let data
+      else if (['ref', 'full'].includes(format)) droits = true
+      else droits = false
+
       if (format === 'ref') {
-        data = new Ref(ressource)
-        droits = true
+        send(new Ref(ressource))
       } else if (format === 'full') {
         // ressource complète avec résolution des oid externes (auteurs, groupe…)
         // c'est async, donc on sort pour éviter le send final
         return $ressourceConverter.enhance(ressource, (error, ressource) => {
           if (error) return $json.send(context, error)
-          addDroits(ressource)
-          $json.send(context, null, ressource)
+          send(ressource)
         })
       } else {
-        data = ressource
+        send(ressource)
       }
-      if (droits) addDroits(data)
-      $json.send(context, null, data)
     }
 
     /**
