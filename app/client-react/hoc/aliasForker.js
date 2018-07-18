@@ -2,11 +2,19 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {forkAlias} from '../actions/ressource'
-import history from '../history'
+import {goBack} from 'connected-react-router'
 
-const mapDispatchToProps = {
-  forkAlias
-}
+const mapDispatchToProps = (dispatch) => ({
+  ensuresIsForked: ({oid, aliasOf}) => {
+    if (!aliasOf) return
+
+    if (confirm('Cette ressource est un alias, une copie va donc être créée, voulez-vous continuer ?')) {
+      dispatch(forkAlias(oid))
+    } else {
+      dispatch(goBack())
+    }
+  }
+})
 
 const mapStateToProps = ({ressource}) => ({ressource})
 
@@ -18,21 +26,11 @@ const mapStateToProps = ({ressource}) => ({ressource})
 const aliasForker = (ResourceForm) => {
   class AliasForker extends Component {
     componentDidMount () {
-      this.ensuresIsForked()
+      this.props.ensuresIsForked(this.props.ressource)
     }
 
     componentDidUpdate () {
-      this.ensuresIsForked()
-    }
-
-    ensuresIsForked () {
-      if (!this.props.ressource.aliasOf) return
-
-      if (confirm('Cette ressource est un alias, une copie va donc être créée, voulez-vous continuer ?')) {
-        this.props.forkAlias(this.props.ressource.oid)
-      } else {
-        history.goBack()
-      }
+      this.props.ensuresIsForked(this.props.ressource)
     }
 
     render () {
