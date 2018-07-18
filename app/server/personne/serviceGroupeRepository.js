@@ -36,7 +36,6 @@ const flow = require('an-flow')
 // on ne peut pas mettre ces services en dépendance de $groupeRepository car ils sont déclarés après
 let $ressourceRepository
 let $personneRepository
-const {limites: {listeMax}} = require('../ressource/config')
 
 module.exports = function (component) {
   component.service('$groupeRepository', function (EntityGroupe, $cacheGroupe) {

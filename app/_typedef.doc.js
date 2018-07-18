@@ -135,4 +135,3 @@
  * @property {string} 0 la clé sur laquelle trier
  * @property {string} [1=asc] passer 'desc' pour un tri inversé
  */
-

@@ -38,9 +38,6 @@ const sjtObj = require('sesajstools/utils/object')
 const config = require('../config')
 const configRessource = require('../ressource/config')
 
-const defaultSearchLimit = 25
-const maxSearchLimit = 100
-
 module.exports = function (component) {
   component.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
     /**

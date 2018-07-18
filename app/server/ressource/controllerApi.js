@@ -47,7 +47,7 @@ const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConv
 const myBaseId = config.application.baseId
 const myBaseUrl = config.application.baseUrl
 
-const {listeMax, listeNbDefault } = configRessource.limites
+const {listeMax, listeNbDefault} = configRessource.limites
 if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
 
 /**
@@ -589,7 +589,6 @@ module.exports = function (component) {
     function sendListe (context, error, ressources, listOptions) {
       if (error) return $json.send(context, error)
       if (!listOptions) listOptions = {}
-      const query = listOptions.query || {}
       const queryOptions = listOptions.queryOptions || {}
       const liste = []
       const reponse = listOptions
