@@ -1,8 +1,8 @@
+import {goBack} from 'connected-react-router'
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {forkAlias} from '../actions/ressource'
-import {goBack} from 'connected-react-router'
 
 const mapDispatchToProps = (dispatch) => ({
   ensuresIsForked: ({oid, aliasOf}) => {
@@ -47,12 +47,7 @@ const aliasForker = (ResourceForm) => {
   }
 
   AliasForker.propTypes = {
-    match: PropTypes.shape({
-      params: PropTypes.shape({
-        ressourceOid: PropTypes.string
-      })
-    }),
-    forkAlias: PropTypes.func,
+    ensuresIsForked: PropTypes.func,
     ressource: PropTypes.shape({
       aliasOf: PropTypes.string,
       oid: PropTypes.string
