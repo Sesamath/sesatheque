@@ -52,6 +52,7 @@ const sessionReducer = (state = null, {type, payload}) => {
       const {groupe} = payload
       const {nom} = groupe
       const {personne} = state
+
       return {
         ...state,
         personne: {
@@ -65,11 +66,28 @@ const sessionReducer = (state = null, {type, payload}) => {
       const {groupe} = payload
       const {nom} = groupe
       const {personne} = state
+
       return {
         ...state,
         personne: {
           ...personne,
           groupesMembre: [...personne.groupesMembre, nom]
+        }
+      }
+    }
+    case 'DELETE_GROUPE': {
+      if (state === null) { return state }
+      const {nom} = payload
+      const {personne} = state
+      const filter = filterGroups(nom)
+
+      return {
+        ...state,
+        personne: {
+          ...personne,
+          groupesAdmin: personne.groupesAdmin.filter(filter),
+          groupesMembre: personne.groupesMembre.filter(filter),
+          groupesSuivis: personne.groupesSuivis.filter(filter)
         }
       }
     }
