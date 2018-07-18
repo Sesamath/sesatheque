@@ -14,7 +14,8 @@ class IframeHandler extends Component {
     this.iframe = React.createRef()
 
     this.state = {
-      manualEdition: false
+      manualEdition: !props.allowManualEdition,
+      disableEditor: false
     }
   }
 
@@ -23,6 +24,13 @@ class IframeHandler extends Component {
    */
   onLoad () {
     this.props.onLoad(this.iframe)
+  }
+
+  onManualEditorChange (annotations) {
+    if (annotations.length === 0) return this.setState({disableEditor: false})
+
+    let hasErrors = annotations.find(a => a.type === 'error') !== undefined
+    this.setState({disableEditor: hasErrors})
   }
 
   /**
@@ -47,16 +55,17 @@ class IframeHandler extends Component {
   render () {
     return (
       <fieldset>
-        {this.props.allowManualEdition ? (
+      {this.props.allowManualEdition ? (
           <nav className="tabs-menu">
             <button
               type="button"
               onClick={this.toggleManualEditor.bind(this, true)}
-              className={!this.state.manualEdition ? 'inactive' : ''}>Mode texte</button>
+              className={!this.state.manualEdition ? 'btn' : 'btn selected'}>Mode texte</button>
             <button
               type="button"
               onClick={this.toggleManualEditor.bind(this, false)}
-              className={this.state.manualEdition ? 'inactive' : ''}>Éditeur graphique</button>
+              className={this.state.manualEdition ? 'btn' : 'btn selected'}
+              disabled={this.state.disableEditor}>Éditeur graphique</button>
           </nav>
         ) : null}
         {this.props.allowManualEdition && this.state.manualEdition ? (
@@ -64,6 +73,7 @@ class IframeHandler extends Component {
             label="Script"
             name={this.props.name ||
               'parametres'}
+            onValidate={this.onManualEditorChange.bind(this)}
           />
         ) : (
           <iframe
