@@ -1,7 +1,9 @@
+@import "styles/fonts.scss";
+@import "styles/mixins.scss";
+
 /**
- * règles css pour page et iframe,
- * attention à vérifier que les variables utilisées ici sont bien importées par page.scss et iframe.scss
- * (elles devraient toutes être dans _00-config-sesatheque)
+ * règles css pour page et iframe
+ * (elles devraient toutes être dans config.scss)
  */
 
 /* les pictos des ressources faut mettre du !important pour que ce ne soit pas écrasé par les css jstree */
@@ -83,19 +85,6 @@ html, body {padding: 0; margin: 0;height: 100%;}
   padding: 0.5em;
 }
 
-/* Couleurs */
-@mixin avert($icon) {
-  @include fa-icon;
-  @extend .fa;
-  background-color: $background-base;
-  margin: 1rem;
-  padding: 1rem;
-  border: thin solid;
-  &:before {
-    margin-right: 1rem;
-    content: fa-content($icon);
-  }
-}
 #errors {
   margin: 0;
   padding: 0;

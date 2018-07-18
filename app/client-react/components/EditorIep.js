@@ -7,6 +7,9 @@ import ShowError from './ShowError.js'
 
 const importErrorMessage = 'Une erreur s’est produite durant l’importation du script'
 
+/**
+ * Éditeur des paramètres d'une ressource iep
+ */
 class EditorIep extends Component {
   constructor (props) {
     super(props)
@@ -94,12 +97,16 @@ class EditorIep extends Component {
 }
 
 EditorIep.propTypes = {
+  /** L'url du script */
   url: PropTypes.string,
+  /** Pour modifier parametres[xml] (fourni par le wrapper formValues de redux-form) */
   change: PropTypes.func,
+  /** Pour les notifications (fourni par le wrapper addNotifyToProps) */
   notify: PropTypes.func
 }
 
 // on extrait en props la valeur d'un champ
 // puis on wrappe dans addNotify:
-const urlToProps = formValues({url: 'parametres[url]'})(EditorIep)
-export default addNotifyToProps(urlToProps)
+export default addNotifyToProps(
+  formValues({url: 'parametres[url]'})(EditorIep)
+)

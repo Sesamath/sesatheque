@@ -5,6 +5,7 @@ import {hot} from 'react-hot-loader'
 import {Provider} from 'react-redux'
 import {Route, Switch} from 'react-router-dom'
 import {withContext, lifecycle} from 'recompose'
+import Account from './components/Account'
 import Header from './components/Header'
 import Home from './components/Home'
 import Footer from './components/Footer'
@@ -20,7 +21,7 @@ import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
 import store from './store'
 
-import '../srcStyles/page.scss'
+import './App.scss'
 
 // ATTENTION à garder la liste des routes synchrones dans app/server/main/controllerMain.js
 
@@ -33,6 +34,7 @@ const App = () => (
           <Notifications />
           <Switch>
             <Route exact path="/" component={Home} />
+            <Route exact path="/compte" component={Account} />
             <Route exact path="/mentionsLegales" component={MentionsLegales} />
             <Route exact path="/ressource/ajouter" component={RessourceCreate} />
             <Route exact path="/ressource/modifier/:ressourceOid" component={ResourceForm} />

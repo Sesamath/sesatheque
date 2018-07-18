@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import {NavLink} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {version} from '../../../package'
+import './Header.scss'
 
 const logoUrl = `/images/sesatheque.png?${version}`
 
@@ -11,7 +12,10 @@ const getButtons = (personne) => {
   const buttonSearch = {
     id: 'buttonSearch',
     title: 'Recherche',
-    to: '/ressource/rechercher#form',
+    to: {
+      pathname: `/ressource/rechercher`,
+      hash: `#form`
+    },
     icon: 'search'
   }
   if (personne === null) {
@@ -31,7 +35,11 @@ const getButtons = (personne) => {
     {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
-      to: `/ressource/rechercher?auteurs=${personne.pid}#results`,
+      to: {
+        pathname: `/ressource/rechercher`,
+        search: `?auteurs=${personne.pid}`,
+        hash: `#results`
+      },
       icon: 'bookmark'
     },
     {
@@ -49,7 +57,7 @@ export const Header = ({
   personne,
   loginLink,
   logoutUrl,
-  ssoLinks,
+  sso,
   currentUrl
 }) => {
   if (isIframeLayout) return null
@@ -75,16 +83,21 @@ export const Header = ({
         role="navigation"
       >
         {getButtons(personne).map(({
+          id,
           icon,
           title,
           to,
           target
         }) => (
           <NavLink
-            key={to}
+            key={id}
             to={to}
             title={title}
             target={target}
+            isActive={(match, location) => {
+              if (to.hash) return location.pathname + location.hash === to.pathname + to.hash
+              return location.pathname + location.hash === to
+            }}
           >
             <i className={`fa fa-${icon}`}></i>
             <span>{title}</span>
@@ -98,19 +111,25 @@ export const Header = ({
                 <i className="fa fa-ellipsis-v"></i>
               </NavLink>
               <ul>
-                <div>{`${personne.prenom} ${personne.nom} (${personne.pid})`}</div>
-                {ssoLinks ? ssoLinks.map(({
-                  href,
-                  icon,
-                  value
-                }) => (
-                  <li key={href}>
-                    <a href={setRedirect(href)} title={value}>
-                      <i className={`fa fa-${icon}`}></i>
-                      <span>{value}</span>
+                <div>{`${personne.prenom} ${personne.nom}`}</div>
+                <li>
+                  <NavLink
+                    key="compte"
+                    to="/compte"
+                    title="Mes informations personnelles"
+                  >
+                    <i className={`fa fa-user`}></i>
+                    <span>Mes informations personnelles</span>
+                  </NavLink>
+                </li>
+                {sso && sso.links && sso.links.length > 1 && sso.links.slice(1).map(link => (
+                  <li key={link.href}>
+                    <a href={setRedirect(link.href)} title={link.value} target="_blank" rel="noopener noreferrer">
+                      {link.icon && (<i className={`fa fa-${link.icon}`}></i>)}
+                      <span>{link.value}</span>
                     </a>
                   </li>
-                )) : null}
+                ))}
                 <li>
                   <a href={setRedirect(logoutUrl)} title="Déconnexion">
                     <i className="fa fa-sign-out-alt"></i>
@@ -131,7 +150,10 @@ Header.propTypes = {
   personne: PropTypes.object,
   logoutUrl: PropTypes.string,
   loginLink: PropTypes.object,
-  ssoLinks: PropTypes.arrayOf(PropTypes.object),
+  sso: PropTypes.shape({
+    links: PropTypes.arrayOf(PropTypes.object),
+    name: PropTypes.string
+  }),
   currentUrl: PropTypes.string
 }
 
@@ -149,7 +171,6 @@ const getCurrentUrl = ({
 
 const mapStateToProps = ({
   session,
-  iframe,
   router: {location}
 }) => ({
   personne: session && session.personne,
@@ -157,7 +178,7 @@ const mapStateToProps = ({
   // we suppose that loginLinks is a singleton
   // todo: add support for several links
   loginLink: session && session.loginLinks && session.loginLinks[0],
-  ssoLinks: session && session.ssoLinks,
+  sso: session && session.sso,
   currentUrl: getCurrentUrl(location)
 })
 
