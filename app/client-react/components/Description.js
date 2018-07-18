@@ -17,6 +17,7 @@ const {jour: dateFormat} = formats
  * @return du jsx
  */
 const nl2br = (str) => {
+  if (!str) return null
   // on ajoute des parenthèses capturantes dans la regex pour avoir les \n comme élément de tableau
   // (sinon un split('\n') suffisait mais ça obligeait à mettre du <Fragment> dans le retour du map)
   return str.split(/(\n)/g).map((part, index) => {
@@ -29,7 +30,7 @@ const nl2br = (str) => {
  * @type {PureComponent}
  * @return {Fragment}
  */
-const Description = ({
+export const Description = ({
   ressource: {
     _droits: droits,
     _urls,
@@ -57,7 +58,7 @@ const Description = ({
     _contributeurs = [],
     _groupesAuteurs = [],
     _relations = [],
-    groupes
+    groupes = []
   }
 }) => {
   // on précalcule quelques flags & labels pour la lisibilité
