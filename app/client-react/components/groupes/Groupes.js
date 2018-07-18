@@ -16,7 +16,8 @@ import './Groupes.scss'
 const toDetailedList = (groupes, ref) => {
   const res = []
   groupes.forEach(nom => {
-    res.push(ref[nom])
+    const details = ref[nom]
+    if (details) { res.push(details) }
   })
 
   return res
