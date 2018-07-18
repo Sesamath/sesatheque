@@ -18,7 +18,8 @@ import validate from '../utils/validate'
 const RessourceCreate = ({
   handleSubmit,
   pristine,
-  submitting
+  submitting,
+  submitSucceeded
 }) => (
   <Fragment>
     <h1>Créer une ressource</h1>
@@ -94,7 +95,7 @@ const RessourceCreate = ({
       </div>
     </form>
     <Prompt
-      when={!pristine}
+      when={!pristine && !submitSucceeded}
       message="Il existe des changements non sauvegardés sur le formulaire, êtes vous sûr de vouloir changer de page ?"
     />
   </Fragment>
@@ -103,6 +104,7 @@ const RessourceCreate = ({
 RessourceCreate.propTypes = {
   handleSubmit: PropTypes.func,
   submitting: PropTypes.bool,
+  submitSucceeded: PropTypes.bool,
   pristine: PropTypes.bool
 }
 
