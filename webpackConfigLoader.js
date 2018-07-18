@@ -9,6 +9,7 @@ const safeConfig = {
     staging: config.application.staging
   },
   baseId: config.application.baseId,
+  baseUrl: config.application.baseUrl,
   bugsnag: config.bugsnag,
   sesatheques: config.sesatheques.map(({baseId, baseUrl}) => ({baseId, baseUrl})),
   version

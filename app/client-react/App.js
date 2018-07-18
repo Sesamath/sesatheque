@@ -19,8 +19,15 @@ import {getCurrentSession} from './actions/session'
 import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
 import store from './store'
+// cf webpackConfigLoader.js pour les valeurs exportées à un browser
+import {baseId, baseUrl, sesatheques} from '../server/config'
+import {addSesatheque} from 'sesatheque-client/src/sesatheques'
 
 import './App.scss'
+
+// init de cette sesatheque et des autres pour sesatheque-client
+addSesatheque(baseId, baseUrl)
+if (sesatheques.length) sesatheques.forEach(({baseId, baseUrl}) => addSesatheque(baseId, baseUrl))
 
 // ATTENTION à garder la liste des routes synchrones dans app/server/main/controllerMain.js
 
