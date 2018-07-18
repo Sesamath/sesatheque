@@ -46,7 +46,7 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {groupeListCallback} next
    */
   function loadMyGroupesManaged (context, next) {
-    var myOid = $accessControl.getCurrentUserPid(context)
+    var myOid = $accessControl.getCurrentUserOid(context)
     if (myOid) $groupeRepository.getListManagedBy(myOid, next)
     else next()
   }

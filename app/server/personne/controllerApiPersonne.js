@@ -34,11 +34,13 @@
 const flow = require('an-flow')
 
 module.exports = function (component) {
-  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json) {
+  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository) {
     /**
      * Controleur de la route /api/personne/
      * @Controller controllerApiPersonne
      */
+
+    const {loadMyGroupesManaged} = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
 
     /**
      * Équivalent de context.denied en json
@@ -128,33 +130,45 @@ module.exports = function (component) {
     this.get('current', function (context) {
       if (!$auth) $auth = lassi.service('$auth')
       const response = {}
-      if ($accessControl.isAuthenticated(context)) {
-        const {
-          oid,
-          pid,
-          nom,
-          prenom,
-          groupesMembre,
-          groupesSuivis
-        } = $accessControl.getCurrentUser(context)
-        response.personne = {
-          oid,
-          pid,
-          nom,
-          prenom,
-          groupesMembre,
-          groupesSuivis
+      flow().seq(function () {
+        if ($accessControl.isAuthenticated(context)) {
+          const {
+            oid,
+            pid,
+            nom,
+            prenom,
+            groupesMembre,
+            groupesSuivis
+          } = $accessControl.getCurrentUser(context)
+          response.personne = {
+            oid,
+            pid,
+            nom,
+            prenom,
+            groupesMembre,
+            groupesSuivis
+          }
+          response.logoutUrl = $auth.getLogoutUrl(context)
+          response.sso = {
+            links: $auth.getSsoLinks(context),
+            name: $auth.getName(context)
+          }
+          loadMyGroupesManaged(context, (error, groupesAdmin) => {
+            if (error) return this(error)
+
+            response.personne.groupesAdmin = groupesAdmin.map(({nom}) => nom)
+            this()
+          })
+        } else {
+          response.personne = null
+          response.loginLinks = $auth.getLoginLinks(context)
+          this()
         }
-        response.logoutUrl = $auth.getLogoutUrl(context)
-        response.sso = {
-          links: $auth.getSsoLinks(context),
-          name: $auth.getName(context)
-        }
-      } else {
-        response.personne = null
-        response.loginLinks = $auth.getLoginLinks(context)
-      }
-      sendJson(context, null, response)
+      }).seq(function () {
+        sendJson(context, null, response)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
     })
 
     /**

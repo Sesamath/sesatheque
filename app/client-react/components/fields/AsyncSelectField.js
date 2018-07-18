@@ -4,6 +4,11 @@ import {Field} from 'redux-form'
 import AsyncMultiSelectInput from './inputs/AsyncMultiSelectInput'
 import addLabel from './hoc/addLabel'
 
+/**
+ * Redux-form react-select field with async loaded options
+ * @todo factor with SelectField
+ *
+ */
 const AsyncSelectField = ({
   disabled,
   label,

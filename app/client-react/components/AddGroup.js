@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {connect} from 'react-redux'
-import {addGroupe} from '../actions/session'
+import {saveGroupe} from '../actions/groupes'
 
 /**
  * Input pour ajouter un groupe
@@ -38,7 +38,7 @@ AddGroupe.propTypes = {
 
 const mapDispatchToProps = (dispatch) => ({
   saveGroupe: (input) =>
-    dispatch(addGroupe(input.value))
+    dispatch(saveGroupe({nom: input.value}))
       .then(() => {
         input.value = ''
       })

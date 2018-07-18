@@ -13,7 +13,7 @@ import {
 
 import './Groupes.scss'
 
-const toDetailedList = (groupes = [], ref) => {
+const toDetailedList = (groupes, ref) => {
   const res = []
   groupes.forEach(nom => {
     res.push(ref[nom])
@@ -28,12 +28,10 @@ const Groupes = ({
   deleteGroupe,
   ignoreGroupe,
   leaveGroupe,
-  groupes: {
-    groupesAdmin,
-    groupesMembre,
-    groupesSuivis,
-    groupes
-  }
+  groupesAdmin,
+  groupesMembre,
+  groupesSuivis,
+  groupes
 }) => (
   <Fragment>
     <h1>Mes groupes</h1>
@@ -163,12 +161,10 @@ const Groupes = ({
 )
 
 Groupes.propTypes = {
-  groupes: PropTypes.shape({
-    groupes: PropTypes.object,
-    groupesAdmin: PropTypes.array,
-    groupesMembre: PropTypes.array,
-    groupesSuivis: PropTypes.array
-  }),
+  groupes: PropTypes.object,
+  groupesAdmin: PropTypes.array,
+  groupesMembre: PropTypes.array,
+  groupesSuivis: PropTypes.array,
   joinGroupe: PropTypes.func,
   leaveGroupe: PropTypes.func,
   followGroupe: PropTypes.func,

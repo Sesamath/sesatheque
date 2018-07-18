@@ -5,6 +5,11 @@ import showInvalidField from '../hoc/showInvalidField'
 
 import 'react-select/dist/react-select.css'
 
+/**
+ * Redux-form react-select input with async loaded options
+ * @todo factor with MultiSelectInput
+ *
+ */
 const AsyncMultiSelectInput = ({
   input: {name, onFocus, onBlur, onChange, value},
   meta: {error, warning, touched},

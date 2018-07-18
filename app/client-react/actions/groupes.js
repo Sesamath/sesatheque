@@ -3,7 +3,7 @@ import {addNotification} from './notifications'
 
 export const loadGroupes = () => dispatch =>
   GET('/api/groupes/perso')
-    .then(({success, error, ...groupes}) => {
+    .then(({success, error, groupes}) => {
       if (success) {
         return dispatch({
           type: 'LOAD_GROUPES',
@@ -15,7 +15,7 @@ export const loadGroupes = () => dispatch =>
     })
 
 const saveGroupeAction = (groupe, isNew) => ({
-  type: 'ADD_GROUPE',
+  type: 'SAVE_GROUPE',
   payload: {
     groupe,
     isNew

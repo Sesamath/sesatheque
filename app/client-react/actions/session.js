@@ -10,16 +10,3 @@ export const getCurrentSession = () => dispatch =>
     .then((session) => {
       dispatch(receiveCurrentSession(session))
     })
-
-export const addGroupe = (groupe) => dispatch =>
-  GET(`/api/groupe/ajouter/${groupe}`)
-    .then(({success, error}) => {
-      if (success) {
-        return dispatch({
-          type: 'ADD_GROUPES',
-          payload: {groupe}
-        })
-      }
-
-      throw Error(error)
-    })
