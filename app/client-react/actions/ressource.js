@@ -1,15 +1,19 @@
 import {DELETE, GET, POST} from '../utils/httpMethods'
 import {addNotification} from './notifications'
+import getUrls from 'sesatheque-client/src/getUrls'
 
 /**
  * Retourne l'action de type SET_RESSOURCE pour affecter une ressource dans le store
  * @param ressource
  * @return {{type: string, ressource: Ressource}}
  */
-const setRessource = (ressource) => ({
-  type: 'SET_RESSOURCE',
-  ressource
-})
+const setRessource = (ressource) => {
+  ressource._urls = getUrls(ressource)
+  return {
+    type: 'SET_RESSOURCE',
+    ressource
+  }
+}
 
 /**
  * Retourne l'action de type CLEAR_RESSOURCE pour retirer la ressource du store
