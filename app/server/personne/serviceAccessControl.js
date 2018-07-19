@@ -608,7 +608,7 @@ module.exports = function (component) {
       return context.session.user &&
         context.session.user.groupesMembre &&
         context.session.user.groupesMembre.length &&
-        context.session.user.groupesMembre.find(n => n === nom)
+        context.session.user.groupesMembre.some(n => n === nom)
     }
 
     /**
@@ -623,7 +623,7 @@ module.exports = function (component) {
       return context.session.user &&
         context.session.user.groupesSuivis &&
         context.session.user.groupesSuivis.length &&
-        context.session.user.groupesSuivis.find(n => n === nom)
+        context.session.user.groupesSuivis.some(n => n === nom)
     }
 
     /**
@@ -634,7 +634,7 @@ module.exports = function (component) {
      */
     $accessControl.isInGroupes = function (context, ressource) {
       if (ressource && ressource.groupes && ressource.groupes.length) {
-        return ressource.groupes.find(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
+        return ressource.groupes.some(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
       }
       return false
     }
@@ -647,7 +647,7 @@ module.exports = function (component) {
      */
     $accessControl.isInGroupesAuteurs = function (context, ressource) {
       if (ressource && ressource.groupesAuteurs && ressource.groupesAuteurs.length) {
-        return ressource.groupesAuteurs.find(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
+        return ressource.groupesAuteurs.some(groupeNom => $accessControl.isGroupeMembre(context, groupeNom))
       }
       return false
     }
