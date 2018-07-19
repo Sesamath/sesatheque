@@ -38,9 +38,7 @@ module.exports = function (component) {
    * Controleurs de la route /api/personne/
    * @Controller controllerApiPersonne
    */
-  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session, $groupe) {
-    const {loadMyGroupesManaged} = $groupe
-
+  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session) {
     /**
      * Équivalent de context.denied en json
      * @todo utiliser $json.denied, qui devra utiliser context.restKo (prop message et plus error)
@@ -158,9 +156,10 @@ module.exports = function (component) {
               links: $auth.getSsoLinks(context),
               name: $auth.getName(context)
             }
-            loadMyGroupesManaged(context, this)
-            // on met à jour la session
+            // on met à jour la session (sans groupesAdmin, mais personne l'utilise depuis la session)
             $session.updatePersonne(context, personne)
+            // et on charge les groupes gérés (on veut leurs noms)
+            $groupeRepository.getListManagedBy(oid, this)
           }).seq(function (groupesAdmin) {
             response.personne.groupesAdmin = groupesAdmin.map(({nom}) => nom)
             send()

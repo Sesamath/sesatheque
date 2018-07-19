@@ -44,7 +44,7 @@ function optionsOk (context) {
 
 module.exports = function (component) {
   component.controller('api/groupes', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository, $groupe) {
-    const {addInfos} = $groupe
+    const {addGestionnairesNames} = $groupe
 
     /**
      * Controleur de la route /api/groupe/
@@ -148,7 +148,7 @@ module.exports = function (component) {
           next(null, Array.from(groupSet))
         }).catch(next)
       }).seqEach(function (groupe) {
-        addInfos(context, groupe, this)
+        addGestionnairesNames(context, groupe, this)
       }).seq(function () {
         $json.sendOk(context, {groupes})
       }).catch($json.sendError.bind(null, context))
@@ -205,7 +205,7 @@ module.exports = function (component) {
         flow().seq(function () {
           $groupeRepository.loadOuvert(this)
         }).seqEach(function (groupe) {
-          addInfos(context, groupe, this)
+          addGestionnairesNames(context, groupe, this)
         }).seq(function (groupesOuverts) {
           $json.sendOk(context, {groupes: groupesOuverts})
         }).catch(function (error) {
@@ -228,7 +228,7 @@ module.exports = function (component) {
         flow().seq(function () {
           $groupeRepository.loadPublic(this)
         }).seqEach(function (groupe) {
-          addInfos(context, groupe, this)
+          addGestionnairesNames(context, groupe, this)
         }).seq(function (groupesPublics) {
           $json.sendOk(context, {groupes: groupesPublics})
         }).catch(function (error) {

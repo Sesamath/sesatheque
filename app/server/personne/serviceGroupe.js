@@ -33,22 +33,43 @@
 
 const flow = require('an-flow')
 
+// nos 3 cas
+const suivis = ['groupesSuivis']
+const membre = ['groupesMembre']
+const both = ['groupesMembre', 'groupesSuivis']
+
 /**
  * Helper des controleurs de groupe (api et html)
  * @private
  */
 module.exports = function (component) {
-  component.service('$groupe', function ($accessControl, $groupeRepository, $personneRepository) {
+  component.service('$groupe', function ($session, $accessControl, $groupeRepository, $personneRepository) {
     /**
-     * Récupère la liste des groupes dont je suis proprio
+     * Récupère le user courant en bdd
      * @private
      * @param {Context} context
-     * @param {groupeListCallback} next
+     * @param {callbackPersonne} next
      */
-    function loadMyGroupesManaged (context, next) {
-      var myOid = $accessControl.getCurrentUserOid(context)
-      if (myOid) $groupeRepository.getListManagedBy(myOid, next)
-      else next()
+    function loadCurrentUser (context, next) {
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) throw Error('Pas d’utilisateur en session')
+      $personneRepository.load(myOid, function (error, personne) {
+        if (error) return next(error)
+        $session.updatePersonne(context, personne)
+        next(null, personne)
+      })
+    }
+
+    /**
+     * Met a jour le user courant en session et bdd
+     * @private
+     * @param {Context} context
+     * @param {Personne} me
+     * @param {callbackPersonne} next
+     */
+    function saveCurrentUser (context, me, next) {
+      $session.updatePersonne(context, me)
+      $personneRepository.save(me, next)
     }
 
     /**
@@ -65,7 +86,6 @@ module.exports = function (component) {
 
     /**
      * Retourne true si on est gestionnaire du groupe
-     * @private
      * @param context
      * @param {Groupe} groupe Le groupe (pas son nom)
      * @returns {boolean}
@@ -78,20 +98,29 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne true si on est membre du groupe
+     * @param {Context} context
+     * @param {string|Groupe} groupe Le groupe ou son nom
+     * @returns {boolean}
+     */
+    function isMemberOf (context, groupe) {
+      const groupesMembre = $accessControl.getCurrentUserGroupesMembre(context)
+      const nom = getNom(groupe)
+      if (nom && groupesMembre.length) return groupesMembre.includes(nom)
+      return false
+    }
+
+    /**
      * Retourne true si on suit ce groupe
-     * @private
      * @param context
      * @param {string|Groupe} groupe Le groupe ou son nom
      * @returns {boolean}
      */
     function isFollowed (context, groupe) {
-      var groupesSuivis = $accessControl.getCurrentUserGroupesSuivis(context)
-      var nom = getNom(groupe)
-      var retour = false
-      if (nom && groupesSuivis.length) {
-        retour = groupesSuivis.some(function (groupeNom) { return groupeNom === nom })
-      }
-      return retour
+      const groupesSuivis = $accessControl.getCurrentUserGroupesSuivis(context)
+      const nom = getNom(groupe)
+      if (nom && groupesSuivis.length) return groupesSuivis.includes(nom)
+      return false
     }
 
     /**
@@ -99,27 +128,26 @@ module.exports = function (component) {
      * @private
      * @param {Context} context
      * @param {string} nom Nom du groupe
-     * @param {boolean} isFollow true pour groupesSuivis, groupesMembre sinon
+     * @param {string[]} groupTypes tableau dont les éléments ne peuvent être que les strings groupesMembre ou groupesSuivis
      * @param {callbackPersonne} next
      */
-    function addGroup (context, userOid, nom, isFollow, next) {
-      flow().seq(function () {
-        $personneRepository.load(userOid, this)
-      }).seq(function (me) {
-        const prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
-        if (!me[prop]) me[prop] = []
-        if (me[prop].includes(nom)) {
-          log.debug('Le groupe ' + nom + ' était déjà dans ' + prop + ' pour le user ' + me.oid)
-          this(null, me)
-        } else {
-          me[prop].push(nom)
-          // màj session
-          // $accessControl.updateCurrentUser(context, me)
-          // màj user en bdd
-          $personneRepository.save(me, this)
-          log.debug('groupe ' + nom + ' ajouté à ' + prop)
-        }
-      }).done(next)
+    function addGroup (context, nom, groupTypes, next) {
+      loadCurrentUser(context, function (error, me) {
+        if (error) return next(error)
+        let hasChanged = false
+        groupTypes.forEach(prop => {
+          if (!me[prop]) me[prop] = []
+          if (me[prop].includes(nom)) {
+            log.debug(`Le groupe ${nom} était déjà dans ${prop} pour le user ${me.oid}`)
+          } else {
+            log.debug('groupe ' + nom + ' ajouté à ' + prop)
+            me[prop].push(nom)
+            hasChanged = true
+          }
+        })
+        if (hasChanged) saveCurrentUser(context, me, next)
+        else next(null, me)
+      })
     }
 
     /**
@@ -127,72 +155,74 @@ module.exports = function (component) {
      * @private
      * @param {Context} context
      * @param {string} nom Nom du groupe
-     * @param {boolean} isFollow true pour groupesSuivis, groupesMembre sinon
+     * @param {string[]} groupTypes tableau dont les éléments ne peuvent être que les strings groupesMembre ou groupesSuivis
      * @param {callbackPersonne} next
      */
-    function removeGroup (context, userOid, nom, isFollow, next) {
-      flow().seq(function () {
-        $personneRepository.load(userOid, this)
-      }).seq(function (me) {
-        const prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
-        const deniedMsg = "Vous n'étiez pas dans ce groupe ou il n’existe pas"
-        if (me[prop] && me[prop].length) {
-          var newGroupes = me[prop].filter(function (groupeNom) { return groupeNom !== nom })
-          if (newGroupes.length === me[prop].length) {
-            this(new Error(deniedMsg))
-          } else {
-            me[prop] = newGroupes
-            // màj session, pas très utile car on doit avoir une ref dessus, mais plus propre
-            // $accessControl.updateCurrentUser(context, me)
-            // màj user en bdd (et en cache)
-            $personneRepository.save(me, this)
-          }
-        }
-      }).done(next)
+    function removeGroup (context, nom, groupTypes, next) {
+      loadCurrentUser(context, function (error, me) {
+        if (error) return next(error)
+        let hasChanged = false
+        groupTypes.forEach(prop => {
+          // shortcut aucun groupe
+          if (!me[prop] || !me[prop].length) return
+          const newGroupes = me[prop].filter((groupeNom) => groupeNom !== nom)
+          if (newGroupes.length === me[prop].length) return
+          hasChanged = true
+          me[prop] = newGroupes
+        })
+        if (hasChanged) saveCurrentUser(context, me, next)
+        else next(new Error(`Vous n’étiez pas dans le groupe ${nom}`))
+      })
     }
 
     /**
      * Ajoute un groupe (membre) à l'utilisateur courant
-     * @private
      * @param {Context} context
      * @param {string} nom Nom du groupe
      * @param {callbackPersonne} next
      */
-    function joinGroup (context, userOid, nom, next) {
-      addGroup(context, userOid, nom, false, next)
+    function joinGroup (context, nom, next) {
+      addGroup(context, nom, membre, next)
+    }
+
+    /**
+     * Ajoute le groupe à groupesMembre et groupesSuivis du user courant
+     * @param {Context} context
+     * @param {string} nom Le groupe
+     * @param {callbackPersonne} next
+     */
+    function joinAndFollowGroup (context, nom, next) {
+      addGroup(context, nom, both, next)
     }
 
     /**
      * Retire un groupe (membre) à l'utilisateur courant
-     * @private
      * @param {Context} context
      * @param {string} nom Nom du groupe
      * @param {callbackPersonne} next
      */
-    function quitGroup (context, userOid, nom, next) {
-      removeGroup(context, userOid, nom, false, next)
+    function quitGroup (context, nom, next) {
+      removeGroup(context, nom, membre, next)
     }
 
     /**
      * Ajoute un groupe suivi pour l'utilisateur courant
-     * @private
      * @param {Context} context
      * @param {string} nom Nom du groupe
      * @param {callbackPersonne} next
      */
-    function followGroup (context, userOid, nom, next) {
-      addGroup(context, userOid, nom, true, next)
+    function followGroup (context, nom, next) {
+      addGroup(context, nom, suivis, next)
     }
 
     /**
      * Retire un groupe suivi pour l'utilisateur courant
-     * @private
      * @param {Context} context
      * @param {string} nom Nom du groupe
      * @param {callbackPersonne} next
      */
-    function ignoreGroup (context, userOid, nom, next) {
-      removeGroup(context, userOid, nom, true, next)
+    function ignoreGroup (context, nom, next) {
+      removeGroup(context, nom, suivis, next)
     }
 
     /**
@@ -201,7 +231,7 @@ module.exports = function (component) {
      * @param groupe
      * @param {callback} next
      */
-    const addInfos = (context, groupe, next) => {
+    const addGestionnairesNames = (context, groupe, next) => {
       flow().seq(function () {
         // on veut les noms des gestionnaires
         const gestionnaires = groupe.gestionnaires || []
@@ -220,15 +250,15 @@ module.exports = function (component) {
     }
 
     return {
-      addGroup,
-      addInfos,
+      addGestionnairesNames,
       followGroup,
       ignoreGroup,
       isFollowed,
       isManaged,
+      isMemberOf,
       joinGroup,
-      loadMyGroupesManaged,
-      quitGroup: quitGroup
+      joinAndFollowGroup,
+      quitGroup
     }
   })
 }
