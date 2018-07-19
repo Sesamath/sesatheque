@@ -35,7 +35,6 @@ const groupeLoader = (WrappedComponent) => {
     }
 
     render () {
-      console.log('state dans groupeLoader.render', this.state)
       if (this.state === null) return null
 
       return (
