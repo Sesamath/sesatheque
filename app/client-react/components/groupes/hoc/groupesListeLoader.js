@@ -1,9 +1,10 @@
 import React, {Component} from 'react'
 import {GET} from '../../../utils/httpMethods'
+import ensureLogged from '../../../hoc/ensureLogged'
 
 /**
- * Higher Order Component qui charge les groupes ouverts avant de les passer à WrappedComponent
- * (si on l'avait pas déjà dans le state)
+ * Higher Order Component qui charge les groupes ouverts ou publics (suivant url passée)
+ * avant de les passer à WrappedComponent
  * @param {Component} WrappedComponent
  * @return {Component} Le composant enrichi
  */
@@ -31,7 +32,7 @@ const groupesListeLoader = url => WrappedComponent => {
 
   GroupesListeLoader.propTypes = {}
 
-  return GroupesListeLoader
+  return ensureLogged(GroupesListeLoader)
 }
 
 export default groupesListeLoader

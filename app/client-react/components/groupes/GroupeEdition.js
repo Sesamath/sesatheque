@@ -162,7 +162,7 @@ const onSubmit = ({gestionnaires, ...others}, dispatch) => {
     ...others,
     gestionnaires: gestionnaires.map(({value}) => value)
   }
-  const onSaveSuccess = () => dispatch(push('/groupe/perso'))
+  const onSaveSuccess = () => dispatch(push('/groupes/perso'))
   const action = saveGroupe(groupe, onSaveSuccess)
   dispatch(action)
 }
@@ -179,6 +179,7 @@ const propsFromForm = {
   isOuvert: 'ouvert'
 }
 
+// groupesLoader contient ensureLogged
 export default groupesLoader(
   withProps(getInitialValues)(
     reduxForm(formDefinition)(

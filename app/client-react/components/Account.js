@@ -10,14 +10,6 @@ const Account = ({personne, sso}) => {
   // le lien vers les données perso est le premier (on le vire dans le header pour ne le garder qu'ici)
   const firstHref = sso && sso.links && sso.links[0] && sso.links[0].href
 
-  if (!firstHref) {
-    return (
-      <Fragment>
-        <h1>Mes informations personnelles</h1>
-        <p>Vous n’êtes pas connecté</p>
-      </Fragment>
-    )
-  }
   return (
     <Fragment>
       <h1>Mes informations personnelles</h1>
@@ -32,9 +24,21 @@ const Account = ({personne, sso}) => {
         <div className="txtright"><strong>Nom :</strong></div>
         <div className="col-5">{personne.nom}</div>
       </div><br />
-      <p>
-        Ces informations proviennent du serveur d’authentification « {sso.name} » <a href={firstHref} target="_blank" rel="noopener noreferrer">modifier ces informations</a>
-      </p>
+      {sso && sso.name
+        ? firstHref
+          ? (
+            <p>
+              Ces informations proviennent du serveur d’authentification « {sso.name} » <a href={firstHref} target="_blank" rel="noopener noreferrer">modifier ces informations</a>
+            </p>
+          ) : (
+            <p>
+              Ces informations proviennent du serveur d’authentification « {sso.name} » mais il n’a pas fourni de lien pour les modifier.
+            </p>
+          )
+        : (
+          <p>Erreur interne, données du serveur d’authentification manquantes.</p>
+        )
+      }
     </Fragment>
   )
 }
@@ -54,4 +58,6 @@ const mapStateToProps = ({
   sso: session && session.sso
 })
 
-export default ensureLogged(connect(mapStateToProps)(Account))
+export default ensureLogged(
+  connect(mapStateToProps)(Account)
+)

@@ -5,6 +5,15 @@ import {NavLink} from 'react-router-dom'
 import groupesListeLoader from './hoc/groupesListeLoader'
 import {followGroupe, ignoreGroupe} from './utils/groupesOperations'
 
+/**
+ * La liste des groupes publics (auth)
+ * @type PureComponent
+ * @param {object} props
+ * @param {Groupe[]} props.groupes
+ * @param {function} props.followGroupe
+ * @param {function} props.ignoreGroupe
+ * @param {function} props.groupesSuivis
+ */
 const GroupesPublics = ({
   groupes,
   followGroupe,
@@ -13,47 +22,51 @@ const GroupesPublics = ({
 }) => (
   <Fragment>
     <h1>Tous les groupes publics</h1>
-    <ul className="liste">
-      {groupes.map(
-        ({
-          nom,
-          description,
-          ouvert,
-          gestionnaires,
-          gestionnairesNames
-        }) => {
-          return (
-            <li key={nom}> {nom} ({ouvert ? 'ouvert' : 'fermé'})
-              <span className="links">
-                {groupesSuivis.includes(nom) ? (
-                  <button onClick={() => ignoreGroupe(nom)}>
-                    Ne plus suivre
-                  </button>
-                ) : (
-                  <button onClick={() => followGroupe(nom)}>
-                    Suivre
-                  </button>
-                )}
-                <NavLink to={{
-                  pathname: '/ressource/rechercher',
-                  hash: 'results',
-                  search: `groupes=${encodeURIComponent(nom)}`
-                }}>Voir les ressources du groupe
-                </NavLink>
-              </span>
-              <pre>{description}</pre>
-              <ul>
-                Gestionnaire(s) :&nbsp;
-                {gestionnaires.map((oid, index) => (
-                  <li key={oid}>{gestionnairesNames[index]} <span className="remarque">({oid})</span>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          )
-        }
-      )}
-    </ul>
+    {groupes.length ? (
+      <ul className="liste">
+        {groupes.map(
+          ({
+            nom,
+            description,
+            ouvert,
+            gestionnaires,
+            gestionnairesNames
+          }) => {
+            return (
+              <li key={nom}><strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'})
+                <span className="links">
+                  {groupesSuivis.includes(nom) ? (
+                    <button onClick={() => ignoreGroupe(nom)}>
+                      Ne plus suivre
+                    </button>
+                  ) : (
+                    <button onClick={() => followGroupe(nom)}>
+                      Suivre
+                    </button>
+                  )}
+                  <NavLink to={{
+                    pathname: '/ressource/rechercher',
+                    hash: 'results',
+                    search: `groupes=${encodeURIComponent(nom)}`
+                  }}>Voir les ressources du groupe
+                  </NavLink>
+                </span>
+                <pre>{description}</pre>
+                <ul>
+                  Gestionnaire(s) :&nbsp;
+                  {gestionnaires.map((oid, index) => (
+                    <li key={oid}>{gestionnairesNames[index]} <span className="remarque">({oid})</span>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            )
+          }
+        )}
+      </ul>
+    ) : (
+      <p>Il n’y a aucun groupe public</p>
+    )}
   </Fragment>
 )
 
@@ -68,6 +81,7 @@ const mapStateToProps = ({session}) => ({
   groupesSuivis: (session && session.personne && session.personne.groupesSuivis) || []
 })
 
+// groupesListeLoader contient ensureLogged
 export default groupesListeLoader('/api/groupes/publics')(
   connect(mapStateToProps, {followGroupe, ignoreGroupe})(
     GroupesPublics

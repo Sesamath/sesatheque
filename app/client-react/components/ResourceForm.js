@@ -15,6 +15,7 @@ import GroupContainer from './GroupContainer'
 import aliasForker from '../hoc/aliasForker'
 import resourceLoader from '../hoc/resourceLoader'
 import resourceSaver from '../hoc/resourceSaver'
+import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
 import validate from '../utils/validate'
 
@@ -93,11 +94,13 @@ ResourceForm.propTypes = {
   saveRessource: PropTypes.func
 }
 
-export default resourceLoader(
-  aliasForker(
-    resourceSaver(
-      renameProp('ressource', 'initialValues')(
-        reduxForm({form: 'ressource', validate})(ResourceForm)
+export default ensureLogged(
+  resourceLoader(
+    aliasForker(
+      resourceSaver(
+        renameProp('ressource', 'initialValues')(
+          reduxForm({form: 'ressource', validate})(ResourceForm)
+        )
       )
     )
   )

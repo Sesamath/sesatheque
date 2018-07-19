@@ -45,7 +45,7 @@ const getButtons = (personne) => {
     {
       id: 'buttonMyGroupes',
       title: 'Mes groupes',
-      to: '/groupe/perso',
+      to: '/groupes/perso',
       icon: 'users'
     }
   ]
