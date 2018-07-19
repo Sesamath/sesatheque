@@ -3,7 +3,7 @@ import {debounce} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {withProps} from 'recompose'
-import {reduxForm} from 'redux-form'
+import {formValues, reduxForm} from 'redux-form'
 import {GET} from '../../utils/httpMethods'
 import {
   SwitchField,
@@ -38,14 +38,6 @@ const getOptions = (input, callback) => {
   debouncedGET(input, callback)
 }
 
-// @todo rendre les remarques ouvert / public conditionnelles
-// remarqueOuvert = ouvert
-//   ? 'Tout le monde pourra devenir membre du groupe'
-//   : 'Seul un gestionnaire pourra ajouter un membre'}
-// remarquePublic = public
-//   ? 'tout le monde peut suivre les publications du groupe'
-//   : 'il faut être membre pour suivre les publications du groupe'
-
 /**
  * Formulaire d'édition de groupe
  * Doit être dans un redux-form
@@ -56,6 +48,8 @@ const getOptions = (input, callback) => {
 const GroupeEdition = ({
   initialValues: {oid, gestionnaires},
   handleSubmit,
+  isOuvert,
+  isPublic,
   submitting
 }) => (
   <Fragment>
@@ -76,14 +70,20 @@ const GroupeEdition = ({
             name="ouvert"
             label="Ouvert à tous"
           />
-          <span className="remarque">(tout le monde pourra devenir membre du groupe)</span>
+          <span className="remarque">({isOuvert
+            ? 'tout le monde pourra devenir membre du groupe'
+            : 'seul un gestionnaire pourra ajouter un membre'
+          })</span>
         </div>
         <div>
           <SwitchField
             name="public"
             label="Public"
           />
-          <span className="remarque">(tout le monde peut suivre les publications du groupe)</span>
+          <span className="remarque">({isPublic
+            ? 'tout le monde peut suivre les publications du groupe'
+            : 'il faut être membre pour suivre les publications du groupe'
+          })</span>
         </div>
         <label>
           Ajouter des gestionnaires
@@ -114,7 +114,9 @@ const GroupeEdition = ({
 GroupeEdition.propTypes = {
   initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  submitting: PropTypes.bool
+  submitting: PropTypes.bool,
+  isOuvert: PropTypes.bool,
+  isPublic: PropTypes.bool
 }
 
 const getInitialValues = ({groupe}) => {
@@ -146,10 +148,18 @@ const formDefinition = {
   onSubmit
 }
 
+const propsFromForm = {
+  // public est un mot clé js, on préfixe avec is
+  isPublic: 'public',
+  // pour ouvert aussi par cohérence
+  isOuvert: 'ouvert'
+}
+
 export default ensureLogged(
   groupeLoader(
     withProps(getInitialValues)(
-      reduxForm(formDefinition)(GroupeEdition)
+      reduxForm(formDefinition)(
+        formValues(propsFromForm)(GroupeEdition))
     )
   )
 )
