@@ -7,16 +7,19 @@ const mapStateToProps = ({session}) => ({
 })
 
 /**
-* High Order Component qui ne rend rien si
-* la session ne contient pas un utilisateur
-* (si on ne l'avait pas déjà dans le state)
+* High Order Component qui affiche qu'il faut se connecter lorsque la session
+ * ne contient pas d'utilisateur, et le WrappedComponent sinon
 * @param {Component} WrappedComponent
 * @return {Component} Le composant enrichi
 */
 const ensureLogged = (WrappedComponent) => {
   class EnsureLogged extends Component {
     render () {
-      if (this.props.personne === null) return null
+      if (this.props.personne === null) {
+        return (
+          <p>Vous devez être connecté pour accéder à cette page.</p>
+        )
+      }
 
       return (
         <WrappedComponent {...this.props} />
