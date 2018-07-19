@@ -12,8 +12,7 @@ import {
   AsyncSelectField
 } from '../fields'
 import {saveGroupe} from '../../actions/groupes'
-import ensureLogged from '../../hoc/ensureLogged'
-import groupeLoader from './hoc/groupeLoader'
+import groupesLoader from './hoc/groupesLoader'
 
 const debouncedGET = debounce((input, callback) => {
   GET(`/api/personne/byOid/${input}`)
@@ -119,7 +118,32 @@ GroupeEdition.propTypes = {
   isPublic: PropTypes.bool
 }
 
-const getInitialValues = ({groupe}) => {
+const getInitialValues = ({
+  groupes,
+  match: {params: {groupe: groupeNom}},
+  personne: {
+    oid,
+    nom,
+    prenom
+  }
+}) => {
+  let groupe
+  if (groupeNom) {
+    groupe = groupes[groupeNom] || {
+      ouvert: false,
+      public: true,
+      gestionnaires: [oid],
+      gestionnairesNames: [`${prenom} ${nom}`],
+      nom: groupeNom
+    }
+  } else {
+    groupe = {
+      ouvert: false,
+      public: true,
+      gestionnaires: [oid],
+      gestionnairesNames: [`${prenom} ${nom}`]
+    }
+  }
   const {gestionnaires, gestionnairesNames, ...others} = groupe
   const gestionnairesItems = gestionnaires.map((oid, index) => ({
     value: oid,

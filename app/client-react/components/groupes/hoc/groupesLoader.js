@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import ensureLogged from '../../../hoc/ensureLogged'
 import {loadGroupes} from '../../../actions/groupes'
 
 const mapDispatchToProps = {
@@ -9,7 +10,9 @@ const mapDispatchToProps = {
 
 const mapStateToProps = ({groupes, session}) => ({
   groupes,
-  oid: session && session.personne && session.personne.oid
+  groupesAdmin: (session && session.personne && session.personne.groupesAdmin) || [],
+  groupesMembre: (session && session.personne && session.personne.groupesMembre) || [],
+  groupesSuivis: (session && session.personne && session.personne.groupesSuivis) || []
 })
 
 /**
@@ -20,18 +23,18 @@ const mapStateToProps = ({groupes, session}) => ({
  */
 const groupesLoader = (WrappedComponent) => {
   class GroupesLoader extends Component {
-    // lors du 1er mount du component on charge la ressource
     componentDidMount () {
-      if (this.props.oid !== null && this.props.groupes === null) {
+      if (this.props.groupes === null) {
         this.props.loadGroupes()
       }
     }
 
     componentDidUpdate () {
-      if (this.props.oid !== null && this.props.groupes === null) {
+      if (this.props.groupes === null) {
         this.props.loadGroupes()
       }
     }
+
     render () {
       if (this.props.groupes === null) return null
 
@@ -43,14 +46,17 @@ const groupesLoader = (WrappedComponent) => {
 
   GroupesLoader.propTypes = {
     loadGroupes: PropTypes.func,
-    oid: PropTypes.string,
     groupes: PropTypes.shape({})
   }
 
-  return connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(GroupesLoader)
+  return ensureLogged(
+    connect(
+      mapStateToProps,
+      mapDispatchToProps
+    )(
+      GroupesLoader
+    )
+  )
 }
 
 export default groupesLoader

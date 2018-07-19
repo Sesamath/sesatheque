@@ -116,16 +116,11 @@ module.exports = function (component) {
     controller.get('perso', function (context) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
-      const res = {
-        groupes: {},
-        groupesAdmin: [],
-        groupesMembre: $accessControl.getCurrentUserGroupesMembre(context),
-        groupesSuivis: $accessControl.getCurrentUserGroupesSuivis(context)
-      }
+      const groupes = {}
       const groupSet = new Set()
       const addGroupe = (groupe) => {
         delete groupe.$loadState
-        res.groupes[groupe.nom] = groupe
+        groupes[groupe.nom] = groupe
         groupSet.add(groupe)
       }
       flow().seq(function () {
@@ -133,15 +128,18 @@ module.exports = function (component) {
       }).seq(function (managedGroups) {
         managedGroups.forEach((groupe) => {
           addGroupe(groupe)
-          res.groupesAdmin.push(groupe.nom)
         })
+        this()
+      }).seq(function () {
+        $personneRepository.load(oid, this)
+      }).seq(function (personne) {
+        const {groupesMembre, groupesSuivis} = personne
         // les groupes qu'il faut aller chercher
         const missing = new Set()
-        res.groupesMembre.concat(res.groupesSuivis).forEach(nom => {
-          if (!res.groupes[nom]) missing.add(nom)
+        groupesMembre.concat(groupesSuivis).forEach(nom => {
+          if (!groupes[nom]) missing.add(nom)
         })
         if (!missing.size) return this()
-
         const next = this
         flow().seq(function () {
           $groupeRepository.fetchList(Array.from(missing), this)
@@ -152,7 +150,7 @@ module.exports = function (component) {
       }).seqEach(function (groupe) {
         addInfos(context, groupe, this)
       }).seq(function () {
-        $json.sendOk(context, res)
+        $json.sendOk(context, {groupes})
       }).catch($json.sendError.bind(null, context))
     })
     controller.options('perso', optionsOk)

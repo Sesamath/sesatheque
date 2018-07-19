@@ -1,4 +1,4 @@
-const nameFilter = (removeMe) => (nom) => (nom !== removeMe)
+const filterGroups = (removeMe) => (nom) => (nom !== removeMe)
 
 const sessionReducer = (state = null, {type, payload}) => {
   switch (type) {
@@ -6,13 +6,12 @@ const sessionReducer = (state = null, {type, payload}) => {
       if (state === null || state.personne === undefined) return state
       const {nom} = payload
       const {personne} = state
-      const filter = nameFilter(nom)
 
       return {
         ...state,
         personne: {
           ...personne,
-          groupesSuivis: personne.groupesSuivis.filter(filter)
+          groupesSuivis: personne.groupesSuivis.filter(filterGroups(nom))
         }
       }
     }
@@ -20,17 +19,16 @@ const sessionReducer = (state = null, {type, payload}) => {
       if (state === null || state.personne === undefined) return state
       const {nom} = payload
       const {personne} = state
-      const filter = nameFilter(nom)
 
       return {
         ...state,
         personne: {
           ...personne,
-          groupesMembre: personne.groupesMembre.filter(filter)
+          groupesMembre: personne.groupesMembre.filter(filterGroups(nom))
         }
       }
     }
-    case 'ADD_GROUPE': {
+    case 'SAVE_GROUPE': {
       if (state === null || state.personne === undefined) return state
       const {groupe, isNew} = payload
       const {nom} = groupe
@@ -40,6 +38,7 @@ const sessionReducer = (state = null, {type, payload}) => {
           ...state,
           personne: {
             ...personne,
+            groupesAdmin: [...personne.groupesAdmin, nom],
             groupesMembre: [...personne.groupesMembre, nom],
             groupesSuivis: [...personne.groupesSuivis, nom]
           }
@@ -53,6 +52,7 @@ const sessionReducer = (state = null, {type, payload}) => {
       const {groupe} = payload
       const {nom} = groupe
       const {personne} = state
+
       return {
         ...state,
         personne: {
@@ -66,6 +66,7 @@ const sessionReducer = (state = null, {type, payload}) => {
       const {groupe} = payload
       const {nom} = groupe
       const {personne} = state
+
       return {
         ...state,
         personne: {
@@ -74,17 +75,19 @@ const sessionReducer = (state = null, {type, payload}) => {
         }
       }
     }
-    case 'ADD_GROUPES': {
-      if (state === null || state.personne === undefined) return state
-      const {groupe} = payload
+    case 'DELETE_GROUPE': {
+      if (state === null) { return state }
+      const {nom} = payload
       const {personne} = state
+      const filter = filterGroups(nom)
 
       return {
         ...state,
         personne: {
           ...personne,
-          groupesMembre: [...personne.groupesMembre, groupe],
-          groupesSuivis: [...personne.groupesSuivis, groupe]
+          groupesAdmin: personne.groupesAdmin.filter(filter),
+          groupesMembre: personne.groupesMembre.filter(filter),
+          groupesSuivis: personne.groupesSuivis.filter(filter)
         }
       }
     }
