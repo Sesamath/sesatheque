@@ -55,7 +55,7 @@ class IframeHandler extends Component {
   render () {
     return (
       <fieldset>
-      {this.props.allowManualEdition ? (
+        {this.props.allowManualEdition ? (
           <nav className="tabs-menu">
             <button
               type="button"

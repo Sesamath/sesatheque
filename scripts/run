@@ -4,6 +4,7 @@ set -u
 
 dirInitial="$PWD"
 dirApp=$(dirname $0)/../
+dockerFlag="$dirApp/_private/.testOnDocker"
 PM2=_private/pm2App.json5
 nodeEnv=${NODE_ENV:-dev}
 pm2opts=''
@@ -27,8 +28,9 @@ function usage() {
   echo "  -l : affiche les logs pm2 (avec pm2 logs, après les autres commandes)"
   echo "  -n : lancement avec node directement en mode dev, sans watch"
   echo "  -o : pour passer des options à pm2"
-  echo "  -p : lancement avec $PM2 en mode prod, utiliser -sp si on était en watch)"
+  echo "  -p : lancement avec $PM2 en mode prod (utiliser -sp si on était en watch)"
   echo "  -s : stoppe les process pm2 sesatheque qui pourraient tourner (pm2 delete)"
+  echo "  -t : lance les tests (avec docker si $dockerFlag présent)"
   echo "  -w : lancement avec $PM2 en mode dev avec watch, utiliser -sw si pm2 tournait déjà (sinon le statut watch n'est pas modifié)"
   exit $exitCode
 }
@@ -70,7 +72,7 @@ cd "$dirApp"
 runNode='no'
 runPm2='no'
 runDel='no'
-while getopts "c:dhlno:psw" OPTION
+while getopts "c:dhlno:pstw" OPTION
 do
   case $OPTION in
     c) PM2="$OPTARG";;
@@ -81,6 +83,14 @@ do
     o) pm2opts="$OPTARG";;
     p) nodeEnv='prod'; runPm2='yes';;
     s) runDel='yes';;
+    t)
+      if [ -f "$dockerFlag" ]; then
+        yarn run docker:test
+      else
+        yarn run test:all
+      fi
+      exit $?
+    ;;
     # les options passées en ligne de commande n'écrasent pas celle de la conf
     # en cli le scale sert à rien avec --watch (et donne une erreur à partir de pm2 1.0)
     # pas réussi à faire un env watch qui marche pour avoir du watch dans ce cas mais pas en prod,
