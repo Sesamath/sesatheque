@@ -137,9 +137,9 @@ module.exports = function (component) {
           if (error) return $json.sendError(context, error)
 
           flow().seq(function () {
-            joinGroup(context, groupe.nom, this)
+            joinGroup(context, myOid, groupe.nom, this)
           }).seq(function () {
-            followGroup(context, groupe.nom, this)
+            followGroup(context, myOid, groupe.nom, this)
           }).seq(function () {
             addInfos(context, groupe, this)
           }).seq(function () {
@@ -162,7 +162,7 @@ module.exports = function (component) {
       }).seq(function (groupe) {
         if (!groupe) return $json.notFound(context, `Le groupe d’identifiant ${oid} n’existe pas`)
         if (isFullFormat) addInfos(context, groupe, this)
-        else this(groupe)
+        else this(null, groupe)
       }).seq(function (groupe) {
         $json.sendOk(context, groupe)
       }).catch(function (error) {
@@ -182,7 +182,7 @@ module.exports = function (component) {
       }).seq(function (groupe) {
         if (!groupe) return $json.notFound(context, `Le groupe « ${nom} » n’existe pas`)
         if (isFullFormat) addInfos(context, groupe, this)
-        else this(groupe)
+        else this(null, groupe)
       }).seq(function (groupe) {
         $json.sendOk(context, groupe)
       }).catch(function (error) {
@@ -218,7 +218,7 @@ module.exports = function (component) {
             })
             groupe.store(function (error, groupeBdd) {
               if (error) {
-                $json.sendError(context, error)
+                $json.spersonneRepositoryendError(context, error)
               } else if (groupeBdd && groupeBdd.oid) {
                 addGroup(context, nom, false, function (error, personne) {
                   if (!error && personne) $json.sendOk(context)
@@ -240,17 +240,13 @@ module.exports = function (component) {
      * @route GET /api/groupe/ignorer/:nom
      */
     controller.get('ignorer/:nom', function (context) {
-      var nom = context.arguments.nom.toLowerCase()
-      flow().seq(function () {
-        $groupeRepository.loadByNom(nom, this)
-      }).seq(function (grp) {
-        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous ne le suivez pas`
-        if (grp && isFollowed(context, nom)) ignoreGroup(context, nom, this)
-        else this(deniedMsg)
-      }).seq(function () {
-        $json.sendOk(context)
-      }).catch(function (error) {
-        $json.sendError(context, error)
+      const nom = context.arguments.nom.toLowerCase()
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) return $json.denied(context, 'Il faut être authentifié pour ignorer un groupe')
+      ignoreGroup(context, myOid, nom, (error) => {
+        if (error) return $json.sendError(context, error)
+
+        return $json.sendOk(context)
       })
     })
 
@@ -259,17 +255,13 @@ module.exports = function (component) {
      * @route GET /groupe/quitter/:nom
      */
     controller.get('quitter/:nom', function (context) {
-      var nom = context.arguments.nom.toLowerCase()
-      flow().seq(function () {
-        $groupeRepository.loadByNom(nom, this)
-      }).seq(function (grp) {
-        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous n'en faites pas partie`
-        if (grp && $accessControl.isGroupeMembre(context, nom)) quitGroup(context, nom, this)
-        else this(deniedMsg)
-      }).seq(function () {
-        $json.sendOk(context)
-      }).catch(function (error) {
-        $json.sendError(context, error)
+      const nom = context.arguments.nom.toLowerCase()
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) return $json.denied(context, 'Il faut être authentifié pour quitter un groupe')
+      quitGroup(context, myOid, nom, (error) => {
+        if (error) return $json.sendError(context, error)
+
+        return $json.sendOk(context)
       })
     })
 
@@ -278,15 +270,17 @@ module.exports = function (component) {
      * @route GET /groupe/suivre/:nom
      */
     controller.get('suivre/:nom', function (context) {
-      var nom = context.arguments.nom.toLowerCase()
+      const nom = context.arguments.nom.toLowerCase()
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) return $json.denied(context, 'Il faut être authentifié pour suivre un groupe')
       let groupe
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
-        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous y êtes déjà abonné`
-        if (grp && (isManaged(context, grp) || (grp.ouvert && !$accessControl.isGroupeSuivi(context, nom)))) {
+        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous n'avez pas droits pour le suivre`
+        if (grp && (isManaged(context, grp) || grp.ouvert)) {
           groupe = grp
-          followGroup(context, nom, this)
+          followGroup(context, myOid, nom, this)
         } else this(deniedMsg)
       }).seq(function () {
         addInfos(context, groupe, this)
@@ -302,15 +296,17 @@ module.exports = function (component) {
      * @route GET /groupe/rejoindre/:nom
      */
     controller.get('rejoindre/:nom', function (context) {
-      var nom = context.arguments.nom.toLowerCase()
+      const nom = context.arguments.nom.toLowerCase()
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) return $json.denied(context, 'Il faut être authentifié pour rejoindre un groupe')
       let groupe
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
-        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous en êtes déjà membre`
-        if (grp && (isManaged(context, grp) || (grp.public && !$accessControl.isGroupeMembre(context, nom)))) {
+        var deniedMsg = `Le groupe ${nom} n’existe pas ou vous n'avez pas les droits pour le rejoindre`
+        if (grp && (isManaged(context, grp) || grp.public)) {
           groupe = grp
-          joinGroup(context, nom, this)
+          joinGroup(context, myOid, nom, this)
         } else this(deniedMsg)
       }).seq(function () {
         addInfos(context, groupe, this)
@@ -335,9 +331,14 @@ module.exports = function (component) {
         if (error) return $json.sendError(context, error)
         if (!groupe) return $json.notFound(context, `Le groupe ${nom} n’existe pas`)
         if (!groupe.gestionnaires.includes(myOid)) return $json.denied(context, `Vous n’avez pas le droit de supprimer ce groupe`)
-        $groupeRepository.delete(nom, function (error) {
-          if (error) return $json.sendError(context, error)
+        flow().seq(function () {
+          $groupeRepository.delete(nom, this)
+        }).seq(function () {
+          $personneRepository.removeGroup(nom, this)
+        }).seq(function () {
           $json.sendOk(context, {deleted: nom})
+        }).catch(function(error) {
+          $json.sendError(context, error)
         })
       })
     }

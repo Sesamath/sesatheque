@@ -116,8 +116,6 @@ module.exports = function (component) {
     controller.get('perso', function (context) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
-      const groupesMembre = $accessControl.getCurrentUserGroupesMembre(context)
-      const groupesSuivis = $accessControl.getCurrentUserGroupesSuivis(context)
       const groupes = {}
       const groupSet = new Set()
       const addGroupe = (groupe) => {
@@ -131,13 +129,17 @@ module.exports = function (component) {
         managedGroups.forEach((groupe) => {
           addGroupe(groupe)
         })
+        this()
+      }).seq(function () {
+        $personneRepository.load(oid, this)
+      }).seq(function (personne) {
+        const {groupesMembre, groupesSuivis} = personne
         // les groupes qu'il faut aller chercher
         const missing = new Set()
         groupesMembre.concat(groupesSuivis).forEach(nom => {
           if (!groupes[nom]) missing.add(nom)
         })
         if (!missing.size) return this()
-
         const next = this
         flow().seq(function () {
           $groupeRepository.fetchList(Array.from(missing), this)

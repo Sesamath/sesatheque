@@ -102,25 +102,24 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {boolean} isFollow true pour groupesSuivis, groupesMembre sinon
    * @param {callbackPersonne} next
    */
-  function addGroup (context, nom, isFollow, next) {
-    var me = $accessControl.getCurrentUser(context)
-    var prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
-    if (me) {
+  function addGroup (context, userOid, nom, isFollow, next) {
+    flow().seq(function () {
+      $personneRepository.load(userOid, this)
+    }).seq(function(me) {
+      const prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
       if (!me[prop]) me[prop] = []
-      if (_.includes(me[prop], nom)) {
+      if (me[prop].includes(nom)) {
         log.debug('Le groupe ' + nom + ' était déjà dans ' + prop + ' pour le user ' + me.oid)
-        next(null, me)
+        this(null, me)
       } else {
         me[prop].push(nom)
         // màj session
-        $accessControl.updateCurrentUser(context, me)
+        // $accessControl.updateCurrentUser(context, me)
         // màj user en bdd
-        $personneRepository.save(me, next)
+        $personneRepository.save(me, this)
         log.debug('groupe ' + nom + ' ajouté à ' + prop)
       }
-    } else {
-      next(new Error('Il faut être authentifié pour ajouter un groupe'))
-    }
+    }).done(next)
   }
 
   /**
@@ -131,28 +130,25 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {boolean} isFollow true pour groupesSuivis, groupesMembre sinon
    * @param {callbackPersonne} next
    */
-  function removeGroup (context, nom, isFollow, next) {
-    var me = $accessControl.getCurrentUser(context)
-    var prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
-    if (me) {
-      var deniedMsg = "Vous n'étiez pas dans ce groupe ou il n’existe pas"
+  function removeGroup (context, userOid, nom, isFollow, next) {
+    flow().seq(function () {
+      $personneRepository.load(userOid, this)
+    }).seq(function(me) {
+      const prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
+      const deniedMsg = "Vous n'étiez pas dans ce groupe ou il n’existe pas"
       if (me[prop] && me[prop].length) {
         var newGroupes = me[prop].filter(function (groupeNom) { return groupeNom !== nom })
         if (newGroupes.length === me[prop].length) {
-          next(new Error(deniedMsg))
+          this(new Error(deniedMsg))
         } else {
           me[prop] = newGroupes
           // màj session, pas très utile car on doit avoir une ref dessus, mais plus propre
-          $accessControl.updateCurrentUser(context, me)
+          // $accessControl.updateCurrentUser(context, me)
           // màj user en bdd (et en cache)
-          $personneRepository.save(me, next)
+          $personneRepository.save(me, this)
         }
-      } else {
-        next(new Error(deniedMsg))
       }
-    } else {
-      next(new Error('Il faut être authentifié pour modifier les groupe'))
-    }
+    }).done(next)
   }
 
   /**
@@ -162,8 +158,8 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {string} nom Nom du groupe
    * @param {callbackPersonne} next
    */
-  function joinGroup (context, nom, next) {
-    addGroup(context, nom, false, next)
+  function joinGroup (context, userOid, nom, next) {
+    addGroup(context, userOid, nom, false, next)
   }
 
   /**
@@ -173,8 +169,8 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {string} nom Nom du groupe
    * @param {callbackPersonne} next
    */
-  function quitGroup (context, nom, next) {
-    removeGroup(context, nom, false, next)
+  function quitGroup (context, userOid, nom, next) {
+    removeGroup(context, userOid, nom, false, next)
   }
 
   /**
@@ -184,8 +180,8 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {string} nom Nom du groupe
    * @param {callbackPersonne} next
    */
-  function followGroup (context, nom, next) {
-    addGroup(context, nom, true, next)
+  function followGroup (context, userOid, nom, next) {
+    addGroup(context, userOid, nom, true, next)
   }
 
   /**
@@ -195,8 +191,8 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
    * @param {string} nom Nom du groupe
    * @param {callbackPersonne} next
    */
-  function ignoreGroup (context, nom, next) {
-    removeGroup(context, nom, true, next)
+  function ignoreGroup (context, userOid, nom, next) {
+    removeGroup(context, userOid, nom, true, next)
   }
 
   /**
@@ -208,19 +204,17 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
   const addInfos = (context, groupe, next) => {
     flow().seq(function () {
       // on veut les noms des gestionnaires
-      if (!groupe.gestionnaires || !groupe.gestionnaires.length) return this(null, {})
-      $personneRepository.loadByOids(groupe.gestionnaires, this)
+      const gestionnaires = groupe.gestionnaires || []
+      $personneRepository.loadByOids(gestionnaires, this)
     }).seq(function (personnes) {
-      if (personnes && personnes.length) {
-        groupe.gestionnairesNames = personnes.map((p, i) => {
-          if (!p) {
-            const oid = groupe.gestionnaires[i]
-            log.dataError(Error(`Le gestionnaire ${oid} du groupe ${groupe.oid} n’existe plus`))
-            return `${oid} inconnu`
-          }
-          return `${p.prenom} ${p.nom}`
-        })
-      }
+      groupe.gestionnairesNames = personnes.map((p, i) => {
+        if (!p) {
+          const oid = groupe.gestionnaires[i]
+          log.dataError(Error(`Le gestionnaire ${oid} du groupe ${groupe.oid} n’existe plus`))
+          return `${oid} inconnu`
+        }
+        return `${p.prenom} ${p.nom}`
+      })
       next(null, groupe)
     }).catch(next)
   }

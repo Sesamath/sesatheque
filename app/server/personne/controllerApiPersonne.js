@@ -132,33 +132,38 @@ module.exports = function (component) {
       const response = {}
       flow().seq(function () {
         if ($accessControl.isAuthenticated(context)) {
+          const next = this
           const {
             oid,
             pid,
             nom,
-            prenom,
-            groupesMembre,
-            groupesSuivis
+            prenom
           } = $accessControl.getCurrentUser(context)
-          response.personne = {
-            oid,
-            pid,
-            nom,
-            prenom,
-            groupesMembre,
-            groupesSuivis
-          }
-          response.logoutUrl = $auth.getLogoutUrl(context)
-          response.sso = {
-            links: $auth.getSsoLinks(context),
-            name: $auth.getName(context)
-          }
-          loadMyGroupesManaged(context, (error, groupesAdmin) => {
-            if (error) return this(error)
-
+          flow().seq(function () {
+            $personneRepository.load(oid, this)
+          }).seq(function (personne) {
+            const {
+              groupesMembre,
+              groupesSuivis
+            } = personne
+            response.personne = {
+              oid,
+              pid,
+              nom,
+              prenom,
+              groupesMembre,
+              groupesSuivis
+            }
+            response.logoutUrl = $auth.getLogoutUrl(context)
+            response.sso = {
+              links: $auth.getSsoLinks(context),
+              name: $auth.getName(context)
+            }
+            loadMyGroupesManaged(context, this)
+          }).seq(function (groupesAdmin) {
             response.personne.groupesAdmin = groupesAdmin.map(({nom}) => nom)
-            this()
-          })
+            next()
+          }).catch(next)
         } else {
           response.personne = null
           response.loginLinks = $auth.getLoginLinks(context)

@@ -177,6 +177,9 @@ module.exports = function (component) {
      * @memberOf $personneRepository
      */
     function removeGroup (groupName, next) {
+      // @todo corriger: seuls les 100 premiers
+      // membres et les 100 premiers suiveurs
+      // sont nettoyés
       let offset = 0
       const limit = 100
       flow().seq(function () {
@@ -249,11 +252,8 @@ module.exports = function (component) {
      */
     function save (personne, next) {
       if (!personne.store) personne = EntityPersonne.create(personne)
-      personne.store(function (error, personne) {
-        $cachePersonne.set(personne)
-        // on passe à next sans attendre le résultat de la mise en cache
-        next(error, personne)
-      })
+      // La mise en cache est réalisée dans l'afterstore
+      personne.store(next)
     }
 
     /**
