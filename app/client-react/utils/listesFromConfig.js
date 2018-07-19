@@ -1,5 +1,10 @@
 import {editable, listes, listesOrdonnees} from '../../server/ressource/config'
 
+/**
+ * Les listes sous forme de tableaux ordonnés avec label & value
+ * On ajoute une liste editableTypes (types filtrés)
+ * @type {{[listName]: string, ListeItem[]}}
+ */
 const formattedLists = {}
 
 Object.entries(listes).forEach(([key, values]) => {

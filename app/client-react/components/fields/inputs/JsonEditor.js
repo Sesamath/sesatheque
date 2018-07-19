@@ -25,7 +25,7 @@ function formatJSON (value) {
   }
 }
 
-const JsonEditor = ({ input: { value, onChange, onBlur, onFocus } }) => (
+const JsonEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate }) => (
   <AceEditor
     mode="json"
     theme="github"
@@ -33,6 +33,7 @@ const JsonEditor = ({ input: { value, onChange, onBlur, onFocus } }) => (
     onChange={onChange}
     onFocus={onFocus}
     onBlur={(_, editor) => onBlur(editor.getValue())}
+    onValidate={onValidate}
     width="100%"
     highlightActiveLine={true}
     showPrintMargin={false}
@@ -55,7 +56,8 @@ JsonEditor.propTypes = {
     onBlur: PropTypes.func,
     onChange: PropTypes.func,
     onFocus: PropTypes.func
-  })
+  }),
+  onValidate: PropTypes.func
 }
 
 export default showInvalidField(JsonEditor)

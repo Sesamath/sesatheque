@@ -14,7 +14,7 @@ const NavMenu = ({
   askClone,
   askDelete,
   titre,
-  droits
+  droits = ''
 }) => {
   if (isIframeLayout) {
     return <h1>{titre}</h1>

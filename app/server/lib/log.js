@@ -37,24 +37,12 @@
  * @todo utiliser https://nodejs.org/api/util.html#util_util_debuglog_section
  */
 
-var fs = require('fs')
-var moment = require('moment')
-var _ = require('lodash')
-var config = require('../config') // jshint ignore:line
-var sjt = require('sesajstools')
-var applog = require('an-log')(config.application.name)
-// en cli on est chargé avant qu'il puisse configurer anLog
-if (process.argv.some(arg => /cli\.js/.test(arg))) applog.setLogLevel(0)
-
-var _lassi = (typeof global.lassi === 'undefined') ? console : global.lassi
-
-/**
- * une pile pour les streams que l'on créé (pour les fermer au shutdown)
- * @private
- * @type {stream.Writable[]}
- */
-var streamsQuiet = []
-var streamsVerbose = []
+const fs = require('fs')
+const moment = require('moment')
+const _ = require('lodash')
+const config = require('../config')
+const sjt = require('sesajstools')
+const applog = require('an-log')(config.application.name)
 
 /**
  * Retourne une writeStream sur le fichier passé en arguments (qui sera ouvert dans le dossier de log défini dans la conf)
@@ -64,9 +52,9 @@ var streamsVerbose = []
  * @returns {stream.Writable}
  */
 function getLogStream (log, verbose) {
-  var file = config.logs.dir + '/' + log
-  var options = {'flags': 'a', mode: '0644'}
-  var stream
+  const file = `${logDir}/${log}`
+  const options = {'flags': 'a', mode: '0644'}
+  let stream
   try {
     stream = fs.createWriteStream(file, options)
     if (stream) {
@@ -85,34 +73,6 @@ function getLogStream (log, verbose) {
   }
 
   return stream
-}
-
-// les streams vers nos logs, celui de dev est ouvert plus loin si on est en dev
-var debugOutputStream
-// ces logs dans tous les cas
-/** un log d'erreur actif en prod */
-var errorOutputStream = getLogStream(config.logs.error, true)
-/** un log spécifique pour les erreurs liées à des datas incohérentes */
-var errorDataOutputStream = getLogStream(config.logs.dataError, true)
-/** un log pour mesure de performances */
-var perfOutputStream
-
-var env = process.env.NODE_ENV || 'dev'
-
-/**
- * Les messages à exclure
- * (une valeur à true excluera les debug de ce type dans le log de debug)
- * @private
- */
-var exclusions = {}
-
-/**
- * Retourne le préfixe avec la date courante entre crochet
- * @private
- * @returns {string}
- */
-function getPrefix () {
-  return '[' + moment().format('YYYY-MM-DD HH:mm:ss.SSS') + '] '
 }
 
 /**
@@ -151,9 +111,9 @@ function out (message, objectToDump, filter, stream, options) {
       } else if (typeof objectToDump === 'function') {
         msg += '\n' + objectToDump.toString() + '\n'
       } else {
-        var dump = sjt.stringify(objectToDump, options.indent)
+        let dump = sjt.stringify(objectToDump, options.indent)
         if (dump) {
-          var max = (options && options.max) || 200
+          const max = (options && options.max) || 200
           if (dump.length > max) dump = dump.substr(0, max) + '…'
           msg += '\n' + dump + '\n'
         } else {
@@ -166,6 +126,47 @@ function out (message, objectToDump, filter, stream, options) {
     else console.log(msg)
   }
 }
+
+// en cli on est chargé avant qu'il puisse configurer anLog
+if (process.argv.some(arg => /cli\.js/.test(arg))) applog.setLogLevel(0)
+
+// si le dossier de log n'existe pas on le crée
+const logDir = config.logs.dir
+if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, 0o775)
+
+/**
+ * une pile pour les streams que l'on créé (pour les fermer au shutdown)
+ * @private
+ * @type {stream.Writable[]}
+ */
+const streamsQuiet = []
+const streamsVerbose = []
+
+// les streams vers nos logs, celui de dev est ouvert plus loin si on est en dev
+let debugOutputStream
+// ces logs dans tous les cas
+/** un log d'erreur actif en prod */
+const errorOutputStream = getLogStream(config.logs.error, true)
+/** un log spécifique pour les erreurs liées à des datas incohérentes */
+const errorDataOutputStream = getLogStream(config.logs.dataError, true)
+/** un log pour mesure de performances */
+let perfOutputStream
+
+const env = process.env.NODE_ENV || 'dev'
+
+/**
+ * Les messages à exclure
+ * (une valeur à true excluera les debug de ce type dans le log de debug)
+ * @private
+ */
+const exclusions = {}
+
+/**
+ * Retourne le préfixe avec la date courante entre crochet
+ * @private
+ * @returns {string}
+ */
+const getPrefix = () => `[${moment().format('YYYY-MM-DD HH:mm:ss.SSS')}] `
 
 // log
 if (env === 'prod') {
@@ -240,7 +241,7 @@ if (config.logs.perf) {
    * @param {boolean} [noTimer=false] passer true pour ne pas ajouter la mesure de temps
    */
   log.perf = function (response, strToAdd, noTimer) {
-    var timer = !noTimer
+    const timer = !noTimer
     if (response.perf && response.perf.msg) {
       response.perf.msg += '\t' + strToAdd
       if (timer) response.perf.msg += ' ' + log.getElapsed(response.perf.start) + 'ms'
@@ -265,9 +266,9 @@ if (config.logs.sql) {
   // pour que ça sorte qqchose, ajouter à node_modules/lassi/classes/entities/EntityQuery.js la ligne
   // if (typeof log !== 'undefined' && log.sql) log.sql(query.toString(), query.args);
   // juste avant l'appel de database.query
-  var sqlOutputStream = getLogStream(config.logs.sql)
+  const sqlOutputStream = getLogStream(config.logs.sql)
   log.sql = function (queryString, args) {
-    for (var i = 0; i < args.length; i++) {
+    for (let i = 0; i < args.length; i++) {
       queryString = queryString.replace('?', "'' +args[i] +''")
     }
     out(queryString, null, null, sqlOutputStream)
@@ -282,7 +283,7 @@ if (config.logs.sql) {
  * @param {number} [start=0] Passer un top de départ (timestamp en ms)
  */
 log.getElapsed = function (start) {
-  var ts = (new Date()).getTime()
+  let ts = (new Date()).getTime()
   if (start) ts -= start
 
   return ts
@@ -350,8 +351,8 @@ log.include = function (filter) {
 }
 
 // Et on fermera nos streams au shutdown
-if (_lassi.on) {
-  _lassi.on('shutdown', function () {
+if (global.lassi) {
+  global.lassi.on('shutdown', function () {
     applog('app', 'shutdown event in log')
 
     if (streamsQuiet.length) {

@@ -1,46 +1,6 @@
 @import "styles/fonts.scss";
 @import "styles/mixins.scss";
 
-/**
- * règles css pour page et iframe
- * (elles devraient toutes être dans config.scss)
- */
-
-/* les pictos des ressources faut mettre du !important pour que ce ne soit pas écrasé par les css jstree */
-.jstree-themeicon-custom {
-  display: inline-block;
-  text-decoration: none;
-  margin: 4px 0 0 2px !important;
-  padding: 0;
-  width: 16px;
-  height: 24px !important;
-}
-.amJstNode {background: url("/plugins/am/am.gif") no-repeat !important;}
-.arbreJstNode {background: url("/plugins/arbre/images/arbre.gif") no-repeat !important;}
-.arbreJstNodeRef {background: url("/plugins/arbre/images/arbreRef.gif") no-repeat !important;}
-.atoJstNode {background: url("/plugins/ato/ato.gif") no-repeat !important;}
-.calkcJstNode { background: url("/plugins/calkc/calkc.gif") no-repeat !important;}
-.coll_docJstNode {background: url("/plugins/coll_doc/coll_doc.gif") no-repeat !important;}
-.ec2JstNode { background: url("/plugins/ec2/ec2.gif") no-repeat !important;}
-.ecjsJstNode { background: url("/plugins/ecjs/ecjs.gif") no-repeat !important;}
-.emJstNode { background: url("/plugins/em/em.gif") no-repeat !important;}
-.iepJstNode { background: url("/plugins/iep/iep.gif") no-repeat !important;}
-.j3pJstNode { background: url("/plugins/j3p/j3p.gif") no-repeat !important;}
-.lingotJstNode {background: url("/plugins/lingot/lingot.gif") no-repeat !important;}
-.mathgraphJstNode { background: url("/plugins/mathgraph/mathgraph.gif") no-repeat !important;}
-.mentalJstNode { background: url("/plugins/mental/mental.gif") no-repeat !important;}
-.tepJstNode {background: url("/plugins/tep/tep.gif") no-repeat !important;}
-.testdJstNode {background: url("/plugins/testd/testd.gif") no-repeat !important;}
-.urlJstNode { background: url("/plugins/url/url.gif") no-repeat !important;}
-
-#display #apercu {
-  width: 100%;
-  min-height: 500px;
-  resize: both;
-  overflow: auto;
-  border: 1px solid black
-}
-
 /*
 des restes de ressources.css
 html, body {padding: 0; margin: 0;height: 100%;}

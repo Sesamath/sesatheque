@@ -49,16 +49,16 @@ describe('<ResourceList />', () => {
   it('renders ressources', () => {
     const component = TestRenderer.create(wrappedComponent)
 
-    // Le tableau doit contenir nos 2 ressources
+    // Le tableau doit contenir nos ressources
     const tableBody = component.root.findByType('table').findByType('tbody')
-    expect(tableBody.children).to.have.length(2)
+    expect(tableBody.children).to.have.length(ressources.length)
 
-    // La première ressource doit posséder 5 liens (La base + modifier + supprimer)
-    const firstResource = tableBody.children[0].findByProps({className: 'links'})
-    expect(firstResource.children).to.have.length(5)
+    // La première ressource doit posséder 5 liens (les 3 read + modifier + supprimer)
+    const firstResourceLinks = tableBody.children[0].findByProps({className: 'links'})
+    expect(firstResourceLinks.children).to.have.length(5)
 
     // La seconde ressource doit posséder 4 liens (La base + supprimer)
-    const secondResource = tableBody.children[1].findByProps({className: 'links'})
-    expect(secondResource.children).to.have.length(4)
+    const secondResourceLinks = tableBody.children[1].findByProps({className: 'links'})
+    expect(secondResourceLinks.children).to.have.length(4)
   })
 })
