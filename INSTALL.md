@@ -28,7 +28,8 @@ Installation avec Docker (sans sésalab)
 - `mkdir _private; cp -R _private.example/config.docker.minimale.js _private/config.js`
 - modifier le fichier de configuration pour les valeurs obligatoires, mails et clés (cookie et session)
 - build docker `npm run docker:build`
-- start avec `docker-compose up`
+- installer les node_modules ` docker-compose run --rm sesatheque yarn install`
+- start avec `yarn start docker:dev`
 - une fois que la compil webpack est terminée se rendre à l'adresse http://localhost:3001
 
 Installation avec Docker, avec sesalab

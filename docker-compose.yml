@@ -19,6 +19,7 @@ services:
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
       - ./docker/sesatheque/_private:/sesatheque/_private
       # le reste dont l'appli a besoin
+      - ~/.cache/yarn:/sesatheque/.cache/yarn
       - ./node_modules:/sesatheque/node_modules
       - ./app:/sesatheque/app
       - ./logs:/sesatheque/logs
