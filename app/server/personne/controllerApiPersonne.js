@@ -34,7 +34,7 @@
 const flow = require('an-flow')
 
 module.exports = function (component) {
-  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository) {
+  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session) {
     /**
      * Controleur de la route /api/personne/
      * @Controller controllerApiPersonne
@@ -44,6 +44,7 @@ module.exports = function (component) {
 
     /**
      * Équivalent de context.denied en json
+     * @todo utiliser $json.denied, qui devra utiliser context.restKo (prop message et plus error)
      * @private
      * @param {Context} context
      * @param msg
@@ -56,6 +57,7 @@ module.exports = function (component) {
 
     /**
      * Callback générique de sortie
+     * @todo utiliser $json.send, qui devra utiliser context.restKo (prop message et plus error)
      * @private
      * @param {Context} context
      * @param error
@@ -64,11 +66,9 @@ module.exports = function (component) {
     function sendJson (context, error, data) {
       if (error) {
         log.error(error)
-        log.debug("sendJson va renvoyer l'erreur", error, 'api')
         context.json({error: error.toString()})
       } else {
-        log.debug('sendJson va renvoyer', data, 'api')
-        context.json(data)
+        context.rest(data)
       }
     }
 
@@ -112,7 +112,7 @@ module.exports = function (component) {
      * @route GET /api/personne/me
      */
     this.get('me', function (context) {
-      sendJson(context, null, context.session.user)
+      sendJson(context, null, $session.getCurrentPersonne(context))
     })
 
     /**
@@ -131,18 +131,18 @@ module.exports = function (component) {
       if (!$auth) $auth = lassi.service('$auth')
       const response = {}
       flow().seq(function () {
-        if ($accessControl.isAuthenticated(context)) {
-          const next = this
-          const {
-            oid,
-            pid,
-            nom,
-            prenom
-          } = $accessControl.getCurrentUser(context)
+        const send = this
+        const oid = $accessControl.getCurrentUserOid(context)
+        if (oid) {
+          // on retourne chercher la personne pour avoir des groupes à jour
+          // (indépendamment de la session)
           flow().seq(function () {
             $personneRepository.load(oid, this)
           }).seq(function (personne) {
             const {
+              pid,
+              nom,
+              prenom,
               groupesMembre,
               groupesSuivis
             } = personne
@@ -160,14 +160,16 @@ module.exports = function (component) {
               name: $auth.getName(context)
             }
             loadMyGroupesManaged(context, this)
+            // on met à jour la session
+            $session.updatePersonne(context, personne)
           }).seq(function (groupesAdmin) {
             response.personne.groupesAdmin = groupesAdmin.map(({nom}) => nom)
-            next()
-          }).catch(next)
+            send()
+          }).catch(send)
         } else {
           response.personne = null
           response.loginLinks = $auth.getLoginLinks(context)
-          this()
+          send()
         }
       }).seq(function () {
         sendJson(context, null, response)
@@ -192,6 +194,8 @@ module.exports = function (component) {
         if (!personne) return $json.sendOk(context, {user: null})
         else {
           const {nom, oid, prenom} = personne
+          // si on tombe sur soi-même on rafraîchit la session
+          if (oid === myOid) $session.updatePersonne(context, personne)
           $json.sendOk(context, {user: {nom, oid, prenom}})
         }
       }).catch(function (error) {
