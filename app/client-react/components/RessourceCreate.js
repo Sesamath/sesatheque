@@ -1,4 +1,5 @@
 import {push} from 'connected-react-router'
+import {Prompt} from 'react-router'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {reduxForm} from 'redux-form'
@@ -16,7 +17,9 @@ import validate from '../utils/validate'
 
 const RessourceCreate = ({
   handleSubmit,
-  submitting
+  pristine,
+  submitting,
+  submitSucceeded
 }) => (
   <Fragment>
     <h1>Créer une ressource</h1>
@@ -91,12 +94,18 @@ const RessourceCreate = ({
         </button>
       </div>
     </form>
+    <Prompt
+      when={!pristine && !submitSucceeded}
+      message="Il existe des changements non sauvegardés sur le formulaire, êtes vous sûr de vouloir changer de page ?"
+    />
   </Fragment>
 )
 
 RessourceCreate.propTypes = {
   handleSubmit: PropTypes.func,
-  submitting: PropTypes.bool
+  submitting: PropTypes.bool,
+  submitSucceeded: PropTypes.bool,
+  pristine: PropTypes.bool
 }
 
 const form = {

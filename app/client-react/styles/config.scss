@@ -9,7 +9,7 @@ $secondary-color-light : #f17045;
 $primary-color-light : #2a4095;
 $primary-color-lighter : #3047a7;
 $secondary-color-link: #f17045;
-$secondary-color-link-hover: #f17045;
+$secondary-color-link-hover: lighten($secondary-color-light, 5%);
 $border-primary: #2a4095;
 
 // Warning: you should use your own values, regardless of the devices
@@ -143,10 +143,10 @@ $blue-sesatheque : #237;
 // Semantic colors
 $color-brand    : $green-500;
 $color-primary  : $blue-sesatheque;
-$color-success  : $green-500;
-$color-info     : $blue-300;
-$color-warning  : $orange-500;
-$color-danger   : $red-500;
+$color-success  : #dff0d8;
+$color-info     : #d9edf7;
+$color-warning  : #fcf8e3;
+$color-danger   : #f2dede;
 $color-inverse  : $gray-800;
 $color-ghost    : transparent;
 $color-muted    : $gray-200;
@@ -200,10 +200,10 @@ $table-footer-background    : transparent;
 // Convention is: name - background-color - color - border
 $variants-list: (
   (primary,    $color-primary,    $white,    none),
-  (success,    $color-success,    $white,    none),
-  (info,       $color-info,       $black,    none),
-  (warning,    $color-warning,    $black,    none),
-  (danger,     $color-danger,     $white,    none),
+  (success,    $color-success,    #3c763d,    0 0 0 1px #d6e9c6),
+  (info,       $color-info,       #31708f,    0 0 0 1px #bce8f1),
+  (warning,    $color-warning,    #8a6d3b,    0 0 0 1px #faebcc),
+  (danger,     $color-danger,     #a94442,    0 0 0 1px #ebccd1),
   (inverse,    $color-inverse,    $white,    none),
   (ghost,      $color-ghost,      $white,    0 0 0 1px $white inset)
 ) !default;

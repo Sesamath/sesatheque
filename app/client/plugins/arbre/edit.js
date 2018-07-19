@@ -35,6 +35,8 @@ import dom from 'sesajstools/dom'
 import log from 'sesajstools/utils/log'
 import $ from 'jquery'
 import 'jstree'
+import 'jstree/dist/themes/default/style.min.css'
+import './arbre.css'
 import { addSesatheques, exists, fetchPublicRef } from 'sesatheque-client/src/fetch'
 import { addNode, build, getEnfants } from 'sesatheque-client/src/jstree'
 import {sesatheques} from '../../../server/config'
@@ -149,9 +151,6 @@ function edit (arbre, options, saveCallback) {
    * @param options
    */
   function initDom (options) {
-    // Ajout css, si on a pas tant pis pour le css mais ça va être moche
-    const vendorsBaseUrl = options.vendorsBaseUrl || '/vendor'
-    dom.addCss(vendorsBaseUrl + '/jstree/dist/themes/default/style.min.css')
     // nos éléments html
     container = window.document.getElementById('display')
   }

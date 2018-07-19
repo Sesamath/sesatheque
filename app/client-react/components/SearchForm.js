@@ -11,6 +11,7 @@ import {
   SwitchField
 } from './fields'
 import queryString from 'query-string'
+import './SearchForm.scss'
 
 const anyOption = {
   value: '',
@@ -76,11 +77,16 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
   }
   // sinon on rappelle juste les critères
   return (
-    <ul><a href="#form">Modifier</a> les critères de recherche actuels
-      {Object.keys(query).map(key => (
-        <li key={key}>{labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}</li>
-      ))}
-    </ul>
+    <div className="search-box">
+      <div className="fr">
+        <a href="#form">Modifier</a> les critères de recherche actuels
+      </div>
+      <ul className="tags">
+        {Object.keys(query).map(key => (
+          <li key={key}><span className="tag--info">{labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}</span></li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

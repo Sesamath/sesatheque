@@ -44,6 +44,8 @@ const babelIgnoreFilter = (file) => {
   }
   return false
 }
+
+require('ignore-styles')
 require('babel-core/register')({
   // faut pas qu'il lise les preset du package.json, sinon ça donne du
   // Error: Options {"loose":true} passed to  /home/sesamath/projets/git/sesatheque/node_modules/babel-preset-env/lib/index.js which does not accept options. (While processing preset: …

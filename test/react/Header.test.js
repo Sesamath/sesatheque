@@ -10,18 +10,21 @@ const props = {
   personne,
   loginLinks: [{href: application.baseUrl}],
   logoutUrl: application.baseUrl,
-  ssoLinks: [
-    {
-      href: application.baseUrl + 'accueil',
-      icon: 'home',
-      value: ' Mon espace Sésamath'
-    },
-    {
-      href: application.baseUrl + 'profile',
-      icon: 'user-secret',
-      value: 'Informations personnelles'
-    }
-  ]
+  sso: {
+    links: [
+      {
+        href: application.baseUrl + 'profile',
+        icon: 'user-secret',
+        value: 'Informations personnelles'
+      },
+      {
+        href: application.baseUrl + 'accueil',
+        icon: 'home',
+        value: ' Mon espace Sésamath'
+      }
+    ],
+    name: 'Sésamath'
+  }
 }
 
 describe('<Header />', () => {

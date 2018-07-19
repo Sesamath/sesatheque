@@ -1,0 +1,79 @@
+@import "styles/fonts.scss";
+@import "styles/mixins.scss";
+
+/*
+des restes de ressources.css
+html, body {padding: 0; margin: 0;height: 100%;}
+/* faut du 100% de haut sur chaque parent de display (pourquoi ?) * /
+#body, #body .row, #content, #display {height: 100%;}
+*/
+
+#display {
+  position: relative;
+  margin: 0 auto;
+  padding: 0;
+  clear: both;
+}
+#titre {
+  font-size: 1.4em;
+  text-align:center;
+  font-family: Verdana, sans-serif;
+  width: 86%;
+  margin:auto; /* centrage décalé de qq pixel à gauche à cause du feedback mais tant pis, plus simple comme ça */
+  min-height:28px;
+}
+#pictoFeedback  {width: 16px; height: 16px; float:right; margin: 6px 8% 0 0;}
+.feedbackOk { background-image: url("/medias/saveOk.png"); visibility: visible; }
+.feedbackKo { background-image: url("/medias/saveKo.png"); visibility: visible; }
+.feedbackOff { background-image: none; visibility: hidden; }
+
+#boutonVu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: none;
+  z-index: 11; /* #display possède un z-index à 10 */
+}
+
+/* le layout-iframe n'inclue pas ce qui est défini dans les sesatheque-* hors display mais il a besoin de ça */
+/**
+ * Couleurs
+ */
+.debug {
+  border: 1px #ff0000 solid;
+  margin: 1em;
+  padding: 0.5em;
+}
+
+#errors {
+  margin: 0;
+  padding: 0;
+  color: $color-danger;
+  background-color: $background-base;
+  text-align: center;
+  font-size: 1.2em;
+  font-family: Verdana, sans-serif;
+}
+.error {
+  @include avert($fa-var-exclamation-triangle);
+  color: $color-danger;
+  border-color: $color-danger;
+}
+.warning {
+  @include avert($fa-var-exclamation);
+  color: $color-warning;
+  border-color: $color-warning;
+}
+.info {
+  @include avert($fa-var-info-circle);
+  color: $color-info;
+  border-color: $color-info;
+}
+
+/* Pour j3p faut annuler les css de normalize sur sup / sub, car mathquill fait du positionnement en js */
+#display #Mepact sup {
+  top: 0;
+}
+#display #Mepact sub {
+  bottom: 0;
+}

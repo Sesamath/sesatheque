@@ -34,6 +34,8 @@
 import dom from 'sesajstools/dom'
 import log from 'sesajstools/utils/log'
 import {addSesatheques} from 'sesatheque-client/src/sesatheques'
+import 'jstree/dist/themes/default/style.min.css'
+import './arbre.css'
 
 import {sesatheques} from '../../../server/config'
 import page from '../../page/index'

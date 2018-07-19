@@ -16,7 +16,6 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
 const path = require('path')
 const autoprefixer = require('autoprefixer')
-// passer --debug pour ne pas avoir de minification
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -24,7 +23,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const appConfig = require('./app/server/config')
 const {version} = require('./package')
 
+// passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
+
 // prod d'après la conf (sauf --debug)
 const isProd = isDebug ? false : (appConfig.application.staging === 'production' || appConfig.application.staging === 'prod')
 
@@ -45,8 +46,6 @@ const conf = {
     // apiClient: './app/client/apiClient.js',
     client: 'sesatheque-client',
     page: './app/client/page/index.js',
-    // juste pour compiler iframe.css
-    iframe: './app/srcStyles/iframe.scss',
     display: './app/client/display/index.js',
     edit: './app/client/edit/index.js',
     import: './app/client/edit/import.js',
@@ -93,18 +92,18 @@ const conf = {
       {test: /app\/client-react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
-      // Pour lloadera config qui contient des données sensibles, on passe par un loader qui filtre
+      // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       // {test: /\.json$/, loader: 'json-loader'},
       {test: /app\/client\/.*\.html/, loader: 'file-loader'},
-      // editgraphe passe par babel
+      // editgraphe doit passer par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
       {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel-loader'},
       // le statique
       /* process CSS files */
       {
-        test: /\.(css|scss)$/,
+        test: /\.s?css$/,
         rules: [
           {
             loader: 'style-loader'
@@ -145,8 +144,10 @@ const conf = {
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
       {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']},
+      // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
+    // utile pour mettre des variables dans le html au build
     new HtmlWebpackPlugin({
       title: appConfig.application.name,
       version: version,
@@ -168,7 +169,7 @@ if (process.env.SESATHEQUE_CONF) {
   console.log(`Compilation avec urls absolues pour ${process.env.SESATHEQUE_CONF}`)
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
-  conf.output.path = `build/${process.env.SESATHEQUE_CONF}/`
+  conf.output.path = path.resolve(__dirname, 'build', process.env.SESATHEQUE_CONF)
 }
 
 if (isProd) {

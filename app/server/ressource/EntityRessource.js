@@ -113,7 +113,10 @@ module.exports = function (component) {
       // pour les arbres, on indexe tous les enfants, c'est lourd en écriture d'index
       // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
       // (pour mettre à jour titre & résumé par ex).
-      .defineIndex('enfants', 'string', function () { return getRidEnfants(this) })
+      .defineIndex('enfants', 'string', function () {
+        if (!this.enfants || !this.enfants.length) return
+        return getRidEnfants(this)
+      })
       .defineIndex('auteurs', 'string')
       .defineIndex('auteursParents', 'string')
       .defineIndex('contributeurs', 'string')
