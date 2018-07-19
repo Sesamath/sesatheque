@@ -43,8 +43,8 @@ function optionsOk (context) {
 }
 
 module.exports = function (component) {
-  component.controller('api/groupes', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
-    const {addInfos} = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
+  component.controller('api/groupes', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository, $groupe) {
+    const {addInfos} = $groupe
 
     /**
      * Controleur de la route /api/groupe/

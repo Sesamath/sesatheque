@@ -34,13 +34,12 @@
 const flow = require('an-flow')
 
 module.exports = function (component) {
-  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session) {
-    /**
-     * Controleur de la route /api/personne/
-     * @Controller controllerApiPersonne
-     */
-
-    const {loadMyGroupesManaged} = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
+  /**
+   * Controleurs de la route /api/personne/
+   * @Controller controllerApiPersonne
+   */
+  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session, $groupe) {
+    const {loadMyGroupesManaged} = $groupe
 
     /**
      * Équivalent de context.denied en json
