@@ -14,7 +14,7 @@ class IframeHandler extends Component {
     this.iframe = React.createRef()
 
     this.state = {
-      manualEdition: !props.allowManualEdition,
+      manualEdition: false,
       disableEditor: false
     }
   }
