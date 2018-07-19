@@ -179,11 +179,9 @@ const propsFromForm = {
   isOuvert: 'ouvert'
 }
 
-export default ensureLogged(
-  groupeLoader(
-    withProps(getInitialValues)(
-      reduxForm(formDefinition)(
-        formValues(propsFromForm)(GroupeEdition))
-    )
+export default groupesLoader(
+  withProps(getInitialValues)(
+    reduxForm(formDefinition)(
+      formValues(propsFromForm)(GroupeEdition))
   )
 )

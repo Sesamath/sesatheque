@@ -50,12 +50,7 @@ const groupesLoader = (WrappedComponent) => {
   }
 
   return ensureLogged(
-    connect(
-      mapStateToProps,
-      mapDispatchToProps
-    )(
-      GroupesLoader
-    )
+    connect(mapStateToProps, mapDispatchToProps)(GroupesLoader)
   )
 }
 
