@@ -13,15 +13,29 @@ import {
 
 import './Groupes.scss'
 
-const toDetailedList = (groupes = [], ref) => {
-  const res = []
-  groupes.forEach(nom => {
-    res.push(ref[nom])
-  })
+/**
+ * Retourne un array de groupe à partir de tous les groupes et la sélection demandée
+ * @private
+ * @param {string[]} noms Les groupes que l'on veut
+ * @param {Object} allGroupes Tous les groupes, le nom en propriété et le groupe en valeur
+ * @return {Groupe[]} La sélection demandée
+ */
+const toDetailedList = (noms = [], allGroupes) => noms.map(nom => allGroupes[nom])
 
-  return res
-}
-
+/**
+ * Composant qui liste "Mes groupes"
+ * @type {PureComponent}
+ * @param {object} props
+ * @param {function} props.followGroupe
+ * @param {function} props.joinGroupe
+ * @param {function} props.deleteGroupe
+ * @param {function} props.ignoreGroupe
+ * @param {function} props.leaveGroupe
+ * @param {string[]} props.groupesAdmin
+ * @param {string[]} props.groupesMembre
+ * @param {string[]} props.groupesSuivis
+ * @param {Groupe[]} props.groupes
+ */
 const Groupes = ({
   followGroupe,
   joinGroupe,
@@ -38,11 +52,9 @@ const Groupes = ({
   <Fragment>
     <h1>Mes groupes</h1>
     <h2>Groupes dont je suis gestionnaire</h2>
-    <p>
-      <NavLink to="/groupe/ajouter">
-        Créer un groupe
-      </NavLink>
-    </p>
+
+    <p><NavLink to="/groupe/ajouter">Créer un groupe</NavLink></p>
+
     <ul className="liste">
       {(toDetailedList(groupesAdmin, groupes)).map(
         ({
@@ -53,18 +65,17 @@ const Groupes = ({
           gestionnaires,
           gestionnairesNames
         }) => (
-          <li key={nom}> {nom} ({ouvert ? 'ouvert' : 'fermé'} {publicStatus ? 'public' : 'privé'})
+          <li key={nom}>
+            <strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'} {publicStatus ? 'public' : 'privé'})
             <span className="links">
-              <button onClick={() => deleteGroupe(nom)}>Supprimer</button>
-              {groupesMembre.includes(nom) ? null
-                : (
-                  <button onClick={() => joinGroupe(nom)}>Rejoindre</button>
-                )
+              <a href="#" onClick={() => deleteGroupe(nom)}>Supprimer</a>
+              {groupesMembre.includes(nom)
+                ? null // le lien quitter sera dans la liste des groupesMembre
+                : (<button onClick={() => joinGroupe(nom)}>Rejoindre</button>)
               }
-              {groupesSuivis.includes(nom) ? null
-                : (
-                  <button onClick={() => followGroupe(nom)}>Suivre</button>
-                )
+              {groupesSuivis.includes(nom)
+                ? null // le lien "ne plus suivre sera dans la liste des groupesSuivis
+                : (<button onClick={() => followGroupe(nom)}>Suivre</button>)
               }
               <NavLink to={`/groupe/editer/${encodeURIComponent(nom)}`}>Modifier</NavLink>
               <NavLink to={{
@@ -86,10 +97,11 @@ const Groupes = ({
         )
       )}
     </ul>
+
     <h2>Groupes dont je suis membre</h2>
     <p>
       <NavLink to="/groupe/ouvert">Voir la liste des groupes ouverts</NavLink>
-      <span className="remarque">(pour éventuellement en devenir membre)</span>
+      <span className="remarque"> (pour éventuellement en devenir membre)</span>
     </p>
     <ul className="liste">
       {(toDetailedList(groupesMembre, groupes)).map(
@@ -99,10 +111,10 @@ const Groupes = ({
           gestionnaires,
           gestionnairesNames
         }) => (
-          <li key={nom}> {nom}
+          <li key={nom}>
+            <strong>{nom}</strong>
             <span className="links">
-              <button onClick={() => leaveGroupe(nom)}>Quitter le groupe
-              </button>
+              <button onClick={() => leaveGroupe(nom)}>Quitter le groupe</button>
               <NavLink to={{
                 pathname: '/ressource/rechercher',
                 hash: 'results',
@@ -114,7 +126,8 @@ const Groupes = ({
             <ul>
               Gestionnaire(s) :&nbsp;
               {gestionnaires.map((oid, index) => (
-                <li key={oid}>{gestionnairesNames[index]} <span className="remarque">({oid})</span>
+                <li key={oid}>
+                  {gestionnairesNames[index]} <span className="remarque">({oid})</span>
                 </li>
               ))}
             </ul>
@@ -122,11 +135,11 @@ const Groupes = ({
         )
       )}
     </ul>
+
     <h2>Groupes suivis</h2>
     <p>
       <NavLink to="/groupe/public">Voir la liste des groupes publics</NavLink>
-      <span className="remarque">(pour éventuellement suivre leurs publications)
-      </span>
+      <span className="remarque"> (pour éventuellement suivre leurs publications)</span>
     </p>
     <ul className="liste">
       {(toDetailedList(groupesSuivis, groupes)).map(
@@ -136,10 +149,10 @@ const Groupes = ({
           gestionnaires,
           gestionnairesNames
         }) => (
-          <li key={nom}> {nom}
+          <li key={nom}>
+            <strong>{nom}</strong>
             <span className="links">
-              <button onClick={() => ignoreGroupe(nom)}>Ne plus suivre le groupe
-              </button>
+              <button onClick={() => ignoreGroupe(nom)}>Ne plus suivre le groupe</button>
               <NavLink to={{
                 pathname: '/ressource/rechercher',
                 hash: 'results',
@@ -151,7 +164,8 @@ const Groupes = ({
             <ul>
               Gestionnaire(s) :&nbsp;
               {gestionnaires.map((oid, index) => (
-                <li key={oid}>{gestionnairesNames[index]} <span className="remarque">({oid})</span>
+                <li key={oid}>
+                  {gestionnairesNames[index]}<span className="remarque">({oid})</span>
                 </li>
               ))}
             </ul>
