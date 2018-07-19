@@ -45,7 +45,7 @@ function optionsOk (context) {
 module.exports = function (component) {
   component.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository) {
     const helper = require('./controllerGroupeHelper')($accessControl, $groupeRepository, $personneRepository)
-    const {addGroup, addInfos, ignoreGroup, isFollowed, isManaged, joinGroup, quitGroup, followGroup} = helper
+    const {addGroup, addInfos, ignoreGroup, isManaged, joinGroup, quitGroup, followGroup} = helper
     /**
      * Controleur de la route /api/groupe/
      * @Controller controllerApiGroupe
@@ -337,7 +337,7 @@ module.exports = function (component) {
           $personneRepository.removeGroup(nom, this)
         }).seq(function () {
           $json.sendOk(context, {deleted: nom})
-        }).catch(function(error) {
+        }).catch(function (error) {
           $json.sendError(context, error)
         })
       })

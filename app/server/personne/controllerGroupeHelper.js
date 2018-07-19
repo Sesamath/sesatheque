@@ -32,7 +32,6 @@
 'use strict'
 
 const flow = require('an-flow')
-var _ = require('lodash')
 
 /**
  * Helper des controleurs de groupe (api et html)
@@ -105,7 +104,7 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
   function addGroup (context, userOid, nom, isFollow, next) {
     flow().seq(function () {
       $personneRepository.load(userOid, this)
-    }).seq(function(me) {
+    }).seq(function (me) {
       const prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
       if (!me[prop]) me[prop] = []
       if (me[prop].includes(nom)) {
@@ -133,7 +132,7 @@ module.exports = function ($accessControl, $groupeRepository, $personneRepositor
   function removeGroup (context, userOid, nom, isFollow, next) {
     flow().seq(function () {
       $personneRepository.load(userOid, this)
-    }).seq(function(me) {
+    }).seq(function (me) {
       const prop = isFollow ? 'groupesSuivis' : 'groupesMembre'
       const deniedMsg = "Vous n'étiez pas dans ce groupe ou il n’existe pas"
       if (me[prop] && me[prop].length) {
