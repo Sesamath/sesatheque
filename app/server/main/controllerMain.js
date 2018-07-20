@@ -72,7 +72,7 @@ module.exports = function (mainComponent) {
     this.serve('/', expressOptions)
 
     // le source react pour toutes ses routes
-    const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
+    const buildDir = envSesathequeConf && envSesathequeConf !== 'test' ? `build/${envSesathequeConf}` : 'build'
     const reactPagePath = path.resolve(root, buildDir, 'index.html')
     const reactPage = fs.readFileSync(reactPagePath)
     // pour la page html react, c'est la même sur toutes les routes
