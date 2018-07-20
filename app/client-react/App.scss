@@ -38,11 +38,16 @@
 /* --------------------------------------------- */
 /* Écrase le style de knackcss sur les alertes   */
 /* --------------------------------------------- */
-  .alert--danger, .alert--warning {
+  .alert--danger, .alert--warning, .alert--info {
     padding: 5px 10px;
 
     i {
       margin-right: 5px;
+    }
+
+    a {
+      display: inline;
+      padding: 0;
     }
   }
 }
