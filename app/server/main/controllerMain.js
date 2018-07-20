@@ -71,35 +71,33 @@ module.exports = function (mainComponent) {
     expressOptions.fsPath = path.join(root, 'app', 'assets')
     this.serve('/', expressOptions)
 
-    if (process.env.NODE_ENV === 'production') {
-      const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
-      const reactPagePath = path.resolve(root, buildDir, 'index.html')
-      const reactPage = fs.readFileSync(reactPagePath)
-      // pour la page html react, c'est la même sur toutes les routes
-      const sendReactPage = (context) => {
-        const options = {
-          headers: {
-            'Content-Length': Buffer.byteLength(reactPage, 'utf8'),
-            'Content-Type': 'text/html'
-          }
+    // le source react pour toutes ses routes
+    const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
+    const reactPagePath = path.resolve(root, buildDir, 'index.html')
+    const reactPage = fs.readFileSync(reactPagePath)
+    // pour la page html react, c'est la même sur toutes les routes
+    const sendReactPage = (context) => {
+      const options = {
+        headers: {
+          'Content-Length': Buffer.byteLength(reactPage, 'utf8'),
+          'Content-Type': 'text/html'
         }
-        context.raw(reactPage, options)
       }
-
-      // cf app/client-react/App.js pour ne pas en oublier
-      const reactRoutes = [
-        // '/', inutile car /build/index.html passe avant
-        '/mentionsLegales',
-        '/ressource/ajouter',
-        '/ressource/modifier/:oid',
-        '/ressource/apercevoir/:oid',
-        '/ressource/decrire/:oid',
-        '/ressource/rechercher',
-        '/ressources'
-      ]
-
-      reactRoutes.forEach(route => this.get(route, sendReactPage))
+      context.raw(reactPage, options)
     }
+    // cf app/client-react/App.js pour ne pas en oublier
+    const reactRoutes = [
+      // '/', inutile car /build/index.html passe avant
+      '/mentionsLegales',
+      '/ressource/ajouter',
+      '/ressource/modifier/:oid',
+      '/ressource/apercevoir/:oid',
+      '/ressource/decrire/:oid',
+      '/ressource/rechercher',
+      '/ressources'
+    ]
+
+    reactRoutes.forEach(route => this.get(route, sendReactPage))
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
     // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)
