@@ -45,6 +45,7 @@ const configRessource = require('./ressource/config')
 const {version} = require('../../package')
 const checkConfigSesatheques = require('./checkConfigSesatheques')
 const isTestEnv = process.argv[1].includes('mocha')
+const isDevServerEnv = process.env.NODE_ENV === 'devServer'
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -251,6 +252,8 @@ const knownStagings = ['prod', 'preprod', 'dev', 'test']
 let staging
 if (isTestEnv) {
   staging = 'test'
+} else if (isDevServerEnv) {
+  staging = 'dev'
 } else if (knownStagings.includes(process.env.NODE_ENV)) {
   staging = process.env.NODE_ENV
 } else if (knownStagings.includes(config.application.staging)) {
@@ -403,7 +406,7 @@ if (config.sesalabs.length) {
 }
 
 // on indique à webpack s'il doit mettre un devServer et où
-if (staging === 'dev') {
+if (isDevServerEnv) {
   // le port utilisé par le navigateur ne doit pas changer (pour que le sso fonctionne et ne
   // pas avoir à changer baseUrl), on décale le port de node et on l'indique à devServer
   if (typeof config.$server.port !== 'number') config.$server.port = Number(config.$server.port)
