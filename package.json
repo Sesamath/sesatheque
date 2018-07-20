@@ -23,6 +23,7 @@
     "doc:react:build": "npx styleguidist build",
     "doc:react:serve": "npx styleguidist server",
     "docker:build": "docker-compose build",
+    "docker:refresh": "docker-compose run --rm sesatheque yarn install",
     "docker:buildFull": "docker-compose -f docker-compose.avec.sesalab.yml build",
     "docker:dev": "docker-compose up sesatheque",
     "docker:devFull": "docker-compose -f docker-compose.avec.sesalab.yml up",

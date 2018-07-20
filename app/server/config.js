@@ -44,6 +44,7 @@ const {addSesatheque, reBaseUrl} = require('sesatheque-client/src/sesatheques')
 const configRessource = require('./ressource/config')
 const {version} = require('../../package')
 const checkConfigSesatheques = require('./checkConfigSesatheques')
+const isTestEnv = process.argv[1].includes('mocha')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -69,27 +70,20 @@ if (typeof window !== 'undefined') {
   throw new Error('config.js should never be included in browser source code!')
 }
 
-/**
- * L'environnement d'execution est récupéré par NODE_ENV
- * Il peut valoir prod ou dev et sera mis à dev si NODE_ENV est absent
- * (ou test si on est lancé par mocha)
- */
-const staging = (process.env.NODE_ENV === 'production') ? 'prod' : (process.argv[1].indexOf('mocha') !== -1) ? 'test' : 'dev'
-
 /** La racine du projet */
 const root = path.resolve(__dirname, '..', '..')
 const logDir = process.env.LOGS || root + '/logs'
 
 // la conf privée pour surcharger cette conf par défaut (et ajouter les accès à la base)
 const privateConfPath = [root, '_private']
-if (process.env.SESATHEQUE_CONF) {
+if (isTestEnv) {
+  privateConfPath.push('test')
+} else if (process.env.SESATHEQUE_CONF) {
   // on peut préciser un autre fichier de conf via l'environnement
   // (utile pour faire tourner plusieurs instances de l'appli)
   // on vérifie ici que y'a pas de slash dedans, pour signifier une erreur et arrêter là
   if (!/^[a-zA-Z0-9_-]+$/.test(process.env.SESATHEQUE_CONF)) throw new Error(`variable d’environnement SESATHEQUE_CONF invalide (${process.env.SESATHEQUE_CONF})`)
   privateConfPath.push(process.env.SESATHEQUE_CONF)
-} else if (staging === 'test') {
-  privateConfPath.push('test')
 } else {
   privateConfPath.push('config')
 }
@@ -112,9 +106,9 @@ const config = {
     defaultViewsPath: 'app/server/views',
     // mis dans _private/config.js car dépendant de l'instance
     baseId: toBeConfigured, // l'id de cette sésathèque
-    baseUrl: toBeConfigured,
+    baseUrl: toBeConfigured
     // mail: 'user@example.com',
-    staging: staging
+    // staging plus loin
   },
   $entities: {
     // mongo
@@ -247,6 +241,27 @@ const config = {
 // on ajoute nos params locaux (accès à la base et port,
 // mais aussi tout ce qui est spécifique à une installation de sesatheque)
 if (localConfig) sjtObj.merge(config, localConfig)
+
+// Le staging dépend de l'environnement d'execution
+// - si on est lancé par mocha c'est toujours test
+// - sinon on prend NODE_ENV
+// - sinon config.application.staging
+// - sinon dev
+const knownStagings = ['prod', 'preprod', 'dev', 'test']
+let staging
+if (isTestEnv) {
+  staging = 'test'
+} else if (process.env.NODE_ENV === 'production') {
+  staging = 'prod'
+} else if (knownStagings.includes(process.env.NODE_ENV)) {
+  staging = process.env.NODE_ENV
+} else if (knownStagings.includes(config.application.staging)) {
+  staging = config.application.staging
+} else {
+  staging = 'dev'
+}
+config.application.staging = staging
+log(`staging : ${staging}`)
 
 // pour bugsnag (il faudra mettre apiKey en private sinon il sera pas instancié
 if (config.bugsnag && config.bugsnag.apiKey) {

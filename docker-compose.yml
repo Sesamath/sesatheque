@@ -18,9 +18,13 @@ services:
       - ./_private:/sesatheque/_privateLocal
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
       - ./docker/sesatheque/_private:/sesatheque/_private
+      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
+      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
+      # une compilation de modules faite pour l'architecture du docker (linux amd64)
+      - ./node_modules:/sesatheque/node_modules
+      # On a pas besoin de build car on démarre toujours en devServer
       # le reste dont l'appli a besoin
       - ~/.cache/yarn:/sesatheque/.cache/yarn
-      - ./node_modules:/sesatheque/node_modules
       - ./app:/sesatheque/app
       - ./logs:/sesatheque/logs
       - ./package.json:/sesatheque/package.json
@@ -51,9 +55,13 @@ services:
       - ./_private:/sesatheque/_privateLocal
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
       - ./docker/sesatheque/_private:/sesatheque/_private
+      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
+      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
+      # une compilation de modules faite pour l'architecture du docker (linux amd64)
+      - ./node_modules:/sesatheque/node_modules
+      # On a pas besoin de build en test
       # le reste dont l'appli a besoin
       - ~/.cache/yarn:/sesatheque/.cache/yarn
-      - ./node_modules:/sesatheque/node_modules
       - ./app:/sesatheque/app
       - ./logsTest:/sesatheque/logsTest
       - ./package.json:/sesatheque/package.json

@@ -71,7 +71,11 @@ module.exports = function (mainComponent) {
     expressOptions.fsPath = path.join(root, 'app', 'assets')
     this.serve('/', expressOptions)
 
-    if (process.env.NODE_ENV === 'production') {
+    // le source react pour toutes ses routes
+    // sauf en dev (c'est webpack-dev-server qui gère)
+    // sauf en test (docker n'a pas de dossier build)
+    // => pour prod et preprod
+    if (config.application.staging.includes('prod')) {
       const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
       const reactPagePath = path.resolve(root, buildDir, 'index.html')
       const reactPage = fs.readFileSync(reactPagePath)

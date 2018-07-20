@@ -32,6 +32,7 @@
 'use strict'
 
 const path = require('path')
+const {application: {staging}} = require('../config')
 
 module.exports = function mainComponentFactory (lassi) {
   /**
@@ -58,21 +59,21 @@ module.exports = function mainComponentFactory (lassi) {
 
   // services
   require('./serviceSession')(mainComponent)
+  // pour le statique
+  require('./controllerMain')(mainComponent)
+  // pour /api/checkSesalab et /api/checkSesatheque
+  require('./controllerApi')(mainComponent)
   require('./servicePage')(mainComponent)
   require('./serviceFlashMessages')(mainComponent)
   require('./serviceForm')(mainComponent)
   require('./serviceJson')(mainComponent)
 
-  // controleurs, pour le statique
-  require('./controllerMain')(mainComponent)
-  // pour /api/checkSesalab et /api/checkSesatheque
-  require('./controllerApi')(mainComponent)
   // pour la doc
   mainComponent.controller(function () {
     this.serve('doc', path.resolve(__dirname, '../../../documentation'))
   })
   // En dev on ajoute des routes pour debug
-  if (!global.isProd) {
+  if (staging === 'dev') {
     require('./controllerDebug')(mainComponent)
   }
 
