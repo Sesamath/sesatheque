@@ -53,7 +53,7 @@ if (fs.existsSync(homeContentFile)) {
 if (!homeContent) homeContent = 'Site en construction.'
 
 /**
- * Controleur du composant main pour les routes "statiques"
+ * Controleur du composant main pour les routes "statiques" (pas chargé si test ou devServer)
  * @Controller controllerMain
  */
 module.exports = function (mainComponent) {

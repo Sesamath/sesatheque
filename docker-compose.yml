@@ -22,8 +22,7 @@ services:
       # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
       # une compilation de modules faite pour l'architecture du docker (linux amd64)
       - ./node_modules:/sesatheque/node_modules
-      # le build pour pouvoir y jeter un œil
-      - ./build:/sesatheque/build
+      # On a pas besoin de build car on démarre toujours en devServer
       # le reste dont l'appli a besoin
       - ~/.cache/yarn:/sesatheque/.cache/yarn
       - ./app:/sesatheque/app
@@ -60,8 +59,7 @@ services:
       # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
       # une compilation de modules faite pour l'architecture du docker (linux amd64)
       - ./node_modules:/sesatheque/node_modules
-      # le build pour pouvoir y jeter un œil
-      - ./build:/sesatheque/build
+      # On a pas besoin de build en test
       # le reste dont l'appli a besoin
       - ~/.cache/yarn:/sesatheque/.cache/yarn
       - ./app:/sesatheque/app
