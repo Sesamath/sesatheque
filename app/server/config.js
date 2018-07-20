@@ -247,7 +247,7 @@ if (localConfig) sjtObj.merge(config, localConfig)
 // - sinon on prend NODE_ENV
 // - sinon config.application.staging
 // - sinon dev
-const knownStagings = ['prod', 'preprod', 'dev', 'test']
+const knownStagings = ['prod', 'preprod', 'dev', 'devServer', 'test']
 let staging
 if (isTestEnv) {
   staging = 'test'
@@ -403,7 +403,7 @@ if (config.sesalabs.length) {
 }
 
 // on indique à webpack s'il doit mettre un devServer et où
-if (staging === 'dev') {
+if (staging === 'devServer') {
   // le port utilisé par le navigateur ne doit pas changer (pour que le sso fonctionne et ne
   // pas avoir à changer baseUrl), on décale le port de node et on l'indique à devServer
   if (typeof config.$server.port !== 'number') config.$server.port = Number(config.$server.port)
