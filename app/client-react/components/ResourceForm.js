@@ -47,7 +47,8 @@ const ResourceForm = ({
   updateStoreFromEditor,
   setUpdateStoreFromEditor,
   saveRessource,
-  pristine
+  pristine,
+  initialize
 }) => {
   const Editor = typeToData[type] || EditorExternal
 
@@ -75,7 +76,8 @@ const ResourceForm = ({
             onClick={(e) => {
               e.persist()
               return Promise.resolve(updateStoreFromEditor())
-                .then(() => handleSubmit(saveRessource)(e))
+                .then(() => handleSubmit(
+                  values => saveRessource(values, initialize))(e))
             }}
           >
             Enregistrer
@@ -98,7 +100,8 @@ ResourceForm.propTypes = {
   updateStoreFromEditor: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func,
   saveRessource: PropTypes.func,
-  pristine: PropTypes.bool
+  pristine: PropTypes.bool,
+  initialize: PropTypes.func
 }
 
 export default ensureLogged(

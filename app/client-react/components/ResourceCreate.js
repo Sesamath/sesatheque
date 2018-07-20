@@ -120,7 +120,7 @@ const form = {
     restriction: '0'
   },
   onSubmit: (values, dispatch) => {
-    const onSave = (oid) => dispatch(push(`/ressource/modifier/${oid}`))
+    const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}`))
     dispatch(saveRessource(values, onSave))
   },
   validate
