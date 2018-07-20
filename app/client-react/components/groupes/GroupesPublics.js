@@ -34,23 +34,6 @@ const GroupesPublics = ({
           }) => {
             return (
               <li key={nom}><strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'})
-                <span className="links">
-                  {groupesSuivis.includes(nom) ? (
-                    <button onClick={() => ignoreGroupe(nom)}>
-                      Ne plus suivre
-                    </button>
-                  ) : (
-                    <button onClick={() => followGroupe(nom)}>
-                      Suivre
-                    </button>
-                  )}
-                  <NavLink to={{
-                    pathname: '/ressource/rechercher',
-                    hash: 'results',
-                    search: `groupes=${encodeURIComponent(nom)}`
-                  }}>Voir les ressources du groupe
-                  </NavLink>
-                </span>
                 <pre>{description}</pre>
                 <ul>
                   Gestionnaire(s) :&nbsp;
@@ -59,6 +42,26 @@ const GroupesPublics = ({
                     </li>
                   ))}
                 </ul>
+
+                <span className="links">
+                  {groupesSuivis.includes(nom) ? (
+                    <button className="btn--info" onClick={() => ignoreGroupe(nom)}>
+                      <i className="fa fa-eye-slash"></i>Ne plus suivre
+                    </button>
+                  ) : (
+                    <button className="btn--info" onClick={() => followGroupe(nom)}>
+                      <i className="fa fa-eye"></i>Suivre
+                    </button>
+                  )}
+                  <NavLink
+                    className="btn--info"
+                    to={{
+                      pathname: '/ressource/rechercher',
+                      hash: 'results',
+                      search: `groupes=${encodeURIComponent(nom)}`
+                    }}><i className="fa fa-bookmark"></i>Voir les ressources du groupe
+                  </NavLink>
+                </span>
               </li>
             )
           }

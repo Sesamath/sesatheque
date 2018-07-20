@@ -1,9 +1,57 @@
-.liste .links a {
-  padding-left: 5px;
-  padding-right: 5px;
+.liste {
+  padding-left: 20px;
+  margin-top: 10px;
+  list-style-type: none;
+
+  .links {
+    margin-top: 10px;
+    display: block;
+
+    a {
+      display: inline-block;
+      padding: 10px 15px;
+      margin: 5px;
+
+      i {
+        padding-right: 5px;
+      }
+    }
+
+    button {
+      margin-left: 5px;
+      margin-right: 5px;
+
+      i {
+        padding-right: 5px;
+      }
+    }
+  }
 }
 
-.links button {
-    margin-left: 5px;
-    margin-right: 5px;
+section.groupes {
+  pre {
+    font-family: Roboto;
+    color: #555;
+    line-height: 2.2rem;
+    font-size: 13px;
+  }
+
+  li {
+    padding-top: 10px;
+  }
+
+  h2 {
+    margin-top: 20px;
+  }
+
+  li {
+    border-left: 5px solid #b8c2ea;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+
+    &:first-child {
+      padding-top: 5px;
+    }
+  }
 }

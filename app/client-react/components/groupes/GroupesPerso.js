@@ -69,44 +69,50 @@ const GroupesPerso = ({
   // à l'affichage, y'a que les liens qui changent suivant le type
   const getAdminLinks = (nom) => (
     <span className="links">
-      <a href="#" onClick={() => deleteGroupe(nom)}>Supprimer</a>
-      <NavLink to={`/groupe/editer/${encodeURIComponent(nom)}`}>Modifier</NavLink>
-      <NavLink to={{
-        pathname: '/ressource/rechercher',
-        hash: 'results',
-        search: `groupes=${encodeURIComponent(nom)}`
-      }}>Voir les ressources du groupe</NavLink>
+      <a href="#" onClick={() => deleteGroupe(nom)} className="btn--info"><i className="fa fa-trash"></i>Supprimer</a>
+      <NavLink to={`/groupe/editer/${encodeURIComponent(nom)}`} className="btn--info"><i className="fa fa-edit"></i>Modifier</NavLink>
+      <NavLink
+        className="btn--info"
+        to={{
+          pathname: '/ressource/rechercher',
+          hash: 'results',
+          search: `groupes=${encodeURIComponent(nom)}`
+        }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe</NavLink>
       {groupesMembre.includes(nom)
         ? null // le lien quitter sera dans la liste des groupesMembre
-        : (<button onClick={() => joinGroupe(nom)}>Rejoindre</button>)
+        : (<button className="btn--info" onClick={() => joinGroupe(nom)}><i className="fa fa-sign-in-alt"></i>Rejoindre</button>)
       }
       {groupesSuivis.includes(nom)
         ? null // le lien "ne plus suivre sera dans la liste des groupesSuivis
-        : (<button onClick={() => followGroupe(nom)}>Suivre</button>)
+        : (<button className="btn--info" onClick={() => followGroupe(nom)}><i className="fa fa-eye"></i>Suivre</button>)
       }
     </span>
   )
 
   const getMemberLinks = (nom) => (
     <span className="links">
-      <NavLink to={{
-        pathname: '/ressource/rechercher',
-        hash: 'results',
-        search: `groupes=${encodeURIComponent(nom)}`
-      }}>Voir les ressources du groupe</NavLink>
-      <button onClick={() => leaveGroupe(nom)}>Quitter le groupe</button>
+      <NavLink
+        className="btn--info"
+        to={{
+          pathname: '/ressource/rechercher',
+          hash: 'results',
+          search: `groupes=${encodeURIComponent(nom)}`
+        }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe</NavLink>
+      <button className="btn--info" onClick={() => leaveGroupe(nom)}><i className="fa fa-sign-out-alt"></i>Quitter le groupe</button>
     </span>
   )
 
   const getFollowLinks = (nom) => (
     <span className="links">
-      <NavLink to={{
-        pathname: '/ressource/rechercher',
-        hash: 'results',
-        search: `groupes=${encodeURIComponent(nom)}`
-      }}>Voir les ressources du groupe
+      <NavLink
+        className="btn--info"
+        to={{
+          pathname: '/ressource/rechercher',
+          hash: 'results',
+          search: `groupes=${encodeURIComponent(nom)}`
+        }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe
       </NavLink>
-      <button onClick={() => ignoreGroupe(nom)}>Ne plus suivre le groupe</button>
+      <button className="btn--info" onClick={() => ignoreGroupe(nom)}><i className="fa fa-eye-slash"></i>Ne plus suivre le groupe</button>
     </span>
   )
 
@@ -123,9 +129,9 @@ const GroupesPerso = ({
     return (
       <li key={nom}>
         <strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'} {isPublic ? 'public' : 'privé'})
-        {getLinks(nom)}
         <pre>{description}</pre>
         {displayAdmins(gestionnaires, gestionnairesNames)}
+        {getLinks(nom)}
       </li>
     )
   }
@@ -140,35 +146,42 @@ const GroupesPerso = ({
   return (
     <Fragment>
       <h1>Mes groupes</h1>
-      <h2>Groupes dont je suis gestionnaire</h2>
 
-      <p><NavLink to="/groupe/ajouter">Créer un groupe</NavLink></p>
+      <section className="groupHeader">
+        <NavLink to="/groupe/ajouter" className="fr btn--success">
+          <i className="fa fa-plus"></i>
+          Créer un groupe
+        </NavLink>
+        <ul>
+          <li>
+            <NavLink to="/groupes/ouverts">Voir les groupes ouverts</NavLink>
+            <span className="remarque"> (pour éventuellement en devenir membre)</span>
+          </li>
+          <li>
+            <NavLink to="/groupes/publics">Voir les groupes publics</NavLink>
+            <span className="remarque"> (pour éventuellement suivre leurs publications)</span>
+          </li>
+        </ul>
+      </section>
+      <section className="groupes">
+        <h2>Groupes dont je suis gestionnaire</h2>
+        {adminList.length
+          ? displayList(adminList, getAdminLinks)
+          : (<p>Vous n’êtes gestionnaire d’aucun groupe.</p>)
+        }
 
-      {adminList.length
-        ? displayList(adminList, getAdminLinks)
-        : (<p>Vous n’êtes gestionnaire d’aucun groupe.</p>)
-      }
+        <h2>Groupes dont je suis membre</h2>
+        {memberList.length
+          ? displayList(memberList, getMemberLinks)
+          : (<p>Vous n’êtes membre d’aucun groupe.</p>)
+        }
 
-      <h2>Groupes dont je suis membre</h2>
-      <p>
-        <NavLink to="/groupes/ouverts">Voir la liste des groupes ouverts</NavLink>
-        <span className="remarque"> (pour éventuellement en devenir membre)</span>
-      </p>
-      {memberList.length
-        ? displayList(memberList, getMemberLinks)
-        : (<p>Vous n’êtes membre d’aucun groupe.</p>)
-      }
-
-      <h2>Groupes suivis</h2>
-      <p>
-        <NavLink to="/groupes/publics">Voir la liste des groupes publics</NavLink>
-        <span className="remarque"> (pour éventuellement suivre leurs publications)</span>
-      </p>
-
-      {followList.length
-        ? displayList(followList, getFollowLinks)
-        : (<p>Vous ne suivez les publications d’aucun groupe.</p>)
-      }
+        <h2>Groupes suivis</h2>
+        {followList.length
+          ? displayList(followList, getFollowLinks)
+          : (<p>Vous ne suivez les publications d’aucun groupe.</p>)
+        }
+      </section>
     </Fragment>
   )
 }

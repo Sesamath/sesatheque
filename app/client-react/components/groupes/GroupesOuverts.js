@@ -36,19 +36,21 @@ const GroupesOuverts = ({
               <li key={nom}><strong>{nom}</strong> ({publicStatus ? 'public' : 'privé'})
                 <span className="links">
                   {groupesMembre.includes(nom) ? (
-                    <button onClick={() => leaveGroupe(nom)}>
-                      Quitter
+                    <button className="btn--info" onClick={() => leaveGroupe(nom)}>
+                      <i className="fa fa-sign-out-alt"></i>Quitter
                     </button>
                   ) : (
-                    <button onClick={() => joinGroupe(nom)}>
-                      Rejoindre
+                    <button className="btn--info" onClick={() => joinGroupe(nom)}>
+                      <i className="fa fa-sign-in-alt"></i>Rejoindre
                     </button>
                   )}
-                  <NavLink to={{
-                    pathname: '/ressource/rechercher',
-                    hash: 'results',
-                    search: `groupes=${encodeURIComponent(nom)}`
-                  }}>Voir les ressources du groupe
+                  <NavLink
+                    className="btn--info"
+                    to={{
+                      pathname: '/ressource/rechercher',
+                      hash: 'results',
+                      search: `groupes=${encodeURIComponent(nom)}`
+                    }}><i className="fa fa-bookmark"></i>Voir les ressources du groupe
                   </NavLink>
                 </span>
                 <pre>{description}</pre>
