@@ -13,7 +13,7 @@ const GroupContainer = ({groupesList}) => {
           component={GroupesSelector}
           groupesList={groupesList}
         />
-        <div className="alert--info">{'Vous pouvez gérer vos groupes depuis la page "Mes groupes" du menu principal.'}</div>
+        <div className="alert--info">Vous pouvez gérer vos groupes depuis la page <a href="/groupes/perso">Mes groupes</a>.</div>
       </fieldset>
     )
   }
