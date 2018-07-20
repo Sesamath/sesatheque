@@ -58,9 +58,7 @@ module.exports = function mainComponentFactory (lassi) {
 }); /**/
 
   // pour le statique
-  if (!['test', 'devServer'].includes(staging)) {
-    require('./controllerMain')(mainComponent)
-  }
+  require('./controllerMain')(mainComponent)
 
   // pour /api/checkSesalab et /api/checkSesatheque
   require('./controllerApi')(mainComponent)
@@ -76,7 +74,7 @@ module.exports = function mainComponentFactory (lassi) {
   })
 
   // En dev on ajoute des routes pour debug
-  if (staging.startsWith('dev')) {
+  if (staging === 'dev') {
     require('./controllerDebug')(mainComponent)
   }
 

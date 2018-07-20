@@ -53,7 +53,7 @@ if (fs.existsSync(homeContentFile)) {
 if (!homeContent) homeContent = 'Site en construction.'
 
 /**
- * Controleur du composant main pour les routes "statiques" (pas chargé si test ou devServer)
+ * Controleur du composant main pour les routes "statiques"
  * @Controller controllerMain
  */
 module.exports = function (mainComponent) {
@@ -72,32 +72,38 @@ module.exports = function (mainComponent) {
     this.serve('/', expressOptions)
 
     // le source react pour toutes ses routes
-    const buildDir = envSesathequeConf && envSesathequeConf !== 'test' ? `build/${envSesathequeConf}` : 'build'
-    const reactPagePath = path.resolve(root, buildDir, 'index.html')
-    const reactPage = fs.readFileSync(reactPagePath)
-    // pour la page html react, c'est la même sur toutes les routes
-    const sendReactPage = (context) => {
-      const options = {
-        headers: {
-          'Content-Length': Buffer.byteLength(reactPage, 'utf8'),
-          'Content-Type': 'text/html'
+    // sauf en dev (c'est webpack-dev-server qui gère)
+    // sauf en test (docker n'a pas de dossier build)
+    // => pour prod et preprod
+    if (config.application.staging.includes('prod')) {
+      const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
+      const reactPagePath = path.resolve(root, buildDir, 'index.html')
+      const reactPage = fs.readFileSync(reactPagePath)
+      // pour la page html react, c'est la même sur toutes les routes
+      const sendReactPage = (context) => {
+        const options = {
+          headers: {
+            'Content-Length': Buffer.byteLength(reactPage, 'utf8'),
+            'Content-Type': 'text/html'
+          }
         }
+        context.raw(reactPage, options)
       }
-      context.raw(reactPage, options)
-    }
-    // cf app/client-react/App.js pour ne pas en oublier
-    const reactRoutes = [
-      // '/', inutile car /build/index.html passe avant
-      '/mentionsLegales',
-      '/ressource/ajouter',
-      '/ressource/modifier/:oid',
-      '/ressource/apercevoir/:oid',
-      '/ressource/decrire/:oid',
-      '/ressource/rechercher',
-      '/ressources'
-    ]
 
-    reactRoutes.forEach(route => this.get(route, sendReactPage))
+      // cf app/client-react/App.js pour ne pas en oublier
+      const reactRoutes = [
+        // '/', inutile car /build/index.html passe avant
+        '/mentionsLegales',
+        '/ressource/ajouter',
+        '/ressource/modifier/:oid',
+        '/ressource/apercevoir/:oid',
+        '/ressource/decrire/:oid',
+        '/ressource/rechercher',
+        '/ressources'
+      ]
+
+      reactRoutes.forEach(route => this.get(route, sendReactPage))
+    }
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
     // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)
