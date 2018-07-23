@@ -209,7 +209,7 @@ const List = ({list, component, groupes, ...others}) => (
 List.propTypes = {
   list: PropTypes.array,
   component: PropTypes.func,
-  groupes: PropTypes.o
+  groupes: PropTypes.object
 }
 
 /**
