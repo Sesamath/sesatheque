@@ -27,7 +27,7 @@ const Admins = ({
   if (!gestionnaires.length) return (<p>Aucun gestionnaire</p>)
   if (gestionnaires.length === 1) return (<p>Gestionnaire&nbsp;: {gestionnairesNames[0]} <span className="remarque">({gestionnaires[0]})</span></p>)
   return (
-    <ul>Gestionnaires :&nbsp;
+    <ul className="admins">Gestionnaires :&nbsp;
       {gestionnaires.map((oid, index) => (
         <li key={oid}>
           {gestionnairesNames[index]} <span className="remarque">({oid})</span>

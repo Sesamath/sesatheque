@@ -3,6 +3,13 @@
   margin-top: 10px;
   list-style-type: none;
 
+  .admins {
+    list-style-type: none;
+    li {
+      display: inline;
+      padding-left: 5px;
+    }
+  }
   .links {
     margin-top: 10px;
     display: block;
@@ -26,6 +33,18 @@
       }
     }
   }
+
+  > li {
+    border-left: 5px solid #b8c2ea;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    paddin-top: 10px;
+    padding-bottom: 10px;
+
+    &:first-child {
+      padding-top: 5px;
+    }
+  }
 }
 
 section.groupes {
@@ -36,22 +55,7 @@ section.groupes {
     font-size: 13px;
   }
 
-  li {
-    padding-top: 10px;
-  }
-
   h2 {
     margin-top: 20px;
-  }
-
-  li {
-    border-left: 5px solid #b8c2ea;
-    padding-left: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-
-    &:first-child {
-      padding-top: 5px;
-    }
   }
 }
