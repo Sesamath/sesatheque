@@ -31,22 +31,28 @@
 
 'use strict'
 
-/* global describe,it */
+const {listeMax, listeNbDefault} = require('./config')
 
-const assert = require('assert')
-const tools = require('../../../app/server/lib/tools')
-global.log = require('sesajstools/utils/log')
+/**
+ * Normalise {skip, limit} et le retourne
+ * @param {Object} [options]
+ * @param {number} [options.limit]
+ * @param {number} [options.skip]
+ * @return {{limit: number, skip: number}}
+ */
+function getNormalizedGrabOptions (options) {
+  if (!options || typeof options !== 'object') return {limit: listeNbDefault, skip: 0}
+  const grabOptions = {}
+  // on peut nous passer des strings
+  const limit = Number(options.limit)
+  const skip = Number(options.skip)
 
-describe('tools', function () {
-  describe('encadre', function () {
-    it("retourne la valeur fournie si dans l'intervalle", function () {
-      assert.strictEqual(42, tools.encadre(42, -2, 48))
-    })
-    it('retourne la borne inf si trop petit', function () {
-      assert.strictEqual(42, tools.encadre(-2, 42, 48))
-    })
-    it('retourne la borne sup si trop grand', function () {
-      assert.strictEqual(42, tools.encadre(52, 2, 42))
-    })
-  })
-})
+  grabOptions.limit = (Number.isInteger(limit) && limit > 0 && limit < listeMax) ? limit : listeNbDefault
+  grabOptions.skip = (Number.isInteger(skip) && skip >= 0) ? skip : 0
+
+  return grabOptions
+}
+
+module.exports = {
+  getNormalizedGrabOptions
+}

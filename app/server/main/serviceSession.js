@@ -31,22 +31,48 @@
 
 'use strict'
 
-/* global describe,it */
+module.exports = function (component) {
+  component.service('$session', function () {
+    /**
+     * Retourne le user courant (undefined si on est pas loggé)
+     * @param {Context} context
+     * @return {Personne|undefined}
+     */
+    function getCurrentPersonne (context) {
+      return context.session.user
+    }
 
-const assert = require('assert')
-const tools = require('../../../app/server/lib/tools')
-global.log = require('sesajstools/utils/log')
+    /**
+     * Affecte un utilisateur en session (props groupesMembre, groupesSuivis, nom, oid, pid, prenom, roles)
+     * @param {Context} context
+     * @param {Personne} personne
+     * @throws {Error} Si y'avait déjà un user en session ou si personne n'a pas les propriétés minimales
+     */
+    function login (context, personne) {
+      if (context.session.user) throw Error('Il y avait déjà une utilisateur en session')
+      // on vérifie qu'il a au moins ces propriétés
+      ;['groupesMembre', 'groupesSuivis', 'nom', 'oid', 'pid', 'prenom', 'roles', 'permissions'].forEach(prop => {
+        if (!personne.hasOwnProperty(prop)) throw new Error(`Paramètres invalides (${prop} manquant)`)
+      })
+      context.session.user = personne
+    }
 
-describe('tools', function () {
-  describe('encadre', function () {
-    it("retourne la valeur fournie si dans l'intervalle", function () {
-      assert.strictEqual(42, tools.encadre(42, -2, 48))
-    })
-    it('retourne la borne inf si trop petit', function () {
-      assert.strictEqual(42, tools.encadre(-2, 42, 48))
-    })
-    it('retourne la borne sup si trop grand', function () {
-      assert.strictEqual(42, tools.encadre(52, 2, 42))
-    })
+    /**
+     * Supprime l'utilisateur en session
+     * @param {Context} context
+     */
+    function logout (context) {
+      context.session.user = null
+    }
+
+    /**
+     * Service de gestion de la session (ça devrait être le seul endroit qui modifie context.session)
+     * @service $session
+     */
+    return {
+      getCurrentPersonne,
+      login,
+      logout
+    }
   })
-})
+}

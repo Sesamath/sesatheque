@@ -57,12 +57,12 @@ module.exports = function mainComponentFactory (lassi) {
   return chunk.write('<pre class='debug'>' + JSON.stringify(params, null, 2) + '</pre>');
 }); /**/
 
+  // services
+  require('./serviceSession')(mainComponent)
   // pour le statique
   require('./controllerMain')(mainComponent)
-
   // pour /api/checkSesalab et /api/checkSesatheque
   require('./controllerApi')(mainComponent)
-
   require('./servicePage')(mainComponent)
   require('./serviceFlashMessages')(mainComponent)
   require('./serviceForm')(mainComponent)
@@ -72,11 +72,10 @@ module.exports = function mainComponentFactory (lassi) {
   mainComponent.controller(function () {
     this.serve('doc', path.resolve(__dirname, '../../../documentation'))
   })
-
   // En dev on ajoute des routes pour debug
   if (staging === 'dev') {
     require('./controllerDebug')(mainComponent)
   }
 
-  // le listener beforeTransport est dans le composant ressource (il a besoin des services de ressurce)
+  // le listener beforeTransport est dans le composant ressource (il a besoin des services de ressource)
 }

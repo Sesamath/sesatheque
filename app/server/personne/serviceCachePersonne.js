@@ -33,14 +33,6 @@
 
 module.exports = function (component) {
   component.service('$cachePersonne', function ($cache, $settings) {
-    /**
-     * Une callback qui ne fait rien sinon logguer une éventuelle erreur
-     * @private
-     */
-    function logIfError (error) {
-      if (error) log.error(error)
-    }
-
     var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
 
     /**
@@ -65,9 +57,9 @@ module.exports = function (component) {
      * @param {errorCallback} [next]
      * @memberOf $cachePersonne
      */
-    $cachePersonne.set = function (personne, next = logIfError) {
+    $cachePersonne.set = function (personne, next = log.ifError) {
       // by pid
-      $cache.set('personne_' + personne.pid, personne, ttl, logIfError)
+      $cache.set('personne_' + personne.pid, personne, ttl, log.ifError)
       // by oid
       $cache.set('personne_' + personne.oid, personne, ttl, next)
     }
@@ -78,7 +70,7 @@ module.exports = function (component) {
      * @param {errorCallback} [next]
      * @memberOf $cachePersonne
      */
-    $cachePersonne.delete = function (oid, next = logIfError) {
+    $cachePersonne.delete = function (oid, next = log.ifError) {
       // on efface pas l'oid par origine, le get par origine renverra undefined quand même
       $cache.delete('personne_' + oid, next)
     }

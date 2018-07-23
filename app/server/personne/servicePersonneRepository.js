@@ -33,67 +33,45 @@
 
 const _ = require('lodash')
 const flow = require('an-flow')
-const merge = require('sesajstools/utils/object').merge
+const {merge} = require('sesajstools/utils/object')
 
 module.exports = function (component) {
   component.service('$personneRepository', function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
     /**
-     * Service d'accès aux personnes, utilisé par les différents contrôleurs
-     * @service $personneRepository
-     */
-    const $personneRepository = {}
-
-    /**
-     * Ajoute un groupe à la personne (en le créant s'il n'existait pas),
-     * et sauvegarde les modifs de personne
-     * @param {Personne} personne
+     * Ajoute un groupe à la personne, comme membre (en le créant s'il n'existait pas),
+     * @param {Personne|EntityPersonne} personne (sa prop groupesMembre sera modifiée)
      * @param {string} groupeNom
-     * @param {groupeCallback} next
+     * @param {errorCallback} next
      * @memberOf $personneRepository
      */
-    $personneRepository.addGroupe = function (personne, groupeNom, next) {
-      const uid = personne.oid
-      if (!uid) return next(new Error('Impossible d’ajouter un groupe à une personne sans oid'))
-      if (_.include(personne.groupesMembre, groupeNom)) {
-        return next(null, {nom: groupeNom})
-      }
-      // on commence par récupérer une entity si on en a pas déjà une
+    function addGroupe (personne, groupeNom, next) {
+      const oid = personne.oid
+      if (!oid) return next(new Error('Impossible d’ajouter un groupe à une personne sans oid'))
+      if (!Array.isArray(personne.groupesMembre)) personne.groupesMembre = []
+      if (personne.groupesMembre.includes(groupeNom)) return next(Error(`La personne ${oid} était déjà membre du groupe ${groupeNom}`))
+
+      // on veut une EntityPersonne si on en a pas déjà une (faudra la sauvegarder)
+      const entityPersonne = personne.store ? personne : EntityPersonne.create(personne)
+
+      // faut regarder si le groupe existe
       flow().seq(function () {
-        if (personne.store) this(null, personne)
-        else $personneRepository.load(uid, this)
-      }).seq(function (entityPersonne) {
-        if (entityPersonne) {
-          personne = entityPersonne
-          $groupeRepository.load(groupeNom, this)
-        } else {
-          this(new Error('Aucun utilisateur d’oid ' + uid))
-        }
+        $groupeRepository.loadByNom(groupeNom, this)
       }).seq(function (groupe) {
-        if (groupe) {
-          this(null, groupe)
-        } else {
-          // on le crée
-          const newGroupe = {
-            nom: groupeNom,
-            gestionnaires: [uid]
-          }
-          EntityGroupe.create(newGroupe).store(this)
+        if (groupe) return this(null, groupe)
+        // sinon on le crée
+        const newGroupe = {
+          nom: groupeNom,
+          gestionnaires: [oid]
         }
+        EntityGroupe.create(newGroupe).store(this)
       }).seq(function (groupe) {
-        if (groupe && groupe.nom) {
-          if (!personne.groupesMembre) personne.groupesMembre = []
-          personne.groupesMembre.push(groupe.nom)
-          personne.store(function (error, personne) {
-            if (error) next(error)
-            else if (personne) next(null, groupe)
-            else next(new Error('Erreur à l’affectation du groupe ' + groupeNom))
-          })
-        } else {
-          next(new Error('Erreur à l’enregistrement du groupe ' + groupeNom))
-        }
-      }).catch(function (error) {
-        next(error)
-      })
+        entityPersonne.groupesMembre.push(groupe.nom)
+        entityPersonne.store(this)
+      }).seq(function (personneBdd) {
+        // on mute le groupesMembre du personne passé en argument
+        personne.groupesMembre = personneBdd.groupesMembre
+        next()
+      }).catch(next)
     }
 
     /**
@@ -101,10 +79,10 @@ module.exports = function (component) {
      * @param {string|Personne|EntityPersonne} who
      * @param next
      */
-    $personneRepository.delete = function (who, next) {
+    function deletePersonne (who, next) {
       flow().seq(function () {
         if (typeof who === 'number') who += '' // oid numérique
-        if (typeof who === 'string') return $personneRepository.load(who, this)
+        if (typeof who === 'string') return load(who, this)
         if (typeof who === 'object') {
           // on nous passe une personne
           if (who.delete) return this(null, who)
@@ -127,7 +105,7 @@ module.exports = function (component) {
      * @param {personneCallback} next Renvoie toujours une EntityPersonne
      * @memberOf $personneRepository
      */
-    $personneRepository.load = function (id, next) {
+    function load (id, next) {
       if (typeof id === 'number') id += ''
       if (typeof id !== 'string') {
         const error = new Error(`id invalide ${typeof id}`)
@@ -141,7 +119,7 @@ module.exports = function (component) {
         this()
       }).seq(function () {
         // on va chercher en bdd
-        const key = (id.substr('/') === -1) ? 'oid' : 'pid'
+        const key = id.includes('/') ? 'pid' : 'oid'
         EntityPersonne.match(key).equals(id).grabOne(this)
       }).seq(function (personne) {
         if (!personne) return next()
@@ -151,12 +129,57 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne une liste de personnes d'apres une liste de oids
+     * @param {string[]} oids Liste de oid
+     * @param next callback appelée avec (error, personnes) (personnes étant un array de personne || null si l'oid est inconnu en bdd)
+     */
+    function loadByOids (oids, next) {
+      if (!Array.isArray(oids)) return next(Error('arguments invalides'))
+      // @todo add $cachePersonne.getByPid()
+      flow().seq(function () {
+        EntityPersonne.match('oid').in(oids).grab(this)
+      }).seq(function (personnesArray) {
+        const personnes = oids.map(refOid => {
+          return personnesArray.find(({oid}) => oid === refOid) || null
+        })
+        next(null, personnes)
+      }).catch(function (error) {
+        next(error)
+      })
+    }
+
+    /**
+     * Retourne une liste de personnes d'apres une liste de pids
+     * @param {string[]} pids Liste de pid
+     * @param next callback appelée avec (error, {personnes: Personne[], missing: string[]}) (missing étant les pids inconnus en bdd)
+     */
+    function loadByPids (pids, next) {
+      if (!Array.isArray(pids)) return next(Error('arguments invalides'))
+      const personnes = []
+      // @todo add $cachePersonne.getByPid()
+      flow().seq(function () {
+        EntityPersonne.match('pid').in(pids).grab(this)
+      }).seqEach(function (personne) {
+        if (personne && personne.oid) personnes.push(personne)
+        this()
+      }).seq(function () {
+        const missing = pids.filter(pid => !personnes.some(p => p.pid === pid))
+        next(null, {personnes, missing})
+      }).catch(function (error) {
+        next(error)
+      })
+    }
+
+    /**
      * Efface un groupe chez toutes les personnes qui en sont membre ou qui le suivent
      * @param {string}            groupName Nom du groupe
      * @param {errorCallback} next      Avec la liste des personnes (ou un tableau vide)
      * @memberOf $personneRepository
      */
-    $personneRepository.removeGroup = function (groupName, next) {
+    function removeGroup (groupName, next) {
+      // @todo corriger: seuls les 100 premiers
+      // membres et les 100 premiers suiveurs
+      // sont nettoyés
       let offset = 0
       const limit = 100
       flow().seq(function () {
@@ -164,14 +187,61 @@ module.exports = function (component) {
       }).seqEach(function (personne) {
         personne.groupesMembre = personne.groupesMembre.filter(grp => grp !== groupName)
         personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
-        $personneRepository.save(personne, this)
+        save(personne, this)
       }).seq(function () {
         // reste ceux qui suivaient sans être membre
         EntityPersonne.match('groupesSuivis').equals(groupName).grab({limit, offset}, this)
       }).seqEach(function (personne) {
         personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
-        $personneRepository.save(personne, this)
+        save(personne, this)
       }).done(next)
+    }
+
+    /**
+     * Renomme un groupe chez toutes les personnes qui sont membres ou abonnés
+     * @param oldName
+     * @param newName
+     * @param next
+     */
+    function renameGroup (oldName, newName, next) {
+      const limit = 100
+      const modifier = (nom) => nom === oldName ? newName : nom
+
+      const updateMembres = () => {
+        flow().seq(function () {
+          EntityPersonne.match('groupesMembre').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (personne) {
+          personne.groupesMembre = personne.groupesMembre.map(modifier)
+          personne.groupesSuivis = personne.groupesSuivis.map(modifier)
+          save(personne, this)
+        }).seq(function (personnes) {
+          if (personnes.length < limit) {
+            // on a fini
+            offset = 0
+            return updateSuiveurs()
+          }
+          // faut refaire un tour
+          offset += limit
+          updateMembres()
+        }).done(next)
+      }
+
+      const updateSuiveurs = () => {
+        flow().seq(function () {
+          // pour ceux qui suivaient sans être membre
+          EntityPersonne.match('groupesSuivis').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (personne) {
+          personne.groupesSuivis = personne.groupesSuivis.map(modifier)
+          save(personne, this)
+        }).seq(function (personnes) {
+          if (personnes.length < limit) return next()
+          offset += limit
+          updateSuiveurs()
+        }).done(next)
+      }
+
+      let offset = 0
+      updateMembres()
     }
 
     /**
@@ -180,13 +250,10 @@ module.exports = function (component) {
      * @param {entityPersonneCallback} next
      * @memberOf $personneRepository
      */
-    $personneRepository.save = function (personne, next) {
+    function save (personne, next) {
       if (!personne.store) personne = EntityPersonne.create(personne)
-      personne.store(function (error, personne) {
-        $cachePersonne.set(personne)
-        // on passe à next sans attendre le résultat de la mise en cache
-        next(error, personne)
-      })
+      // La mise en cache est réalisée dans l'afterstore
+      personne.store(next)
     }
 
     /**
@@ -195,8 +262,7 @@ module.exports = function (component) {
      * @param {personneCallback} next Avec l'EntityPersonne
      * @memberOf $personneRepository
      */
-    $personneRepository.updateOrCreate = function (personne, next) {
-      // log.debug("$personneRepository.updateOrCreate", personne, {max:2000})
+    function updateOrCreate (personne, next) {
       function checkUpdate (personne, personneNew, next) {
         let needUpdate = false
         for (let prop in personneNew) {
@@ -226,8 +292,24 @@ module.exports = function (component) {
         log.error(new Error('on a passé à updateOrCreate une personne avec origine & idOrigine, on voudrait un pid'), personne)
         id = personne.origine + '/' + personne.idOrigine
       }
-      if (id) $personneRepository.load(id, modify)
+      if (id) load(id, modify)
       else next(new Error('Il manque un identifiant pour mettre à jour ou créer les données de cet utilisateur'))
+    }
+
+    /**
+     * Service d'accès aux personnes, utilisé par les différents contrôleurs
+     * @service $personneRepository
+     */
+    const $personneRepository = {
+      addGroupe,
+      delete: deletePersonne,
+      load,
+      loadByOids,
+      loadByPids,
+      removeGroup,
+      renameGroup,
+      save,
+      updateOrCreate
     }
 
     return $personneRepository

@@ -39,8 +39,8 @@ const request = require('request')
 const {parse, stringify} = require('sesajstools')
 const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
 const Ref = require('../../constructors/Ref')
-const {ensure} = require('../tools')
-const {getRidEnfants} = require('../tools/ressource')
+const {ensure} = require('../lib/tools')
+const {getRidEnfants} = require('../lib/ressource')
 
 const config = require('./config')
 const appConfig = require('../config')
@@ -49,6 +49,8 @@ const j3pGraphe2json = require('../../../tasks/modules/j3pGraphe2json')
 
 const myBaseId = appConfig.application.baseId
 
+const {getNormalizedGrabOptions} = require('../lib/grab')
+
 // et des petites fonctions utiles
 const prependMyBaseId = (oid) => myBaseId + '/' + oid
 const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
@@ -56,7 +58,7 @@ const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 module.exports = function (ressourceComponent) {
   ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
     // on applique toujours un limit
-    const listeMax = config.limites.listeMax
+    const {listeMax} = config.limites
     if (!listeMax) throw new Error('ressource.limites.listeMax manquant en configuration')
 
     /**
@@ -545,6 +547,33 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Récupère la liste des ressources publiées dans un groupe
+     * @param nom Nom du groupe
+     * @param {object} [options]
+     * @param {number} [options.limit]
+     * @param {number} [options.skip]
+     * @param {function} next appelée avec (error, {total, ressources})
+     */
+    function fetchPublishedInGroup (nom, options, next) {
+      if (typeof options === 'function') next = options
+      const grabOptions = getNormalizedGrabOptions(options)
+      const data = {}
+      flow().seq(function () {
+        EntityRessource.match('groupes').equals(nom).count(this)
+      }).seq(function (total) {
+        data.total = total
+        if (!total) {
+          data.ressources = []
+          return next(null, data)
+        }
+        EntityRessource.match('groupes').equals(nom).grab(grabOptions, this)
+      }).seq(function (ressources) {
+        data.ressources = ressources
+        next(null, data)
+      }).catch(next)
+    }
+
+    /**
      * Récupère un liste de ressource d'après critères
      * @memberOf $ressourceRepository
      * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
@@ -769,6 +798,53 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Renomme un groupe chez toutes les ressources qui l'ont en groupes ou groupesAuteurs
+     * @param oldName
+     * @param newName
+     * @param next
+     */
+    function renameGroup (oldName, newName, next) {
+      const limit = 100
+      const modifier = (nom) => nom === oldName ? newName : nom
+
+      const updateGroupes = () => {
+        flow().seq(function () {
+          EntityRessource.match('groupes').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (ressource) {
+          ressource.groupes = ressource.groupes.map(modifier)
+          ressource.groupesAuteurs = ressource.groupesAuteurs.map(modifier)
+          save(ressource, this)
+        }).seq(function (ressources) {
+          if (ressources.length < limit) {
+            // on a fini
+            offset = 0
+            return updateGroupesAuteurs()
+          }
+          // faut refaire un tour
+          offset += limit
+          updateGroupes()
+        }).done(next)
+      }
+
+      const updateGroupesAuteurs = () => {
+        flow().seq(function () {
+          // pour ceux qui suivaient sans être membre
+          EntityRessource.match('groupesAuteurs').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (ressource) {
+          ressource.groupesAuteurs = ressource.groupesAuteurs.map(modifier)
+          save(ressource, this)
+        }).seq(function (ressources) {
+          if (ressources.length < limit) return next()
+          offset += limit
+          updateGroupesAuteurs()
+        }).done(next)
+      }
+
+      let offset = 0
+      updateGroupes()
+    }
+
+    /**
      * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin),
      * met à jour le cache (interne + varnish) et toutes les relations (passe en revue tous les éventuels
      * arbres qui référencent cette ressource)
@@ -864,6 +940,7 @@ module.exports = function (ressourceComponent) {
      */
     return {
       archive,
+      fetchPublishedInGroup,
       getDeferred,
       getListe,
       getListeCount,
@@ -873,6 +950,7 @@ module.exports = function (ressourceComponent) {
       loadByCle,
       loadByOrigin,
       remove,
+      renameGroup,
       save,
       saveDeferred,
       updateParent

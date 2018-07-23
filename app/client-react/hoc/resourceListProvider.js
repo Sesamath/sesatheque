@@ -102,7 +102,7 @@ const resourceListProvider = (WrappedComponent) => {
     // restriction en int, 0 par défaut
     query.restriction = listes.restriction[parsedSearch.restriction] ? Number(parsedSearch.restriction) : 0
     // pour les autres valeurs uniques (select ou input), on récupère tel quel si non vide
-    ;['titre', 'type', 'langue', 'oid', 'origine', 'idOrigine', 'auteurs'].forEach(prop => {
+    ;['titre', 'type', 'langue', 'oid', 'origine', 'idOrigine', 'auteurs', 'groupes'].forEach(prop => {
       if (parsedSearch[prop]) query[prop] = parsedSearch[prop]
     })
     // multiselect

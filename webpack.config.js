@@ -189,7 +189,6 @@ if (appConfig.devServer) {
       '/images': nodeUrl,
       '/medias': nodeUrl,
       '/vendor': nodeUrl,
-      '/groupe': nodeUrl,
       '/sesasso': nodeUrl,
       '/sesalabSso': nodeUrl,
       '/ressource/voir': nodeUrl

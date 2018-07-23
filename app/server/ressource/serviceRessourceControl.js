@@ -33,7 +33,7 @@
 
 const _ = require('lodash')
 const sjt = require('sesajstools')
-const rTools = require('../tools/ressource')
+const rTools = require('../lib/ressource')
 
 const config = require('./config')
 const appConfig = require('../config')

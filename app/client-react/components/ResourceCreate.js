@@ -7,6 +7,8 @@ import Classification from './Classification'
 import {saveRessource} from '../actions/ressource'
 import {labels} from '../../server/ressource/config'
 import listes from '../utils/listesFromConfig'
+import ensureLogged from '../hoc/ensureLogged'
+
 import {
   SelectField,
   SwitchField,
@@ -15,7 +17,7 @@ import {
 } from './fields'
 import validate from '../utils/validate'
 
-const RessourceCreate = ({
+const ResourceCreate = ({
   handleSubmit,
   pristine,
   submitting,
@@ -101,7 +103,7 @@ const RessourceCreate = ({
   </Fragment>
 )
 
-RessourceCreate.propTypes = {
+ResourceCreate.propTypes = {
   handleSubmit: PropTypes.func,
   submitting: PropTypes.bool,
   submitSucceeded: PropTypes.bool,
@@ -124,4 +126,6 @@ const form = {
   validate
 }
 
-export default reduxForm(form)(RessourceCreate)
+export default ensureLogged(
+  reduxForm(form)(ResourceCreate)
+)

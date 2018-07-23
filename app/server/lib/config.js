@@ -31,22 +31,18 @@
 
 'use strict'
 
-/* global describe,it */
+const appConfig = require('../config')
+const ressourceConfig = require('../ressource/config')
 
-const assert = require('assert')
-const tools = require('../../../app/server/lib/tools')
-global.log = require('sesajstools/utils/log')
-
-describe('tools', function () {
-  describe('encadre', function () {
-    it("retourne la valeur fournie si dans l'intervalle", function () {
-      assert.strictEqual(42, tools.encadre(42, -2, 48))
-    })
-    it('retourne la borne inf si trop petit', function () {
-      assert.strictEqual(42, tools.encadre(-2, 42, 48))
-    })
-    it('retourne la borne sup si trop grand', function () {
-      assert.strictEqual(42, tools.encadre(52, 2, 42))
-    })
-  })
-})
+/**
+ * Réexporte à plat des éléments de configuration d'origine variée
+ * @module
+ * @type {{baseId: string, baseUrl: string, listeMax: number, listeNbDefault: number, sesatheques: Array}}
+ */
+module.exports = {
+  baseId: appConfig.application.baseId,
+  baseUrl: appConfig.application.baseUrl,
+  listeMax: ressourceConfig.limites.listeMax,
+  listeNbDefault: ressourceConfig.limites.listeNbDefault,
+  sesatheques: appConfig.sesatheques
+}

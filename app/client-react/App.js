@@ -12,10 +12,14 @@ import Footer from './components/Footer'
 import Description from './components/Description'
 import MentionsLegales from './components/MentionsLegales'
 import Preview from './components/Preview'
-import RessourceCreate from './components/RessourceCreate'
+import ResourceCreate from './components/ResourceCreate'
 import ResourceForm from './components/ResourceForm'
 import ResourceSearch from './components/ResourceSearch'
 import Notifications from './components/Notifications'
+import GroupesPerso from './components/groupes/GroupesPerso'
+import GroupeEdition from './components/groupes/GroupeEdition'
+import GroupesOuverts from './components/groupes/GroupesOuverts'
+import GroupesPublics from './components/groupes/GroupesPublics'
 import {getCurrentSession} from './actions/session'
 import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
@@ -43,11 +47,16 @@ const App = () => (
             <Route exact path="/" component={Home} />
             <Route exact path="/compte" component={Account} />
             <Route exact path="/mentionsLegales" component={MentionsLegales} />
-            <Route exact path="/ressource/ajouter" component={RessourceCreate} />
+            <Route exact path="/ressource/ajouter" component={ResourceCreate} />
             <Route exact path="/ressource/modifier/:ressourceOid" component={ResourceForm} />
             <Route exact path="/ressource/apercevoir/:ressourceOid" component={Preview} />
             <Route exact path="/ressource/decrire/:ressourceOid" component={Description} />
             <Route exact path="/ressource/rechercher" component={ResourceSearch} />
+            <Route exact path="/groupe/ajouter" component={GroupeEdition} />
+            <Route exact path="/groupe/editer/:groupe" component={GroupeEdition} />
+            <Route exact path="/groupes/perso" component={GroupesPerso} />
+            <Route exact path="/groupes/ouverts" component={GroupesOuverts} />
+            <Route exact path="/groupes/publics" component={GroupesPublics} />
           </Switch>
         </div>
         <Footer />

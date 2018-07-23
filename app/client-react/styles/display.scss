@@ -77,3 +77,21 @@ html, body {padding: 0; margin: 0;height: 100%;}
 #display #Mepact sub {
   bottom: 0;
 }
+
+[class*="btn--"] {
+  i {
+    padding-right: 5px;
+  }
+}
+
+.link, a {
+  display: inline;
+  background: none;
+  text-decoration: underline;
+  color: #2a4095;
+  padding: 5px;
+}
+
+.groupHeader {
+  margin: 20px;
+}

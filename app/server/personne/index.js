@@ -62,12 +62,12 @@ module.exports = function personneComponentFactory (lassi) {
   require('./serviceGroupeRepository')(personneComponent)
   require('./servicePersonneRepository')(personneComponent)
   require('./serviceAccessControl')(personneComponent)
+  require('./serviceGroupe')(personneComponent)
   require('./servicePersonneControl')(personneComponent)
 
-  // controleur des pages html de gestion de groupe
-  require('./controllerGroupe')(personneComponent)
-  // pour api/personne
+  // controleur, pour api/personne
   require('./controllerApiPersonne')(personneComponent)
-  // pour api/groupe
+  // pour api/groupe et api/groupes
   require('./controllerApiGroupe')(personneComponent)
+  require('./controllerApiGroupes')(personneComponent)
 }

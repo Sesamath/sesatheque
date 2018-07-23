@@ -55,14 +55,6 @@ module.exports = function (component) {
       return `ressource_${id}`
     }
 
-    /**
-     * Une callback qui ne fait rien d'autre que logguer une éventuelle erreur
-     * @private
-     */
-    function logIfError (error) {
-      if (error) log.error(error)
-    }
-
     const ttl = $settings.get('components.ressource.cacheTTL', 3600)
 
     if ($settings.get('noCache', false)) {
@@ -160,9 +152,9 @@ module.exports = function (component) {
     $cacheRessource.set = function (ressource, next = dummy) {
       if (!ressource.oid) return next(new Error('cacheSet sur une ressource sans oid'))
       // next appelé seulement sur le set principal (le dernier)
-      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, logIfError)
-      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, logIfError)
-      if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl, logIfError)
+      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, log.ifError)
+      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, log.ifError)
+      if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl, log.ifError)
       $cache.set(getKey(ressource.oid), ressource, ttl, function (error, ress) {
         if (error) {
           if (error.message && /^The length of the value is greater/.test(error.message)) log.dataError(`ressource ${ressource.oid} trop grosse pour le cache (${error.message})`)
@@ -187,7 +179,7 @@ module.exports = function (component) {
           return next()
         }
         if (ressource) {
-          $cache.delete(getKey(ressource.idOrigine, ressource.origine), logIfError)
+          $cache.delete(getKey(ressource.idOrigine, ressource.origine), log.ifError)
           $cache.delete(getKey(oid), function (error) {
             if (error) log.error(error)
             next()
@@ -210,7 +202,7 @@ module.exports = function (component) {
           return next()
         }
         if (!oid) return next()
-        $cache.delete(getKey(idOrigine, origine), logIfError)
+        $cache.delete(getKey(idOrigine, origine), log.ifError)
         $cache.delete(getKey(oid), function (error) {
           if (error) log.error(error)
           next()

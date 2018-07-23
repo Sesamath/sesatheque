@@ -40,10 +40,35 @@ let $personneRepository
 module.exports = function (component) {
   component.service('$groupeRepository', function (EntityGroupe, $cacheGroupe) {
     /**
-     * Service d'accès aux groupes utilisé par les différents contrôleurs
-     * @service $groupeRepository
+     * @typedef groupeCallback
+     * @param {Error} [error]
+     * @param {Groupe} groupe
      */
-    const $groupeRepository = {}
+    /**
+     * @typedef groupesCallback
+     * @param {Error} [error]
+     * @param {Groupe[]} groupes
+     */
+
+    /**
+     * Récupère un groupe d'après son oip
+     * @param {string} groupeNom
+     * @param {groupeCallback} next
+     * @memberOf $groupeRepository
+     */
+    function load (oid, next) {
+      $cacheGroupe.get(oid, function (error, groupe) {
+        if (error) return next(error)
+        if (groupe) return next(null, groupe)
+        // pas en cache, on va chercher en bdd
+        EntityGroupe.match('oid').equals(oid).grabOne(function (error, groupe) {
+          if (error) return next(error)
+          if (!groupe) return next()
+          $cacheGroupe.set(groupe)
+          next(null, groupe)
+        })
+      })
+    }
 
     /**
      * Récupère un groupe d'après son nom
@@ -51,36 +76,52 @@ module.exports = function (component) {
      * @param {groupeCallback} next
      * @memberOf $groupeRepository
      */
-    $groupeRepository.load = function (groupeNom, next) {
+    function loadByNom (groupeNom, next) {
       const nom = groupeNom.toLowerCase()
-      $cacheGroupe.get(nom, function (error, groupe) {
+      $cacheGroupe.getByNom(nom, function (error, groupe) {
         if (error) log.error(error)
-        if (groupe) {
+        if (groupe) return next(null, groupe)
+        // pas en cache, on va chercher en bdd
+        EntityGroupe.match('nom').equals(nom).grabOne(function (error, groupe) {
+          if (error) return next(error)
+          if (!groupe) return next()
+          $cacheGroupe.set(groupe)
           next(null, groupe)
-        } else {
-          // pas en cache, on va chercher en bdd
-          EntityGroupe.match('nom').equals(nom).grabOne(function (error, groupe) {
-            if (error) {
-              next(error)
-            } else if (groupe) {
-              $cacheGroupe.set(groupe)
-              next(null, groupe)
-            } else {
-              next()
-            }
-          })
-        }
+        })
       })
     }
 
     /**
-     * Récupère une liste de groupes dont le pid fourni est gestionnaire
-     * @param {string} pid
+     * Récupère une liste de groupes
+     * @param {string[]} noms
+     * @param {groupesCallback} next
+     */
+    function fetchList (noms, next) {
+      let groupes = []
+      flow(noms).seqEach(function (nom) {
+        $cacheGroupe.getByNom(nom, this)
+      }).seq(function (cachedGroups) {
+        const missing = []
+        cachedGroups.forEach((groupe, index) => {
+          // FIXME y'a un bug dans flow().seqEach qui transforme undefined en []
+          if (groupe && !Array.isArray(groupe)) groupes.push(groupe)
+          else missing.push(noms[index])
+        })
+        if (!missing.length) return next(null, groupes)
+        EntityGroupe.match('nom').in(missing).grab(this)
+      }).seq(function (grps) {
+        next(null, groupes.concat(grps))
+      }).catch(next)
+    }
+
+    /**
+     * Récupère une liste de groupes dont le oid fourni est gestionnaire
+     * @param {string} oid
      * @param {groupeListCallback} next
      * @memberOf $groupeRepository
      */
-    $groupeRepository.getListManagedBy = function (pid, next) {
-      EntityGroupe.match('gestionnaires').equals(pid).sort('nom').grab(next)
+    function getListManagedBy (oid, next) {
+      EntityGroupe.match('gestionnaires').equals(oid).sort('nom').grab(next)
     }
 
     /**
@@ -88,15 +129,10 @@ module.exports = function (component) {
      * @param {groupeCallback} next
      * @memberOf $groupeRepository
      */
-    $groupeRepository.loadOuvert = function (next) {
+    function loadOuvert (next) {
       EntityGroupe.match('ouvert').equals(true).grab(function (error, groupes) {
-        if (error) {
-          next(error)
-        } else if (groupes) {
-          next(null, groupes)
-        } else {
-          next(null, [])
-        }
+        if (error) return next(error)
+        next(null, groupes)
       })
     }
 
@@ -105,15 +141,10 @@ module.exports = function (component) {
      * @param {groupeCallback} next
      * @memberOf $groupeRepository
      */
-    $groupeRepository.loadPublic = function (next) {
+    function loadPublic (next) {
       EntityGroupe.match('public').equals(true).grab(function (error, groupes) {
-        if (error) {
-          next(error)
-        } else if (groupes) {
-          next(null, groupes)
-        } else {
-          next(null, [])
-        }
+        if (error) return next(error)
+        next(null, groupes)
       })
     }
 
@@ -123,12 +154,8 @@ module.exports = function (component) {
      * @param {entityPersonneCallback} next
      * @memberOf $groupeRepository
      */
-    $groupeRepository.save = function (groupe, next) {
-      if (!groupe.nom) {
-        const error = new Error('Impossible d’enregistrer un groupe sans nom')
-        log.error(error)
-        return next(error)
-      }
+    function save (groupe, next) {
+      if (!groupe.nom) return next(Error('Impossible d’enregistrer un groupe sans nom'))
       if (!groupe.store) groupe = EntityGroupe.create(groupe)
       // la mise en cache est dans afterStore de l'entity
       groupe.store(next)
@@ -140,7 +167,7 @@ module.exports = function (component) {
      * @param {errorCallback} next
      * @memberOf $groupeRepository
      */
-    $groupeRepository.delete = function (groupName, next) {
+    function deleteGroupe (groupName, next) {
       if (!groupName) {
         const error = new Error('Impossible d’effacer un groupe sans nom')
         log.error(error)
@@ -189,6 +216,21 @@ module.exports = function (component) {
           }).catch(next)
         })
       }).catch(next)
+    }
+
+    /**
+     * Service d'accès aux groupes utilisé par les différents contrôleurs
+     * @service $groupeRepository
+     */
+    const $groupeRepository = {
+      delete: deleteGroupe,
+      fetchList,
+      getListManagedBy,
+      load,
+      loadByNom,
+      loadOuvert,
+      loadPublic,
+      save
     }
 
     return $groupeRepository

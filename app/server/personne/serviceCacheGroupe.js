@@ -31,47 +31,64 @@
 
 'use strict'
 
-// var crypto = require('crypto')
-var flow = require('an-flow')
-var _ = require('lodash')
-var tools = require('../tools/index')
+const flow = require('an-flow')
+const tools = require('../lib/tools')
 
 module.exports = function (component) {
   component.service('$cacheGroupe', function ($cache, $settings) {
+    // on peut pas le mettre en dépendance car il nous utilise
+    let EntityGroupe
+
     /**
-     * Retourne la clé de cache d'un groupe (memcache est pénible, tools.sanitizeHashKey suffit pas)
+     * TTL du cache des groupes, mis idem personne si c'est en conf, 20min par défaut
+     * @type number
+     */
+    const ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
+
+    const prefix = 'groupe_'
+
+    /**
+     * Retourne la clé de cache d'un groupe, construite d'après son nom
      * @private
      * @param {string|Groupe} groupe
      * @returns {string}
      */
-    function getKey (groupe) {
-      var key
+    const getKey = (groupe) => {
+      let key
       // si on tombait un jour sur une clé sortie de sanitizeHashKey qui plaisait pas à memcache,
-      // utiliser un md5 du nom avec
+      // utiliser un md5 du nom, mais c'est bcp plus gourmand
       // key = crypto.createHash('md5').update(data).digest('hex')
-      if (_.isString(groupe)) key = 'groupe_' + tools.sanitizeHashKey(groupe)
-      else if (groupe && groupe.nom) key = 'groupe_' + tools.sanitizeHashKey(groupe.nom)
+      if (groupe) {
+        const nom = typeof groupe === 'string' ? groupe : groupe.nom
+        if (nom) key = prefix + tools.sanitizeHashKey(nom)
+      }
       return key
     }
 
     /**
-     * Une callback qui ne fait rien sinon logguer une éventuelle erreur
-     * @param {Error} [error]
+     * Enrobe next pour passer le groupe retourné du cache par EntityGroupe.create
      * @private
+     * @param {groupeCallback} next
+     * @return {groupeCallback}
      */
-    function logIfError (error) {
-      if (error) log.error(error)
+    const getWrapper = (next) => {
+      if (!EntityGroupe) EntityGroupe = lassi.service('EntityGroupe')
+      return (error, groupe) => {
+        if (error) return next(error)
+        if (!groupe) return next()
+        next(null, EntityGroupe.create(groupe))
+      }
     }
 
-    var ttl = $settings.get('components.personne.cacheTTL', 20 * 60)
-
     /**
-     * Service helper de $personneRepository
-     * Chaque groupe est mis en cache deux fois, par son nom et son oid
-     * (vu la taille d'un groupe pas rentable de passer par nom => id)
-     * @service $cacheGroupe
+     * Récupère un groupe dans le cache, d'après son oid
+     * @param {string} oid
+     * @param {groupeCallback} next
+     * @memberOf $cacheGroupe
      */
-    var $cacheGroupe = {}
+    function get (oid, next) {
+      $cache.get(prefix + oid, getWrapper(next))
+    }
 
     /**
      * Récupère un groupe dans le cache, d'après son nom
@@ -79,33 +96,34 @@ module.exports = function (component) {
      * @param {groupeCallback} next
      * @memberOf $cacheGroupe
      */
-    $cacheGroupe.get = function (nom, next) {
-      var key = getKey(nom)
-      if (key) $cache.get(key, next)
-      else next(new Error('Nom de groupe vide'))
+    function getByNom (nom, next) {
+      const key = getKey(nom)
+      if (!key) return next(Error('Nom manquant'))
+      $cache.get(key, getWrapper(next))
     }
+
     /**
      * Met un groupe en cache
      * @param {Groupe} groupe
      * @param {errorCallback} [next]
      * @memberOf $cacheGroupe
      */
-    $cacheGroupe.set = function (groupe, next = logIfError) {
+    function set (groupe, next = log.ifError) {
       if (groupe && groupe.nom) {
-        // ça plante sur certains noms, try/catch sert à rien car async
         const key = getKey(groupe)
         flow().seq(function () {
           $cache.set(key, groupe, ttl, this)
+          if (groupe.oid) $cache.set(prefix + groupe.oid, groupe, ttl, log.ifError)
         }).seq(function () {
           if (next) next()
         }).catch(function (error) {
           log.error('le $cache.set a planté avec la clé ' + key, error)
-          // pb de clé, tant pis, ça sera pas en cache (pas de risque d'avoir une ancienne
-          // version foireuse car c'est la la clé qui plante)
+          // pb de clé, tant pis, ça sera pas en cache via le nom
+          // (pas de risque d'avoir une ancienne version foireuse au get si le set plante)
           if (next) next()
         })
       } else {
-        var error = new Error('Groupe invalide')
+        const error = new Error('Groupe invalide')
         log.error(error, groupe)
         if (next) next(error)
       }
@@ -117,8 +135,8 @@ module.exports = function (component) {
      * @param {errorCallback} [next]
      * @memberOf $cacheGroupe
      */
-    $cacheGroupe.delete = function (groupe, next = logIfError) {
-      var key = getKey(groupe)
+    function deleteGroupe (groupe, next = log.ifError) {
+      const key = getKey(groupe)
       if (key) $cache.delete(key, next)
       else next(new Error('groupe invalide'))
     }
@@ -126,7 +144,25 @@ module.exports = function (component) {
     // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
     if ($settings.get('noCache', false)) {
       log('$cacheRessource désactivé')
-      $cacheGroupe.get = function (oid, next) { next() }
+      const dummy = (arg, next) => next()
+      return {
+        delete: dummy,
+        get: dummy,
+        getByNom: dummy,
+        set: dummy
+      }
+    }
+
+    /**
+     * Service helper de $personneRepository
+     * Chaque groupe est mis en cache deux fois, par son nom et son oid
+     * @service $cacheGroupe
+     */
+    const $cacheGroupe = {
+      delete: deleteGroupe,
+      get,
+      getByNom,
+      set
     }
 
     return $cacheGroupe
