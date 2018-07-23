@@ -49,7 +49,7 @@ function Groupe (initObj) {
    * @type {string}
    * @default ''
    */
-  if (typeof initObj.nom === 'string') this.nom = initObj.nom.toLowerCase()
+  if (typeof initObj.nom === 'string') this.nom = initObj.nom.trim()
   else this.nom = ''
   /**
    * Description

@@ -32,10 +32,50 @@
 'use strict'
 
 const Groupe = require('../../constructors/Groupe')
+const {toAscii} = require('sesajstools')
+
+/**
+ * Callback de normalisation de l'index du nom d'un groupe
+ * @param {string} nom
+ * @return {string} Le nom sans caractères autres que [a-z0-9]
+ */
+const normalizer = (nom) => {
+  if (!nom) throw Error('nom est obligatoire pour un groupe')
+  if (typeof nom !== 'string') throw Error('nom invalide')
+  const _nom = toAscii(nom.toLowerCase()) // minuscules sans accents
+    .replace(/[^a-z0-9]/g, ' ') // sans caractères autres que a-z0-9
+    .replace(/  +/g, ' ').trim() // on vire les espaces en double + les éventuels de début et fin
+  if (!_nom) throw Error('nom invalide', nom)
+  return _nom
+}
 
 module.exports = function (component) {
   component.entity('EntityGroupe', function ($cacheGroupe) {
     const EntityGroupe = this
+
+    EntityGroupe.validateJsonSchema({
+      type: 'object',
+      properties: {
+        oid: {type: 'string'},
+        nom: {type: 'string'},
+        description: {type: 'string'},
+        ouvert: {type: 'boolean'},
+        public: {type: 'boolean'},
+        gestionnaires: {
+          type: 'array',
+          items: {type: 'string'}
+        },
+        creationDate: {instanceof: 'Date'}
+      },
+      additionalProperties: false,
+      required: [
+        'nom',
+        'ouvert',
+        'public',
+        'gestionnaires'
+      ]
+    })
+
     /**
      * L'entité groupe
      * @entity EntityGroupe
@@ -47,7 +87,6 @@ module.exports = function (component) {
     })
 
     EntityGroupe.beforeStore(function (next) {
-      this.nom = this.nom.toLowerCase()
       if (!this.creationDate) this.creationDate = new Date()
       if (!this.gestionnaires || !this.gestionnaires.length) return next(new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`))
       next()
@@ -61,7 +100,7 @@ module.exports = function (component) {
     })
 
     EntityGroupe
-      .defineIndex('nom', 'string')
+      .defineIndex('nom', {normalizer, unique: true})
       .defineIndex('ouvert', 'boolean')
       .defineIndex('public', 'boolean')
       .defineIndex('gestionnaires', 'string')
