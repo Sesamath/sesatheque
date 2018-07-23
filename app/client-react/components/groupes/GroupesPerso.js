@@ -14,19 +14,20 @@ import {
 import './Groupes.scss'
 
 /**
- * Retourne un array de groupe à partir de tous les groupes et la sélection demandée
- * @private
- * @param {string[]} noms Les groupes que l'on veut
- * @param {Object} allGroupes Tous les groupes, le nom en propriété et le groupe en valeur
- * @return {Groupe[]} La sélection demandée
+ * Composant qui liste les gestionnaires d'un groupe
+ * @type {PureComponent}
+ * @param {object} props
+ * @param {string[]} props.gestionnaires liste d'oids
+ * @param {string[]} props.gestionnairesNames liste des noms
  */
-const toDetailedList = (noms = [], allGroupes) => noms.map(nom => allGroupes[nom])
-
-const displayAdmins = (gestionnaires, gestionnairesNames) => {
+const Admins = ({
+  gestionnaires,
+  gestionnairesNames
+}) => {
   if (!gestionnaires.length) return (<p>Aucun gestionnaire</p>)
-  if (gestionnaires.length === 1) return (<p>Gestionnaire(s)&nbsp;: {gestionnairesNames[0]} <span className="remarque">({gestionnaires[0]})</span></p>)
+  if (gestionnaires.length === 1) return (<p>Gestionnaire&nbsp;: {gestionnairesNames[0]} <span className="remarque">({gestionnaires[0]})</span></p>)
   return (
-    <ul>Gestionnaire(s) :&nbsp;
+    <ul>Gestionnaires :&nbsp;
       {gestionnaires.map((oid, index) => (
         <li key={oid}>
           {gestionnairesNames[index]} <span className="remarque">({oid})</span>
@@ -36,177 +37,256 @@ const displayAdmins = (gestionnaires, gestionnairesNames) => {
   )
 }
 
+Admins.propTypes = {
+  gestionnaires: PropTypes.arrayOf(PropTypes.string),
+  gestionnairesNames: PropTypes.arrayOf(PropTypes.string)
+}
+
 /**
- * Composant qui liste "Mes groupes" (auth)
+ * Composant qui liste les liens d'un groupe dont on est gestionnaire
  * @type {PureComponent}
  * @param {object} props
  * @param {function} props.followGroupe action redux pour suivre
  * @param {function} props.joinGroupe action redux pour devenir membre
  * @param {function} props.deleteGroupe action redux
- * @param {function} props.ignoreGroupe action redux pour ne plus suivre
- * @param {function} props.leaveGroupe action redux pour ne plus être membre
+ * @param {string} props.nom nom du groupe
+ * @param {string[]} props.groupesMembre
+ * @param {string[]} props.groupesSuivis
+ */
+const AdminLinksInner = ({
+  nom,
+  groupesMembre,
+  groupesSuivis,
+  deleteGroupe,
+  joinGroupe,
+  followGroupe
+}) => (
+  <span className="links">
+    <a href="#" onClick={() => deleteGroupe(nom)} className="btn--info"><i className="fa fa-trash"></i>Supprimer</a>
+    <NavLink to={`/groupe/editer/${encodeURIComponent(nom)}`} className="btn--info"><i className="fa fa-edit"></i>Modifier</NavLink>
+    <NavLink
+      className="btn--info"
+      to={{
+        pathname: '/ressource/rechercher',
+        hash: 'results',
+        search: `groupes=${encodeURIComponent(nom)}`
+      }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe</NavLink>
+    {groupesMembre.includes(nom)
+      ? null // le lien quitter sera dans la liste des groupesMembre
+      : (<button className="btn--info" onClick={() => joinGroupe(nom)}><i className="fa fa-sign-in-alt"></i>Rejoindre</button>)
+    }
+    {groupesSuivis.includes(nom)
+      ? null // le lien "ne plus suivre sera dans la liste des groupesSuivis
+      : (<button className="btn--info" onClick={() => followGroupe(nom)}><i className="fa fa-eye"></i>Suivre</button>)
+    }
+  </span>
+)
+
+AdminLinksInner.propTypes = {
+  nom: PropTypes.string,
+  groupesMembre: PropTypes.arrayOf(PropTypes.string),
+  groupesSuivis: PropTypes.arrayOf(PropTypes.string),
+  deleteGroupe: PropTypes.func,
+  joinGroupe: PropTypes.func,
+  followGroupe: PropTypes.func
+}
+
+const AdminLinks = connect(null, {
+  deleteGroupe,
+  joinGroupe,
+  followGroupe
+})(AdminLinksInner)
+
+/**
+ * Composant qui liste les liens d'un groupe dont on est membre
+ * @type {PureComponent}
+ * @param {object} props
+ * @param {function} props.leaveGroupe action redux pour quitter
+ * @param {string} props.nom nom du groupe
+ */
+const MemberLinksInner = ({nom, leaveGroupe}) => (
+  <span className="links">
+    <NavLink
+      className="btn--info"
+      to={{
+        pathname: '/ressource/rechercher',
+        hash: 'results',
+        search: `groupes=${encodeURIComponent(nom)}`
+      }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe</NavLink>
+    <button className="btn--info" onClick={() => leaveGroupe(nom)}><i className="fa fa-sign-out-alt"></i>Quitter le groupe</button>
+  </span>
+)
+
+MemberLinksInner.propTypes = {
+  nom: PropTypes.string,
+  leaveGroupe: PropTypes.func
+}
+
+const MemberLinks = connect(null, {
+  leaveGroupe
+})(MemberLinksInner)
+
+/**
+ * Composant qui liste les liens d'un groupe dont on est suiveur
+ * @type {PureComponent}
+ * @param {object} props
+ * @param {function} props.ignoreGroupe action redux pour se désabonner
+ * @param {string} props.nom nom du groupe
+ */
+const FollowLinksInner = ({nom, ignoreGroupe}) => (
+  <span className="links">
+    <NavLink
+      className="btn--info"
+      to={{
+        pathname: '/ressource/rechercher',
+        hash: 'results',
+        search: `groupes=${encodeURIComponent(nom)}`
+      }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe
+    </NavLink>
+    <button className="btn--info" onClick={() => ignoreGroupe(nom)}><i className="fa fa-eye-slash"></i>Ne plus suivre le groupe</button>
+  </span>
+)
+
+FollowLinksInner.propTypes = {
+  nom: PropTypes.string,
+  ignoreGroupe: PropTypes.func
+}
+
+const FollowLinks = connect(null, {
+  ignoreGroupe
+})(FollowLinksInner)
+
+// la fct générique d'affichage d'un groupe
+const Groupe = ({
+  groupe: {
+    nom,
+    description,
+    ouvert,
+    public: isPublic,
+    gestionnaires,
+    gestionnairesNames
+  },
+  GroupeLinks,
+  ...others
+}) => (
+  <li key={nom}>
+    <strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'} {isPublic ? 'public' : 'privé'})
+    <pre>{description}</pre>
+    <Admins
+      gestionnaires={gestionnaires}
+      gestionnairesNames={gestionnairesNames}
+    />
+    <GroupeLinks nom={nom} {...others} />
+  </li>
+)
+
+Groupe.propTypes = {
+  groupe: PropTypes.shape({
+    nom: PropTypes.string,
+    description: PropTypes.string,
+    ouvert: PropTypes.bool,
+    public: PropTypes.bool,
+    gestionnaires: PropTypes.arrayOf(PropTypes.string),
+    gestionnairesNames: PropTypes.arrayOf(PropTypes.string)
+  }),
+  GroupeLinks: PropTypes.func
+}
+
+// la fct générique d'affichage d'une liste
+const List = ({list, component, groupes, ...others}) => (
+  <ul className="liste">
+    {list.map(nom => (
+      <Groupe
+        key={nom}
+        groupe={groupes[nom]}
+        GroupeLinks={component}
+        {...others}
+      />
+    ))}
+  </ul>
+)
+
+List.propTypes = {
+  list: PropTypes.array,
+  component: PropTypes.func,
+  groupes: PropTypes.o
+}
+
+/**
+ * Composant qui liste "Mes groupes" (auth)
+ * @type {PureComponent}
+ * @param {object} props
  * @param {string[]} props.groupesAdmin fourni par groupesLoader
  * @param {string[]} props.groupesMembre fourni par groupesLoader
  * @param {string[]} props.groupesSuivis fourni par groupesLoader
  * @param {Groupe[]} props.groupes fourni par groupesLoader
  */
 const GroupesPerso = ({
-  followGroupe,
-  joinGroupe,
-  deleteGroupe,
-  ignoreGroupe,
-  leaveGroupe,
   groupesAdmin,
   groupesMembre,
   groupesSuivis,
   groupes
-}) => {
-  // nos listes
-  const adminList = toDetailedList(groupesAdmin, groupes)
-  const memberList = toDetailedList(groupesMembre, groupes)
-  const followList = toDetailedList(groupesSuivis, groupes)
-
-  // à l'affichage, y'a que les liens qui changent suivant le type
-  const getAdminLinks = (nom) => (
-    <span className="links">
-      <a href="#" onClick={() => deleteGroupe(nom)} className="btn--info"><i className="fa fa-trash"></i>Supprimer</a>
-      <NavLink to={`/groupe/editer/${encodeURIComponent(nom)}`} className="btn--info"><i className="fa fa-edit"></i>Modifier</NavLink>
-      <NavLink
-        className="btn--info"
-        to={{
-          pathname: '/ressource/rechercher',
-          hash: 'results',
-          search: `groupes=${encodeURIComponent(nom)}`
-        }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe</NavLink>
-      {groupesMembre.includes(nom)
-        ? null // le lien quitter sera dans la liste des groupesMembre
-        : (<button className="btn--info" onClick={() => joinGroupe(nom)}><i className="fa fa-sign-in-alt"></i>Rejoindre</button>)
-      }
-      {groupesSuivis.includes(nom)
-        ? null // le lien "ne plus suivre sera dans la liste des groupesSuivis
-        : (<button className="btn--info" onClick={() => followGroupe(nom)}><i className="fa fa-eye"></i>Suivre</button>)
-      }
-    </span>
-  )
-
-  const getMemberLinks = (nom) => (
-    <span className="links">
-      <NavLink
-        className="btn--info"
-        to={{
-          pathname: '/ressource/rechercher',
-          hash: 'results',
-          search: `groupes=${encodeURIComponent(nom)}`
-        }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe</NavLink>
-      <button className="btn--info" onClick={() => leaveGroupe(nom)}><i className="fa fa-sign-out-alt"></i>Quitter le groupe</button>
-    </span>
-  )
-
-  const getFollowLinks = (nom) => (
-    <span className="links">
-      <NavLink
-        className="btn--info"
-        to={{
-          pathname: '/ressource/rechercher',
-          hash: 'results',
-          search: `groupes=${encodeURIComponent(nom)}`
-        }}><i className="fa fa-bookmark"></i> Voir les ressources du groupe
+}) => (
+  <Fragment>
+    <h1>Mes groupes</h1>
+    <section className="groupHeader">
+      <NavLink to="/groupe/ajouter" className="fr btn--success">
+        <i className="fa fa-plus"></i>
+        Créer un groupe
       </NavLink>
-      <button className="btn--info" onClick={() => ignoreGroupe(nom)}><i className="fa fa-eye-slash"></i>Ne plus suivre le groupe</button>
-    </span>
-  )
+      <ul>
+        <li>
+          <NavLink to="/groupes/ouverts">Voir les groupes ouverts</NavLink>
+          <span className="remarque"> (pour éventuellement en devenir membre)</span>
+        </li>
+        <li>
+          <NavLink to="/groupes/publics">Voir les groupes publics</NavLink>
+          <span className="remarque"> (pour éventuellement suivre leurs publications)</span>
+        </li>
+      </ul>
+    </section>
+    <section className="groupes">
+      <h2>Groupes dont je suis gestionnaire</h2>
+      {groupesAdmin.length
+        ? (<List
+          groupes={groupes}
+          list={groupesAdmin}
+          component={AdminLinks}
+          groupesMembre={groupesMembre}
+          groupesSuivis={groupesSuivis}
+        />)
+        : (<p>Vous n’êtes gestionnaire d’aucun groupe.</p>)
+      }
 
-  // la fct générique d'affichage d'un groupe
-  const displayGroup = (groupe, getLinks) => {
-    const {
-      nom,
-      description,
-      ouvert,
-      public: isPublic,
-      gestionnaires,
-      gestionnairesNames
-    } = groupe
-    return (
-      <li key={nom}>
-        <strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'} {isPublic ? 'public' : 'privé'})
-        <pre>{description}</pre>
-        {displayAdmins(gestionnaires, gestionnairesNames)}
-        {getLinks(nom)}
-      </li>
-    )
-  }
+      <h2>Groupes dont je suis membre</h2>
+      {groupesMembre.length
+        ? (<List
+          groupes={groupes}
+          list={groupesMembre}
+          component={MemberLinks}
+        />)
+        : (<p>Vous n’êtes membre d’aucun groupe.</p>)
+      }
 
-  // la fct générique d'affichage d'une liste
-  const displayList = (list, getLinks) => (
-    <ul className="liste">
-      {list.map(groupe => displayGroup(groupe, getLinks))}
-    </ul>
-  )
-
-  return (
-    <Fragment>
-      <h1>Mes groupes</h1>
-
-      <section className="groupHeader">
-        <NavLink to="/groupe/ajouter" className="fr btn--success">
-          <i className="fa fa-plus"></i>
-          Créer un groupe
-        </NavLink>
-        <ul>
-          <li>
-            <NavLink to="/groupes/ouverts">Voir les groupes ouverts</NavLink>
-            <span className="remarque"> (pour éventuellement en devenir membre)</span>
-          </li>
-          <li>
-            <NavLink to="/groupes/publics">Voir les groupes publics</NavLink>
-            <span className="remarque"> (pour éventuellement suivre leurs publications)</span>
-          </li>
-        </ul>
-      </section>
-      <section className="groupes">
-        <h2>Groupes dont je suis gestionnaire</h2>
-        {adminList.length
-          ? displayList(adminList, getAdminLinks)
-          : (<p>Vous n’êtes gestionnaire d’aucun groupe.</p>)
-        }
-
-        <h2>Groupes dont je suis membre</h2>
-        {memberList.length
-          ? displayList(memberList, getMemberLinks)
-          : (<p>Vous n’êtes membre d’aucun groupe.</p>)
-        }
-
-        <h2>Groupes suivis</h2>
-        {followList.length
-          ? displayList(followList, getFollowLinks)
-          : (<p>Vous ne suivez les publications d’aucun groupe.</p>)
-        }
-      </section>
-    </Fragment>
-  )
-}
+      <h2>Groupes suivis</h2>
+      {groupesSuivis.length
+        ? (<List
+          groupes={groupes}
+          list={groupesSuivis}
+          component={FollowLinks}
+        />)
+        : (<p>Vous ne suivez les publications d’aucun groupe.</p>)
+      }
+    </section>
+  </Fragment>
+)
 
 GroupesPerso.propTypes = {
   groupes: PropTypes.object,
   groupesAdmin: PropTypes.array,
   groupesMembre: PropTypes.array,
-  groupesSuivis: PropTypes.array,
-  joinGroupe: PropTypes.func,
-  leaveGroupe: PropTypes.func,
-  followGroupe: PropTypes.func,
-  ignoreGroupe: PropTypes.func,
-  deleteGroupe: PropTypes.func
-}
-
-const mapDispatchToProps = {
-  followGroupe,
-  joinGroupe,
-  deleteGroupe,
-  ignoreGroupe,
-  leaveGroupe
+  groupesSuivis: PropTypes.array
 }
 
 // groupesLoader a déjà du ensureLogged
-export default connect(null, mapDispatchToProps)(
-  groupesLoader(GroupesPerso)
-)
+export default groupesLoader(GroupesPerso)
