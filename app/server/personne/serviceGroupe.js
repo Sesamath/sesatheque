@@ -53,11 +53,7 @@ module.exports = function (component) {
     function loadCurrentUser (context, next) {
       const myOid = $accessControl.getCurrentUserOid(context)
       if (!myOid) throw Error('Pas d’utilisateur en session')
-      $personneRepository.load(myOid, function (error, personne) {
-        if (error) return next(error)
-        $session.updatePersonne(context, personne)
-        next(null, personne)
-      })
+      $personneRepository.load(myOid, next)
     }
 
     /**
@@ -68,7 +64,6 @@ module.exports = function (component) {
      * @param {callbackPersonne} next
      */
     function saveCurrentUser (context, me, next) {
-      $session.updatePersonne(context, me)
       $personneRepository.save(me, next)
     }
 

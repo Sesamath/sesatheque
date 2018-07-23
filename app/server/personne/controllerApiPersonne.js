@@ -156,8 +156,6 @@ module.exports = function (component) {
               links: $auth.getSsoLinks(context),
               name: $auth.getName(context)
             }
-            // on met à jour la session (sans groupesAdmin, mais personne l'utilise depuis la session)
-            $session.updatePersonne(context, personne)
             // et on charge les groupes gérés (on veut leurs noms)
             $groupeRepository.getListManagedBy(oid, this)
           }).seq(function (groupesAdmin) {
@@ -192,8 +190,6 @@ module.exports = function (component) {
         if (!personne) return $json.sendOk(context, {user: null})
         else {
           const {nom, oid, prenom} = personne
-          // si on tombe sur soi-même on rafraîchit la session
-          if (oid === myOid) $session.updatePersonne(context, personne)
           $json.sendOk(context, {user: {nom, oid, prenom}})
         }
       }).catch(function (error) {

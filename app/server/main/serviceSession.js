@@ -66,29 +66,13 @@ module.exports = function (component) {
     }
 
     /**
-     * Met à jour les propriétés existantes du user en session (n'en ajoute pas)
-     * @param {Context} context
-     * @param {Personne} personne
-     */
-    function updatePersonne (context, personne) {
-      if (!context.session.user) return
-      if (!personne) throw Error('paramètre manquant (appeler $session.logout pour supprimer l’utilisateur en session)')
-      const {user} = context.session
-      // on vérifie quand même que c'est bien le même
-      if (personne.oid && personne.oid !== user.oid) throw Error(`La mise à jour ne peut remplacer un utilisateur en session (passer par logout & login)`)
-      Object.keys(personne).forEach(prop => {
-        if (user.hasOwnProperty(prop)) user[prop] = personne[prop]
-      })
-    }
-    /**
      * Service de gestion de la session (ça devrait être le seul endroit qui modifie context.session)
      * @service $session
      */
     return {
       getCurrentPersonne,
       login,
-      logout,
-      updatePersonne
+      logout
     }
   })
 }
