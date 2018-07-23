@@ -168,7 +168,7 @@ class EditorEcjs extends Component {
         {this.props.parametres.fichierjs ? (
           <fieldset>
             <IframeHandler
-              allowManualEdition
+              allowManualEdition={false}
               onLoad={this.onIframeLoaded.bind(this)}
               src={iframeSrc}
               updateStoreFromEditor={this.updateStoreFromEditor.bind(this)}
