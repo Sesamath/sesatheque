@@ -31,7 +31,7 @@
 
 'use strict'
 
-var tools = require('../tools')
+var tools = require('../lib/tools')
 
 module.exports = function (component) {
   component.entity('EntityUpdate', function () {

@@ -39,8 +39,8 @@ const request = require('request')
 const {parse, stringify} = require('sesajstools')
 const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
 const Ref = require('../../constructors/Ref')
-const {ensure} = require('../tools')
-const {getRidEnfants} = require('../tools/ressource')
+const {ensure} = require('../lib/tools')
+const {getRidEnfants} = require('../lib/ressource')
 
 const config = require('./config')
 const appConfig = require('../config')
@@ -48,6 +48,8 @@ const appConfig = require('../config')
 const j3pGraphe2json = require('../../../tasks/modules/j3pGraphe2json')
 
 const myBaseId = appConfig.application.baseId
+
+const {getNormalizedGrabOptions} = require('../lib/grab')
 
 // et des petites fonctions utiles
 const prependMyBaseId = (oid) => myBaseId + '/' + oid
@@ -579,7 +581,7 @@ module.exports = function (ressourceComponent) {
         next()
       })
     }
-
+    
     /**
      * Supprime un groupe de toutes les ressources qui le contiennent
      * @param {string} nom
@@ -601,6 +603,33 @@ module.exports = function (ressourceComponent) {
         }).catch(next)
       }
       deleteInRessources(0, next)
+    }
+
+    /**
+     * Récupère la liste des ressources publiées dans un groupe
+     * @param nom Nom du groupe
+     * @param {object} [options]
+     * @param {number} [options.limit]
+     * @param {number} [options.skip]
+     * @param {function} next appelée avec (error, {total, ressources})
+     */
+    function fetchPublishedInGroup (nom, options, next) {
+      if (typeof options === 'function') next = options
+      const grabOptions = getNormalizedGrabOptions(options)
+      const data = {}
+      flow().seq(function () {
+        EntityRessource.match('groupes').equals(nom).count(this)
+      }).seq(function (total) {
+        data.total = total
+        if (!total) {
+          data.ressources = []
+          return next(null, data)
+        }
+        EntityRessource.match('groupes').equals(nom).grab(grabOptions, this)
+      }).seq(function (ressources) {
+        data.ressources = ressources
+        next(null, data)
+      }).catch(next)
     }
 
     /**
@@ -734,7 +763,7 @@ module.exports = function (ressourceComponent) {
       } catch (error) {
         next(error)
       }
-    } // getListe
+    }
 
     /**
      * Compte le nb de ressources d'après les critères de recherche
@@ -750,6 +779,40 @@ module.exports = function (ressourceComponent) {
       } catch (error) {
         next(error)
       }
+    }
+
+    /**
+     * Récupère une liste de ressource complète (no limit) d'après critères ATTENTION à ne pas l'utiliser n'importe où !
+     * Il y a quand même une limite, 50 × listeMax
+     * @todo à virer car personne ne s'en sert
+     * @memberOf $ressourceRepository
+     * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
+     * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
+     * @param {getListeFilters} [options.filters] Les filtres à appliquer
+     * @param {string}   [options.orderBy] L'index sur lequel trier
+     * @param {string}   [options.order=asc] asc|desc
+     * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
+     */
+    function getListeFull (visibilite, options = {}, next) {
+      function fetch () {
+        getListe(visibilite, options, function (error, ressources) {
+          if (error) return next(error)
+          nbCalls++
+          allRessources = allRessources.concat(ressources)
+          if (ressources.length === listeMax && nbCalls < 50) {
+            options.skip += listeMax
+            fetch()
+          } else {
+            if (nbCalls === 50) log.error(`getListeFull remonte ${nbCalls * listeMax} ressources et il en reste, on arrête là`)
+            next(null, allRessources)
+          }
+        })
+      }
+
+      let nbCalls = 0
+      options.skip = 0
+      let allRessources = []
+      fetch()
     }
 
     /**
@@ -871,6 +934,53 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Renomme un groupe chez toutes les ressources qui l'ont (dans groupes ou groupesAuteurs)
+     * @param oldName
+     * @param newName
+     * @param next
+     */
+    function renameGroup (oldName, newName, next) {
+      const limit = 100
+      const modifier = (nom) => nom === oldName ? newName : nom
+
+      const updateGroupes = () => {
+        flow().seq(function () {
+          EntityRessource.match('groupes').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (ressource) {
+          ressource.groupes = ressource.groupes.map(modifier)
+          ressource.groupesAuteurs = ressource.groupesAuteurs.map(modifier)
+          save(ressource, this)
+        }).seq(function (ressources) {
+          if (ressources.length < limit) {
+            // on a fini
+            offset = 0
+            return updateGroupesAuteurs()
+          }
+          // faut refaire un tour
+          offset += limit
+          updateGroupes()
+        }).done(next)
+      }
+
+      const updateGroupesAuteurs = () => {
+        flow().seq(function () {
+          // pour ceux qui suivaient sans être membre
+          EntityRessource.match('groupesAuteurs').equals(oldName).grab({limit, offset}, this)
+        }).seqEach(function (ressource) {
+          ressource.groupesAuteurs = ressource.groupesAuteurs.map(modifier)
+          save(ressource, this)
+        }).seq(function (ressources) {
+          if (ressources.length < limit) return next()
+          offset += limit
+          updateGroupesAuteurs()
+        }).done(next)
+      }
+
+      let offset = 0
+      updateGroupes()
+    }
+
+    /**
      * Ajoute ou modifie une ressource (contrôle la validité avant et incrémente la version au besoin),
      * met à jour le cache (interne + varnish) et toutes les relations (passe en revue tous les éventuels
      * arbres qui référencent cette ressource)
@@ -966,9 +1076,11 @@ module.exports = function (ressourceComponent) {
      */
     return {
       archive,
+      fetchPublishedInGroup,
       getDeferred,
       getListe,
       getListeCount,
+      getListeFull,
       grabSearch,
       grabSearchCount,
       load,
@@ -977,6 +1089,7 @@ module.exports = function (ressourceComponent) {
       loadByOrigin,
       remove,
       removeGroup,
+      renameGroup,
       save,
       saveDeferred,
       updateParent

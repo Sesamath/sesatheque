@@ -18,7 +18,13 @@ services:
       - ./_private:/sesatheque/_privateLocal
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
       - ./docker/sesatheque/_private:/sesatheque/_private
+      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
+      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
+      # une compilation de modules faite pour l'architecture du docker (linux amd64)
+      - ./node_modules:/sesatheque/node_modules
+      # On a pas besoin de build car on démarre toujours en devServer
       # le reste dont l'appli a besoin
+      - ~/.cache/yarn:/sesatheque/.cache/yarn
       - ./app:/sesatheque/app
       - ./logs:/sesatheque/logs
       - ./package.json:/sesatheque/package.json
@@ -33,3 +39,41 @@ services:
       - mongo
       - redis
     command: "./scripts/wait-for-it.sh mongo:27017 -t 30 --strict -- yarn run docker:_start"
+
+  test:
+    build: ./docker/sesatheque
+    environment:
+      - SESATHEQUE_CONF=test
+    ports:
+      - 3011:3011
+    volumes:
+      # on pourrait exporter toute la racine sauf des dossier à lister dans .dockerignore
+      # mais on veut _private sous le nom _privateLocal, et lister ce qu'on prend
+      # est pas plus long que de lister ce que l'on exclu…
+
+      # on exporte notre _private sous un autre nom
+      - ./_private:/sesatheque/_privateLocal
+      # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
+      - ./docker/sesatheque/_private:/sesatheque/_private
+      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
+      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
+      # une compilation de modules faite pour l'architecture du docker (linux amd64)
+      - ./node_modules:/sesatheque/node_modules
+      # On a pas besoin de build en test
+      # le reste dont l'appli a besoin
+      - ~/.cache/yarn:/sesatheque/.cache/yarn
+      - ./app:/sesatheque/app
+      - ./logsTest:/sesatheque/logsTest
+      - ./package.json:/sesatheque/package.json
+      - ./scripts:/sesatheque/scripts
+      - ./tasks:/sesatheque/tasks
+      - ./test:/sesatheque/test
+      - ./webpack.config.js:/sesatheque/webpack.config.js
+      - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
+      - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
+      - ./yarn.lock:/sesatheque/yarn.lock
+
+    links:
+      - mongo
+      - redis
+    command: "./scripts/wait-for-it.sh mongo:27017 -t 30 --strict -- yarn run docker:_test"

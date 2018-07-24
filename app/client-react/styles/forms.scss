@@ -112,8 +112,9 @@ hr {
 .tabs-menu {
   text-align:center;
 
-  button.inactive {
-    background-color: #aeb4c2;
+  button.selected {
+    background-color: #586174;
+    color: white;
   }
 }
 

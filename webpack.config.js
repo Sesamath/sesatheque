@@ -169,7 +169,7 @@ if (process.env.SESATHEQUE_CONF) {
   console.log(`Compilation avec urls absolues pour ${process.env.SESATHEQUE_CONF}`)
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
-  conf.output.path = `build/${process.env.SESATHEQUE_CONF}/`
+  conf.output.path = path.resolve(__dirname, 'build', process.env.SESATHEQUE_CONF)
 }
 
 if (isProd) {
@@ -189,7 +189,6 @@ if (appConfig.devServer) {
       '/images': nodeUrl,
       '/medias': nodeUrl,
       '/vendor': nodeUrl,
-      '/groupe': nodeUrl,
       '/sesasso': nodeUrl,
       '/sesalabSso': nodeUrl,
       '/ressource/voir': nodeUrl

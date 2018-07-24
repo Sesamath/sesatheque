@@ -33,8 +33,12 @@
 
 const request = require('request')
 const sjt = require('sesajstools')
+const flow = require('an-flow')
 
 module.exports = function (component) {
+  /**
+   * Une route pour afficher des objets en dev (debug)
+   */
   component.controller('debug', function () {
     /**
      * Retourne un contenu minimaliste pour la vue debug
@@ -52,9 +56,23 @@ module.exports = function (component) {
     const $cache = lassi.service('$cache')
     const controller = this
 
-    /**
-     * Une route pour afficher des objets en dev (debug)
-     */
+    controller.get('flow', function (context) {
+      flow([1, 2, 3]).seqEach(function () {
+        this()
+      }).seq(function (results) {
+        context.rest(results)
+        /* bug !
+        {
+          "0": [],
+          "1": [],
+          "2": []
+        }
+        */
+      }).catch(function (error) {
+        context.restKo(error)
+      })
+    })
+
     controller.get('session', function (context) {
       context.layout = 'page'
       // on ajoute un compteur pour vérifier que ça s'incrémente de 1 à chaque affichage

@@ -32,7 +32,6 @@
 'use strict'
 const dns = require('dns')
 const ip = require('ip')
-// const _ = require('lodash')
 const sjtObj = require('sesajstools/utils/object')
 
 const config = require('../config')
@@ -350,9 +349,19 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne l'oid du user courant ou undefined
+     * @param {Context} context
+     * @returns {string} L'oid
+     * @memberOf $accessControl
+     */
+    function getCurrentUserOid (context) {
+      if (context.session.user) return context.session.user.oid
+    }
+
+    /**
      * Retourne le pid du user courant ou undefined
      * @param {Context} context
-     * @returns {Integer} L'oid
+     * @returns {string} Le pid
      * @memberOf $accessControl
      */
     function getCurrentUserPid (context) {
@@ -559,7 +568,7 @@ module.exports = function (component) {
      */
     function isAuteur (context, ressource) {
       const pid = getCurrentUserPid(context)
-      return (ressource && ressource.auteurs && ressource.auteurs.indexOf(pid) !== -1)
+      return (ressource && ressource.auteurs && ressource.auteurs.includes(pid))
     }
 
     /**
@@ -570,7 +579,7 @@ module.exports = function (component) {
      */
     function isContributeur (context, ressource) {
       const pid = getCurrentUserPid(context)
-      return (ressource && ressource.contributeurs && ressource.contributeurs.indexOf(pid) !== -1)
+      return (ressource && ressource.contributeurs && ressource.contributeurs.includes(pid))
     }
 
     /**
@@ -585,7 +594,7 @@ module.exports = function (component) {
       return context.session.user &&
         context.session.user.groupesMembre &&
         context.session.user.groupesMembre.length &&
-        context.session.user.groupesMembre.find(n => n === nom)
+        context.session.user.groupesMembre.some(n => n === nom)
     }
 
     /**
@@ -600,7 +609,7 @@ module.exports = function (component) {
       return context.session.user &&
         context.session.user.groupesSuivis &&
         context.session.user.groupesSuivis.length &&
-        context.session.user.groupesSuivis.find(n => n === nom)
+        context.session.user.groupesSuivis.some(n => n === nom)
     }
 
     /**
@@ -611,7 +620,7 @@ module.exports = function (component) {
      */
     function isInGroupes (context, ressource) {
       if (ressource && ressource.groupes && ressource.groupes.length) {
-        return ressource.groupes.find(groupeNom => isGroupeMembre(context, groupeNom))
+        return ressource.groupes.some(groupeNom => isGroupeMembre(context, groupeNom))
       }
       return false
     }
@@ -624,7 +633,7 @@ module.exports = function (component) {
      */
     function isInGroupesAuteurs (context, ressource) {
       if (ressource && ressource.groupesAuteurs && ressource.groupesAuteurs.length) {
-        return ressource.groupesAuteurs.find(groupeNom => isGroupeMembre(context, groupeNom))
+        return ressource.groupesAuteurs.some(groupeNom => isGroupeMembre(context, groupeNom))
       }
       return false
     }

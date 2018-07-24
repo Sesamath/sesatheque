@@ -34,7 +34,7 @@
 /* global describe,it */
 
 const assert = require('assert')
-const tools = require('../../../app/server/tools')
+const tools = require('../../../app/server/lib/tools')
 global.log = require('sesajstools/utils/log')
 
 describe('tools', function () {

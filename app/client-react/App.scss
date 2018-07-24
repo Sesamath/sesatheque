@@ -38,12 +38,16 @@
 /* --------------------------------------------- */
 /* Écrase le style de knackcss sur les alertes   */
 /* --------------------------------------------- */
-  .alert--danger, .alert--warning {
+  .alert--danger, .alert--warning, .alert--info {
     padding: 5px 10px;
 
     i {
       margin-right: 5px;
-      color: white;
+    }
+
+    a {
+      display: inline;
+      padding: 0;
     }
   }
 }
@@ -78,10 +82,10 @@ a[target="_blank"] {
     border-radius: 10px;
 
     &.alert--danger:hover {
-      background-color: darken(#D9534F, 5%);
+      background-color: darken($color-danger, 5%);
     }
     &.alert--info:hover {
-      background-color: darken(#5BC0DE, 5%);
+      background-color: darken($color-info, 5%);
     }
 
     div {

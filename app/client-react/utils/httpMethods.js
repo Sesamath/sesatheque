@@ -1,5 +1,5 @@
 const handleErrors = (response) => response.json()
-  .then((json) => {
+  .then(json => {
     const {success} = json
     if (success === false) {
       const {error: errorMessage} = json

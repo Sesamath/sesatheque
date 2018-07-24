@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {connect} from 'react-redux'
+import {NavLink} from 'react-router-dom'
 import {Fields} from 'redux-form'
-import AddGroup from './AddGroup'
 import GroupesSelector from './GroupesSelector'
 
 const GroupContainer = ({groupesList}) => {
@@ -14,7 +14,7 @@ const GroupContainer = ({groupesList}) => {
           component={GroupesSelector}
           groupesList={groupesList}
         />
-        <AddGroup/>
+        <div className="alert--info">Vous pouvez gérer vos groupes depuis la page <NavLink to="/groupes/perso">Mes groupes</NavLink>.</div>
       </fieldset>
     )
   }

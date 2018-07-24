@@ -33,7 +33,7 @@
 var flow = require('an-flow')
 var _ = require('lodash')
 var sjt = require('sesajstools')
-var rTools = require('../tools/ressource')
+var rTools = require('../lib/ressource')
 
 module.exports = function (component) {
   component.service('$personneControl', function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
@@ -44,10 +44,10 @@ module.exports = function (component) {
      * @param {Context} context
      * @param {Ressource} ressource
      * @param {string} groupeNom
-     * @param {object} options  peut contenir les propriétés
-     *                            shouldBeNew (boolean) Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
-     *                            isGroupeAuteur (boolean) Ajouter le groupe à groupesAuteurs et pas groupes
-     *                            whiteList (Array) Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
+     * @param {object} [options]
+     * @param {boolean} [options.shouldBeNew] Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
+     * @param {boolean} [options.isGroupeAuteur] Ajouter le groupe à groupesAuteurs et pas groupes
+     * @param {string[]} [options.whiteList] Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
      * @param {errorCallback} next
      */
     function checkGroupe (context, ressource, groupeNom, options, next) {
@@ -61,7 +61,7 @@ module.exports = function (component) {
       var isGroupeAuteur = options.isGroupeAuteur || false
       var whiteList = options.whiteList || []
       if (!Array.isArray(ressource.groupes)) ressource.groupes = []
-      $groupeRepository.load(groupeNom, function (error, groupe) {
+      $groupeRepository.loadByNom(groupeNom, function (error, groupe) {
         if (error) return next(error)
         if (groupe) {
           if (_.includes(whiteList, groupe.nom)) {
@@ -82,17 +82,10 @@ module.exports = function (component) {
         } else if (shouldBeNew) {
           // il est nouveau et on voulait justement l'ajouter
           var currentUser = $accessControl.getCurrentUser(context)
-          // à priori on récupère une Personne de la session mais pas une EntityPersonne, on teste quand même au cas où ça évoluerait
-          if (!currentUser.store) currentUser = EntityPersonne.create(currentUser)
-          $personneRepository.addGroupe(currentUser, groupeNom, function (error, groupe) {
-            if (error) {
-              next(error)
-            } else if (groupe) {
-              ressource.groupes.push(groupe.nom)
-              next()
-            } else {
-              next(new Error('Erreur interne (addGroupe)'))
-            }
+          $personneRepository.addGroupe(currentUser, groupeNom, function (error) {
+            if (error) return next(error)
+            ressource.groupes.push(groupe.nom)
+            next()
           })
         } else {
           // il est nouveau et c'est pas normal

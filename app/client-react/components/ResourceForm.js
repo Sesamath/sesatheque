@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {renameProp} from 'recompose'
 import {reduxForm} from 'redux-form'
+import {Prompt} from 'react-router'
 import MetaForm from './MetaForm'
 import EditorArbre from './EditorArbre'
 import EditorEcjs from './EditorEcjs'
@@ -15,6 +16,7 @@ import GroupContainer from './GroupContainer'
 import aliasForker from '../hoc/aliasForker'
 import resourceLoader from '../hoc/resourceLoader'
 import resourceSaver from '../hoc/resourceSaver'
+import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
 import validate from '../utils/validate'
 
@@ -44,7 +46,8 @@ const ResourceForm = ({
   submitting,
   updateStoreFromEditor,
   setUpdateStoreFromEditor,
-  saveRessource
+  saveRessource,
+  pristine
 }) => {
   const Editor = typeToData[type] || EditorExternal
 
@@ -79,6 +82,10 @@ const ResourceForm = ({
           </button>
         </div>
       </form>
+      <Prompt
+        when={!pristine}
+        message="Il existe des changements non sauvegardés sur le formulaire, êtes vous sûr de vouloir changer de page ?"
+      />
     </Fragment>
   )
 }
@@ -90,14 +97,17 @@ ResourceForm.propTypes = {
   submitting: PropTypes.bool,
   updateStoreFromEditor: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func,
-  saveRessource: PropTypes.func
+  saveRessource: PropTypes.func,
+  pristine: PropTypes.bool
 }
 
-export default resourceLoader(
-  aliasForker(
-    resourceSaver(
-      renameProp('ressource', 'initialValues')(
-        reduxForm({form: 'ressource', validate})(ResourceForm)
+export default ensureLogged(
+  resourceLoader(
+    aliasForker(
+      resourceSaver(
+        renameProp('ressource', 'initialValues')(
+          reduxForm({form: 'ressource', validate})(ResourceForm)
+        )
       )
     )
   )

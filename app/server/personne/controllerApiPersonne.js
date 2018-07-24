@@ -31,15 +31,17 @@
 
 'use strict'
 
-module.exports = function (component) {
-  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl) {
-    /**
-     * Controleur de la route /api/personne/
-     * @Controller controllerApiPersonne
-     */
+const flow = require('an-flow')
 
+module.exports = function (component) {
+  /**
+   * Controleurs de la route /api/personne/
+   * @Controller controllerApiPersonne
+   */
+  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session) {
     /**
      * Équivalent de context.denied en json
+     * @todo utiliser $json.denied, qui devra utiliser context.restKo (prop message et plus error)
      * @private
      * @param {Context} context
      * @param msg
@@ -52,6 +54,7 @@ module.exports = function (component) {
 
     /**
      * Callback générique de sortie
+     * @todo utiliser $json.send, qui devra utiliser context.restKo (prop message et plus error)
      * @private
      * @param {Context} context
      * @param error
@@ -60,11 +63,9 @@ module.exports = function (component) {
     function sendJson (context, error, data) {
       if (error) {
         log.error(error)
-        log.debug("sendJson va renvoyer l'erreur", error, 'api')
         context.json({error: error.toString()})
       } else {
-        log.debug('sendJson va renvoyer', data, 'api')
-        context.json(data)
+        context.rest(data)
       }
     }
 
@@ -108,51 +109,92 @@ module.exports = function (component) {
      * @route GET /api/personne/me
      */
     this.get('me', function (context) {
-      sendJson(context, null, context.session.user)
+      sendJson(context, null, $session.getCurrentPersonne(context))
     })
 
     /**
      * Renvoie le user courant et les liens pour le SSO
      * Retourne un objet
      * {
-   *   user: {pid, nom, prenom},
-   *   sso: {links: link[], name: string} // links peut être vide si le sso ne propose pas de liens (ça devrait pas arriver mais rien ne l'y oblige)
-   *   logoutUrl: string, // si on est authentifié
-   *   loginLinks: link[]
-   * }
+     *   user: {pid, nom, prenom},
+     *   sso: {links: link[], name: string} // links peut être vide si le sso ne propose pas de liens (ça devrait pas arriver mais rien ne l'y oblige)
+     *   logoutUrl: string, // si on est authentifié
+     *   loginLinks: link[]
+     * }
      * un link est de la forme {href: string, icon: string, value: string}
      * @route GET /api/personne/current
      */
     this.get('current', function (context) {
       if (!$auth) $auth = lassi.service('$auth')
       const response = {}
-      if ($accessControl.isAuthenticated(context)) {
-        const {
-          oid,
-          pid,
-          nom,
-          prenom,
-          groupesMembre,
-          groupesSuivis
-        } = $accessControl.getCurrentUser(context)
-        response.personne = {
-          oid,
-          pid,
-          nom,
-          prenom,
-          groupesMembre,
-          groupesSuivis
+      flow().seq(function () {
+        const send = this
+        const oid = $accessControl.getCurrentUserOid(context)
+        if (oid) {
+          // on retourne chercher la personne pour avoir des groupes à jour
+          // (indépendamment de la session)
+          flow().seq(function () {
+            $personneRepository.load(oid, this)
+          }).seq(function (personne) {
+            const {
+              pid,
+              nom,
+              prenom,
+              groupesMembre,
+              groupesSuivis
+            } = personne
+            response.personne = {
+              oid,
+              pid,
+              nom,
+              prenom,
+              groupesMembre,
+              groupesSuivis
+            }
+            response.logoutUrl = $auth.getLogoutUrl(context)
+            response.sso = {
+              links: $auth.getSsoLinks(context),
+              name: $auth.getName(context)
+            }
+            // et on charge les groupes gérés (on veut leurs noms)
+            $groupeRepository.getListManagedBy(oid, this)
+          }).seq(function (groupesAdmin) {
+            response.personne.groupesAdmin = groupesAdmin.map(({nom}) => nom)
+            send()
+          }).catch(send)
+        } else {
+          response.personne = null
+          response.loginLinks = $auth.getLoginLinks(context)
+          send()
         }
-        response.logoutUrl = $auth.getLogoutUrl(context)
-        response.sso = {
-          links: $auth.getSsoLinks(context),
-          name: $auth.getName(context)
+      }).seq(function () {
+        sendJson(context, null, response)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
+    })
+
+    /**
+     * Récupère le nom d'un utilisateur
+     * depuis son oid
+     * @route GET /api/personne/byOid/:oid
+     */
+    this.get('byOid/:oid', function (context) {
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) return $json.denied(context, 'Vous devez être authentifié pour chercher des utilisateurs')
+
+      const {oid} = context.arguments
+      flow().seq(function () {
+        $personneRepository.load(oid, this)
+      }).seq(function (personne) {
+        if (!personne) return $json.sendOk(context, {user: null})
+        else {
+          const {nom, oid, prenom} = personne
+          $json.sendOk(context, {user: {nom, oid, prenom}})
         }
-      } else {
-        response.personne = null
-        response.loginLinks = $auth.getLoginLinks(context)
-      }
-      sendJson(context, null, response)
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
     })
   })
 }
