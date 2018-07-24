@@ -49,10 +49,10 @@ const {listeNbDefault} = limites
 
 describe('GET /api/liste', () => {
   // pour les appels authentifiés via token
-  let apiTokenEncoded
+  // let apiTokenEncoded
+  // let $settings
   // le client express instancié en before
   let _superTestClient
-  let $settings
   // les ressources mises en bdd
   let ressources
 
@@ -65,10 +65,10 @@ describe('GET /api/liste', () => {
       if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
       if (!lassi) return Promise.reject(new Error('boot KO lassi'))
       _superTestClient = superTestClient
-      $settings = lassi.service('$settings')
+      /* $settings = lassi.service('$settings')
       const apiToken = $settings.get('apiTokens')[0]
       if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
-      apiTokenEncoded = encodeURIComponent(apiToken)
+      apiTokenEncoded = encodeURIComponent(apiToken) */
       const EntityRessource = lassi.service('EntityRessource')
 
       // on démarre sur une base peuplée
@@ -117,10 +117,30 @@ describe('GET /api/liste', () => {
       .expect(200)
       .then(res => {
         const result = res.body
+        checkDefault(result)
         expect(result.queryOptions.limit).to.equals(listeNbDefault)
         expect(result.queryOptions.skip).to.equals(0)
         expect(result.total).to.equals(50)
         expect(result.liste).to.have.length(listeNbDefault)
+        return Promise.resolve()
+      })
+  })
+
+  it.only('format light', function () {
+    return _superTestClient
+      .get('/api/liste?format=light')
+      .set('Content-Type', 'application/json')
+      .expect(200)
+      .then(res => {
+        const result = res.body
+        checkDefault(result)
+        expect(result.queryOptions.limit).to.equals(listeNbDefault)
+        expect(result.queryOptions.skip).to.equals(0)
+        expect(result.total).to.equals(50)
+        expect(result.liste).to.have.length(listeNbDefault)
+        result.liste.forEach((item, i) => {
+          lightProps.forEach((prop) => expect(item[prop]).to.equals(ressources[i][prop], `Pb avec ${prop} pour ${i}`))
+        })
         return Promise.resolve()
       })
   })
