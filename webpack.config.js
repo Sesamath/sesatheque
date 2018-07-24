@@ -74,7 +74,11 @@ const conf = {
     steDisplay: 'display'
   }, */
   resolve: {
-    extensions: ['.js', '.json', '.jsx']
+    extensions: ['.js', '.json', '.jsx'],
+    alias: {
+      'client-react': path.resolve(__dirname, 'app/client-react'),
+      plugins: path.resolve(__dirname, 'app/plugins')
+    }
   },
   // pour nos loaders perso
   resolveLoader: {
@@ -89,7 +93,7 @@ const conf = {
         test: /app\/client\/.*\.js/,
         loader: 'babel-loader'
       },
-      {test: /app\/client-react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
+      {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre

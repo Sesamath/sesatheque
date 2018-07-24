@@ -2,8 +2,8 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues, Field} from 'redux-form'
 
-import {IntegerField, InputField, TextareaField} from './fields'
-import ShowError from './ShowError.js'
+import {IntegerField, InputField, TextareaField} from 'client-react/components/fields'
+import ShowError from 'client-react/components/ShowError.js'
 
 const avertMessage = 'Impossible de charger une page http dans une page https, elle sera ouverte dans un autre onglet (donc consigne et réponse ne pourront pas être superposé à son contenu)'
 

@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
 import React, {Fragment, Component} from 'react'
 import {formValues} from 'redux-form'
-import IframeHandler from './IframeHandler'
-import iframeHelper from '../hoc/iframeHelper'
-import {IntegerField, SwitchField} from './fields'
+import IframeHandler from 'client-react/components/IframeHandler'
+import iframeHelper from 'client-react/hoc/iframeHelper'
+import {IntegerField, SwitchField} from 'client-react/components/fields'
 // page de l'éditeur mathgraph à insérer en iframe
 import iframeSrc from '../../client/plugins/mathgraph/mathgraph-editor.html'
 

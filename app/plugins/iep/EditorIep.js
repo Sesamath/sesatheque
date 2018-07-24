@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
-import {IntegerField, InputField, TextareaField} from './fields'
-import addNotifyToProps from '../hoc/addNotifyToProps'
-import ShowError from './ShowError.js'
+import {IntegerField, InputField, TextareaField} from 'client-react/components/fields'
+import addNotifyToProps from 'client-react/hoc/addNotifyToProps'
+import ShowError from 'client-react/components/ShowError.js'
 
 const importErrorMessage = 'Une erreur s’est produite durant l’importation du script'
 

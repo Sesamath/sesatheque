@@ -1,85 +1,12 @@
 import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
 import {formValues} from 'redux-form'
-import {SelectField} from './fields'
-import IframeHandler from './IframeHandler'
-import iframeHelper from '../hoc/iframeHelper'
+import {SelectField} from 'client-react/components/fields'
+import IframeHandler from 'client-react/components/IframeHandler'
+import iframeHelper from 'client-react/hoc/iframeHelper'
 // page de l'éditeur ecjs à insérer en iframe
 import iframeSrc from '../../client/plugins/ecjs/edit.html'
-
-// récupérer cette liste avec (sur le site ressources)
-// ls -1 replication_calculatice/javascript/exercices/|sed -re "/complement|lang/d; s/(.*)/'\1',/"
-const typesEcjs = [
-  'addiclic',
-  'approximationsomme',
-  'araignee',
-  'balance',
-  'balanceadd',
-  'basketmath',
-  'basketmath2p',
-  'basketmath3p',
-  'bocal',
-  'bouleetboule',
-  'bouleetbouledecimaux',
-  'calculakartC3_4',
-  'calculakartCE1',
-  'calculakartCP',
-  'calculdiffere',
-  'carre',
-  'cartes',
-  'cartesCE2',
-  'cartesCM1',
-  'cartesCM2',
-  'chateaufort',
-  'chocolat1',
-  'chocolat2',
-  'chutedenombres',
-  'chutedenombresmulti',
-  'cibles',
-  'croupier',
-  'decollage',
-  'decoupage',
-  'diviclic',
-  'elephants',
-  'estimation',
-  'fleurs',
-  'frise',
-  'grenouille',
-  'grue',
-  'horloge',
-  'jackpot',
-  'lacaisse',
-  'lebanquier',
-  'lesbornes',
-  'marathon',
-  'marathonCE1',
-  'mbrique',
-  'memory',
-  'mistral',
-  'multiclic',
-  'nombresympathique',
-  'numbercrushdecimaux',
-  'oiseauaddition',
-  'oiseaumultiplication',
-  'operationsatrous',
-  'pacman',
-  'planeteaddition',
-  'pokeplus',
-  'quadricalc',
-  'quadricalcinv',
-  'recette',
-  'rectangle',
-  'sommeenligne',
-  'supermarche',
-  'surfacebleue',
-  'tableattaque',
-  'tapis',
-  'tapisdecarte',
-  'ticketdecaisse',
-  'toise',
-  'train',
-  'viaduc'
-]
+import typesEcjs from './subtypes'
 
 class EditorEcjs extends Component {
   /**
