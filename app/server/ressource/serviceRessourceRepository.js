@@ -581,7 +581,7 @@ module.exports = function (ressourceComponent) {
         next()
       })
     }
-    
+
     /**
      * Supprime un groupe de toutes les ressources qui le contiennent
      * @param {string} nom

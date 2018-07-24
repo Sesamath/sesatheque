@@ -806,6 +806,7 @@ module.exports = function (component) {
       checkToken,
       checkPermission,
       getCurrentUser,
+      getCurrentUserOid,
       getCurrentUserPid,
       getCurrentUserGroupesMembre,
       getCurrentUserGroupesSuivis,
