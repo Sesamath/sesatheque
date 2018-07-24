@@ -132,7 +132,7 @@ module.exports = function (component) {
 
       $ressourceRepository.search(params.query, params.queryOptions, function (error, result) {
         if (error) return $json.sendError(context, error)
-        
+
         const {ressources, total} = result
         params.total = total
         sendListe(context, error, ressources, params)

@@ -563,7 +563,6 @@ module.exports = function (ressourceComponent) {
         flow().seq(function () {
           lassiQuery.grab({limit, skip}, this)
         }).seq(function (ressources) {
-
           if (ressources.length) cacheAndNext(null, ressources, next)
           else next(null, [])
         }).catch(next)
