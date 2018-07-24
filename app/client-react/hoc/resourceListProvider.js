@@ -29,7 +29,7 @@ const resourceListProvider = (WrappedComponent) => {
 
     fetchList () {
       const {query, queryOptions} = this.props
-      const url = '/api/search?' + queryString.stringify({...query, ...queryOptions})
+      const url = '/api/liste?' + queryString.stringify({...query, ...queryOptions, format: 'light'})
 
       GET(url)
         .then(({liste, total}) => {

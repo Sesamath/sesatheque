@@ -30,24 +30,20 @@
  */
 
 'use strict'
-const _ = require('lodash')
-const request = require('request')
 const flow = require('an-flow')
+const {isEmpty} = require('lodash')
+const request = require('request')
 const {parse, stringify} = require('sesajstools')
 const {update} = require('sesajstools/utils/object')
+
 const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
-const Ressource = require('../../constructors/Ressource')
-const url = require('../lib/url')
+
 const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
 const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
 const myBaseId = config.application.baseId
-const myBaseUrl = config.application.baseUrl
-
-const {listeMax, listeNbDefault} = configRessource.limites
-if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
 
 /**
  * Ajoute une erreur dans les logs
@@ -384,65 +380,6 @@ module.exports = function (component) {
     }
 
     /**
-     * Envoie une liste de ressources (ajoute les droits)
-     * @private
-     * @param {Context} context
-     * @param {Error} [error]
-     * @param {EntityRessource[]} ressources La liste des ressources
-     * @param {object} listOptions
-     * @param {object} listOptions.query La query qui a donné cette liste
-     * @param {object} listOptions.queryOptions Les queryOptions (skip, limit, orderBy) utilisés
-     * @param {number} listOptions.total
-     * @param {string[]} [listOptions.warnings]
-     */
-    function sendListe (context, error, ressources, listOptions) {
-      if (error) return $json.send(context, error)
-      if (!listOptions) listOptions = {}
-      const queryOptions = listOptions.queryOptions || {}
-      const liste = []
-      const reponse = listOptions
-      reponse.liste = liste
-      if (ressources && ressources.length) {
-        if (!reponse.total) reponse.total = ressources.length
-        // construction de nextUrl
-        const limit = queryOptions.limit || Number(context.get.limit) || listeNbDefault
-        if (ressources.length === limit) {
-          const skip = (queryOptions.skip || Number(context.get.skip) || 0) + limit
-          reponse.nextUrl = myBaseUrl + (url.update(context.request.originalUrl, {...listOptions.query, skip})).substr(1)
-        }
-        // on regarde le format reçu en get ou post
-        const format = context.post.format || context.get.format || 'ref'
-        ressources.forEach(function (ressource) {
-          // vérif des droits
-          let droits = ''
-          if ($accessControl.hasReadPermission(context, ressource)) {
-            droits += 'R'
-            if ($accessControl.hasPermission('update', context, ressource)) droits += 'W'
-            if ($accessControl.hasPermission('delete', context, ressource)) droits += 'D'
-          } else {
-            // ça devrait pas arriver, mais au cas où on crée une ressource fake
-            // pour avoir le bon nb dans la liste et montrer le pb
-            log.error(`sendListe récupère la ressource ${ressource.oid} à envoyer à ${$accessControl.getCurrentUserPid(context)} alors qu’il n’a pas les droits de lecture dessus`, ressource)
-            ressource = new Ressource({
-              titre: 'Vous n’avez pas les droits suffisants pour voir cette ressource',
-              type: 'error'
-            })
-          }
-
-          // formatage
-          const item = (format === 'full') ? ressource : new Ref(ressource)
-          if (ressource.type === 'sequenceModele' && format !== 'full') {
-            // on rajoute les parametres pour les sequenceModele
-            item.parametres = ressource.parametres
-          }
-          item.$droits = droits
-          liste.push(item)
-        })
-      }
-      $json.sendOk(context, reponse)
-    }
-
-    /**
      * Renvoie la ressource (ou l'erreur) après avoir vérifié les droits, complète ou au format de context.get.format (avec ref ça ajoute les droits)
      * @private
      * @param {Context} context
@@ -495,7 +432,7 @@ module.exports = function (component) {
      * @param ressource
      */
     function writeAndOut (context, ressource) {
-      if (!_.isEmpty(ressource.$errors)) return $json.send(context, ressource.$errors)
+      if (!isEmpty(ressource.$errors)) return $json.send(context, ressource.$errors)
       $ressourceRepository.save(ressource, function (error, ressource) {
         if (error) return $json.send(context, error)
         log.perf(context.response, 'written')
@@ -505,7 +442,7 @@ module.exports = function (component) {
         } else {
           // on ne renvoie que l'oid et des warnings éventuels
           const data = {oid: ressource.oid}
-          if (!_.isEmpty(ressource.$warnings)) {
+          if (!isEmpty(ressource.$warnings)) {
             data.warnings = ressource.$warnings
           }
           $json.send(context, null, data)
@@ -913,19 +850,6 @@ module.exports = function (component) {
       // d'un champ contrôlé soit reflétée sur l'autocomplete
       context.setPublicCache('3d')
       $json.sendOk(context, {filters})
-    })
-
-    /**
-     * Récupère des résulats de recherche
-     * @route GET /api/search
-     */
-    controller.get('search', function (context) {
-      // on vérifie les paramètres pour construire query et queryOptions
-      const params = $accessControl.sanitizeSearch(context)
-      $ressourceRepository.search(params.query, params.queryOptions, function (error, {ressources, total}) {
-        params.total = total
-        sendListe(context, error, ressources, params)
-      })
     })
 
     /**
