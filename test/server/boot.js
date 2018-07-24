@@ -99,6 +99,7 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
     const afterBootCallback = () => {
       if (!resolvedValue.lassi) throw new Error('Il y a eu un pb dans la méthode boot, lassi n’est pas disponible')
       resolvedValue.superTestClient = supertest(resolvedValue.lassi.express)
+      resolvedValue.superTestAgent = supertest.agent(resolvedValue.lassi.express)
       resolvedValue.testsDone = () => resetTimer(100)
       isBooted = true
       finish()

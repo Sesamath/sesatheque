@@ -49,7 +49,7 @@ module.exports = function (component) {
      * @throws {Error} Si y'avait déjà un user en session ou si personne n'a pas les propriétés minimales
      */
     function login (context, personne) {
-      if (context.session.user) throw Error('Il y avait déjà une utilisateur en session')
+      if (context.session.user) throw Error('Il y avait déjà un utilisateur en session')
       // on vérifie qu'il a au moins ces propriétés
       ;['groupesMembre', 'groupesSuivis', 'nom', 'oid', 'pid', 'prenom', 'roles', 'permissions'].forEach(prop => {
         if (!personne.hasOwnProperty(prop)) throw new Error(`Paramètres invalides (${prop} manquant)`)

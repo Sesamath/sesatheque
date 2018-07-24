@@ -34,7 +34,7 @@ const config = require('../config')
 const {checkSesalab, checkSesatheque} = require('../checkConfig')
 
 module.exports = function controllerFactory (component) {
-  component.controller(function mainApiController () {
+  component.controller(function mainApiController ($session) {
     /**
      * Retourne la baseUrl d'une baseId de sesatheque
      * (connue par configuration ou déclarée ici par un client)
@@ -46,6 +46,31 @@ module.exports = function controllerFactory (component) {
       if (baseUrl) context.rest({baseUrl})
       else context.restKo({error: `Sésathèque ${baseId} inconnue sur ${config.application.baseUrl}`})
     })
+
+    /**
+     * ATTENTION : Les routes suivantes doivent exister seulement pour les tests.
+     */
+    if (config.application.staging === 'test') {
+      /**
+       * Connecte un utilisateur à son compte
+       * ATTENTION : Cette route doit exister seulement pour les tests
+       * @route POST /api/login
+       */
+      this.post('/api/login', function (context) {
+        const {personne} = context.post
+        $session.login(context, personne)
+        context.rest({message: 'Utilisateur login'})
+      })
+
+      /**
+       * Connecte un utilisateur à son compte
+       * @route POST /api/login
+       */
+      this.post('/api/logout', function (context) {
+        $session.logout(context)
+        context.rest({message: 'Utilisateur logout'})
+      })
+    }
 
     /**
      * Valide la configuration d'un sesalab

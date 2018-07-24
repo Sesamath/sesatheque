@@ -139,7 +139,7 @@ module.exports = function (component) {
         groupesMembre.concat(groupesSuivis).forEach(nom => {
           if (!groupes[nom]) missing.add(nom)
         })
-        if (!missing.size) return this()
+        if (!missing.size) return this(null, Array.from(groupSet))
         const next = this
         flow().seq(function () {
           $groupeRepository.fetchList(Array.from(missing), this)
