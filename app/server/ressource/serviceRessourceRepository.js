@@ -345,8 +345,8 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Créé les objets date à partir des Strings, met en cache et fait suivre
-     * Si on trouve un seul paramètre xml, on le jsonify
+     * Met en cache et fait suivre
+     * Si on trouve un parametres.xml, on le jsonify
      * @private
      * @param error
      * @param ressources ressource ou tableau de ressources (ou rien, sera passé à next tel quel)
@@ -519,19 +519,28 @@ module.exports = function (ressourceComponent) {
     function grabSearch (searchQuery, queryOptions, next) {
       try {
         if (!queryOptions) queryOptions = {}
-        const lassiQuery = getLassiQuery(searchQuery, queryOptions)
+        const lassiQuery = getLassiQuery(searchQuery)
 
-        // order
+        const sort = (orderBy) => {
+          const [key, order] = orderBy
+          if (order === 'desc') lassiQuery.sort(key, 'desc')
+          else lassiQuery.sort(key)
+        }
+
+        // orderBy
         if (Array.isArray(queryOptions.orderBy)) {
-          queryOptions.orderBy.forEach(orderBy => {
-            if (typeof orderBy === 'string') {
-              lassiQuery.sort(orderBy)
-            } else if (Array.isArray(orderBy)) {
-              const [key, order] = orderBy
-              const cleanOrder = (order === 'desc') ? 'desc' : 'asc'
-              lassiQuery.sort(key, cleanOrder)
-            }
-          })
+          // un cas limite, un tableau à 2 elts dont le 2e est 'desc'
+          if (queryOptions.orderBy.length === 2 && ['asc', 'desc'].includes(queryOptions.orderBy[1])) {
+            sort(queryOptions.orderBy)
+          } else {
+            queryOptions.orderBy.forEach(orderBy => {
+              if (typeof orderBy === 'string') {
+                lassiQuery.sort(orderBy)
+              } else if (Array.isArray(orderBy)) {
+                sort(orderBy)
+              }
+            })
+          }
         }
 
         // limit & skip
@@ -554,10 +563,9 @@ module.exports = function (ressourceComponent) {
         flow().seq(function () {
           lassiQuery.grab({limit, skip}, this)
         }).seq(function (ressources) {
-          if (ressources.length) cacheAndNext(null, ressources, this)
+
+          if (ressources.length) cacheAndNext(null, ressources, next)
           else next(null, [])
-        }).seq(function (ressources) {
-          next(null, ressources)
         }).catch(next)
       } catch (error) {
         next(error)
@@ -809,6 +817,7 @@ module.exports = function (ressourceComponent) {
         if (total === 0) return next(null, {ressources: [], total})
         grabSearch(searchQuery, queryOptions, function (error, ressources) {
           if (error) return next(error)
+          console.log('ds search', ressources && ressources.length)
           next(null, {ressources, total})
         })
       })

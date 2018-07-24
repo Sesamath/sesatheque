@@ -129,7 +129,11 @@ module.exports = function (component) {
     controller.get('', function (context) {
       // on vérifie les paramètres pour construire query et queryOptions
       const params = $accessControl.sanitizeSearch(context)
-      $ressourceRepository.search(params.query, params.queryOptions, function (error, {ressources, total}) {
+
+      $ressourceRepository.search(params.query, params.queryOptions, function (error, result) {
+        if (error) return $json.sendError(context, error)
+        
+        const {ressources, total} = result
         params.total = total
         sendListe(context, error, ressources, params)
       })

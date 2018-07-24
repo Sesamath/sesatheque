@@ -63,6 +63,12 @@ module.exports = function ($accessControl) {
       else warnings.push(`Limite ${wantedQuery.limit} invalide, ramenée à ${defaultSearchLimit}`)
     }
 
+    if (wantedQuery.orderBy) {
+      // on controle rien, c'est vérifié dans le queryBuilder
+      // et sans risque si ça contient n'importe quoi
+      queryOptions.orderBy = wantedQuery.orderBy
+    }
+
     return queryOptions
   }
 
