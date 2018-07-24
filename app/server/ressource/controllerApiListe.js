@@ -37,11 +37,14 @@ const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
 const {ensure} = require('../lib/tools')
+const url = require('../lib/url')
 const {pageNextFromContext, pagePreviousFromContext, update: updateUrl} = require('../lib/url')
 const {getNormalizedGrabOptions} = require('../lib/grab')
 
 const myBaseUrl = config.application.baseUrl
 
+const {listeMax, listeNbDefault} = configRessource.limites
+if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
@@ -122,10 +125,10 @@ module.exports = function (component) {
       }).seq(function () {
         if (!retour.warnings.length) delete retour.warnings
         if (nbRessources === listeMax) {
-          retour.nextUrl = myBaseUrl + updateUrl(context.request.originalUrl, {skip: skip + limit})
+          retour.nextUrl = myBaseUrl + url.update(context.request.originalUrl, {skip: skip + limit})
           if (context.get.skip > 0) {
             const prevSkip = Math.max(skip - limit, 0)
-            retour.prevUrl = myBaseUrl + updateUrl(context.request.originalUrl, {skip: prevSkip})
+            retour.prevUrl = myBaseUrl + url.update(context.request.originalUrl, {skip: prevSkip})
           }
         }
         $json.sendOk(context, retour)
@@ -187,7 +190,7 @@ module.exports = function (component) {
         if (ressources.length) mesRessources = mesRessources.concat(ressources)
         this()
       }).seq(function () {
-        sendListe(context, null, mesRessources, nbOwnRessources)
+        sendListe(context, null, mesRessources, {total: nbOwnRessources})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
@@ -238,65 +241,76 @@ module.exports = function (component) {
       log.debug('grabListe ' + visibility, args)
       $ressourceRepository.getListeCount(visibility, args, function (error, total) {
         if (error) return sendListe(context, error)
-        if (total === 0) return sendListe(context, error, [], 0)
+        if (total === 0) return sendListe(context, error, [], {total: 0})
         $ressourceRepository.getListe(visibility, args, function (error, ressources) {
-          sendListe(context, error, ressources, total)
+          sendListe(context, error, ressources, {total})
         })
       })
     }
 
+
     /**
-     * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
+     * Envoie une liste de ressources (ajoute les droits)
      * @private
      * @param {Context} context
-     * @param error
-     * @param ressources
+     * @param {Error} [error]
+     * @param {EntityRessource[]} ressources La liste des ressources
+     * @param {object} listOptions
+     * @param {object} listOptions.query La query qui a donné cette liste
+     * @param {object} listOptions.queryOptions Les queryOptions (skip, limit, orderBy) utilisés
+     * @param {number} listOptions.total
+     * @param {string[]} [listOptions.warnings]
      */
-    function sendListe (context, error, ressources, total) {
+    function sendListe (context, error, ressources, listOptions) {
       if (error) return $json.send(context, error)
-      if (!ressources) ressources = []
-      if (!total) total = ressources.length
+      if (!listOptions) listOptions = {}
+      const queryOptions = listOptions.queryOptions || {}
       const liste = []
-      const reponse = {liste, total}
-      if (total) {
-        // url next|previous
-        const {limit, skip} = getNormalizedGrabOptions(context.get)
-        if (ressources.length === limit) reponse.nextUrl = pageNextFromContext(context)
-        if (skip > 0) reponse.previousUrl = pagePreviousFromContext(context)
-
-        // on regarde le format demandé en get ou post
-        const format = context.post.format || context.get.format
-        ressources.forEach(function (ressource, index) {
-          let item
-          if (!$accessControl.hasReadPermission(context, ressource)) {
-            log.dataError(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
-            // on remplace la ressource par une erreur
-            item = {
-              oid: ressource.oid,
-              titre: 'Vous n’avez pas les droits de lecture sur cette ressource',
-              type: 'error',
-              $droits: ''
-            }
+      const reponse = listOptions
+      reponse.liste = liste
+      if (ressources && ressources.length) {
+        if (!reponse.total) reponse.total = ressources.length
+        // construction de nextUrl
+        const limit = queryOptions.limit || Number(context.get.limit) || listeNbDefault
+        if (ressources.length === limit) {
+          const skip = (queryOptions.skip || Number(context.get.skip) || 0) + limit
+          reponse.nextUrl = myBaseUrl + (url.update(context.request.originalUrl, {...listOptions.query, skip})).substr(1)
+        }
+        // on regarde le format reçu en get ou post
+        const format = context.post.format || context.get.format || 'ref'
+        ressources.forEach(function (ressource) {
+          // vérif des droits
+          let droits = ''
+          if ($accessControl.hasReadPermission(context, ressource)) {
+            droits += 'R'
+            if ($accessControl.hasPermission('update', context, ressource)) droits += 'W'
+            if ($accessControl.hasPermission('delete', context, ressource)) droits += 'D'
           } else {
-            item = (format === 'full') ? ressource : new Ref(ressource)
-            if (ressource.type === 'sequenceModele' && format !== 'full') {
-              // on rajoute les parametres pour les sequenceModele
-              item.parametres = ressource.parametres
-            }
-            item.$droits = 'R'
-            if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
-            if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
+            // ça devrait pas arriver, mais au cas où on crée une ressource fake
+            // pour avoir le bon nb dans la liste et montrer le pb
+            log.error(`sendListe récupère la ressource ${ressource.oid} à envoyer à ${$accessControl.getCurrentUserPid(context)} alors qu’il n’a pas les droits de lecture dessus`, ressource)
+            ressource = new Ressource({
+              titre: 'Vous n’avez pas les droits suffisants pour voir cette ressource',
+              type: 'error'
+            })
           }
+
+          // formatage
+          const item = (format === 'full') ? ressource : new Ref(ressource)
+          if (ressource.type === 'sequenceModele' && format !== 'full') {
+            // on rajoute les parametres pour les sequenceModele
+            item.parametres = ressource.parametres
+          }
+          item.$droits = droits
           liste.push(item)
         })
       }
       $json.sendOk(context, reponse)
     }
 
+
     const controller = this
 
-    const listeMax = configRessource.limites.listeMax
-    if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
 
     /**
      * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin.
