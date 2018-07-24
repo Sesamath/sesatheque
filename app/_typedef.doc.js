@@ -115,12 +115,23 @@
  * Chaque propriété est l'index sur lequel faire la recherche,
  * Sa valeur doit toujours être un tableau. S'il est vide on match simplement l'index
  * (non null dans mongo), sinon les valeurs demandées.
- * S'il n'y a qu'une valeur de type string et qu'elle contient % on fera du like (à éviter car gourmand, préféren fulltext)
+ * ex {type: 'j3p', groupes: ['foo', 'bar']} var chercher les ressources de type j3p publiées dans les groupes foo OU bar
+ * Si une valeur de type string contient % on fera du like dessus (à éviter car gourmand, préférer fulltext)
  *
  * La clé fulltext est particulière, ça lance un textSearch lassi, en concaténant toutes les valeurs
- * (donc ['foo', 'bar'] revient au même que ['foo bar'], passer ['"foo bar"'] pour une recherche exacte sur plusieurs mots)
+ * (donc ['foo', 'bar'] revient au même que ['foo bar'], il faut passer ['"foo bar"'] pour une recherche exacte sur plusieurs mots)
  * @typedef {Object} searchQuery
  */
+
+/**
+ * Objet qui formalise la requete sous forme index: valeurs à chercher
+ * C'est du ET entre les index, et du ou pour un index donné.
+ * @typedef searchQuery
+ * @type Object
+ * @property {string|string[]} anIndexName Un nom d'index avec les valeurs qu'on cherche
+ * @property {string|string[]} anotherIndexName Un autre nom d'index avec les valeurs qu'on cherche
+ */
+
 /**
  * Options de recherche (skip, limit & orderBy)
  * @typedef {Object} searchQueryOptions

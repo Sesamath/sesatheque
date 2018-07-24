@@ -300,6 +300,76 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Récupère un liste de ressource d'après critères
+     * @private
+     * @param {searchQuery} searchQuery Les critères de tri
+     * @param {searchQueryOptions} queryOptions Les options (skip & limit + orderBy éventuel)
+     * @param {ressourcesCallback} next appelée avec (error, ressources)
+     */
+    function grabSearch (searchQuery, queryOptions, next) {
+      try {
+        if (!queryOptions) queryOptions = {}
+        const lassiQuery = getLassiQuery(searchQuery, queryOptions)
+
+        // order
+        if (Array.isArray(queryOptions.orderBy)) {
+          queryOptions.orderBy.forEach(orderBy => {
+            if (typeof orderBy === 'string') {
+              lassiQuery.sort(orderBy)
+            } else if (Array.isArray(orderBy)) {
+              const [key, order] = orderBy
+              const cleanOrder = (order === 'desc') ? 'desc' : 'asc'
+              lassiQuery.sort(key, cleanOrder)
+            }
+          })
+        }
+
+        // limit & skip
+        let {limit, skip} = queryOptions
+        const wantedLimit = ensure(limit, 'integer', listeNbDefault)
+        if (wantedLimit > 0 && wantedLimit <= listeMax) {
+          limit = wantedLimit
+        } else {
+          // y'a un pb
+          if (wantedLimit > listeMax) {
+            log.error(new Error(`limite ${wantedLimit} demandée trop haute, ramenée à ${listeMax}`))
+            limit = listeMax
+          } else {
+            log.error(new Error(`limite ${wantedLimit} invalide, mise à ${listeNbDefault}`))
+            limit = listeNbDefault
+          }
+        }
+        skip = ensure(skip, 'integer', 0)
+
+        flow().seq(function () {
+          lassiQuery.grab({limit, skip}, this)
+        }).seq(function (ressources) {
+          if (ressources.length) cacheAndNext(null, ressources, this)
+          else next(null, [])
+        }).seq(function (ressources) {
+          next(null, ressources)
+        }).catch(next)
+      } catch (error) {
+        next(error)
+      }
+    }
+
+    /**
+     * Compte le nb de ressources d'après les critères de recherche
+     * @private
+     * @param {searchQuery} searchQuery Les critères de tri
+     * @param {function} next appelée avec (error, total)
+     */
+    function grabSearchCount (searchQuery, next) {
+      try {
+        const lassiQuery = getLassiQuery(searchQuery)
+        lassiQuery.count(next)
+      } catch (error) {
+        next(error)
+      }
+    }
+
+    /**
      * Met à jour cette ref dans tous les arbres des autres sesathèques qui la contiennent,
      * @private
      * @param {Ref} ref
@@ -711,77 +781,6 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Récupère un liste de ressource d'après critères
-     * @memberOf $ressourceRepository
-     * @param {searchQuery} searchQuery Les critères de tri
-     * @param {searchQueryOptions} queryOptions Les options (skip & limit + orderBy éventuel)
-     * @param {ressourcesCallback} next appelée avec (error, ressources)
-     */
-    function grabSearch (searchQuery, queryOptions, next) {
-      try {
-        if (!queryOptions) queryOptions = {}
-        const lassiQuery = getLassiQuery(searchQuery, queryOptions)
-
-        // order
-        if (Array.isArray(queryOptions.orderBy)) {
-          queryOptions.orderBy.forEach(orderBy => {
-            if (typeof orderBy === 'string') {
-              lassiQuery.sort(orderBy)
-            } else if (Array.isArray(orderBy)) {
-              const [key, order] = orderBy
-              const cleanOrder = (order === 'desc') ? 'desc' : 'asc'
-              lassiQuery.sort(key, cleanOrder)
-            }
-          })
-        }
-
-        // limit & skip
-        let {limit, skip} = queryOptions
-        const wantedLimit = ensure(limit, 'integer', listeNbDefault)
-        if (wantedLimit > 0 && wantedLimit <= listeMax) {
-          limit = wantedLimit
-        } else {
-          // y'a un pb
-          if (wantedLimit > listeMax) {
-            log.error(new Error(`limite ${wantedLimit} demandée trop haute, ramenée à ${listeMax}`))
-            limit = listeMax
-          } else {
-            log.error(new Error(`limite ${wantedLimit} invalide, mise à ${listeNbDefault}`))
-            limit = listeNbDefault
-          }
-        }
-        skip = ensure(skip, 'integer', 0)
-
-        flow().seq(function () {
-          lassiQuery.grab({limit, skip}, this)
-        }).seq(function (ressources) {
-          if (ressources.length) cacheAndNext(null, ressources, this)
-          else next(null, [])
-        }).seq(function (ressources) {
-          next(null, ressources)
-        }).catch(next)
-      } catch (error) {
-        next(error)
-      }
-    }
-
-    /**
-     * Compte le nb de ressources d'après les critères de recherche
-     * @memberOf $ressourceRepository
-     * @memberOf $ressourceRepository
-     * @param {searchQuery} searchQuery Les critères de tri
-     * @param {function} next appelée avec (error, total)
-     */
-    function grabSearchCount (searchQuery, next) {
-      try {
-        const lassiQuery = getLassiQuery(searchQuery)
-        lassiQuery.count(next)
-      } catch (error) {
-        next(error)
-      }
-    }
-
-    /**
      * Récupère une liste de ressource complète (no limit) d'après critères ATTENTION à ne pas l'utiliser n'importe où !
      * Il y a quand même une limite, 50 × listeMax
      * @todo à virer car personne ne s'en sert
@@ -1033,6 +1032,24 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Récupère un liste de ressource d'après critères
+     * @memberOf $ressourceRepository
+     * @param {searchQuery} searchQuery Les critères de tri
+     * @param {searchQueryOptions} queryOptions Les options (skip & limit + orderBy éventuel)
+     * @param {ressourcesCallback} next appelée avec (error, ressources)
+     */
+    function search (searchQuery, queryOptions, next) {
+      grabSearchCount(searchQuery, function (error, total) {
+        if (error) return next(error)
+        if (total === 0) return next(null, {ressources: [], total})
+        grabSearch(searchQuery, queryOptions, function (error, ressources) {
+          if (error) return next(error)
+          next(null, {ressources, total})
+        })
+      })
+    }
+
+    /**
      * Met à jour les arbres ou séries stockés ici qui ont ref comme enfant
      * @param {Ref} ref
      * @param {function} next appelée avec (error, nbArbres)
@@ -1092,6 +1109,7 @@ module.exports = function (ressourceComponent) {
       renameGroup,
       save,
       saveDeferred,
+      search,
       updateParent
     }
   })

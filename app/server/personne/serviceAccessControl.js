@@ -369,7 +369,11 @@ module.exports = function (component) {
     }
 
     /**
-     * Retourne les groupes (membre) du user courant ou undefined
+     * Retourne les groupes (membre) du user courant ou undefined d'après la session
+     * (à jour pour les modifs faites par l'utilisateur, mais pas celles faites par un externe,
+     * peut donc contenir un groupe supprimé ou bien il peut manquer un groupe si son
+     * admin a ajouté le user depuis le début de sa session
+     * @todo remplacer ça par un $groupesByUser qui maintienne une liste toujours à jour
      * @param {Context} context
      * @return {string[]} La liste des noms des groupes dont on est membre
      * @memberOf $accessControl

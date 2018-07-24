@@ -35,11 +35,7 @@ const configRessource = require('../ressource/config')
 const defaultSearchLimit = 25
 const maxSearchLimit = 100
 
-/**
- * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
- * à la jonction entre personne et ressource.
- * @service $accessControl
- */
+// sanitizeSearch isolé dans ce module, dépendant de $accessControl
 module.exports = function ($accessControl) {
   const {getCurrentUserGroupesMembre, getCurrentUserPid, hasGenericPermission} = $accessControl
 
@@ -71,23 +67,25 @@ module.exports = function ($accessControl) {
   }
 
   /**
-   * Set query.groupes
+   * Set query.groupes en filtrant les groupes demandés
    * @private
    * @param {Context} context
    * @param {object} query
    * @param {string[]} warnings pour en ajouter le cas échéant
    */
   const sanitizeSearchGroupes = (context, query, warnings) => {
-    const wantedGroupes = context.get.groupes
-    // on regarde si y'a un filtre sur des groupes
-    if (wantedGroupes) {
-      const myGroups = getCurrentUserGroupesMembre(context)
-      const canReadAll = hasGenericPermission('read', context)
-      const groupes = (Array.isArray(wantedGroupes) ? wantedGroupes : wantedGroupes.split(','))
-        .map(groupe => groupe.trim())
+    const myGroups = getCurrentUserGroupesMembre(context)
+    const canReadAll = hasGenericPermission('read', context)
+
+    const addGroups = (prop) => {
+      const wantedGroupes = context.get[prop]
+      if (!wantedGroupes) return
+      const groupes = (Array.isArray(wantedGroupes)
+        ? wantedGroupes
+        : wantedGroupes.split(',')).map(groupe => groupe.trim())
       if (groupes.length) {
         if (canReadAll) {
-          query.groupes = wantedGroupes
+          query[prop] = wantedGroupes
         } else {
           const groupes = wantedGroupes.filter(groupe => myGroups.includes(groupe))
           if (groupes.length < wantedGroupes.length) {
@@ -97,12 +95,15 @@ module.exports = function ($accessControl) {
               : `Vous n’êtes pas membre des groupes ${excluded.join(', ')}, ils ont été exclus de la recherche`
             warnings.push(message)
           }
-          if (groupes.length) query.groupes = groupes
+          if (groupes.length) query[prop] = groupes
         }
       } else {
         warnings.push('Groupe(s) invalide(s), ignoré(s)')
       }
     }
+
+    addGroups('groupes')
+    addGroups('groupesAuteurs')
   }
 
   /**
@@ -120,7 +121,7 @@ module.exports = function ($accessControl) {
       // sinon on peut ne rien préciser
     } else {
       if (wantedPublie && wantedPublie !== 'true') {
-        warnings.push('Vous ne pouvez pas chercher de ressources non publiées si vous n’en êtes ni auteur ni contributeur')
+        warnings.push('Vous ne pouvez pas chercher de ressources non publiées sans filtrer sur vos ressources (ou celles de vos groupes)')
       }
       query.publie = [true]
     }
@@ -135,22 +136,21 @@ module.exports = function ($accessControl) {
    * @param {string[]} warnings pour en ajouter le cas échéant
    */
   const sanitizeSearchRestriction = (context, canGrabPrivate, query, warnings) => {
-    const wantedRestrictions = context.get.restriction
     const canReadCorrection = hasGenericPermission('correction', context)
     // un raccourci d'écriture, obj prop => value (integer)
     const r = configRessource.constantes.restriction
-    const defaultRestriction = canGrabPrivate
-      ? [] // toutes les valeurs sont permises
-      : canReadCorrection ? [r.aucune, r.correction] : [r.aucune]
+    const defaultRestriction = canReadCorrection ? [r.aucune, r.correction] : [r.aucune]
     const setDefault = () => {
       if (!canGrabPrivate) query.restriction = defaultRestriction
     }
 
+    /** @type string[] */
+    let wantedRestrictions = context.get.restriction
     if (!wantedRestrictions) return setDefault()
-    if (Array.isArray(wantedRestrictions)) throw new Error('restriction n’est pas un tableau')
+    if (!Array.isArray(wantedRestrictions)) wantedRestrictions = [wantedRestrictions]
     if (!wantedRestrictions.length) return setDefault()
 
-    // faut analyser, on passe par un set pour dedup
+    // faut analyser, on passe par un set pour la déduplication
     const restrictions = new Set()
     wantedRestrictions.forEach(wantedRestriction => {
       switch (wantedRestriction) {
@@ -164,6 +164,7 @@ module.exports = function ($accessControl) {
           break
 
         case `${r.groupe}`:
+          // si y'a déjà un filtre sur des groupes dont je fait partie canGrabPrivate est true
           if (canGrabPrivate) restrictions.add(r.groupe)
           else warnings.push('Vous ne pouvez pas consulter toutes les ressources de tous les groupes, vous devez restreindre aux votres')
           break
@@ -183,8 +184,9 @@ module.exports = function ($accessControl) {
 
   /**
    * Retourne un objet avec query normalisée d'après les droits de l'utilisateur courant
+   * Ça garanti que ce que remontera cette recherche sera lisible par l'utilisateur courant
    * @param {Context} context
-   * @return {{query, queryOptions: {limit: number, skip: number}, warnings: string[]}}
+   * @return {{query: searchQuery, queryOptions: {limit: number, skip: number}, warnings: string[]}}
    */
   const sanitizeSearch = (context) => {
     function getStringValues (prop) {
@@ -203,11 +205,14 @@ module.exports = function ($accessControl) {
     // on regarde si c'est filtré sur ses propres ressources
     const canReadAll = hasGenericPermission('read', context)
     const myPid = getCurrentUserPid(context)
+    // si y'a un filtre sur mes ressources
     const withinMine = myPid && (wantedQuery.auteurs === myPid || wantedQuery.contributeurs === myPid)
 
     sanitizeSearchGroupes(context, query, warnings)
 
-    const withinMyGroups = Boolean(query.groupes)
+    // si y'a un filtre sur les ressources publiées ou éditées par des groupes dont je suis membre
+    const withinMyGroups = Boolean(query.groupes || query.groupesAuteurs)
+
     // le seul cas où on peut chercher du non publié, c'est sur ses propres ressources
     // (sauf si on a le droit de lecture sur tout)
     const canGrabPrivate = canReadAll || withinMine || withinMyGroups

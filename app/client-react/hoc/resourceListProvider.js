@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import queryString from 'query-string'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {POST} from '../utils/httpMethods'
+import {GET} from '../utils/httpMethods'
 import {listes} from '../../server/ressource/config'
 
 const limitDefault = 25
@@ -28,23 +28,16 @@ const resourceListProvider = (WrappedComponent) => {
     }
 
     fetchList () {
-      const {query, queryOptions: {limit, skip}} = this.props
-      const filters = Object.keys(query).map(key => {
-        const value = query[key]
-        const values = Array.isArray(value) ? value : [value]
-        return {index: key, values}
-      })
+      const {query, queryOptions} = this.props
+      const url = '/api/search?' + queryString.stringify({...query, ...queryOptions})
 
-      POST(`/api/liste/prof`, {body: {
-        format: 'full',
-        filters,
-        limit,
-        skip
-      }})
-        .then((resourceList) => this.setState({
-          resources: Object.values(resourceList.liste),
-          total: resourceList.total
-        }))
+      GET(url)
+        .then(({liste, total}) => {
+          this.setState({
+            resources: Object.values(liste),
+            total
+          })
+        })
         .catch((error) => {
           // @todo notify
           console.error(error)
@@ -74,7 +67,7 @@ const resourceListProvider = (WrappedComponent) => {
     // fourni par le connect mapStateToProps (ça vient du router)
     hash: PropTypes.string,
     search: PropTypes.string,
-    // construit à partir du précédent
+    // construit à partir de search (par buildQuery)
     query: PropTypes.object,
     queryOptions: PropTypes.shape({
       skip: PropTypes.number,
