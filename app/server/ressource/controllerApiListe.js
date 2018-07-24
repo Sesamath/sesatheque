@@ -37,8 +37,7 @@ const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
 const {ensure} = require('../lib/tools')
-const url = require('../lib/url')
-const {pageNextFromContext, pagePreviousFromContext, update: updateUrl} = require('../lib/url')
+const {update: updateUrl} = require('../lib/url')
 const {getNormalizedGrabOptions} = require('../lib/grab')
 
 const myBaseUrl = config.application.baseUrl
@@ -125,10 +124,10 @@ module.exports = function (component) {
       }).seq(function () {
         if (!retour.warnings.length) delete retour.warnings
         if (nbRessources === listeMax) {
-          retour.nextUrl = myBaseUrl + url.update(context.request.originalUrl, {skip: skip + limit})
+          retour.nextUrl = myBaseUrl + updateUrl(context.request.originalUrl, {skip: skip + limit})
           if (context.get.skip > 0) {
             const prevSkip = Math.max(skip - limit, 0)
-            retour.prevUrl = myBaseUrl + url.update(context.request.originalUrl, {skip: prevSkip})
+            retour.prevUrl = myBaseUrl + updateUrl(context.request.originalUrl, {skip: prevSkip})
           }
         }
         $json.sendOk(context, retour)
@@ -274,7 +273,7 @@ module.exports = function (component) {
         const limit = queryOptions.limit || Number(context.get.limit) || listeNbDefault
         if (ressources.length === limit) {
           const skip = (queryOptions.skip || Number(context.get.skip) || 0) + limit
-          reponse.nextUrl = myBaseUrl + (url.update(context.request.originalUrl, {...listOptions.query, skip})).substr(1)
+          reponse.nextUrl = myBaseUrl + (updateUrl(context.request.originalUrl, {...listOptions.query, skip})).substr(1)
         }
         // on regarde le format reçu en get ou post
         const format = context.post.format || context.get.format || 'ref'
