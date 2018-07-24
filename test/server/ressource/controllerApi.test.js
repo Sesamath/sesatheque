@@ -40,161 +40,39 @@
 /* eslint-env mocha */
 import {expect} from 'chai'
 import faker from 'faker/locale/fr'
-// import Ressource from '../../../app/constructors/Ressource'
 import {getRandomPersonne, getRandomRessource, getRessources, populate, purge} from '../populate'
 import boot from '../boot'
-import fakeRessource from '../../fixtures/fakeRessource'
 import configRessource from '../../../app/server/ressource/config'
+import config from '../../../app/server/config'
+import helpersFactory from './helpers'
 
-// const {clone} = require('sesajstools/utils/object')
-// const {stringify} = require('sesajstools')
+const {application: {baseId: myBaseId}} = config
 
 describe('controller api ressource', () => {
-  let myBaseId
   // pour les appels authentifiés via token
   let apiTokenEncoded
+  // le client express instancié en before
   let _superTestClient
-  let EntityRessource
   let $settings
-  // pour le mettre en argument de .catch()
-  const catcher = Promise.reject.bind(Promise)
-  // const catcher = (error) => Promise.reject(error)
-
-  /**
-   * Vérifie que ressourceExpected est bien en db
-   * @private
-   * @param ressourceExpected
-   * @return {Promise}
-   */
-  const checkDb = (ressourceExpected) => new Promise((resolve, reject) => {
-    if (!ressourceExpected.oid) return reject(new Error('ressource attendue sans oid'))
-    const {oid} = ressourceExpected
-    EntityRessource.match('oid').equals(oid).grabOne((error, ressource) => {
-      if (error) return reject(error)
-      if (!ressource) return reject(new Error(`aucune resssource ${oid} en base`))
-      try {
-        // console.log(`pour ${ressource.oid} version en db ${ressource.version}`)
-        // Object.keys(ressourceExpected).forEach(p => expect(ressource[p]).to.deep.equals(ressourceExpected[p], `pb avec ${p} pour ${oid} : ${JSON.stringify(ressource[p])} ≠ ${JSON.stringify(ressourceExpected[p])}`))
-        Object.keys(ressourceExpected).forEach(p => expect(JSON.stringify(ressource[p])).to.equals(JSON.stringify(ressourceExpected[p]), `pb avec ${p} pour ${oid}`))
-        resolve()
-      } catch (error) {
-        reject(error)
-      }
-    })
-  })
-  /**
-   * Appelle url en get et vérifie qu'on récupère expected
-   * @private
-   * @param url
-   * @param expected
-   * @return {Promise}
-   */
-  const checkHttp = (url, expected) => checkHttpResult(_superTestClient.get(url), expected)
-
-  /**
-   * Vérifie qu'un supertestClient ayant envoyé sa requête récupère bien la ressource attendue
-   * @private
-   * @param stc
-   * @param expected
-   * @return {Promise}
-   */
-  const checkHttpResult = (stc, expected) => stc
-    .expect(200)
-    .expect('Content-type', /application\/json/)
-    .then((res) => {
-      try {
-        const ressource = res.body
-        cleanVolatileProperties(expected)
-        expect(ressource).to.have.property('oid', expected.oid)
-        expect(ressource.error).to.be.empty
-        expect(ressource.errors).to.be.empty
-        expect(ressource.warnings).to.be.empty
-        Object.keys(expected).forEach(k => {
-          // if (expected[k] instanceof Date) expect(ressource[k]).to.equals(expected[k].toISOString(), `pb sur propriété ${k}`)
-          // else expect(ressource[k]).to.deep.equal(expected[k], `pb sur propriété ${k}`)
-          expect(JSON.stringify(ressource[k])).to.equal(JSON.stringify(expected[k]), `pb sur propriété ${k}`)
-        })
-        return Promise.resolve()
-      } catch (error) {
-        return Promise.reject(error)
-      }
-    })
-    .catch(catcher)
-
-  // nettoie une entity pour en faire un objet presque plain sans ses propriétés volatiles ($original ou dateMiseAJour)
-  // ou susceptible d'être modifiées par un post (typeDoc & typePeda)
-  const cleanVolatileProperties = (ressource) => {
-    // typeDoc et typePeda peuvent avoir été re-générés par le post, on les vérifie pas
-    delete ressource.typeDocumentaires
-    delete ressource.typePedagogiques
-    // pour dateMiseAJour idem, c'est normal que ça change
-    delete ressource.dateMiseAJour
-    // on vire aussi toutes les méthodes et propriétés $
-    Object.keys(ressource).forEach(p => {
-      if (/^\$/.test(p) || typeof ressource[p] === 'function') delete ressource[p]
-    })
-    return ressource
-  }
-
-  // attend un peu…
-  // const sleep = (delay = 100, value) => new Promise((resolve) => setTimeout(() => resolve(value), delay))
-
-  // ressource publique sans oid ni rid
-  const getRessPublicAnonymous = () => fakeRessource({
-    nooid: true,
-    norid: true,
-    // on met une baseId connue, mais pas la notre sinon l'api va virer ces ressources qui n'existent pas chez elle
-    relations: [[1, 'sesabibli/1'], [14, 'sesabibli/2']]
-  })
-  // ressource publique sans oid avec rid
-  const getRessPublicSsOid = () => fakeRessource({
-    nooid: true,
-    rid: `${myBaseId}/${faker.random.uuid()}`
-  })
-  // ressource publique avec oid et rid
-  const getRessPublic = () => fakeRessource()
-  // idem en fixant le type arbre
-  const getArbrePublic = () => fakeRessource({
-    type: 'arbre'
-  })
-  // ressource privée sans oid ni rid
-  const getRessPrivateAnonymous = () => fakeRessource({
-    nooid: true,
-    norid: true,
-    restriction: 1,
-    // on met une baseId connue, mais pas la notre sinon l'api va virer ces ressources qui n'existent pas chez elle
-    relations: [[1, 'sesabibli/1'], [14, 'sesabibli/2']]
-  })
-  // ressource privée sans oid ni rid
-  const getRessUnpublishedAnonymous = () => fakeRessource({
-    nooid: true,
-    norid: true,
-    publie: false,
-    // on met une baseId connue, mais pas la notre sinon l'api va virer ces ressources qui n'existent pas chez elle
-    relations: [[1, 'sesabibli/1'], [14, 'sesabibli/2']]
-  })
-  // toutes ces ressources
-  const getTestRessources = () => [
-    getRessPublicAnonymous(),
-    getRessPublicSsOid(),
-    getRessPublic(),
-    getArbrePublic(),
-    getRessPrivateAnonymous(),
-    getRessUnpublishedAnonymous()
-  ]
+  // nos helpers
+  let h
+  let catcher
+  let checkDb
+  let cleanVolatileProperties
 
   // boot + récup des services et config nécessaires à nos tests
   before(() => boot().then(({superTestClient, lassi}) => {
     if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
     if (!lassi) return Promise.reject(new Error('boot KO lassi'))
     _superTestClient = superTestClient
-    EntityRessource = lassi.service('EntityRessource')
     $settings = lassi.service('$settings')
     const apiToken = $settings.get('apiTokens')[0]
     if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
     apiTokenEncoded = encodeURIComponent(apiToken)
-    myBaseId = $settings.get('application.baseId')
-    if (!myBaseId) return Promise.reject(new Error('pas trouvé de baseId en configuration'))
+    h = helpersFactory(lassi, superTestClient)
+    cleanVolatileProperties = h.cleanVolatileProperties
+    checkDb = h.checkDb
+    catcher = h.catcher
     // on démarre sur une base vide
     return purge()
   }))
@@ -230,7 +108,7 @@ describe('controller api ressource', () => {
 
     return purge()
       .then(() => {
-        Promise.all(getTestRessources().map(getPostPromise))
+        Promise.all(h.getTestRessources().map(getPostPromise))
       }).then(purge)
       .catch(catcher)
   })
@@ -355,7 +233,7 @@ describe('controller api ressource', () => {
 
   describe('GET /api/ressource/… sur ressource publique', () => {
     let ressources
-    const getGlobalPromise = (urlConstructor) => Promise.all(ressources.map(r => checkHttp(urlConstructor(r), r)))
+    const getGlobalPromise = (urlConstructor) => Promise.all(ressources.map(r => h.checkHttp(urlConstructor(r), r)))
 
     before(() => purge()
       .then(() => populate({ressources: 6, personnes: 6}))

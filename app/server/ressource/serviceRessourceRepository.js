@@ -817,7 +817,7 @@ module.exports = function (ressourceComponent) {
         if (total === 0) return next(null, {ressources: [], total})
         grabSearch(searchQuery, queryOptions, function (error, ressources) {
           if (error) return next(error)
-          console.log('ds search', ressources && ressources.length)
+
           next(null, {ressources, total})
         })
       })
