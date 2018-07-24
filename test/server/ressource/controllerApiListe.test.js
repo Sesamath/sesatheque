@@ -126,7 +126,7 @@ describe('GET /api/liste', () => {
       })
   })
 
-  it.only('format light', function () {
+  it('format light', function () {
     return _superTestClient
       .get('/api/liste?format=light')
       .set('Content-Type', 'application/json')
