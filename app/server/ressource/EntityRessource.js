@@ -44,18 +44,6 @@ const configRessource = require('./config')
 
 const myBaseId = config.application.baseId
 
-/**
- * Callback de normalisation de l'index du nom d'un groupe
- * @param {string} nom
- * @return {string} Le nom sans caractères autres que [a-z0-9]
- */
-const normalizer = (nom) => {
-  if (!nom || typeof nom !== 'string' || nom === 'undefined') throw Error('groupe invalide')
-  const _nom = getNormalizedName(nom)
-  if (!_nom) throw Error(`nom invalide : ${nom}`)
-  return _nom
-}
-
 module.exports = function (component) {
   component.entity('EntityRessource', function () {
     const EntityRessource = this
@@ -139,9 +127,9 @@ module.exports = function (component) {
         return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
       })
       // les groupes chez qui la ressource est publiée
-      .defineIndex('groupes', {normalizer})
+      .defineIndex('groupes', {normalizer: getNormalizedName})
       // les groupes qui ont un droit d'écriture sur la ressource
-      .defineIndex('groupesAuteurs', {normalizer})
+      .defineIndex('groupesAuteurs', {normalizer: getNormalizedName})
       .defineIndex('langue', 'string')
       .defineIndex('publie', 'boolean')
       .defineIndex('indexable', 'boolean')
@@ -153,8 +141,11 @@ module.exports = function (component) {
     EntityRessource.defineTextSearchFields([
       ['titre', 5],
       ['resume', 2],
-      'description', // poid de 1 par défaut
-      'commentaires' // idem
+      // poid de 1 par défaut pour le reste
+      'commentaires',
+      'description',
+      'groupes',
+      'groupesAuteurs'
     ])
 
     // beforeStore était dans $ressourceRepository, pour des questions de cycle d'injection de dépendances

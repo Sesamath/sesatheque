@@ -34,19 +34,6 @@
 const Groupe = require('../../constructors/Groupe')
 const {getNormalizedName} = require('../lib/normalize')
 
-/**
- * Callback de normalisation de l'index du nom d'un groupe
- * @param {string} nom
- * @return {string} Le nom sans caractères autres que [a-z0-9]
- */
-const normalizer = (nom) => {
-  if (!nom) throw Error('nom est obligatoire pour un groupe')
-  if (typeof nom !== 'string') throw Error('nom invalide')
-  const _nom = getNormalizedName(nom)
-  if (!_nom) throw Error('nom invalide', nom)
-  return _nom
-}
-
 module.exports = function (component) {
   component.entity('EntityGroupe', function ($cacheGroupe) {
     const EntityGroupe = this
@@ -74,10 +61,6 @@ module.exports = function (component) {
       ]
     })
 
-    EntityGroupe.defineMethod('getNormalizedName', function () {
-      return normalizer(this.nom)
-    })
-
     /**
      * L'entité groupe
      * @entity EntityGroupe
@@ -102,7 +85,7 @@ module.exports = function (component) {
     })
 
     EntityGroupe
-      .defineIndex('nom', {normalizer, unique: true})
+      .defineIndex('nom', {normalizer: getNormalizedName, unique: true})
       .defineIndex('ouvert', 'boolean')
       .defineIndex('public', 'boolean')
       .defineIndex('gestionnaires', 'string')
