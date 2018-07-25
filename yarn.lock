@@ -4626,9 +4626,9 @@ knacss@^7.0.5:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/knacss/-/knacss-7.0.6.tgz#6dd2e3610db586248c742350adad0d30f5a9b276"
 
-"lassi@git+https://framagit.org/Sesamath/lassi.git#f636628":
+"lassi@git+https://framagit.org/Sesamath/lassi.git#a9443b3":
   version "2.3.7"
-  resolved "git+https://framagit.org/Sesamath/lassi.git#f636628b2ce278ec951135337feea8dab69b724f"
+  resolved "git+https://framagit.org/Sesamath/lassi.git#a9443b3e61773f953263b85dcde2c347a1f1f181"
   dependencies:
     ajv "^6.1.1"
     ajv-errors "^1.0.0"
