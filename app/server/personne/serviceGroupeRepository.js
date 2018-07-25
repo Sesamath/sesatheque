@@ -168,12 +168,15 @@ module.exports = function (component) {
       // on affecte au 1er appel
       if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
       if (!$personneRepository) $personneRepository = lassi.service('$personneRepository')
-      // on efface d'abord le groupe des ressources
+
       flow().seq(function () {
+        // on efface d'abord le groupe des ressources
         $ressourceRepository.removeGroup(nom, this)
       }).seq(function () {
+        // puis des personnes
         $personneRepository.removeGroup(nom, this)
       }).seq(function () {
+        // on peut virer le groupe
         EntityGroupe.match('nom').equals(indexedName).purge(this)
       }).seq(function () {
         // et on vire du cache

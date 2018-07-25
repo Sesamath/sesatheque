@@ -67,7 +67,7 @@ module.exports = function (component) {
      * @param {errorCallback} next
      */
     function addGroupes (context, formData, groupes, groupesAuteurs, next) {
-      log.debug('addGroupes avec', {groupes: groupes, groupeAuteurs: groupesAuteurs}, 'form', {max: 2000})
+      log.debug('addGroupes avec', {groupes, groupesAuteurs}, 'form', {max: 2000})
       // on ajoute déjà les groupes de celui qui édite
       var myGroupes = $accessControl.getCurrentUserGroupesMembre(context)
       var choices = myGroupes.map(function (nom) {
