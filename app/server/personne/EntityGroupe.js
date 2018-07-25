@@ -32,7 +32,7 @@
 'use strict'
 
 const Groupe = require('../../constructors/Groupe')
-const {toAscii} = require('sesajstools')
+const {getNormalizedName} = require('../lib/normalize')
 
 /**
  * Callback de normalisation de l'index du nom d'un groupe
@@ -42,9 +42,7 @@ const {toAscii} = require('sesajstools')
 const normalizer = (nom) => {
   if (!nom) throw Error('nom est obligatoire pour un groupe')
   if (typeof nom !== 'string') throw Error('nom invalide')
-  const _nom = toAscii(nom.toLowerCase()) // minuscules sans accents
-    .replace(/[^a-z0-9]/g, ' ') // sans caractères autres que a-z0-9
-    .replace(/  +/g, ' ').trim() // on vire les espaces en double + les éventuels de début et fin
+  const _nom = getNormalizedName(nom)
   if (!_nom) throw Error('nom invalide', nom)
   return _nom
 }
@@ -74,6 +72,10 @@ module.exports = function (component) {
         'public',
         'gestionnaires'
       ]
+    })
+
+    EntityGroupe.defineMethod('getNormalizedName', function () {
+      return normalizer(this.nom)
     })
 
     /**

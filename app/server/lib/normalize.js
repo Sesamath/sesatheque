@@ -32,6 +32,7 @@
 'use strict'
 
 const {listeMax, listeNbDefault} = require('./config')
+const {toAscii} = require('sesajstools')
 
 /**
  * Normalise {skip, limit} et le retourne
@@ -53,6 +54,19 @@ function getNormalizedGrabOptions (options) {
   return grabOptions
 }
 
+/**
+ * Callback de normalisation de string (utilisé pour l'index du nom d'un groupe)
+ * @param {string} nom
+ * @return {string} Le nom sans caractères autres que [a-z0-9]
+ */
+function getNormalizedName (nom) {
+  if (typeof nom !== 'string') return ''
+  return toAscii(nom.toLowerCase()) // minuscules sans accents
+    .replace(/[^a-z0-9]/g, ' ') // sans caractères autres que a-z0-9
+    .replace(/  +/g, ' ').trim() // on vire les espaces en double + les éventuels de début et fin
+}
+
 module.exports = {
-  getNormalizedGrabOptions
+  getNormalizedGrabOptions,
+  getNormalizedName
 }

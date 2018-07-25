@@ -32,7 +32,7 @@
 'use strict'
 
 const flow = require('an-flow')
-const tools = require('../lib/tools')
+const {getNormalizedName} = require('../lib/normalize')
 
 module.exports = function (component) {
   component.service('$cacheGroupe', function ($cache, $settings) {
@@ -58,9 +58,13 @@ module.exports = function (component) {
       // si on tombait un jour sur une clé sortie de sanitizeHashKey qui plaisait pas à memcache,
       // utiliser un md5 du nom, mais c'est bcp plus gourmand
       // key = crypto.createHash('md5').update(data).digest('hex')
+      // key = prefix + tools.sanitizeHashKey(nom)
       if (groupe) {
-        const nom = typeof groupe === 'string' ? groupe : groupe.nom
-        if (nom) key = prefix + tools.sanitizeHashKey(nom)
+        let nom = typeof groupe === 'string' ? groupe : groupe.nom
+        if (nom) {
+          nom = getNormalizedName(nom).replace(' ', '')
+          if (nom) return nom
+        }
       }
       return key
     }
@@ -92,7 +96,7 @@ module.exports = function (component) {
 
     /**
      * Récupère un groupe dans le cache, d'après son nom
-     * @param {string} nom
+     * @param {string} nom Le nom, normalisé ou pas
      * @param {groupeCallback} next
      * @memberOf $cacheGroupe
      */
@@ -109,23 +113,23 @@ module.exports = function (component) {
      * @memberOf $cacheGroupe
      */
     function set (groupe, next = log.ifError) {
-      if (groupe && groupe.nom) {
-        const key = getKey(groupe)
+      const key = getKey(groupe)
+      if (key) {
         flow().seq(function () {
           $cache.set(key, groupe, ttl, this)
           if (groupe.oid) $cache.set(prefix + groupe.oid, groupe, ttl, log.ifError)
         }).seq(function () {
           if (next) next()
         }).catch(function (error) {
-          log.error('le $cache.set a planté avec la clé ' + key, error)
+          log.error(`le $cache.set a planté avec la clé ${key}`, error)
           // pb de clé, tant pis, ça sera pas en cache via le nom
-          // (pas de risque d'avoir une ancienne version foireuse au get si le set plante)
+          // (pas de risque d'avoir une ancienne version foireuse au get)
           if (next) next()
         })
       } else {
-        const error = new Error('Groupe invalide')
-        log.error(error, groupe)
+        const error = Error('Groupe invalide')
         if (next) next(error)
+        else log.error(error, groupe)
       }
     }
 
@@ -137,11 +141,25 @@ module.exports = function (component) {
      */
     function deleteGroupe (groupe, next = log.ifError) {
       const key = getKey(groupe)
-      if (key) $cache.delete(key, next)
-      else next(new Error('groupe invalide'))
+      if (key) {
+        if (groupe.oid) {
+          $cache.delete(key, next)
+          $cache.delete(prefix + groupe.oid, next)
+        } else {
+          // faut aller le chercher en cache pour récupérer l'oid
+          $cache.get(key, (error, groupe) => {
+            if (error) return next(error)
+            if (!groupe) return next()
+            $cache.delete(key, next)
+            $cache.delete(prefix + groupe.oid, next)
+          })
+        }
+      } else {
+        next(new Error('groupe invalide'))
+      }
     }
 
-    // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
+    // on ajoute une possibilité noCache en conf
     if ($settings.get('noCache', false)) {
       log('$cacheRessource désactivé')
       const dummy = (arg, next) => next()

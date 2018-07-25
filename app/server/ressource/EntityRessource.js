@@ -34,12 +34,27 @@ const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesa
 const {stringify} = require('sesajstools')
 
 const tools = require('../lib/tools')
-const Ressource = require('../../constructors/Ressource')
+const {getNormalizedName} = require('../lib/normalize')
 const {getRidEnfants} = require('../lib/ressource')
+
+const Ressource = require('../../constructors/Ressource')
 const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
+
 const myBaseId = config.application.baseId
+
+/**
+ * Callback de normalisation de l'index du nom d'un groupe
+ * @param {string} nom
+ * @return {string} Le nom sans caractères autres que [a-z0-9]
+ */
+const normalizer = (nom) => {
+  if (!nom || typeof nom !== 'string' || nom === 'undefined') throw Error('groupe invalide')
+  const _nom = getNormalizedName(nom)
+  if (!_nom) throw Error(`nom invalide : ${nom}`)
+  return _nom
+}
 
 module.exports = function (component) {
   component.entity('EntityRessource', function () {
@@ -124,9 +139,9 @@ module.exports = function (component) {
         return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
       })
       // les groupes chez qui la ressource est publiée
-      .defineIndex('groupes', 'string')
+      .defineIndex('groupes', {normalizer})
       // les groupes qui ont un droit d'écriture sur la ressource
-      .defineIndex('groupesAuteurs', 'string')
+      .defineIndex('groupesAuteurs', {normalizer})
       .defineIndex('langue', 'string')
       .defineIndex('publie', 'boolean')
       .defineIndex('indexable', 'boolean')

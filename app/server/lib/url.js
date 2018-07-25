@@ -34,7 +34,7 @@
 // @see https://nodejs.org/dist/latest-v8.x/docs/api/querystring.html
 // (et on préfère son comportement sur les params multiples)
 const querystring = require('querystring')
-const {getNormalizedGrabOptions} = require('./grab')
+const {getNormalizedGrabOptions} = require('./normalize')
 const {baseUrl} = require('./config')
 
 // fonctions privées

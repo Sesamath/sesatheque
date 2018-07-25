@@ -49,7 +49,7 @@ const j3pGraphe2json = require('../../../tasks/modules/j3pGraphe2json')
 
 const myBaseId = appConfig.application.baseId
 
-const {getNormalizedGrabOptions} = require('../lib/grab')
+const {getNormalizedGrabOptions, getNormalizedName} = require('../lib/normalize')
 
 // et des petites fonctions utiles
 const prependMyBaseId = (oid) => myBaseId + '/' + oid
@@ -547,6 +547,21 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Retire un groupe de toutes les ressources qui l'ont
+     * @param nom
+     * @param next
+     */
+    function removeGroup (nom, next) {
+      const indexedName = getNormalizedName(nom)
+      flow().seq(function () {
+        getListeFull('groupe/' + indexedName, {}, this)
+      }).seqEach(function (ressource) {
+        ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== nom)
+        save(ressource, this)
+      }).empty().done(next)
+    }
+
+    /**
      * Récupère la liste des ressources publiées dans un groupe
      * @param nom Nom du groupe
      * @param {object} [options]
@@ -950,6 +965,7 @@ module.exports = function (ressourceComponent) {
       loadByCle,
       loadByOrigin,
       remove,
+      removeGroup,
       renameGroup,
       save,
       saveDeferred,
