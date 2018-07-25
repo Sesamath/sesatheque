@@ -260,10 +260,6 @@ amdefine@>=0.0.4, amdefine@^1.0.1:
   version "3.0.1"
   resolved "git://src.sesamath.net/an-flow#118c52817e521ca6bb2e7a7b3e2a7b2063084237"
 
-"an-flow@git://src.sesamath.net/an-flow#3aa74ba":
-  version "2.0.8"
-  resolved "git://src.sesamath.net/an-flow#3aa74ba5ba7c6470774e3c6955414c7a0f51c9fa"
-
 "an-format-date@git://src.sesamath.net/an-format-date#a76218a":
   version "2.0.2"
   resolved "git://src.sesamath.net/an-format-date#a76218a71134029ac10b33398ba96510cef962cd"
@@ -7307,28 +7303,21 @@ serve-static@1.13.2, serve-static@^1.13.1:
   version "1.0.6"
   resolved "git+https://framagit.org/Sesamath/sesaeditgraphe.git#123681daed44bfe98d49cbf5604347fade73c4dd"
 
-sesajstools@Sesamath/sesajstools:
-  version "1.0.21"
-  uid "29972a3d34eff2311f4d629d242d8169e2bdd147"
-  resolved "https://codeload.github.com/Sesamath/sesajstools/tar.gz/29972a3d34eff2311f4d629d242d8169e2bdd147"
-  dependencies:
-    lodash.isequal "^4.5.0"
-
 "sesajstools@git+https://framagit.org/Sesamath/sesajstools.git":
   version "1.0.21"
   resolved "git+https://framagit.org/Sesamath/sesajstools.git#29972a3d34eff2311f4d629d242d8169e2bdd147"
   dependencies:
     lodash.isequal "^4.5.0"
 
-"sesalab-sso@git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.12":
-  version "1.0.12"
-  resolved "git+https://framagit.org/Sesamath/sesalab-sso.git#d78f4ae7315a69df96cba80ff2d323037a3a506f"
+"sesalab-sso@git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14":
+  version "1.0.14"
+  resolved "git+https://framagit.org/Sesamath/sesalab-sso.git#029a084e1a2ff0db0de15e03650f72d9661ebe81"
   dependencies:
-    an-flow "git://src.sesamath.net/an-flow#3aa74ba"
+    an-flow "git://src.sesamath.net/an-flow#118c528"
     an-uuid "git://src.sesamath.net/an-uuid#4ba4304"
     lodash "^4.17.5"
     request "2.82.0"
-    sesajstools Sesamath/sesajstools
+    sesajstools "git+https://framagit.org/Sesamath/sesajstools.git"
 
 "sesatheque-client@git+https://framagit.org/Sesamath/sesatheque-client.git#1.2.50":
   version "1.2.50"
