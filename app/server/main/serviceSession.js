@@ -34,13 +34,18 @@
 module.exports = function (component) {
   component.service('$session', function () {
     /**
+     * Retourne le baseId du client d'authentification courant
+     * @param context
+     * @return {string|undefined}
+     */
+    const getAuthBaseId = (context) => context.session.authBaseId
+
+    /**
      * Retourne le user courant (undefined si on est pas loggé)
      * @param {Context} context
      * @return {Personne|undefined}
      */
-    function getCurrentPersonne (context) {
-      return context.session.user
-    }
+    const getCurrentPersonne = (context) => context.session.user
 
     /**
      * Affecte un utilisateur en session (props groupesMembre, groupesSuivis, nom, oid, pid, prenom, roles)
@@ -66,13 +71,24 @@ module.exports = function (component) {
     }
 
     /**
+     * Affecte authBaseId
+     * @param context
+     * @param baseId
+     */
+    function setAuthBaseId (context, baseId) {
+      context.session.authBaseId = baseId
+    }
+
+    /**
      * Service de gestion de la session (ça devrait être le seul endroit qui modifie context.session)
      * @service $session
      */
     return {
+      getAuthBaseId,
       getCurrentPersonne,
       login,
-      logout
+      logout,
+      setAuthBaseId
     }
   })
 }
