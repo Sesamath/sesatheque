@@ -117,20 +117,16 @@ module.exports = function (component) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
       const groupes = {}
-      const groupSet = new Set()
       const addGroupe = (groupe) => {
         delete groupe.$loadState
         groupes[groupe.nom] = groupe
-        groupSet.add(groupe)
       }
+
       flow().seq(function () {
         $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (managedGroups) {
-        managedGroups.forEach((groupe) => {
-          addGroupe(groupe)
-        })
-        this()
-      }).seq(function () {
+        managedGroups.forEach((groupe) => addGroupe(groupe))
+        // on peut charger le user
         $personneRepository.load(oid, this)
       }).seq(function (personne) {
         const {groupesMembre, groupesSuivis} = personne
@@ -140,13 +136,16 @@ module.exports = function (component) {
           if (!groupes[nom]) missing.add(nom)
         })
         if (!missing.size) return this()
+        // faut aller chercher les groupes manquants
         const next = this
-        flow().seq(function () {
-          $groupeRepository.fetchListByNom(Array.from(missing), this)
-        }).seq(function (missingGroups) {
-          missingGroups.forEach(addGroupe)
-          next(null, Array.from(groupSet))
-        }).catch(next)
+        $groupeRepository.fetchListByNom(Array.from(missing), (error, groupes) => {
+          if (error) next(error)
+          groupes.forEach(addGroupe)
+          next()
+        })
+      }).seq(function () {
+        // on peut traiter la liste de tous les groupes
+        this(null, Object.values(groupes))
       }).seqEach(function (groupe) {
         addGestionnairesNames(context, groupe, this)
       }).seq(function () {
