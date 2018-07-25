@@ -157,7 +157,7 @@ module.exports = function (component) {
               name: $auth.getName(context)
             }
             // et on charge les groupes gérés (on veut leurs noms)
-            $groupeRepository.getListManagedBy(oid, this)
+            $groupeRepository.fetchListManagedBy(oid, this)
           }).seq(function (groupesAdmin) {
             response.personne.groupesAdmin = groupesAdmin.map(({nom}) => nom)
             send()

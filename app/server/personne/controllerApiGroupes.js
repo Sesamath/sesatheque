@@ -61,7 +61,7 @@ module.exports = function (component) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {
@@ -86,7 +86,7 @@ module.exports = function (component) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {
@@ -124,7 +124,7 @@ module.exports = function (component) {
         groupSet.add(groupe)
       }
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (managedGroups) {
         managedGroups.forEach((groupe) => {
           addGroupe(groupe)
@@ -142,7 +142,7 @@ module.exports = function (component) {
         if (!missing.size) return this()
         const next = this
         flow().seq(function () {
-          $groupeRepository.fetchList(Array.from(missing), this)
+          $groupeRepository.fetchListByNom(Array.from(missing), this)
         }).seq(function (missingGroups) {
           missingGroups.forEach(addGroupe)
           next(null, Array.from(groupSet))
@@ -166,7 +166,7 @@ module.exports = function (component) {
       if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes suivis")
 
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {

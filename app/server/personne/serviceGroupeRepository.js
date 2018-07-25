@@ -32,7 +32,6 @@
 'use strict'
 
 const flow = require('an-flow')
-const {getNormalizedName} = require('../lib/normalize')
 
 // on ne peut pas mettre ces services en dépendance de $groupeRepository car ils sont déclarés après
 let $ressourceRepository
@@ -45,6 +44,64 @@ module.exports = function (component) {
      * @param {Error} [error]
      * @param {Groupe[]} groupes
      */
+
+    /**
+     * Supprime un groupe (ET modifie les ressources liées)
+     * @param {string} nom
+     * @param {errorCallback} next
+     * @memberOf $groupeRepository
+     */
+    function deleteGroupe (nom, next) {
+      // on affecte au 1er appel
+      if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
+      if (!$personneRepository) $personneRepository = lassi.service('$personneRepository')
+
+      flow().seq(function () {
+        // on efface d'abord le groupe des ressources
+        $ressourceRepository.removeGroup(nom, this)
+      }).seq(function () {
+        // puis des personnes
+        $personneRepository.removeGroup(nom, this)
+      }).seq(function () {
+        // on peut virer le groupe
+        EntityGroupe.match('nom').equals(nom).purge(this)
+      }).seq(function () {
+        // et on vire du cache
+        $cacheGroupe.delete(nom, next)
+      }).catch(next)
+    }
+
+    /**
+     * Récupère une liste de groupes
+     * @param {string[]} noms
+     * @param {groupesCallback} next
+     */
+    function fetchListByNom (noms, next) {
+      let groupes = []
+      flow(noms).seqEach(function (nom) {
+        $cacheGroupe.getByNom(nom, this)
+      }).seq(function (cachedGroups) {
+        const missing = []
+        cachedGroups.forEach((groupe, index) => {
+          if (groupe) groupes.push(groupe)
+          else missing.push(noms[index])
+        })
+        if (!missing.length) return next(null, groupes)
+        EntityGroupe.match('nom').in(missing).grab(this)
+      }).seq(function (grps) {
+        next(null, groupes.concat(grps))
+      }).catch(next)
+    }
+
+    /**
+     * Récupère une liste de groupes dont le oid fourni est gestionnaire
+     * @param {string} oid
+     * @param {groupeListCallback} next
+     * @memberOf $groupeRepository
+     */
+    function fetchListManagedBy (oid, next) {
+      EntityGroupe.match('gestionnaires').equals(oid).sort('nom').grab(next)
+    }
 
     /**
      * Récupère un groupe d'après son oip
@@ -77,47 +134,13 @@ module.exports = function (component) {
         if (error) log.error(error)
         if (groupe) return next(null, groupe)
         // pas en cache, on va chercher en bdd
-        const indexedName = getNormalizedName(nom)
-        EntityGroupe.match('nom').equals(indexedName).grabOne(function (error, groupe) {
+        EntityGroupe.match('nom').equals(nom).grabOne(function (error, groupe) {
           if (error) return next(error)
           if (!groupe) return next()
           next(null, groupe)
           $cacheGroupe.set(groupe)
         })
       })
-    }
-
-    /**
-     * Récupère une liste de groupes
-     * @param {string[]} noms
-     * @param {groupesCallback} next
-     */
-    function fetchList (noms, next) {
-      let groupes = []
-      flow(noms).seqEach(function (nom) {
-        $cacheGroupe.getByNom(nom, this)
-      }).seq(function (cachedGroups) {
-        const missing = []
-        cachedGroups.forEach((groupe, index) => {
-          if (groupe) groupes.push(groupe)
-          else missing.push(noms[index])
-        })
-        if (!missing.length) return next(null, groupes)
-        const indexedNames = missing.map(getNormalizedName)
-        EntityGroupe.match('nom').in(indexedNames).grab(this)
-      }).seq(function (grps) {
-        next(null, groupes.concat(grps))
-      }).catch(next)
-    }
-
-    /**
-     * Récupère une liste de groupes dont le oid fourni est gestionnaire
-     * @param {string} oid
-     * @param {groupeListCallback} next
-     * @memberOf $groupeRepository
-     */
-    function getListManagedBy (oid, next) {
-      EntityGroupe.match('gestionnaires').equals(oid).sort('nom').grab(next)
     }
 
     /**
@@ -158,40 +181,13 @@ module.exports = function (component) {
     }
 
     /**
-     * Supprime un groupe (ET modifie les ressources liées)
-     * @param {string} nom
-     * @param {errorCallback} next
-     * @memberOf $groupeRepository
-     */
-    function deleteGroupe (nom, next) {
-      const indexedName = getNormalizedName(nom)
-      // on affecte au 1er appel
-      if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
-      if (!$personneRepository) $personneRepository = lassi.service('$personneRepository')
-
-      flow().seq(function () {
-        // on efface d'abord le groupe des ressources
-        $ressourceRepository.removeGroup(nom, this)
-      }).seq(function () {
-        // puis des personnes
-        $personneRepository.removeGroup(nom, this)
-      }).seq(function () {
-        // on peut virer le groupe
-        EntityGroupe.match('nom').equals(indexedName).purge(this)
-      }).seq(function () {
-        // et on vire du cache
-        $cacheGroupe.delete(nom, next)
-      }).catch(next)
-    }
-
-    /**
      * Service d'accès aux groupes utilisé par les différents contrôleurs
      * @service $groupeRepository
      */
     const $groupeRepository = {
       delete: deleteGroupe,
-      fetchList,
-      getListManagedBy,
+      fetchListByNom,
+      fetchListManagedBy,
       load,
       loadByNom,
       loadOuvert,

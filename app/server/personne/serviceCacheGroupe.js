@@ -49,6 +49,7 @@ module.exports = function (component) {
 
     /**
      * Retourne la clé de cache d'un groupe, construite d'après son nom
+     * (nom normalisé sans espace)
      * @private
      * @param {string|Groupe} groupe
      * @returns {string}
