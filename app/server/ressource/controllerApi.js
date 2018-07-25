@@ -291,7 +291,7 @@ module.exports = function (component) {
       const {action, baseId, rids} = context.post
       if (!action) return $json.sendError(context, 'action manquante')
       if (!baseId) return $json.sendError(context, 'baseId manquante')
-      if (!rids || !rids.length) return $json.sendError(context, 'rids manquant')
+      if (!Array.isArray(rids) || !rids.length) return $json.sendError(context, 'rids manquant')
 
       // ajouter un listener (pour prévenir baseId que rid a changé)
       if (action === 'add') {
