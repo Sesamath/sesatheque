@@ -84,6 +84,8 @@ module.exports = function (component) {
       next()
     })
 
+    // NOTE : en cas de pb d'unicité sur le nom, lancer localement
+    // `./scripts/mongoApp -f ./scripts-mongo/fixUniqueGroupeNom.js`
     EntityGroupe
       .defineIndex('nom', {normalizer: getNormalizedName, unique: true})
       .defineIndex('ouvert', 'boolean')
