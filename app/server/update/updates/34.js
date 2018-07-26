@@ -44,6 +44,9 @@ module.exports = {
     const EntityRessource = lassi.service('EntityRessource')
     const $groupeRepository = lassi.service('$groupeRepository')
     const $ressourceRepository = lassi.service('$ressourceRepository')
+    // on utilise le cli de lassi pour reindexAll
+    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    const reindexAll = $entitiesCli().commands().reindexAll
 
     flow().seq(function () {
       EntityPersonne.getCollection().aggregate([
@@ -104,7 +107,12 @@ module.exports = {
         $ressourceRepository.save(ressource, this)
       }).done(nextRessource)
     }).seq(function () {
-      updateLog('doublons pid supprimés & rid invalides reconstruits')
+      updateLog('doublons pid supprimés & rid invalides reconstruits, on réindexe tout')
+      this(null, ['EntityArchive', 'EntityExternalRef', 'EntityGroupe', 'EntityPersonne', 'EntityRessource', 'EntityUpdate'])
+    }).seqEach(function (entityName) {
+      reindexAll(entityName, this)
+    }).seq(function () {
+      updateLog('fin des réindexations')
       next()
     }).catch(next)
   } // run
