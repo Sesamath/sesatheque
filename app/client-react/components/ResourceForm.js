@@ -12,12 +12,12 @@ import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
 import commonValidate from '../utils/validate'
-import plugins from '../../plugins'
+import editors from 'plugins'
 
 const validate = (values) => {
   const errors = commonValidate(values)
   const {type} = values
-  const typeValidate = plugins[type] && plugins[type].validate
+  const typeValidate = editors[type] && editors[type].validate
   if (typeValidate) {
     typeValidate(values, errors)
   }
@@ -40,7 +40,7 @@ const ResourceForm = ({
   pristine,
   initialize
 }) => {
-  const Editor = (plugins[type] && plugins[type].editor) || EditorSimple
+  const Editor = (editors[type] && editors[type].editor) || EditorSimple
 
   return (
     <Fragment>

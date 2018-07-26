@@ -49,7 +49,7 @@ const consoleErrorSpy = require('../page/consoleErrorSpy')
 const errorCatcher = require('../page/errorCatcher')
 const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
-const {displays} = require('../../plugins')
+const {displays} = require('plugins')
 
 const wd = window.document
 
