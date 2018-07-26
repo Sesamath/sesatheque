@@ -33,6 +33,7 @@
 const flow = require('an-flow')
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
 const updateLog = require('an-log')('update' + updateNum)
+const {application: {baseId}} = require('../../config')
 
 module.exports = {
   name: 'nettoie les rid et pid en doublon',
@@ -42,6 +43,7 @@ module.exports = {
     const EntityPersonne = lassi.service('EntityPersonne')
     const EntityRessource = lassi.service('EntityRessource')
     const $groupeRepository = lassi.service('$groupeRepository')
+    const $ressourceRepository = lassi.service('$ressourceRepository')
 
     flow().seq(function () {
       EntityPersonne.getCollection().aggregate([
@@ -90,19 +92,19 @@ module.exports = {
     }).seqEach(function (result) {
       const nextRessource = this
       const {_id: {rid}} = result
-      let oidsToDel
       flow().seq(function () {
+        updateLog.error(`rid ${rid} en ${result.count} exemplaires`)
         EntityRessource.match('rid').equals(rid).grab(this)
-      }).seq(function (ressources) {
-        updateLog(`rid ${rid} en ${ressources.length} exemplaires (${ressources.map(r => r.oid).join(', ')})`)
-        // on garde la dernière (on mémorise pas car les oid de ressource
-        // ne sont jamais utilisés comme ref externe, c'est toujours des rid)
-        ressources.pop()
-        oidsToDel = ressources.map(p => p.oid)
-        EntityRessource.match('oid').in(oidsToDel).purge(this)
+      }).seqEach(function (ressource) {
+        // on reset le rid
+        const rid = `${baseId}/${ressource.oid}`
+        if (rid === ressource.rid) return this()
+        updateLog(`rid invalide pour ${ressource.oid}, ${ressource.rid} => ${rid}`)
+        ressource.rid = rid
+        $ressourceRepository.save(ressource, this)
       }).done(nextRessource)
     }).seq(function () {
-      updateLog('doublons pid & rid supprimés')
+      updateLog('doublons pid supprimés & rid invalides reconstruits')
       next()
     }).catch(next)
   } // run
