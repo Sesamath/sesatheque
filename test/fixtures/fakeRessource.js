@@ -137,7 +137,6 @@ function getFakeRessource (options) {
     'dateCreation',
     'dateMiseAJour',
     'indexable',
-    'archiveOid',
     '$warnings',
     '$errors'
   ].forEach(p => { if (options[p]) fakeRessource[p] = options[p] })

@@ -42,6 +42,9 @@ const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
 
+// pour le shema
+const restrictionMax = Object.keys(configRessource.constantes.restriction).length - 1
+
 const myBaseId = config.application.baseId
 
 module.exports = function (component) {
@@ -69,7 +72,7 @@ module.exports = function (component) {
       }
 
       // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
-      // plus pratique ici que dans le constructeur qui ne peut faire de require
+      // plus pratique ici que dans le constructeur qui ne peut pas faire de require
       if (values) {
         if (values.dateCreation && !(values.dateCreation instanceof Date)) values.dateCreation = tools.toDate(values.dateCreation)
         if (values.dateMiseAJour && !(values.dateMiseAJour instanceof Date)) values.dateMiseAJour = tools.toDate(values.dateMiseAJour)
@@ -89,14 +92,105 @@ module.exports = function (component) {
       }
     })
 
+    EntityRessource.validateJsonSchema({
+      type: 'object',
+      properties: {
+        oid: {type: 'string'},
+        rid: {type: 'string'},
+        aliasOf: {type: 'string'},
+        cle: {type: 'string'},
+        origine: {type: 'string'},
+        idOrigine: {type: 'string'},
+        titre: {type: 'string'},
+        type: {type: 'string'},
+        resume: {type: 'string'},
+        description: {type: 'string'},
+        commentaires: {type: 'string'},
+        niveaux: {$ref: '#/definitions/arrayOfStrings'},
+        categories: {
+          type: 'array',
+          items: {type: 'integer'}
+        },
+        typePedagogiques: {
+          type: 'array',
+          items: {type: 'integer'}
+        },
+        typeDocumentaires: {
+          type: 'array',
+          items: {type: 'integer'}
+        },
+        parametres: {type: 'object'},
+        enfants: {
+          type: 'array',
+          items: {$ref: '#/definitions/enfant'}
+        },
+        relations: {
+          type: 'array',
+          items: {$ref: '#/definitions/relation'}
+        },
+        auteurs: {$ref: '#/definitions/arrayOfMixedId'},
+        auteursParents: {$ref: '#/definitions/arrayOfMixedId'},
+        contributeurs: {$ref: '#/definitions/arrayOfMixedId'},
+        groupes: {$ref: '#/definitions/arrayOfStrings'},
+        groupesAuteurs: {$ref: '#/definitions/arrayOfStrings'},
+        langue: {type: 'string'},
+        publie: {type: 'boolean'},
+        restriction: {type: 'integer', minimum: 0, maximum: restrictionMax},
+        dateCreation: {instanceof: 'Date'},
+        dateMiseAJour: {instanceof: 'Date'},
+        version: {type: 'integer', minimum: 1},
+        inc: {type: 'integer', minimum: 1},
+        indexable: {type: 'boolean'}
+      },
+      additionalProperties: false,
+      required: ['titre', 'type'],
+      definitions: {
+        arrayOfMixedId: {
+          type: 'array',
+          items: {
+            type: 'string',
+            pattern: '^[a-z0-9]+/[a-z0-9_-]+$'
+          }
+        },
+        arrayOfStrings: {
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1
+          }
+        },
+        enfant: {
+          type: 'object',
+          properties: {
+            titre: {type: 'string'},
+            type: {type: 'string'},
+            aliasOf: {type: 'string'},
+            enfants: {
+              type: 'array',
+              items: {$ref: '#/definitions/enfant'}
+            }
+          },
+          additionalProperties: false,
+          required: ['titre', 'type']
+        },
+        relation: {
+          type: 'array',
+          items: [
+            {type: 'integer'},
+            {type: 'string'}
+          ]
+        }
+      }
+    })
+
     EntityRessource
-      .defineIndex('rid', 'string')
-      .defineIndex('cle', 'string') // pour loadByCle
+      .defineIndex('rid', {unique: true})
+      .defineIndex('cle', {unique: true, sparse: true}) // pour loadByCle
       .defineIndex('aliasOf', 'string')
       .defineIndex('origine', 'string')
       .defineIndex('idOrigine', 'string')
-      .defineIndex('type', 'string')
-      .defineIndex('titre', 'string')
+      .defineIndex('type')
+      .defineIndex('titre')
       .defineIndex('niveaux', 'string')
       .defineIndex('categories', 'integer')
       .defineIndex('typePedagogiques', 'integer')

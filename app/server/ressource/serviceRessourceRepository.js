@@ -312,7 +312,6 @@ module.exports = function (ressourceComponent) {
           log.debug('ressource archivée', archive)
           ressource.version++
           ressource.inc++
-          ressource.archiveOid = archive.oid
           next(null, ressource)
           updateParents(ressource)
         })

@@ -287,7 +287,6 @@ const configRessource = {
     dateMiseAJour: 'Date de mise à jour',
     version: 'Version',
     indexable: 'Indexable',
-    archiveOid: 'Version précédente',
     // facultatifs
     enfants: 'Enfants' // utilisé seulement pour les arbres (à la place de parametres)
   },
@@ -329,7 +328,6 @@ const configRessource = {
     dateMiseAJour: 'Date',
     version: 'Number',
     indexable: 'Boolean',
-    archiveOid: 'Number',
     // facultatifs
     enfants: 'Array'
   },

@@ -146,8 +146,6 @@ describe('controller api ressource', () => {
       ressource.auteurs.push(getRandomPersonne(true, existingPids))
       ressource.inc++
       ressource.version++
-      // on vire ça des propriétés à vérifier car ça va changer
-      delete ressource.archiveOid
       const postData = {
         oid,
         auteurs: ressource.auteurs
