@@ -91,10 +91,6 @@ module.exports = function (component) {
 
     EntityRessource
       .defineIndex('rid', 'string')
-      // baseId n'est pas une propriété de Ressource mais ça nous intéresse de connaître la provenance
-      .defineIndex('baseId', 'string', function () {
-        if (this.rid) return getBaseIdFromRid(this.rid)
-      })
       .defineIndex('cle', 'string') // pour loadByCle
       .defineIndex('aliasOf', 'string')
       .defineIndex('origine', 'string')
@@ -212,8 +208,19 @@ module.exports = function (component) {
         }
         // check aliasOf
         if (this.aliasOf) {
-          // peu importe la base, on veut juste un check
-          getBaseIdFromRid(this.aliasOf)
+          // y'a eu des 'undefined' enregistrés à une époque…
+          // @todo virer ça après update34
+          if (this.aliasOf === 'undefined') {
+            delete this.aliasOf
+          } else {
+            // peu importe la base, on veut juste un check
+            try {
+              getBaseIdFromRid(this.aliasOf)
+            } catch (error) {
+              if (this.oid) throw Error(`aliasOf invalide ${this.aliasOf} pour ${this.oid}`)
+              throw Error(`aliasOf invalide ${this.aliasOf}`)
+            }
+          }
         }
         // on vire un éventuel token
         if (this.token) delete this.token
