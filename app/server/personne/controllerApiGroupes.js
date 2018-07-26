@@ -110,7 +110,7 @@ module.exports = function (component) {
 
     /**
      * Retourne la liste de tous les groupes du user courant, sous la forme d'un objet
-     * {groupesAll: {nom: groupe},groupesAdmin: string[], groupesMembre: string[], groupesSuivis: string[]}
+     * {groupes: {nom: groupe},groupesAdmin: string[], groupesMembre: string[], groupesSuivis: string[]}
      * @route GET /api/groupes/perso
      */
     controller.get('perso', function (context) {
