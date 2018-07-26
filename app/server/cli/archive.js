@@ -102,12 +102,12 @@ function restore (oid, version, done) {
     ressource = _ressource
     if (version === 'last') {
       EntityArchive
-        .match('archiveOid').equals(oid)
+        .match('rid').equals(ressource.rid)
         .sort('version', 'desc')
         .grabOne(this)
     } else {
       EntityArchive
-        .match('archiveOid').equals(oid)
+        .match('rid').equals(ressource.rid)
         .match('version').equals(version)
         .grabOne(this)
     }

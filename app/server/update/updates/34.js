@@ -36,7 +36,7 @@ const updateLog = require('an-log')('update' + updateNum)
 const {application: {baseId}} = require('../../config')
 
 module.exports = {
-  name: 'nettoie les rid et pid en doublon',
+  name: 'nettoie les rid et pid en doublon, réindexe tout',
   description: '',
   run: function run (next) {
     const EntityGroupe = lassi.service('EntityGroupe')
@@ -48,6 +48,8 @@ module.exports = {
     const $entitiesCli = require('lassi/source/services/entities-cli.js')
     const reindexAll = $entitiesCli().commands().reindexAll
 
+    let nbDoublonsPid = 0
+    let nbDoublonsRid = 0
     flow().seq(function () {
       EntityPersonne.getCollection().aggregate([
         {
@@ -60,6 +62,7 @@ module.exports = {
         }
       ]).toArray(this)
     }).seqEach(function (result) {
+      nbDoublonsPid++
       const nextPersonne = this
       const {_id: {pid}} = result
       let oidToKeep
@@ -81,6 +84,8 @@ module.exports = {
         $groupeRepository.save(groupe, this)
       }).done(nextPersonne)
     }).seq(function () {
+      if (!nbDoublonsPid) updateLog('Il n’y avait aucun pid en doublon')
+
       // on peut passer aux ressources
       EntityRessource.getCollection().aggregate([
         {
@@ -93,13 +98,13 @@ module.exports = {
         }
       ]).toArray(this)
     }).seqEach(function (result) {
+      nbDoublonsRid++
       const nextRessource = this
       const {_id: {rid}} = result
       flow().seq(function () {
         updateLog.error(`rid ${rid} en ${result.count} exemplaires`)
         EntityRessource.match('rid').equals(rid).grab(this)
       }).seqEach(function (ressource) {
-        // on reset le rid
         const rid = `${baseId}/${ressource.oid}`
         if (rid === ressource.rid) return this()
         updateLog(`rid invalide pour ${ressource.oid}, ${ressource.rid} => ${rid}`)
@@ -107,7 +112,8 @@ module.exports = {
         $ressourceRepository.save(ressource, this)
       }).done(nextRessource)
     }).seq(function () {
-      updateLog('doublons pid supprimés & rid invalides reconstruits, on réindexe tout')
+      if (!nbDoublonsRid) updateLog('Il n’y avait aucun rid en doublon')
+      updateLog('Réindexation de toute les entities')
       this(null, ['EntityArchive', 'EntityExternalRef', 'EntityGroupe', 'EntityPersonne', 'EntityRessource', 'EntityUpdate'])
     }).seqEach(function (entityName) {
       reindexAll(entityName, this)

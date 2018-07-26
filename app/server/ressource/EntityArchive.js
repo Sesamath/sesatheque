@@ -34,25 +34,19 @@
 module.exports = function (component) {
   component.entity('EntityArchive', function () {
     const EntityArchive = this
+    // pas besoin de constructeur, on ne doit nous passer que des archives
+    // ou des ressources sans oid
     /**
      * Idem {@link EntityRessource}, avec dateArchivage en plus et moins d'index
+     * @name EntityArchive
      * @entity EntityArchive
      * @extends Ressource
      * @extends Entity
      */
-    EntityArchive.construct(function (ressource) {
-      if (!ressource) {
-        log.error("Création d'une entité archive sans ressource ni archive fourmie")
-        return
-      }
-      // on garde tout
-      Object.assign(this, ressource)
-      if (!ressource.dateArchivage) {
-        // on nous a passé une ressource et pas une archive, faut virer l'oid
-        this.oid = undefined
-        // et ajouter la date d'archivage
-        this.dateArchivage = new Date()
-      }
+
+    EntityArchive.beforeStore(function (next) {
+      if (!this.dateArchivage) this.dateArchivage = new Date()
+      next()
     })
 
     EntityArchive
