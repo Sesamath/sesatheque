@@ -461,7 +461,7 @@ module.exports = function (ressourceComponent) {
      */
     function archive (ressource, next) {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n’existe pas encore")
-      EntityArchive.create(parse(stringify(ressource))).store(next)
+      EntityArchive.create(ressource).store(next)
     }
 
     /**

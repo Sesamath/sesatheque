@@ -42,21 +42,21 @@ module.exports = function (component) {
      */
     EntityArchive.construct(function (ressource) {
       if (!ressource) {
-        log.error("Création d'une entité archive sans ressource fourmie")
+        log.error("Création d'une entité archive sans ressource ni archive fourmie")
         return
       }
       // on garde tout
       Object.assign(this, ressource)
-      // sauf l'oid
-      delete this.oid
-      // et on ajoute la date d'archivage
-      this.dateArchivage = new Date()
+      if (!ressource.dateArchivage) {
+        // on nous a passé une ressource et pas une archive, faut virer l'oid
+        this.oid = undefined
+        // et ajouter la date d'archivage
+        this.dateArchivage = new Date()
+      }
     })
 
     EntityArchive
       .defineIndex('rid', 'string')
       .defineIndex('version', 'integer')
-      .defineIndex('archiveOid', 'string')
-      .defineIndex('dateArchivage', 'date')
   })
 }

@@ -31,6 +31,7 @@
 'use strict'
 const flow = require('an-flow')
 const taskLog = require('an-log')('sesatheque-cli')
+const {application: {baseId}} = require('../config')
 
 function listVersions (oid, done) {
   if (typeof done !== 'function' || !oid) {
@@ -38,12 +39,13 @@ function listVersions (oid, done) {
     listVersions().help()
     return
   }
-  lassi.service('EntityArchive').match('archiveOid').equals(oid).sort('version').grab((error, archives) => {
+  const rid = `${baseId}/${oid}`
+  lassi.service('EntityArchive').match('rid').equals(rid).sort('version').grab((error, archives) => {
     if (error) return done(error)
     if (archives.length) {
       console.log(`La ressource ${oid} est archivée avec les versions ${archives.map(a => a.version).join(' ')}`)
     } else {
-      console.log(`La ressource ${oid} n’ pas d’archives`)
+      console.log(`La ressource ${oid} n’a pas d’archives`)
     }
     done()
   })
@@ -58,16 +60,17 @@ function print (oid, version, done) {
     return
   }
   if (!oid || !version) return done(new Error('arguments invalides'))
-  const query = lassi.service('EntityArchive').match('archiveOid').equals(oid)
+  const rid = `${baseId}/${oid}`
+  const query = lassi.service('EntityArchive').match('rid').equals(rid)
   if (version === 'last') query.sort('version', 'desc')
   else query.match('version').equals(version)
   query.grabOne((error, archive) => {
     if (error) return done(error)
-    if (archive) {
+    if (!archive) {
       console.log(`La ressource ${oid} archivée en version ${version} :`)
       console.log(JSON.stringify(archive, null, 2))
     } else {
-      console.log(`La ressource ${oid} n’ pas d’archive en version ${version}`)
+      console.log(`La ressource ${oid} n’a pas d’archive en version ${version}`)
     }
     done()
   })
@@ -75,7 +78,7 @@ function print (oid, version, done) {
 print.help = () => console.log('La commande restore prend un oid de ressource en premier argument et la version à restaurer en 2e (mettre last pour récupérer la dernière)')
 
 /**
- * Rafraichit les datas de tous les arbres
+ * Restore une version depuis les archives
  * @param {string} [oid]
  * @param {errorCallback} done
  */
@@ -113,16 +116,15 @@ function restore (oid, version, done) {
     archive = _archive
     $ressourceRepository.archive(ressource, this)
   }).seq(function () {
-    const ressourceRestored = {
+    const overrides = {
       oid: ressource.oid,
+      // on garde comme parent l'archive restaurée, qui ne sera donc pas en version - 1
+      archiveOid: archive.oid,
       version: ressource.version + 1,
-      inc: ressource.inc + 1
+      inc: ressource.inc + 1,
+      dateArchivage: undefined
     }
-    Object.keys(archive).forEach(p => {
-      if (['oid', 'archiveOid', 'dateArchivage', 'version', 'inc'].includes(p)) return
-      if (typeof archive[p] === 'function') return
-      ressourceRestored[p] = archive[p]
-    })
+    const ressourceRestored = Object.assign({}, archive, overrides)
     $ressourceRepository.save(ressourceRestored, this)
   }).seq(function (freshRessource) {
     taskLog(`Archive ${archive.oid} de la ressource ${oid}`)
