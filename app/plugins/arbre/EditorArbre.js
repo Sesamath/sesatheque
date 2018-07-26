@@ -4,7 +4,7 @@ import {formValues} from 'redux-form'
 import IframeHandler from 'client-react/components/IframeHandler'
 import iframeHelper from 'client-react/hoc/iframeHelper'
 // page contenant l'éditeur d'arbre à insérer en iframe
-import iframeSrc from '../../client/plugins/arbre/edit.html'
+import iframeSrc from './public/edit.html'
 // cf webpackConfigLoader.js pour les valeurs exportées à un browser
 import {baseId} from '../../server/config'
 

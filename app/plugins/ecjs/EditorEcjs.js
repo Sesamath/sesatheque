@@ -5,7 +5,7 @@ import {SelectField} from 'client-react/components/fields'
 import IframeHandler from 'client-react/components/IframeHandler'
 import iframeHelper from 'client-react/hoc/iframeHelper'
 // page de l'éditeur ecjs à insérer en iframe
-import iframeSrc from '../../client/plugins/ecjs/edit.html'
+import iframeSrc from './public/edit.html'
 import typesEcjs from './subtypes'
 
 class EditorEcjs extends Component {

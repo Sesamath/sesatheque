@@ -1,6 +1,8 @@
 import editor from './EditorEcjs'
 import validate from './validate'
+import display from './public/display'
+import icon from './public/ecjs.gif'
 
-const types = ['ecjs']
+const type = 'ecjs'
 
-export {editor, types, validate}
+export {editor, type, validate, display, icon}

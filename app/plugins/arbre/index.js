@@ -1,6 +1,8 @@
 import editor from './EditorArbre'
 import validate from './validate'
+import icon from './public/arbre.gif'
+import display from './public/display'
 
-const types = ['arbre']
+const type = 'arbre'
 
-export {editor, types, validate}
+export {editor, type, validate, icon, display}

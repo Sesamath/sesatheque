@@ -1,5 +1,7 @@
 import editor from './EditorUrl'
+import icon from './public/url.gif'
+import display from './public/display'
 
-const types = ['url']
+const type = 'url'
 
-export {editor, types}
+export {editor, type, icon, display}

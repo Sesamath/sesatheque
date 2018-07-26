@@ -1,5 +1,8 @@
 import editor from './EditorMathGraph'
+import validate from './validate'
+import icon from './public/mathgraph.gif'
+import display from './public/display'
 
-const types = ['mathgraph']
+const type = 'mathgraph'
 
-export {editor, types}
+export {editor, type, validate, display, icon}

@@ -1,5 +1,7 @@
 import editor from './EditorIep'
+import icon from './public/iep.gif'
+import display from './public/display'
 
-const types = ['iep']
+const type = 'iep'
 
-export {editor, types}
+export {editor, type, icon, display}

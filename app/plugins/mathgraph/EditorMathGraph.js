@@ -5,7 +5,7 @@ import IframeHandler from 'client-react/components/IframeHandler'
 import iframeHelper from 'client-react/hoc/iframeHelper'
 import {IntegerField, SwitchField} from 'client-react/components/fields'
 // page de l'éditeur mathgraph à insérer en iframe
-import iframeSrc from '../../client/plugins/mathgraph/mathgraph-editor.html'
+import iframeSrc from './public/mathgraph-editor.html'
 
 class EditorMathGraph extends Component {
   constructor (props) {

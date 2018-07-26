@@ -6,6 +6,7 @@ import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
 import queryString from 'query-string'
 import './ResourceList.scss'
+import {icons} from '../../plugins'
 
 export const ResourceList = ({
   handlePageClick,
@@ -66,7 +67,7 @@ export const ResourceList = ({
             $droits
           }) => (
             <tr key={oid.toString()}>
-              <td><img src={`/plugins/${type}/${type}.gif`} alt="thumbnail" /></td>
+              <td><img src={icons[type]} alt="thumbnail" /></td>
               <td>{oid.toString()}</td>
               <td>{titre}</td>
               <td colSpan="4" className="links">

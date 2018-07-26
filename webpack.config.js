@@ -51,7 +51,7 @@ const conf = {
     import: './app/client/edit/import.js',
     react: './app/client-react/index.js',
     // arbre passe par babel
-    editArbre: './app/client/plugins/arbre/edit.js'
+    editArbre: './app/plugins/arbre/public/edit.js'
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
   output: {
@@ -100,6 +100,7 @@ const conf = {
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       // {test: /\.json$/, loader: 'json-loader'},
       {test: /app\/client\/.*\.html/, loader: 'file-loader'},
+      {test: /app\/plugins\/.*\.html/, loader: 'file-loader'},
       // editgraphe doit passer par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
