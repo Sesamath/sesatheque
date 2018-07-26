@@ -110,7 +110,7 @@ module.exports = function (component) {
 
     /**
      * Retourne la liste de tous les groupes du user courant, sous la forme d'un objet
-     * {groupes: {nom: groupe},groupesAdmin: string[], groupesMembre: string[], groupesSuivis: string[]}
+     * {groupesAll: {nom: groupe},groupesAdmin: string[], groupesMembre: string[], groupesSuivis: string[]}
      * @route GET /api/groupes/perso
      */
     controller.get('perso', function (context) {
@@ -121,16 +121,27 @@ module.exports = function (component) {
         delete groupe.$loadState
         groupes[groupe.nom] = groupe
       }
+      const response = {
+        groupes,
+        groupesAdmin: []
+      }
 
       flow().seq(function () {
         $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (managedGroups) {
-        managedGroups.forEach((groupe) => addGroupe(groupe))
-        // on peut charger le user
+        managedGroups.forEach((groupe) => {
+          addGroupe(groupe)
+          response.groupesAdmin.push(groupe.nom)
+        })
+
+        // on peut charger le user (pour avoir ses groupes à jour)
         $personneRepository.load(oid, this)
       }).seq(function (personne) {
         const {groupesMembre, groupesSuivis} = personne
-        // les groupes qu'il faut aller chercher
+        response.groupesMembre = groupesMembre
+        response.groupesSuivis = groupesSuivis
+
+        // les groupes qui manquent
         const missing = new Set()
         groupesMembre.concat(groupesSuivis).forEach(nom => {
           if (!groupes[nom]) missing.add(nom)
@@ -149,7 +160,7 @@ module.exports = function (component) {
       }).seqEach(function (groupe) {
         addGestionnairesNames(context, groupe, this)
       }).seq(function () {
-        $json.sendOk(context, {groupes})
+        $json.sendOk(context, response)
       }).catch($json.sendError.bind(null, context))
     })
     controller.options('perso', optionsOk)

@@ -1,11 +1,10 @@
 const groupesReducer = (state = null, {type, payload}) => {
   switch (type) {
-    case 'LOAD_GROUPES': {
-      const {groupes} = payload
-      return groupes
-    }
+    case 'LOAD_GROUPES':
+      return payload.groupes
+
     case 'DELETE_GROUPE': {
-      if (state === null) { return state }
+      if (state === null) return state
       const {nom} = payload
 
       return {
@@ -13,6 +12,7 @@ const groupesReducer = (state = null, {type, payload}) => {
         [nom]: undefined
       }
     }
+
     case 'SAVE_GROUPE':
     case 'JOIN_GROUPE':
     case 'FOLLOW_GROUPE': {
@@ -26,6 +26,7 @@ const groupesReducer = (state = null, {type, payload}) => {
         [nom]: groupe
       }
     }
+
     default:
       return state
   }
