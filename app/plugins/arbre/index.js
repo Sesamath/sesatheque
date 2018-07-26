@@ -5,4 +5,4 @@ import display from './public/display'
 
 const type = 'arbre'
 
-export {editor, type, validate, icon, display}
+export default {editor, type, validate, icon, display}

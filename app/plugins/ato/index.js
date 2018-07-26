@@ -4,4 +4,4 @@ import display from './public/display'
 
 const type = 'ato'
 
-export {editor, type, icon, display}
+export default {editor, type, icon, display}

@@ -4,4 +4,4 @@ import display from './public/display'
 
 const type = 'j3p'
 
-export {editor, type, display, icon}
+export default {editor, type, display, icon}

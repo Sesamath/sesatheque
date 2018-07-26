@@ -4,4 +4,4 @@ import display from './public/display'
 
 const type = 'am'
 
-export {editor, type, icon, display}
+export default {editor, type, icon, display}

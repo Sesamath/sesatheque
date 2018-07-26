@@ -5,4 +5,4 @@ import display from './public/display'
 
 const type = 'mathgraph'
 
-export {editor, type, validate, display, icon}
+export default {editor, type, validate, display, icon}

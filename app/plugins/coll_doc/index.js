@@ -4,4 +4,4 @@ import display from './public/display'
 
 const type = 'coll_doc'
 
-export {editor, type, icon, display}
+export default {editor, type, icon, display}

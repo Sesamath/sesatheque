@@ -39,8 +39,9 @@ import './arbre.css'
 import 'jstree/dist/themes/default/style.css'
 import {sesatheques} from '../../../server/config'
 import page from '../../../client/page/index'
-addSesatheques(sesatheques)
 import * as stJstree from './lib'
+
+addSesatheques(sesatheques)
 
 /**
  * Affiche l'arbre, avec les boutons pour déplier les branches et afficher l'aperçu des feuilles
