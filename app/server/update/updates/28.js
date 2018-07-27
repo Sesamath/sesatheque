@@ -367,7 +367,6 @@ module.exports = {
 
     updateLog(name)
     flow().seq(function () {
-      // $ressourceRepository.getListe('all', {filters: [{index: 'origine', values: ['sesamath']}]}, this)
       $ressourceRepository.loadByOrigin('sesamath', 'labomep_all', this)
     }).seq(function (labomepAll) {
       // on est pas forcément sur une sesatheque avec cet arbre
