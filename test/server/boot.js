@@ -51,8 +51,16 @@ import sesatheques from 'sesatheque-client/dist/sesatheques'
 import log from 'sesajstools/utils/log'
 
 /**
+ * client supertest
  * @see https://github.com/visionmedia/supertest
+ * @typedef supertestClient
+ * @type {object}
+ */
+/**
+ * Agent supertest
  * @see https://visionmedia.github.io/superagent/
+ * @typedef supertestAgent
+ * @type {object}
  */
 import supertest from 'supertest'
 
@@ -98,7 +106,10 @@ const getBootPromise = (delay) => new Promise((resolve, reject) => {
     // sera appelé sur l'événement startup de lassi
     const afterBootCallback = () => {
       if (!resolvedValue.lassi) throw new Error('Il y a eu un pb dans la méthode boot, lassi n’est pas disponible')
+      /** @type supertestClient */
       resolvedValue.superTestClient = supertest(resolvedValue.lassi.express)
+      /** @type supertestAgent */
+      resolvedValue.superTestAgent = supertest.agent(resolvedValue.lassi.express)
       resolvedValue.testsDone = () => resetTimer(100)
       isBooted = true
       finish()
