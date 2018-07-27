@@ -49,8 +49,6 @@ const j3pGraphe2json = require('../../../tasks/modules/j3pGraphe2json')
 
 const myBaseId = appConfig.application.baseId
 
-const {getNormalizedGrabOptions} = require('../lib/normalize')
-
 // et des petites fonctions utiles
 const prependMyBaseId = (oid) => myBaseId + '/' + oid
 const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
@@ -58,7 +56,7 @@ const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 module.exports = function (ressourceComponent) {
   ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
     // on applique toujours un limit
-    const {listeMax} = config.limites
+    const {listeMax, listeNbDefault} = config.limites
     if (!listeMax) throw new Error('ressource.limites.listeMax manquant en configuration')
 
     /**
@@ -173,94 +171,37 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Retourne la requête préparée d'après visibilite et options.filters
+     * Retourne la requête lassi, préparée d'après searchQuery
      * @private
-     * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
-     * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
+     * @param {searchQuery} searchQuery Un objet avec les match à faire en propriété et les valeurs à matcher en value (toujours Array)
      * @param {getListeFilters} [options.filters] tableau de filtres
      * @return {EntityQuery}
      */
-    function getListeQuery (visibilite, options) {
-      // avant de construire la query on fait un minimum de vérifications
-      const filters = []
-      if (options.filters) {
-        if (!Array.isArray(options.filters)) throw new Error('Filtres incorrects')
-        options.filters.forEach(function (filter) {
-          if (!filter.index || !_.isString(filter.index)) throw new Error('index invalide ou manquant pour un des filtres')
-          if (!Array.isArray(filter.values)) throw new Error(`values invalides (pas un tableau) pour filter ${filter.index}`)
-          // on ne prend que ce que l'on connait, le filtre restriction est ignoré car c'est visibilite qui l'impose éventuellement
-          if (filter.index === 'restriction') {
-            log.error(new Error('le filtre restriction doit passer par le paramètre visibilité'))
-          } else if (config.labels[filter.index]) {
-            filters.push(filter)
-          } else if (filter.index === 'fulltext') {
-            if (filter.values.length) filters.push(filter)
-            else log.error(new Error('filter fulltext sans values'))
+    function getLassiQuery (searchQuery) {
+      const lassiQuery = EntityRessource.match() // sans argument ça retourne une EntityQuery vierge
+      Object.entries(searchQuery).forEach(([prop, values]) => {
+        if (!Array.isArray(values)) throw new Error(`values invalides (pas un tableau) pour ${prop}`)
+        if (values.length) {
+          if (prop === 'fulltext') {
+            lassiQuery.textSearch(values.join(' '))
+          } else if (values.length > 1) {
+            lassiQuery.match(prop).in(values)
           } else {
-            log.error(new Error(`Index ${filter.index} non déclaré en config`))
+            const value = values[0]
+            if (typeof value === 'string' && value.includes('%')) {
+              lassiQuery.match(prop).like(value)
+            } else {
+              lassiQuery.match(prop).equals(values)
+            }
           }
-        })
-      } else {
-        // donc pas de filtre, mais faut un argument à match
-        filters.push({index: 'oid'})
-      }
-
-      const query = EntityRessource.match() // sans argument ça retourne une EntityQuery vierge
-      filters.forEach(function (filter) {
-        // log.debug('getListe filter ' + filter.index)
-        // fulltext à part
-        if (filter.index === 'fulltext') {
-          query.textSearch(filter.values.join(' '))
-
-        // les index ordinaires avec valeurs
-        } else if (filter.values) {
-          switch (filter.values.length) {
-            case 0:
-              query.match(filter.index)
-              break
-            case 1:
-              // une seule valeur, on regarde si on veut du like
-              const value = filter.values[0]
-              const action = (typeof value === 'string' && (value.indexOf('%') !== -1 || value.indexOf('_') !== -1)) ? 'like' : 'equals'
-              query.match(filter.index)[action](filter.values[0])
-              break
-            default:
-              query.match(filter.index).in(filter.values)
-          }
-
-        // et sans valeurs
         } else {
-          query.match(filter.index)
+          // pas de valeur, on fait juste un match sur la prop, sauf fulltext qui n'y a pas droit
+          if (prop === 'fulltext') throw new Error('searchQuery avec fulltext sans values')
+          lassiQuery.match(prop)
         }
       })
 
-      // restriction d'après la visibilité
-      if (visibilite === 'public') {
-        query.match('restriction').equals(config.constantes.restriction.aucune)
-      } else if (visibilite === 'correction') {
-        query.match('restriction').lowerThanOrEquals(config.constantes.restriction.correction)
-      } else if (visibilite === 'all') {
-        log.debug('recherche sur tout')
-      } else {
-        const slashPos = visibilite.indexOf('/')
-        if (slashPos > 0) {
-          const type = visibilite.substr(0, slashPos)
-          const target = visibilite.substr(slashPos + 1)
-          if (type === 'auteur') {
-            query.match('auteurs').equals(target)
-          } else if (type === 'groupe') {
-            query.match('groupes').equals(target.toLowerCase())
-          } else {
-            throw new Error('Clé de recherche ' + visibilite + ' incorrecte')
-          }
-        } else {
-          // on a pas mis de restriction connue, c'est pas normal, on met public
-          query.match('restriction').equals(config.constantes.restriction.aucune)
-          log.error(new Error('Appel de getListe avec visibilite ' + visibilite))
-        }
-      }
-
-      return query
+      return lassiQuery
     }
 
     /**
@@ -404,8 +345,8 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Créé les objets date à partir des Strings, met en cache et fait suivre
-     * Si on trouve un seul paramètre xml, on le jsonify
+     * Met en cache et fait suivre
+     * Si on trouve un parametres.xml, on le jsonify
      * @private
      * @param error
      * @param ressources ressource ou tableau de ressources (ou rien, sera passé à next tel quel)
@@ -547,136 +488,101 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Récupère la liste des ressources publiées dans un groupe
-     * @param nom Nom du groupe
-     * @param {object} [options]
-     * @param {number} [options.limit]
-     * @param {number} [options.skip]
-     * @param {function} next appelée avec (error, {total, ressources})
+     * Supprime un groupe de toutes les ressources qui le contiennent
+     * @param {string} nom
+     * @param {errorCallback} next
      */
-    function fetchPublishedInGroup (nom, options, next) {
-      if (typeof options === 'function') next = options
-      const grabOptions = getNormalizedGrabOptions(options)
-      const data = {}
-      flow().seq(function () {
-        EntityRessource.match('groupes').equals(nom).count(this)
-      }).seq(function (total) {
-        data.total = total
-        if (!total) {
-          data.ressources = []
-          return next(null, data)
-        }
-        EntityRessource.match('groupes').equals(nom).grab(grabOptions, this)
-      }).seq(function (ressources) {
-        data.ressources = ressources
-        next(null, data)
-      }).catch(next)
+    function removeGroup (nom, next) {
+      // helper pour supprimer le groupe dans toutes les ressources qui le contienne
+      function deleteInRessources (skip, next) {
+        let nb = 0
+        flow().seq(function () {
+          grabSearch({'groupes': [nom]}, {limit: listeMax}, this)
+        }).seqEach(function (ressource) {
+          ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== nom)
+          save(ressource, this)
+          nb++
+        }).seq(function () {
+          if (nb === listeMax) deleteInRessources(skip + listeMax, next)
+          else next()
+        }).catch(next)
+      }
+      deleteInRessources(0, next)
     }
 
     /**
      * Récupère un liste de ressource d'après critères
-     * @memberOf $ressourceRepository
-     * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
-     * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
-     * @param {getListeFilters} [options.filters] Les filtres à appliquer
-     * @param {string}   [options.orderBy] L'index sur lequel trier
-     * @param {string}   [options.order=asc] asc|desc
-     * @param {string}   [options.skip] L'indice de la 1re valeur à remonter
-     * @param {string}   [options.limit=listeMax] Le nombre max de ressources à remonter
-     * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
+     * @param {searchQuery} searchQuery Les critères de tri
+     * @param {searchQueryOptions} queryOptions Les options (skip & limit + orderBy éventuel)
+     * @param {ressourcesCallback} next appelée avec (error, ressources)
      */
-    function getListe (visibilite, options, next) {
+    function grabSearch (searchQuery, queryOptions, next) {
       try {
-        if (!options) options = {}
-        log.debug(`getListe avec visibility=${visibilite} et les options`, options)
-        const query = getListeQuery(visibilite, options)
-        // order
-        if (typeof (options.orderBy) === 'string') {
-          const order = (options.order === 'desc') ? 'desc' : 'asc'
-          query.sort(options.orderBy, order)
+        if (!queryOptions) queryOptions = {}
+        const lassiQuery = getLassiQuery(searchQuery)
+
+        const sort = (orderBy) => {
+          const [key, order] = orderBy
+          if (order === 'desc') lassiQuery.sort(key, 'desc')
+          else lassiQuery.sort(key)
         }
-        // limit
-        let limit
-        const wantedLimit = ensure(options.limit, 'integer', listeMax)
+
+        // orderBy
+        if (Array.isArray(queryOptions.orderBy)) {
+          // un cas limite, un tableau à 2 elts dont le 2e est 'desc'
+          if (queryOptions.orderBy.length === 2 && ['asc', 'desc'].includes(queryOptions.orderBy[1])) {
+            sort(queryOptions.orderBy)
+          } else {
+            queryOptions.orderBy.forEach(orderBy => {
+              if (typeof orderBy === 'string') {
+                lassiQuery.sort(orderBy)
+              } else if (Array.isArray(orderBy)) {
+                sort(orderBy)
+              }
+            })
+          }
+        }
+
+        // limit & skip
+        let {limit, skip} = queryOptions
+        const wantedLimit = ensure(limit, 'integer', listeNbDefault)
         if (wantedLimit > 0 && wantedLimit <= listeMax) {
           limit = wantedLimit
         } else {
+          // y'a un pb
           if (wantedLimit > listeMax) {
-            log.error(new Error(`limite ${options.limit} demandée trop haute, ramenée à ${listeMax}`))
-          } else if (wantedLimit < 1) {
-            log.error(new Error(`limite ${options.limit} invalide, mise à ${listeMax}`))
+            log.error(new Error(`limite ${wantedLimit} demandée trop haute, ramenée à ${listeMax}`))
+            limit = listeMax
+          } else {
+            log.error(new Error(`limite ${wantedLimit} invalide, mise à ${listeNbDefault}`))
+            limit = listeNbDefault
           }
-          limit = listeMax
         }
-        const skip = ensure(options.skip, 'integer', 0)
-        log.debug(`getListe démarre ${skip} avec max ${limit} et les options valides`, options)
+        skip = ensure(skip, 'integer', 0)
 
         flow().seq(function () {
-          query.grab({limit, skip}, this)
+          lassiQuery.grab({limit, skip}, this)
         }).seq(function (ressources) {
-          if (ressources.length) cacheAndNext(null, ressources, this)
-          else this(null, [])
-        }).seq(function (ressources) {
-          log.debug('getListe remonte', ressources)
-          next(null, ressources)
+          if (ressources.length) cacheAndNext(null, ressources, next)
+          else next(null, [])
         }).catch(next)
       } catch (error) {
-        next(error)
-      }
-    } // getListe
-
-    /**
-     * Compte le nb de ressources d'après ces critères
-     * @memberOf $ressourceRepository
-     * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
-     * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
-     * @param {Object[]} [options.filters] tableau d'objets {index:'indexAFiltrer', values:valeurs},
-     *                                       valeurs peut être un tableau de valeurs ou [undefined]
-     *                                       (ça filtrera sur les ressources ayant cet index)
-     * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
-     */
-    function getListeCount (visibilite, options, next) {
-      try {
-        const query = getListeQuery(visibilite, options)
-        query.count(next)
-      } catch (error) {
-        log.error(error)
         next(error)
       }
     }
 
     /**
-     * Récupère une liste de ressource complète (no limit) d'après critères ATTENTION à ne pas l'utiliser n'importe où !
-     * Il y a quand même une limite, 50 × listeMax
-     * @todo à virer car personne ne s'en sert
-     * @memberOf $ressourceRepository
-     * @param {string}   visibilite peut valoir public | correction | all | auteur/pid | groupe/nom
-     * @param {Object}   options    Un objet (ou son json) avec éventuellement les propriétés
-     * @param {getListeFilters} [options.filters] Les filtres à appliquer
-     * @param {string}   [options.orderBy] L'index sur lequel trier
-     * @param {string}   [options.order=asc] asc|desc
-     * @param {ressourcesCallback} next La callback qui sera appelée en lui passant la liste de ressources en argument et le nb total de résultat
+     * Compte le nb de ressources d'après les critères de recherche
+     * @param {searchQuery} searchQuery Les critères de tri
+     * @param {function} next appelée avec (error, total)
      */
-    function getListeFull (visibilite, options = {}, next) {
-      function fetch () {
-        getListe(visibilite, options, function (error, ressources) {
-          if (error) return next(error)
-          nbCalls++
-          allRessources = allRessources.concat(ressources)
-          if (ressources.length === listeMax && nbCalls < 50) {
-            options.skip += listeMax
-            fetch()
-          } else {
-            if (nbCalls === 50) log.error(`getListeFull remonte ${nbCalls * listeMax} ressources et il en reste, on arrête là`)
-            next(null, allRessources)
-          }
-        })
+    function grabSearchCount (searchQuery, next) {
+      try {
+        const lassiQuery = getLassiQuery(searchQuery)
+        lassiQuery.count(next)
+      } catch (error) {
+        next(error)
       }
-
-      let nbCalls = 0
-      options.skip = 0
-      let allRessources = []
-      fetch()
     }
 
     /**
@@ -704,7 +610,8 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Récupère une ressource d'un auteur d'après son aliasOf et la passe à next
+     * Récupère une ressource d'un auteur d'après son aliasOf (pour voir si cette personne
+     * a déjà un alias qui pointe sur aliasOf)
      * @memberOf $ressourceRepository
      * @param {string}            aliasOf
      * @param {string}            rid
@@ -798,7 +705,7 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Renomme un groupe chez toutes les ressources qui l'ont en groupes ou groupesAuteurs
+     * Renomme un groupe chez toutes les ressources qui l'ont (dans groupes ou groupesAuteurs)
      * @param oldName
      * @param newName
      * @param next
@@ -897,6 +804,25 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
+     * Récupère un liste de ressource d'après critères
+     * @memberOf $ressourceRepository
+     * @param {searchQuery} searchQuery Les critères de tri
+     * @param {searchQueryOptions} queryOptions Les options (skip & limit + orderBy éventuel)
+     * @param {ressourcesCallback} next appelée avec (error, ressources)
+     */
+    function search (searchQuery, queryOptions, next) {
+      grabSearchCount(searchQuery, function (error, total) {
+        if (error) return next(error)
+        if (total === 0) return next(null, {ressources: [], total})
+        grabSearch(searchQuery, queryOptions, function (error, ressources) {
+          if (error) return next(error)
+
+          next(null, {ressources, total})
+        })
+      })
+    }
+
+    /**
      * Met à jour les arbres ou séries stockés ici qui ont ref comme enfant
      * @param {Ref} ref
      * @param {function} next appelée avec (error, nbArbres)
@@ -940,19 +866,19 @@ module.exports = function (ressourceComponent) {
      */
     return {
       archive,
-      fetchPublishedInGroup,
       getDeferred,
-      getListe,
-      getListeCount,
-      getListeFull,
+      grabSearch,
+      grabSearchCount,
       load,
       loadByAliasAndPid,
       loadByCle,
       loadByOrigin,
       remove,
+      removeGroup,
       renameGroup,
       save,
       saveDeferred,
+      search,
       updateParent
     }
   })

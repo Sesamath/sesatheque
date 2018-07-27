@@ -173,24 +173,22 @@ module.exports = function (component) {
         log.error(error)
         return next(error)
       }
+
       const nom = groupName.toLowerCase()
       // on affecte au 1er appel
       if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
       if (!$personneRepository) $personneRepository = lassi.service('$personneRepository')
-      // on efface d'abord le groupe des ressources
+
       flow().seq(function () {
-        // log.debug('début suppression du groupe ' + groupName)
-        $ressourceRepository.getListeFull('groupe/' + nom, {}, this)
-      }).seqEach(function (ressource) {
-        // log.debug('suppression de groupe, avec la ressource', ressource)
-        ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== nom)
-        $ressourceRepository.save(ressource, this)
+        // on efface d'abord le groupe des ressources
+        $ressourceRepository.removeGroup(nom, this)
       }).seq(function () {
-        // log.debug('suppression de groupe, personnes')
+        // puis des personnes
         $personneRepository.removeGroup(nom, this)
       }).seq(function () {
         // log.debug('suppression de groupe, groupe')
         // on peut effacer le groupe, au cas où y'en aurait plusieurs du même nom on les cherche tous
+        // @todo passer l'index nom unique pour l'entity Groupe puis virer ce test
         EntityGroupe.match('nom').equals(nom).grab(function (error, groups) {
           if (error) return next(error)
           if (groups.length === 0) {
