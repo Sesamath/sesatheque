@@ -33,14 +33,14 @@ const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const config = require('../config')
 const {checkSesalab, checkSesatheque} = require('../checkConfig')
 
-module.exports = function controllerFactory (component) {
-  component.controller(function mainApiController ($session) {
+module.exports = function mainApiControllersFactory (component) {
+  component.controller('api', function mainApiControllers ($session) {
     /**
      * Retourne la baseUrl d'une baseId de sesatheque
      * (connue par configuration ou déclarée ici par un client)
      * @route GET /api/baseId/:id
      */
-    this.get('/api/baseId/:id', function (context) {
+    this.get('baseId/:id', function (context) {
       const baseId = context.arguments.id
       const baseUrl = getBaseUrl(baseId, false)
       if (baseUrl) context.rest({baseUrl})
@@ -48,37 +48,12 @@ module.exports = function controllerFactory (component) {
     })
 
     /**
-     * ATTENTION : Les routes suivantes doivent exister seulement pour les tests.
-     */
-    if (config.application.staging === 'test') {
-      /**
-       * Connecte un utilisateur à son compte
-       * ATTENTION : Cette route doit exister seulement pour les tests
-       * @route POST /api/login
-       */
-      this.post('/api/login', function (context) {
-        const {personne} = context.post
-        $session.login(context, personne)
-        context.rest({message: 'Utilisateur login'})
-      })
-
-      /**
-       * Connecte un utilisateur à son compte
-       * @route POST /api/login
-       */
-      this.post('/api/logout', function (context) {
-        $session.logout(context)
-        context.rest({message: 'Utilisateur logout'})
-      })
-    }
-
-    /**
      * Valide la configuration d'un sesalab
      * Si tout est bon, retournera {success: true, baseId: 'laBaseId assignée au sesalab appelant'}
      * sinon un {success: false, errors: ['error 1', …]}
      * @route POST /api/checkSesalab
      */
-    this.post('/api/checkSesalab', function (context) {
+    this.post('checkSesalab', function (context) {
       const {baseUrl, sesatheques} = context.post
       const {baseId, errors, warnings} = checkSesalab(baseUrl, sesatheques)
       if (errors.length) return context.restKo({errors, warnings})
@@ -89,7 +64,7 @@ module.exports = function controllerFactory (component) {
      * Valide la configuration d'une sésatheque (qui nous envoie ses sesatheques et sesalabs)
      * @route POST /api/checkSesatheque
      */
-    this.post('/api/checkSesatheque', function (context) {
+    this.post('checkSesatheque', function (context) {
       const {errors, warnings} = checkSesatheque(context.post)
       if (errors.length) context.restKo({errors, warnings})
       else context.rest({message: 'Configuration sésathèque OK', warnings})

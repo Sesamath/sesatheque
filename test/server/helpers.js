@@ -12,7 +12,7 @@ const EntityPersonne = () => lassi.service('EntityPersonne')
 export const createAndLogUser = async (agent, personne) => {
   // On s'assure qu'il n'y a pas une autre session en cours
   await agent
-    .post('/api/logout')
+    .post('/api/test/logout')
     .set('Content-Type', 'application/json')
 
   // On crée l'utilisateur en base
@@ -20,7 +20,7 @@ export const createAndLogUser = async (agent, personne) => {
 
   // On se connecte à l'aide de ce nouvel utilisateur
   await agent
-    .post('/api/login')
+    .post('/api/test/login')
     .set('Content-Type', 'application/json')
     .send({personne: personneEntity})
     .expect(200)
