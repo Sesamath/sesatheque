@@ -49,7 +49,7 @@ const j3pGraphe2json = require('../../../tasks/modules/j3pGraphe2json')
 
 const myBaseId = appConfig.application.baseId
 
-const {getNormalizedGrabOptions} = require('../lib/grab')
+const {getNormalizedGrabOptions} = require('../lib/normalize')
 
 // et des petites fonctions utiles
 const prependMyBaseId = (oid) => myBaseId + '/' + oid

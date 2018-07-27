@@ -38,7 +38,7 @@ const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
 const {ensure} = require('../lib/tools')
 const {pageNextFromContext, pagePreviousFromContext, update: updateUrl} = require('../lib/url')
-const {getNormalizedGrabOptions} = require('../lib/grab')
+const {getNormalizedGrabOptions} = require('../lib/normalize')
 
 const myBaseUrl = config.application.baseUrl
 
