@@ -242,7 +242,7 @@ module.exports = function (component) {
         // pas de parametres sur les arbres mais une propriété enfants obligatoire
         if (this.type === 'arbre') {
           if (this.parametres) delete this.parametres
-          // @todo remettre ça après passage de l'update 34
+          // @todo remettre ça après passage de l'update 35
           // if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
           if (!Array.isArray(this.enfants)) this.enfants = []
         }
