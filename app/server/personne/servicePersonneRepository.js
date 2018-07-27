@@ -177,24 +177,36 @@ module.exports = function (component) {
      * @memberOf $personneRepository
      */
     function removeGroup (groupName, next) {
-      // @todo corriger: seuls les 100 premiers
-      // membres et les 100 premiers suiveurs
-      // sont nettoyés
-      let offset = 0
+      // vire dans groupesMembre (et groupesSuivis pour les personnes concernées)
+      const removeMembre = (skip) => {
+        flow().seq(function () {
+          EntityPersonne.match('groupesMembre').equals(groupName).grab({limit, skip}, this)
+        }).seqEach(function (personne) {
+          personne.groupesMembre = personne.groupesMembre.filter(notMatch)
+          personne.groupesSuivis = personne.groupesSuivis.filter(notMatch)
+          save(personne, this)
+        }).seq(function (personnes) {
+          if (personnes.length < limit) return removeSuivis(0)
+          // faut refaire un tour
+          removeMembre(skip + limit)
+        }).catch(next)
+      }
+      // vire dans groupesSuivis s'il en reste
+      const removeSuivis = (skip) => {
+        flow().seq(function () {
+          EntityPersonne.match('groupesSuivis').equals(groupName).grab({limit, skip}, this)
+        }).seqEach(function (personne) {
+          personne.groupesSuivis = personne.groupesSuivis.filter(notMatch)
+          save(personne, this)
+        }).seq(function (personnes) {
+          if (personnes.length < limit) return next()
+          removeSuivis(skip + limit)
+        }).catch(next)
+      }
+
       const limit = 100
-      flow().seq(function () {
-        EntityPersonne.match('groupesMembre').equals(groupName).grab({limit, offset}, this)
-      }).seqEach(function (personne) {
-        personne.groupesMembre = personne.groupesMembre.filter(grp => grp !== groupName)
-        personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
-        save(personne, this)
-      }).seq(function () {
-        // reste ceux qui suivaient sans être membre
-        EntityPersonne.match('groupesSuivis').equals(groupName).grab({limit, offset}, this)
-      }).seqEach(function (personne) {
-        personne.groupesSuivis = personne.groupesSuivis.filter(grp => grp !== groupName)
-        save(personne, this)
-      }).done(next)
+      const notMatch = (grp) => grp !== groupName
+      removeMembre(0)
     }
 
     /**
@@ -207,41 +219,33 @@ module.exports = function (component) {
       const limit = 100
       const modifier = (nom) => nom === oldName ? newName : nom
 
-      const updateMembres = () => {
+      const updateMembres = (skip) => {
         flow().seq(function () {
-          EntityPersonne.match('groupesMembre').equals(oldName).grab({limit, offset}, this)
+          EntityPersonne.match('groupesMembre').equals(oldName).grab({limit, skip}, this)
         }).seqEach(function (personne) {
           personne.groupesMembre = personne.groupesMembre.map(modifier)
           personne.groupesSuivis = personne.groupesSuivis.map(modifier)
           save(personne, this)
         }).seq(function (personnes) {
-          if (personnes.length < limit) {
-            // on a fini
-            offset = 0
-            return updateSuiveurs()
-          }
-          // faut refaire un tour
-          offset += limit
-          updateMembres()
-        }).done(next)
+          if (personnes.length < limit) return updateSuiveurs(0)
+          updateMembres(skip + limit)
+        }).catch(next)
       }
 
-      const updateSuiveurs = () => {
+      const updateSuiveurs = (skip) => {
         flow().seq(function () {
           // pour ceux qui suivaient sans être membre
-          EntityPersonne.match('groupesSuivis').equals(oldName).grab({limit, offset}, this)
+          EntityPersonne.match('groupesSuivis').equals(oldName).grab({limit, skip}, this)
         }).seqEach(function (personne) {
           personne.groupesSuivis = personne.groupesSuivis.map(modifier)
           save(personne, this)
         }).seq(function (personnes) {
           if (personnes.length < limit) return next()
-          offset += limit
-          updateSuiveurs()
-        }).done(next)
+          updateSuiveurs(skip + limit)
+        }).catch(next)
       }
 
-      let offset = 0
-      updateMembres()
+      updateMembres(0)
     }
 
     /**

@@ -32,10 +32,35 @@
 'use strict'
 
 const Groupe = require('../../constructors/Groupe')
+const {getNormalizedName} = require('../lib/normalize')
 
 module.exports = function (component) {
   component.entity('EntityGroupe', function ($cacheGroupe) {
     const EntityGroupe = this
+
+    EntityGroupe.validateJsonSchema({
+      type: 'object',
+      properties: {
+        oid: {type: 'string'},
+        nom: {type: 'string'},
+        description: {type: 'string'},
+        ouvert: {type: 'boolean'},
+        public: {type: 'boolean'},
+        gestionnaires: {
+          type: 'array',
+          items: {type: 'string'}
+        },
+        creationDate: {instanceof: 'Date'}
+      },
+      additionalProperties: false,
+      required: [
+        'nom',
+        'ouvert',
+        'public',
+        'gestionnaires'
+      ]
+    })
+
     /**
      * L'entité groupe
      * @entity EntityGroupe
@@ -47,7 +72,6 @@ module.exports = function (component) {
     })
 
     EntityGroupe.beforeStore(function (next) {
-      this.nom = this.nom.toLowerCase()
       if (!this.creationDate) this.creationDate = new Date()
       if (!this.gestionnaires || !this.gestionnaires.length) return next(new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`))
       next()
@@ -60,8 +84,10 @@ module.exports = function (component) {
       next()
     })
 
+    // NOTE : en cas de pb d'unicité sur le nom, lancer localement
+    // `./scripts/mongoApp -f ./scripts-mongo/fixUniqueGroupeNom.js`
     EntityGroupe
-      .defineIndex('nom', 'string')
+      .defineIndex('nom', {normalizer: getNormalizedName, unique: true})
       .defineIndex('ouvert', 'boolean')
       .defineIndex('public', 'boolean')
       .defineIndex('gestionnaires', 'string')

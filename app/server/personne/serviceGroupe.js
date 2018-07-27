@@ -221,10 +221,10 @@ module.exports = function (component) {
     }
 
     /**
-     * Ajoute les noms des gestionnaires du groupe
+     * Ajoute gestionnairesNames au groupe
      * @param {Context} context
-     * @param groupe
-     * @param {callback} next
+     * @param {Groupe} groupe
+     * @param {groupeCallback} next
      */
     const addGestionnairesNames = (context, groupe, next) => {
       flow().seq(function () {
@@ -233,12 +233,11 @@ module.exports = function (component) {
         $personneRepository.loadByOids(gestionnaires, this)
       }).seq(function (personnes) {
         groupe.gestionnairesNames = personnes.map((p, i) => {
-          if (!p) {
-            const oid = groupe.gestionnaires[i]
-            log.dataError(Error(`Le gestionnaire ${oid} du groupe ${groupe.oid} n’existe plus`))
-            return `${oid} inconnu`
-          }
-          return `${p.prenom} ${p.nom}`
+          if (p) return `${p.prenom} ${p.nom}`
+          // il est pas ou plus en base, faut quand même renvoyer une string
+          const oid = groupe.gestionnaires[i]
+          log.dataError(Error(`Le gestionnaire ${oid} du groupe ${groupe.oid} n’existe plus`))
+          return `${oid} inconnu`
         })
         next(null, groupe)
       }).catch(next)

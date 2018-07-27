@@ -108,3 +108,41 @@
  * @property {string} name
  * @property {string} value
  */
+
+/**
+ * Une liste de critères de recherche.
+ *
+ * Chaque propriété est l'index sur lequel faire la recherche,
+ * Sa valeur doit toujours être un tableau. S'il est vide on match simplement l'index
+ * (non null dans mongo), sinon les valeurs demandées.
+ * ex {type: 'j3p', groupes: ['foo', 'bar']} var chercher les ressources de type j3p publiées dans les groupes foo OU bar
+ * Si une valeur de type string contient % on fera du like dessus (à éviter car gourmand, préférer fulltext)
+ *
+ * La clé fulltext est particulière, ça lance un textSearch lassi, en concaténant toutes les valeurs
+ * (donc ['foo', 'bar'] revient au même que ['foo bar'], il faut passer ['"foo bar"'] pour une recherche exacte sur plusieurs mots)
+ * @typedef {Object} searchQuery
+ */
+
+/**
+ * Objet qui formalise la requete sous forme index: valeurs à chercher
+ * C'est du ET entre les index, et du ou pour un index donné.
+ * @typedef searchQuery
+ * @type Object
+ * @property {string|string[]} anIndexName Un nom d'index avec les valeurs qu'on cherche
+ * @property {string|string[]} anotherIndexName Un autre nom d'index avec les valeurs qu'on cherche
+ */
+
+/**
+ * Options de recherche (skip, limit & orderBy)
+ * @typedef {Object} searchQueryOptions
+ * @param {number} [skip=0] Offset
+ * @param {number} [limit=25] Le nombre max de ressources à remonter
+ * @param {orderByParam[]} [orderBy] La liste éventuelle des clés de tri
+ */
+/**
+ * Indication de tri (on accepte une string pour un tri ascendant)
+ * @typedef orderByParam
+ * @type {Array|string}
+ * @property {string} 0 la clé sur laquelle trier
+ * @property {string} [1=asc] passer 'desc' pour un tri inversé
+ */

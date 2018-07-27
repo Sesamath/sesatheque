@@ -30,14 +30,16 @@
  */
 
 'use strict'
-const _ = require('lodash')
-const request = require('request')
 const flow = require('an-flow')
+const {isEmpty} = require('lodash')
+const request = require('request')
 const {parse, stringify} = require('sesajstools')
 const {update} = require('sesajstools/utils/object')
+
 const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
+
 const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
 const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
 
@@ -289,7 +291,7 @@ module.exports = function (component) {
       const {action, baseId, rids} = context.post
       if (!action) return $json.sendError(context, 'action manquante')
       if (!baseId) return $json.sendError(context, 'baseId manquante')
-      if (!rids || !rids.length) return $json.sendError(context, 'rids manquant')
+      if (!Array.isArray(rids) || !rids.length) return $json.sendError(context, 'rids manquant')
 
       // ajouter un listener (pour prévenir baseId que rid a changé)
       if (action === 'add') {
@@ -430,7 +432,7 @@ module.exports = function (component) {
      * @param ressource
      */
     function writeAndOut (context, ressource) {
-      if (!_.isEmpty(ressource.$errors)) return $json.send(context, ressource.$errors)
+      if (!isEmpty(ressource.$errors)) return $json.send(context, ressource.$errors)
       $ressourceRepository.save(ressource, function (error, ressource) {
         if (error) return $json.send(context, error)
         log.perf(context.response, 'written')
@@ -440,7 +442,7 @@ module.exports = function (component) {
         } else {
           // on ne renvoie que l'oid et des warnings éventuels
           const data = {oid: ressource.oid}
-          if (!_.isEmpty(ressource.$warnings)) {
+          if (!isEmpty(ressource.$warnings)) {
             data.warnings = ressource.$warnings
           }
           $json.send(context, null, data)
@@ -489,9 +491,6 @@ module.exports = function (component) {
      } /* */
 
     const controller = this
-
-    const listeMax = configRessource.limites.listeMax
-    if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
 
     /**
      * Passe au suivant pour toutes les requetes OPTIONS (traitées par le middleware cors)
@@ -1058,6 +1057,28 @@ module.exports = function (component) {
  * @property {boolean} success
  * @property {string}  [error] Message d'erreur éventuel (si success vaut false)
  * @property {string}  deleted L'id passé en argument (DEPRECATED, pour compatibilité avec les versions anterieures)
+ */
+
+/**
+ * Format de la réponse à une demande de liste
+ * @typedef reponseListe
+ * @type {Object}
+ * @property {boolean}                     success
+ * @property {string}                      [error] Message d'erreur éventuel
+ * @property {Ref[]|Ressource[]} liste   Une liste de Ref (ou de Ressource si on le demande)
+ */
+
+/**
+ * Format de la réponse à une demande de liste
+ * @typedef reponseListesByPid
+ * @type {Object}
+ * @property {boolean} success
+ * @property {string}   [error] Message d'erreur éventuel
+ * @property {string[]} [warnings] Éventuelle liste de warnings (auteurs inconnus)
+ * @property {object}   pidXX   Objet contenant les ressources de pidXX
+ * @property {string}   pidXX.pid   rappel de son pid
+ * @property {string}   pidXX.label prénom & nom
+ * @property {Ref[]}    pidXX.liste Ses ressources (lisibles par le demandeur)
  */
 
 /**

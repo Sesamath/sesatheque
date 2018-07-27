@@ -61,7 +61,7 @@ module.exports = function (component) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {
@@ -86,7 +86,7 @@ module.exports = function (component) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes")
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {
@@ -117,40 +117,49 @@ module.exports = function (component) {
       const oid = $accessControl.getCurrentUserOid(context)
       if (!oid) return $json.denied(context, 'Il faut être authentifié pour récupérer ses groupes')
       const groupes = {}
-      const groupSet = new Set()
       const addGroupe = (groupe) => {
         delete groupe.$loadState
         groupes[groupe.nom] = groupe
-        groupSet.add(groupe)
       }
+      const response = {
+        groupes,
+        groupesAdmin: []
+      }
+
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (managedGroups) {
         managedGroups.forEach((groupe) => {
           addGroupe(groupe)
+          response.groupesAdmin.push(groupe.nom)
         })
-        this()
-      }).seq(function () {
+
+        // on peut charger le user (pour avoir ses groupes à jour)
         $personneRepository.load(oid, this)
       }).seq(function (personne) {
         const {groupesMembre, groupesSuivis} = personne
-        // les groupes qu'il faut aller chercher
+        response.groupesMembre = groupesMembre
+        response.groupesSuivis = groupesSuivis
+
+        // les groupes qui manquent
         const missing = new Set()
         groupesMembre.concat(groupesSuivis).forEach(nom => {
           if (!groupes[nom]) missing.add(nom)
         })
         if (!missing.size) return this()
         const next = this
-        flow().seq(function () {
-          $groupeRepository.fetchList(Array.from(missing), this)
-        }).seq(function (missingGroups) {
-          missingGroups.forEach(addGroupe)
-          next(null, Array.from(groupSet))
-        }).catch(next)
+        $groupeRepository.fetchListByNom(Array.from(missing), (error, groupes) => {
+          if (error) next(error)
+          groupes.forEach(addGroupe)
+          next()
+        })
+      }).seq(function () {
+        // on peut traiter la liste de tous les groupes
+        this(null, Object.values(groupes))
       }).seqEach(function (groupe) {
         addGestionnairesNames(context, groupe, this)
       }).seq(function () {
-        $json.sendOk(context, {groupes})
+        $json.sendOk(context, response)
       }).catch($json.sendError.bind(null, context))
     })
     controller.options('perso', optionsOk)
@@ -166,7 +175,7 @@ module.exports = function (component) {
       if (!oid) return $json.denied(context, "Il faut s'authentifier avant pour récupérer ses groupes suivis")
 
       flow().seq(function () {
-        $groupeRepository.getListManagedBy(oid, this)
+        $groupeRepository.fetchListManagedBy(oid, this)
       }).seq(function (groupesManaged) {
         if (groupesManaged && groupesManaged.length) {
           groupesManaged.forEach(function (groupe) {

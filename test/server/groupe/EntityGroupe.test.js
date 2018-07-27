@@ -50,9 +50,8 @@ describe('EntityGroupe', () => {
     description: 'Un groupe ouvert de test.\nAvec un peu de bla bla.',
     ouvert: true,
     public: true,
-    gestionnaires: ['sesabibli/1'] // il en faut un
+    gestionnaires: ['oidXX'] // il en faut un
   }
-  const nomLower = groupeData.nom.trim().toLowerCase()
 
   // @todo ajouter les groupes au populate et gérer des tests indépendants, avec une vérif faite par un client mongo
   // une entity globale,
@@ -60,8 +59,7 @@ describe('EntityGroupe', () => {
   let EntityGroupe
 
   const checkGroupe = (groupe) => {
-    expect(groupe.nom).to.equal(nomLower)
-    ;['description', 'ouvert', 'public'].forEach(p => {
+    ;['nom', 'description', 'ouvert', 'public'].forEach(p => {
       expect(groupe[p]).to.equal(groupeData[p])
     })
     expect(groupe.gestionnaires).to.deep.equal(groupeData.gestionnaires)
@@ -95,7 +93,7 @@ describe('EntityGroupe', () => {
 
   it('grab', function (done) {
     EntityGroupe
-      .match('nom').equals(nomLower)
+      .match('nom').equals(groupeData.nom)
       .grab((error, groupes) => {
         if (error) return done(error)
         expect(groupes.length).to.equals(1)
@@ -106,7 +104,7 @@ describe('EntityGroupe', () => {
 
   it('grabOne', function (done) {
     EntityGroupe
-      .match('nom').equals(nomLower)
+      .match('nom').equals(groupeData.nom)
       .grabOne((error, groupe) => {
         if (error) return done(error)
         checkGroupe(groupe)
@@ -118,7 +116,7 @@ describe('EntityGroupe', () => {
     groupe.delete(function (error) {
       if (error) return done(error)
       EntityGroupe
-        .match('nom').equals(nomLower)
+        .match('nom').equals(groupeData.nom)
         .grab(function (error, groupes) {
           if (error) return done(error)
           expect(groupes).to.have.length(0)

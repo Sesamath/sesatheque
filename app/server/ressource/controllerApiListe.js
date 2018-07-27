@@ -31,17 +31,18 @@
 
 'use strict'
 const flow = require('an-flow')
-const {parse} = require('sesajstools')
-const {merge} = require('sesajstools/utils/object')
+const {pick} = require('lodash')
 const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
-const {ensure} = require('../lib/tools')
-const {pageNextFromContext, pagePreviousFromContext, update: updateUrl} = require('../lib/url')
-const {getNormalizedGrabOptions} = require('../lib/grab')
+const Ressource = require('../../constructors/Ressource')
+const url = require('../lib/url')
 
 const myBaseUrl = config.application.baseUrl
+const updateUrl = (context, options) => myBaseUrl + url.update(context.request.originalUrl, options).substr(1)
 
+const {listeMax, listeNbDefault} = configRessource.limites
+if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
 /**
  * Controleur de la route /api/ (qui répond en json) pour les ressources
  * Toutes les routes contenant /public/ ignorent la session (cookies viré par varnish,
@@ -56,237 +57,63 @@ const myBaseUrl = config.application.baseUrl
 module.exports = function (component) {
   component.controller('api/liste', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json) {
     /**
-     * Traite GET|POST /api/liste/all
+     * Envoie une liste de ressources (ajoute les droits)
      * @private
      * @param {Context} context
+     * @param {Error} [error]
+     * @param {EntityRessource[]} ressources La liste des ressources
+     * @param {object} listOptions
+     * @param {object} listOptions.query La query qui a donné cette liste
+     * @param {object} listOptions.queryOptions Les queryOptions (skip, limit, orderBy) utilisés
+     * @param {number} listOptions.total
+     * @param {string[]} [listOptions.warnings]
      */
-    function getListeAll (context) {
-      context.timeout = 3000
-      // on vérifie les droits all avant de lancer la requete,
-      // ce serait idiot de remonter des milliers de résultats tous privés
-      // (et ça compliquerait bcp la pagination)
-      if ($accessControl.hasAllRights(context)) grabListe(context, 'all')
-      else $json.denied(context, "Vous n'avez pas de droits suffisants pour consulter toutes les ressources (privées comprises)")
-    }
-
-    /**
-     * Traite GET /api/liste/auteurs?pids=pid1,pid2…
-     * @param context
-     */
-    function getListeAuteurs (context) {
-      const pids = context.get.pids && context.get.pids.split(',').filter(pid => pid.indexOf('/') > 0)
-      if (!pids) return $json.sendError(context, 'Argument pids manquant')
-      if (!pids.length) return $json.sendError(context, 'Aucun auteur demandé')
-      const limit = ensure(context.get.limit, 'integer', listeMax)
-      const skip = ensure(context.get.skip, 'integer', 0)
-      const retour = {warnings: []}
-      const args = {
-        filters: [{
-          index: 'auteurs',
-          values: pids
-        }]
-      }
-      let iAuteurs = 0 // pour retrouver le pid d'une personne qu'on a pas trouvé
-      let nbRessources = 0 // pour savoir s'il faut du nextUrl
-      flow(pids).seqEach(function (pid) {
-        // on a pas de loadMulti, tant pis, toujours mieux de passer par ce load qui utilise le cache
-        // plutôt que d'écrire directement ici une requête
-        $personneRepository.load(pid, this)
-      }).seqEach(function (personne) {
-        if (personne && personne.pid) {
-          retour[personne.pid] = {
-            pid: personne.pid,
-            label: `${personne.prenom} ${personne.nom}`,
-            liste: []
-          }
-        } else {
-          retour.warnings.push(`Auteur ${pids[iAuteurs]} inconnu`)
-          if (personne) log.dataError('personne sans pid', personne)
-        }
-        iAuteurs++
-        this()
-      }).seq(function () {
-        $ressourceRepository.getListeCount('all', args, this)
-      }).seq(function (total) {
-        retour.total = total
-        if (!total) return $json.sendOk(context, retour)
-        $ressourceRepository.getListe('all', args, this)
-      }).seqEach(function (ressource) {
-        nbRessources++
-        log.debug('ressource', {rid: ressource.rid, auteurs: ressource.auteurs})
-        if (!$accessControl.hasReadPermission(context, ressource)) return this()
-        ressource.auteurs.forEach(pid => {
-          if (retour[pid]) retour[pid].liste.push(new Ref(ressource))
-        })
-        this()
-      }).seq(function () {
-        if (!retour.warnings.length) delete retour.warnings
-        if (nbRessources === listeMax) {
-          retour.nextUrl = myBaseUrl + updateUrl(context.request.originalUrl, {skip: skip + limit})
-          if (context.get.skip > 0) {
-            const prevSkip = Math.max(skip - limit, 0)
-            retour.prevUrl = myBaseUrl + updateUrl(context.request.originalUrl, {skip: prevSkip})
-          }
-        }
-        $json.sendOk(context, retour)
-      }).catch(function (error) {
-        log.error(error)
-        $json.sendError(context, error)
-      })
-    }
-
-    /**
-     * Traite GET /api/liste/perso (appelé par sesatheque-client)
-     * @private
-     * @param {Context} context
-     */
-    function getListePerso (context) {
-      context.timeout = 3000
-      const pid = $accessControl.getCurrentUserPid(context)
-      if (!pid) return $json.denied(context, 'Ressources personnelles inaccessibles (session expirée sur la Sésathèque), veuillez vous déconnecter et reconnecter')
-      const limit = ensure(context.get.limit, 'integer', listeMax)
-      const skip = ensure(context.get.skip, 'integer', 0)
-      /**
-       * Liste des ressources perso
-       * @type {Ressources[]}
-       */
-      let mesRessources = []
-      // la visibilité, c'est pour cet auteur,
-      const visibility = 'auteur/' + pid
-      let nbOwnRessources = 0
-      flow().seq(function () {
-        // skip est à cheval sur les ressources dont on est l'auteur et celles où on est que contributeur
-        // faut d'abord compter les premières
-        const options = {
-          filters: [{index: 'auteurs', values: [pid]}]
-        }
-        $ressourceRepository.getListeCount(visibility, options, this)
-      }).seq(function (nb) {
-        nbOwnRessources = nb
-        if (skip >= nbOwnRessources) return this(null, [])
-        // sinon on veut des ressources dont on est l'auteur
-        const options = {
-          filters: [{index: 'auteurs', values: [pid]}],
-          limit,
-          skip
-        }
-        // les ressources dont on est l'auteur
-        $ressourceRepository.getListe(visibility, options, this)
-      }).seq(function (ressources) {
-        if (ressources.length) mesRessources = ressources
-        // si on est déjà au max on arrête là
-        if (ressources.length === limit) return this(null, [])
-        // on va aussi chercher les contributeurs
-        const options = {
-          filters: [{index: 'contributeurs', values: [pid]}],
-          limit: limit - ressources.length,
-          skip: (skip >= nbOwnRessources) ? skip - nbOwnRessources : 0
-        }
-        $ressourceRepository.getListe(visibility, options, this)
-      }).seq(function (ressources) {
-        if (ressources.length) mesRessources = mesRessources.concat(ressources)
-        this()
-      }).seq(function () {
-        sendListe(context, null, mesRessources, nbOwnRessources)
-      }).catch(function (error) {
-        $json.sendError(context, error)
-      })
-    }
-
-    /**
-     * Traite GET|POST /api/liste/prof
-     * À priori appelé par un utilisateur connecté, mais pas forcément avec des droits de correction…
-     * @private
-     * @param {Context} context
-     */
-    function getListeProf (context) {
-      context.timeout = 3000
-      let visibility = 'public'
-      if ($accessControl.hasGenericPermission('correction', context)) visibility = 'correction'
-      grabListe(context, visibility)
-      // @todo ajouter une visibility readableBy/xxx
-    }
-
-    /**
-     * Traite GET|POST /api/liste/public
-     * @private
-     * @param context
-     */
-    function getListePublic (context) {
-      grabListe(context, 'public')
-    }
-
-    /**
-     * Recupère une liste de ressource (d'après les argument get et post mergés) et l'envoie
-     * @private
-     * @param {Context} context
-     * @param {string} visibility
-     */
-    function grabListe (context, visibility) {
-      let args
-      if (context.get.json) {
-        args = parse(context.get.json)
-      } else {
-        args = context.get
-        // en get on a des string, faut parser ce qui devrait être un objet
-        if (args.filters) {
-          args.filters = parse(args.filters)
-        }
-      }
-      merge(args, context.post)
-      // @todo ajouter une clé de cache à partir de filter + visibility pour mettre le count en cache
-      log.debug('grabListe ' + visibility, args)
-      $ressourceRepository.getListeCount(visibility, args, function (error, total) {
-        if (error) return sendListe(context, error)
-        if (total === 0) return sendListe(context, error, [], 0)
-        $ressourceRepository.getListe(visibility, args, function (error, ressources) {
-          sendListe(context, error, ressources, total)
-        })
-      })
-    }
-
-    /**
-     * Envoie une liste de ressources (en filtrant d'après les droits en lecture)
-     * @private
-     * @param {Context} context
-     * @param error
-     * @param ressources
-     */
-    function sendListe (context, error, ressources, total) {
+    function sendListe (context, error, ressources, {query, queryOptions, total}) {
       if (error) return $json.send(context, error)
-      if (!ressources) ressources = []
-      if (!total) total = ressources.length
-      const liste = []
-      const reponse = {liste, total}
-      if (total) {
-        // url next|previous
-        const {limit, skip} = getNormalizedGrabOptions(context.get)
-        if (ressources.length === limit) reponse.nextUrl = pageNextFromContext(context)
-        if (skip > 0) reponse.previousUrl = pagePreviousFromContext(context)
+      // @todo virer ça dès que tout le monde nous appellera avec ces infos
+      if (!queryOptions) queryOptions = {}
+      if (total === undefined) total = ressources.length
 
-        // on regarde le format demandé en get ou post
-        const format = context.post.format || context.get.format
-        ressources.forEach(function (ressource, index) {
-          let item
-          if (!$accessControl.hasReadPermission(context, ressource)) {
-            log.dataError(`ressource ${ressource.oid} virée de la liste car pas de droit en lecture`)
-            // on remplace la ressource par une erreur
-            item = {
-              oid: ressource.oid,
-              titre: 'Vous n’avez pas les droits de lecture sur cette ressource',
-              type: 'error',
-              $droits: ''
-            }
+      const liste = []
+      const reponse = {query, queryOptions, total, liste}
+      if (ressources && ressources.length) {
+        // construction de nextUrl
+        const limit = queryOptions.limit || Number(context.get.limit) || listeNbDefault
+        if (ressources.length === limit) {
+          const skip = (queryOptions.skip || Number(context.get.skip) || 0) + limit
+          reponse.nextUrl = updateUrl(context, {...query, skip})
+        }
+        // on regarde le format reçu en get ou post
+        const format = context.post.format || context.get.format || 'ref'
+        ressources.forEach(function (ressource) {
+          // vérif des droits
+          let droits = ''
+          if ($accessControl.hasReadPermission(context, ressource)) {
+            droits += 'R'
+            if ($accessControl.hasPermission('update', context, ressource)) droits += 'W'
+            if ($accessControl.hasPermission('delete', context, ressource)) droits += 'D'
           } else {
-            item = (format === 'full') ? ressource : new Ref(ressource)
-            if (ressource.type === 'sequenceModele' && format !== 'full') {
-              // on rajoute les parametres pour les sequenceModele
-              item.parametres = ressource.parametres
-            }
-            item.$droits = 'R'
-            if ($accessControl.hasPermission('update', context, ressource)) item.$droits += 'W'
-            if ($accessControl.hasPermission('delete', context, ressource)) item.$droits += 'D'
+            // ça devrait pas arriver, mais au cas où on crée une ressource fake
+            // pour avoir le bon nb dans la liste et montrer le pb
+            log.error(`sendListe récupère la ressource ${ressource.oid} à envoyer à ${$accessControl.getCurrentUserPid(context)} alors qu’il n’a pas les droits de lecture dessus`, ressource)
+            ressource = new Ressource({
+              titre: 'Vous n’avez pas les droits suffisants pour voir cette ressource',
+              type: 'error'
+            })
           }
+
+          // formatage
+          let item
+          if (format === 'full') {
+            item = ressource
+          } else if (format === 'light') {
+            item = pick(ressource, ['oid', 'titre', 'type', 'resume', 'description', 'commentaires'])
+          } else {
+            item = new Ref(ressource)
+            // on rajoute les parametres pour les sequenceModele
+            if (ressource.type === 'sequenceModele') item.parametres = ressource.parametres
+          }
+          item.$droits = droits
           liste.push(item)
         })
       }
@@ -295,49 +122,87 @@ module.exports = function (component) {
 
     const controller = this
 
-    const listeMax = configRessource.limites.listeMax
-    if (!listeMax) throw new Error('settings.ressource.limites.listeMax manquant')
+    /**
+     * Récupère des résultats de recherche
+     * @route GET /api/liste
+     */
+    controller.get('', function (context) {
+      // on vérifie les paramètres pour construire query et queryOptions
+      const params = $accessControl.sanitizeSearch(context)
 
-    /**
-     * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin.
-     * Retourne {@link reponseListe}
-     * @route GET /api/liste/all
-     * @param {requeteListe}
-     */
-    controller.get('all', getListeAll)
-    /**
-     * Pour chercher parmi toutes les ressources (y compris privées et non publiées), il faut avoir les droits admin
-     * Retourne {@link reponseListe}
-     * @route POST /api/liste/all
-     * @param {requeteListe}
-     */
-    controller.post('all', getListeAll)
-    /**
-     * Ajoute aux headers cors habituels le header
-     * Access-Control-Allow-Methods', 'POST, OPTIONS'
-     * @route OPTIONS /api/liste/all
-     */
+      $ressourceRepository.search(params.query, params.queryOptions, function (error, result) {
+        if (error) return $json.sendError(context, error)
+
+        const {ressources, total} = result
+        params.total = total
+        sendListe(context, error, ressources, params)
+      })
+    })
 
     /**
      * Récupère les ressources d'une liste de pids, classée par pid (avec prénom & nom du pid)
      * Retourne {@link reponseListesByPid}
+     * Utilisé par sesathequeClient.getListeAuteurs()
      * @route GET /api/liste/auteurs
      * @param {string} pids la liste de pids séparés par des virgules
      */
-    controller.get('auteurs', getListeAuteurs)
+    controller.get('auteurs', function (context) {
+      const pids = context.get.pids && context.get.pids.split(',').filter(pid => pid.indexOf('/') > 0)
+      if (!pids) return $json.sendError(context, 'Argument pids manquant')
+      if (!pids.length) return $json.sendError(context, 'Aucun auteur demandé')
+      const {queryOptions} = $accessControl.sanitizeSearch(context)
+      const {limit, skip} = queryOptions
+      const query = {'auteurs': []}
 
-    /**
-     * Récupère la liste des ressources d'un groupe
-     * Retourne {@link reponseListe}
-     * @route GET /api/liste/groupe/:nom
-     */
-    controller.get('groupe/:nom', function (context) {
-      const {nom} = context.arguments
-      const options = getNormalizedGrabOptions(context.get)
-      $ressourceRepository.fetchPublishedInGroup(nom, options, (error, data) => {
-        if (error) return sendListe(context, error, [], 0)
-        const {total, ressources} = data
-        sendListe(context, error, ressources, total)
+      let nbRessources = 0 // pour savoir s'il faut du nextUrl
+      let nbForbidden = 0
+      let nbLost = 0
+
+      const retour = {warnings: []}
+      flow().seq(function () {
+        // grab auteurs
+        $personneRepository.loadByPids(pids, this)
+      }).seqEach(function (personne, index) {
+        if (personne) {
+          retour[personne.pid] = {
+            pid: personne.pid,
+            label: `${personne.prenom} ${personne.nom}`,
+            liste: []
+          }
+          query.auteurs.push(personne.pid)
+        } else {
+          retour.warnings.push(`Auteur ${pids[index]} inconnu`)
+        }
+
+        // grab ressources
+        $ressourceRepository.search(query, queryOptions, this)
+      }).seq(function ({ressources, total}) {
+        retour.total = total
+        if (!total) return $json.sendOk(context, retour)
+
+        ressources.forEach((ressource) => {
+          nbRessources++
+          if ($accessControl.hasReadPermission(context, ressource)) {
+            ressource.auteurs.forEach(pid => {
+              if (retour[pid]) retour[pid].liste.push(new Ref(ressource))
+              else nbLost++
+            })
+          } else {
+            nbForbidden++
+          }
+        })
+
+        if (nbForbidden) retour.warnings.push(`${nbForbidden} ressources supprimées de la liste car vous n’aviez pas les droits de lecture dessus`)
+        if (nbLost) retour.warnings.push(`${nbLost} ressources supprimées car leur auteur n’existe plus`)
+        if (!retour.warnings.length) delete retour.warnings
+
+        if (nbRessources === listeMax) retour.nextUrl = updateUrl(context, {skip: skip + limit})
+        if (context.get.skip > 0) retour.prevUrl = updateUrl(context, {skip: Math.max(skip - limit, 0)})
+
+        $json.sendOk(context, retour)
+      }).catch(function (error) {
+        log.error(error)
+        $json.sendError(context, error)
       })
     })
 
@@ -347,56 +212,21 @@ module.exports = function (component) {
      * @route GET /api/liste/perso
      * @param {requeteListe}
      */
-    controller.get('perso', getListePerso)
-    /**
-     * Cherche parmi les ressources du user courant (qui doit être connecté avant), retourne {@link reponseListe}
-     * @route POST /api/liste/perso
-     * @param {requeteListe}
-     */
-    controller.post('perso', getListePerso)
-    /**
-     * Pour le preflight, ajoute les headers allow… si autorisé
-     * @route OPTIONS /api/liste/perso
-     * @param {requeteListe}
-     */
+    controller.get('perso', function (context) {
+      context.timeout = 3000
+      const pid = $accessControl.getCurrentUserPid(context)
+      if (!pid) return $json.denied(context, 'Ressources personnelles inaccessibles (session expirée sur la Sésathèque), veuillez vous déconnecter et reconnecter')
 
-    /**
-     * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
-     * @route GET /api/liste/prof
-     * @param {requeteListe}
-     */
-    controller.get('prof', getListeProf)
-    /**
-     * Cherche parmi les ressources publiques ou les corrections, retourne {@link reponseListe}
-     * @route POST /api/liste/prof
-     * @param {requeteListe}
-     */
-    controller.post('prof', getListeProf)
-    /**
-     * Pour le preflight, ajoute aux headers cors habituels le header
-     *   Access-Control-Allow-Methods:POST OPTIONS
-     * @route OPTIONS /api/liste/prof
-     */
-
-    /**
-     * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
-     * @route GET /api/liste/public
-     * @param {requeteListe}
-     */
-    controller.get('public', getListePublic)
-    /**
-     * Cherche parmi les ressources publiques publiées, retourne {@link reponseListe}
-     * @route POST /api/liste/public
-     * @param {requeteListe}
-     */
-    controller.post('public', function (context) {
-      grabListe(context, 'public')
+      const {queryOptions} = $accessControl.sanitizeSearch(context)
+      const query = {auteurs: [pid]}
+      flow().seq(function () {
+        $ressourceRepository.grabSearch(query, queryOptions, this)
+      }).seq(function (result) {
+        sendListe(context, null, {...result, query, queryOptions})
+      }).catch(function (error) {
+        $json.sendError(context, error)
+      })
     })
-    /**
-     * Pour le preflight, ajoute aux headers cors habituels le header
-     *   Access-Control-Allow-Methods: POST OPTIONS
-     * @route OPTIONS /api/liste/public
-     */
   })
 }
 

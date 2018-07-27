@@ -33,14 +33,14 @@ const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const config = require('../config')
 const {checkSesalab, checkSesatheque} = require('../checkConfig')
 
-module.exports = function controllerFactory (component) {
-  component.controller(function mainApiController () {
+module.exports = function mainApiControllersFactory (component) {
+  component.controller('api', function mainApiControllers () {
     /**
      * Retourne la baseUrl d'une baseId de sesatheque
      * (connue par configuration ou déclarée ici par un client)
      * @route GET /api/baseId/:id
      */
-    this.get('/api/baseId/:id', function (context) {
+    this.get('baseId/:id', function (context) {
       const baseId = context.arguments.id
       const baseUrl = getBaseUrl(baseId, false)
       if (baseUrl) context.rest({baseUrl})
@@ -53,7 +53,7 @@ module.exports = function controllerFactory (component) {
      * sinon un {success: false, errors: ['error 1', …]}
      * @route POST /api/checkSesalab
      */
-    this.post('/api/checkSesalab', function (context) {
+    this.post('checkSesalab', function (context) {
       const {baseUrl, sesatheques} = context.post
       const {baseId, errors, warnings} = checkSesalab(baseUrl, sesatheques)
       if (errors.length) return context.restKo({errors, warnings})
@@ -64,7 +64,7 @@ module.exports = function controllerFactory (component) {
      * Valide la configuration d'une sésatheque (qui nous envoie ses sesatheques et sesalabs)
      * @route POST /api/checkSesatheque
      */
-    this.post('/api/checkSesatheque', function (context) {
+    this.post('checkSesatheque', function (context) {
       const {errors, warnings} = checkSesatheque(context.post)
       if (errors.length) context.restKo({errors, warnings})
       else context.rest({message: 'Configuration sésathèque OK', warnings})

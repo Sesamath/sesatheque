@@ -66,9 +66,9 @@ export const ResourceList = ({
             type,
             $droits
           }) => (
-            <tr key={oid.toString()}>
+            <tr key={oid}>
               <td><img src={icons[type]} alt="thumbnail" /></td>
-              <td>{oid.toString()}</td>
+              <td>{oid}</td>
               <td>{titre}</td>
               <td colSpan="4" className="links">
                 <NavLink
@@ -112,7 +112,15 @@ export const ResourceList = ({
 }
 
 ResourceList.propTypes = {
-  resources: PropTypes.array.isRequired,
+  resources: PropTypes.arrayOf(PropTypes.shape({
+    oid: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    titre: PropTypes.string.isRequired,
+    $droits: PropTypes.string.isRequired,
+    resume: PropTypes.string,
+    description: PropTypes.string,
+    commentaires: PropTypes.string
+  })).isRequired,
   total: PropTypes.number.isRequired,
   handlePageClick: PropTypes.func.isRequired,
   // fourni par resourceListProvider

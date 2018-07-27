@@ -28,31 +28,42 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
-const {listeMax, listeNbDefault} = require('./config')
+const flow = require('an-flow')
 
-/**
- * Normalise {skip, limit} et le retourne
- * @param {Object} [options]
- * @param {number} [options.limit]
- * @param {number} [options.skip]
- * @return {{limit: number, skip: number}}
- */
-function getNormalizedGrabOptions (options) {
-  if (!options || typeof options !== 'object') return {limit: listeNbDefault, skip: 0}
-  const grabOptions = {}
-  // on peut nous passer des strings
-  const limit = Number(options.limit)
-  const skip = Number(options.skip)
+module.exports = function controllersApiTestFactory (component) {
+  // Les routes suivantes n'existent que pour les tests, cf index.js
+  component.controller('api/test', function controllersApiTest ($session) {
+    let EntityPersonne
+    /**
+     * Connecte un utilisateur à son compte
+     * ATTENTION : Cette route doit exister seulement pour les tests
+     * @route POST /api/test/login
+     */
+    this.post('login', function (context) {
+      if (!EntityPersonne) EntityPersonne = lassi.service('EntityPersonne')
+      const {personne: {oid, pid}} = context.post
+      flow().seq(function () {
+        if (oid) EntityPersonne.match('oid').equals(oid).grabOne(this)
+        else if (pid) EntityPersonne.match('pid').equals(pid).grabOne(this)
+        else context.restKo('personne sans oid ni pid, login impossible')
+      }).seq(function (personne) {
+        if (!personne) return context.restKo(`La personne ${oid || pid} n’existe pas`)
+        $session.login(context, personne)
+        context.rest({message: 'Utilisateur login', personne})
+      }).catch(function (error) {
+        context.restKo(error)
+      })
+    })
 
-  grabOptions.limit = (Number.isInteger(limit) && limit > 0 && limit < listeMax) ? limit : listeNbDefault
-  grabOptions.skip = (Number.isInteger(skip) && skip >= 0) ? skip : 0
-
-  return grabOptions
-}
-
-module.exports = {
-  getNormalizedGrabOptions
+    /**
+     * Déconnecte un utilisateur
+     * @route GET /api/test/logout
+     */
+    this.get('logout', function (context) {
+      $session.logout(context)
+      context.rest({message: 'Utilisateur logout'})
+    })
+  })
 }
