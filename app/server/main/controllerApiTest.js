@@ -30,25 +30,38 @@
  */
 'use strict'
 
+const flow = require('an-flow')
+
 module.exports = function controllersApiTestFactory (component) {
   // Les routes suivantes n'existent que pour les tests, cf index.js
   component.controller('api/test', function controllersApiTest ($session) {
+    let EntityPersonne
     /**
      * Connecte un utilisateur à son compte
      * ATTENTION : Cette route doit exister seulement pour les tests
      * @route POST /api/test/login
      */
     this.post('login', function (context) {
-      const {personne} = context.post
-      $session.login(context, personne)
-      context.rest({message: 'Utilisateur login'})
+      if (!EntityPersonne) EntityPersonne = lassi.service('EntityPersonne')
+      const {personne: {oid, pid}} = context.post
+      flow().seq(function () {
+        if (oid) EntityPersonne.match('oid').equals(oid).grabOne(this)
+        else if (pid) EntityPersonne.match('pid').equals(pid).grabOne(this)
+        else context.restKo('personne sans oid ni pid, login impossible')
+      }).seq(function (personne) {
+        if (!personne) return context.restKo(`La personne ${oid || pid} n’existe pas`)
+        $session.login(context, personne)
+        context.rest({message: 'Utilisateur login', personne})
+      }).catch(function (error) {
+        context.restKo(error)
+      })
     })
 
     /**
      * Déconnecte un utilisateur
-     * @route POST /api/test/logout
+     * @route GET /api/test/logout
      */
-    this.post('logout', function (context) {
+    this.get('logout', function (context) {
       $session.logout(context)
       context.rest({message: 'Utilisateur logout'})
     })
