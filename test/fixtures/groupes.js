@@ -1,3 +1,6 @@
+import utilisateurs from './utilisateurs'
+const firstUser = utilisateurs[0]
+
 module.exports = [
   {
     oid: '5b5050337309ec014b37c223',
@@ -5,6 +8,6 @@ module.exports = [
     description: 'Le premier groupe de test',
     ouvert: true,
     public: true,
-    gestionnaires: []
+    gestionnaires: [firstUser.oid]
   }
 ]
