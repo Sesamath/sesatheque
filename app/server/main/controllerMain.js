@@ -76,19 +76,14 @@ module.exports = function (mainComponent) {
     // sauf en test (docker n'a pas de dossier build)
     // => pour prod et preprod
     if (staging.includes('prod')) {
-      const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
-      const reactPagePath = path.resolve(root, buildDir, 'index.html')
-      const reactPage = fs.readFileSync(reactPagePath)
       // pour la page html react, c'est la même sur toutes les routes
-      const sendReactPage = (context) => {
-        const options = {
-          headers: {
-            'Content-Length': Buffer.byteLength(reactPage, 'utf8'),
-            'Content-Type': 'text/html'
-          }
+      const {content} = require('../reactPage')
+      const options = {
+        headers: {
+          'Content-Type': 'text/html'
         }
-        context.raw(reactPage, options)
       }
+      const sendReactPage = (context) => context.raw(content, options)
 
       // cf app/client-react/App.js pour ne pas en oublier
       const reactRoutes = [
