@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
-import {IntegerField, InputField, TextareaField} from 'client-react/components/fields'
+import {IntegerField, InputField, TextField} from 'client-react/components/fields'
 import addNotifyToProps from 'client-react/hoc/addNotifyToProps'
 import ShowError from 'client-react/components/ShowError.js'
 
@@ -85,11 +85,10 @@ class EditorIep extends Component {
           </label>
         </div>
         <ShowError error={httpsError} />
-        <TextareaField
+        <TextField
           label="Script instrumenpoche"
           name="parametres[xml]"
-          cols="80"
-          rows="20"
+          mode="xml"
         />
       </fieldset>
     )

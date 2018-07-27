@@ -5,4 +5,4 @@ import icon from './public/ecjs.gif'
 
 const type = 'ecjs'
 
-export default {editor, type, validate, display, icon}
+export {editor, type, validate, display, icon}
