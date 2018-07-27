@@ -3,11 +3,11 @@ import {addNotification} from './notifications'
 
 export const loadGroupes = () => dispatch =>
   GET('/api/groupes/perso')
-    .then(({success, error, groupes}) => {
+    .then(({success, error, groupes, groupesAdmin, groupesMembre, groupesSuivis}) => {
       if (success) {
         return dispatch({
           type: 'LOAD_GROUPES',
-          payload: {groupes}
+          payload: {groupes, groupesAdmin, groupesMembre, groupesSuivis}
         })
       }
 

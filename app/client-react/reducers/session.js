@@ -2,6 +2,21 @@ const filterGroups = (removeMe) => (nom) => (nom !== removeMe)
 
 const sessionReducer = (state = null, {type, payload}) => {
   switch (type) {
+    case 'LOAD_GROUPES': {
+      if (state === null || state.personne === undefined) return state
+      const {groupesAdmin, groupesMembre, groupesSuivis} = payload
+      const {personne} = state
+      return {
+        ...state,
+        personne: {
+          ...personne,
+          groupesAdmin,
+          groupesMembre,
+          groupesSuivis
+        }
+      }
+    }
+
     case 'IGNORE_GROUPE': {
       if (state === null || state.personne === undefined) return state
       const {nom} = payload

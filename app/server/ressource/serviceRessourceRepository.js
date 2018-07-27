@@ -54,7 +54,7 @@ const prependMyBaseId = (oid) => myBaseId + '/' + oid
 const getRealRid = (ressource) => ressource.aliasOf || ressource.rid
 
 module.exports = function (ressourceComponent) {
-  ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes, $json) {
+  ressourceComponent.service('$ressourceRepository', function (EntityRessource, EntityArchive, EntityExternalRef, $ressourceRemote, $ressourceControl, $cacheRessource, $cache, $routes) {
     // on applique toujours un limit
     const {listeMax, listeNbDefault} = config.limites
     if (!listeMax) throw new Error('ressource.limites.listeMax manquant en configuration')
@@ -461,7 +461,9 @@ module.exports = function (ressourceComponent) {
      */
     function archive (ressource, next) {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n’existe pas encore")
-      EntityArchive.create(parse(stringify(ressource))).store(next)
+      const data = Object.assign({}, ressource)
+      delete data.oid
+      EntityArchive.create(data).store(next)
     }
 
     /**
@@ -488,26 +490,40 @@ module.exports = function (ressourceComponent) {
     }
 
     /**
-     * Supprime un groupe de toutes les ressources qui le contiennent
+     * Supprime un groupe de toutes les ressources qui le contiennent (groupes et groupesAuteurs)
      * @param {string} nom
      * @param {errorCallback} next
      */
     function removeGroup (nom, next) {
-      // helper pour supprimer le groupe dans toutes les ressources qui le contienne
-      function deleteInRessources (skip, next) {
-        let nb = 0
+      // Supprime dans groupes (+groupesAuteurs pour les ressources concernées)
+      const deleteInGroupes = (skip) => {
         flow().seq(function () {
-          grabSearch({'groupes': [nom]}, {limit: listeMax}, this)
+          EntityRessource.match('groupes').equals(nom).grab(this)
         }).seqEach(function (ressource) {
-          ressource.groupes = ressource.groupes.filter((groupeNom) => groupeNom !== nom)
+          ressource.groupes = ressource.groupes.filter(notMatch)
+          if (ressource.groupesAuteurs.length) ressource.groupesAuteurs = ressource.groupesAuteurs.filter(notMatch)
           save(ressource, this)
-          nb++
-        }).seq(function () {
-          if (nb === listeMax) deleteInRessources(skip + listeMax, next)
-          else next()
+        }).seq(function (ressources) {
+          if (ressources.length < limit) return deleteInGroupesAuteurs(0)
+          deleteInGroupes(skip + limit)
         }).catch(next)
       }
-      deleteInRessources(0, next)
+      // Supprime dans groupesAuteurs pour celles qui restent
+      const deleteInGroupesAuteurs = (skip) => {
+        flow().seq(function () {
+          EntityRessource.match('groupesAuteurs').equals(nom).grab(this)
+        }).seqEach(function (ressource) {
+          ressource.groupesAuteurs = ressource.groupesAuteurs.filter(notMatch)
+          save(ressource, this)
+        }).seq(function (ressources) {
+          if (ressources.length < limit) return next()
+          deleteInGroupesAuteurs(skip + limit)
+        }).catch(next)
+      }
+
+      const limit = 100
+      const notMatch = (groupeNom) => groupeNom !== nom
+      deleteInGroupes(0)
     }
 
     /**
@@ -735,7 +751,7 @@ module.exports = function (ressourceComponent) {
 
       const updateGroupesAuteurs = () => {
         flow().seq(function () {
-          // pour ceux qui suivaient sans être membre
+          // pour les groupes auteur qui ne publiaient pas dans leur groupe
           EntityRessource.match('groupesAuteurs').equals(oldName).grab({limit, offset}, this)
         }).seqEach(function (ressource) {
           ressource.groupesAuteurs = ressource.groupesAuteurs.map(modifier)

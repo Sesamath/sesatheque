@@ -46,7 +46,7 @@ const groupesLoader = (WrappedComponent) => {
 
   GroupesLoader.propTypes = {
     loadGroupes: PropTypes.func,
-    groupes: PropTypes.shape({})
+    groupes: PropTypes.object
   }
 
   return ensureLogged(

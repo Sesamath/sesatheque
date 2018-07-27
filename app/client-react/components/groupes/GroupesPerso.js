@@ -182,29 +182,36 @@ const Groupe = ({
 
 Groupe.propTypes = {
   groupe: PropTypes.shape({
-    nom: PropTypes.string,
+    nom: PropTypes.string.isRequired,
     description: PropTypes.string,
     ouvert: PropTypes.bool,
     public: PropTypes.bool,
     gestionnaires: PropTypes.arrayOf(PropTypes.string),
     gestionnairesNames: PropTypes.arrayOf(PropTypes.string)
-  }),
+  }).isRequired,
   GroupeLinks: PropTypes.func
 }
 
 // la fct générique d'affichage d'une liste
-const List = ({list, component, groupes, ...others}) => (
-  <ul className="liste">
-    {list.map(nom => (
-      <Groupe
-        key={nom}
-        groupe={groupes[nom]}
-        GroupeLinks={component}
-        {...others}
-      />
-    ))}
-  </ul>
-)
+const List = ({list, component, groupes, ...others}) => {
+  const missing = list.filter(nom => !groupes[nom])
+  if (missing.length) console.error(Error(`l'api a renvoyé des listes incohérentes, il manque les groupes « ${missing.join(' », « ')} »`))
+  return (
+    <ul className="liste">
+      {missing.map(nom => (
+        <li key={nom}>Le groupe {nom} a été supprimé</li>
+      ))}
+      {list.filter(nom => groupes[nom]).map(nom => (
+        <Groupe
+          key={nom}
+          groupe={groupes[nom]}
+          GroupeLinks={component}
+          {...others}
+        />
+      ))}
+    </ul>
+  )
+}
 
 List.propTypes = {
   list: PropTypes.array,
@@ -222,10 +229,10 @@ List.propTypes = {
  * @param {Groupe[]} props.groupes fourni par groupesLoader
  */
 const GroupesPerso = ({
+  groupes,
   groupesAdmin,
   groupesMembre,
-  groupesSuivis,
-  groupes
+  groupesSuivis
 }) => (
   <Fragment>
     <h1>Mes groupes</h1>
@@ -282,10 +289,10 @@ const GroupesPerso = ({
 )
 
 GroupesPerso.propTypes = {
-  groupes: PropTypes.object,
-  groupesAdmin: PropTypes.array,
-  groupesMembre: PropTypes.array,
-  groupesSuivis: PropTypes.array
+  groupes: PropTypes.object.isRequired,
+  groupesAdmin: PropTypes.arrayOf(PropTypes.string).isRequired,
+  groupesMembre: PropTypes.arrayOf(PropTypes.string).isRequired,
+  groupesSuivis: PropTypes.arrayOf(PropTypes.string).isRequired
 }
 
 // groupesLoader a déjà du ensureLogged

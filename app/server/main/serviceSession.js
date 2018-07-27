@@ -34,13 +34,18 @@
 module.exports = function (component) {
   component.service('$session', function () {
     /**
+     * Retourne le baseId du client d'authentification courant
+     * @param context
+     * @return {string|undefined}
+     */
+    const getAuthBaseId = (context) => context.session.authBaseId
+
+    /**
      * Retourne le user courant (undefined si on est pas loggé)
      * @param {Context} context
      * @return {Personne|undefined}
      */
-    function getCurrentPersonne (context) {
-      return context.session.user
-    }
+    const getCurrentPersonne = (context) => context.session.user
 
     /**
      * Affecte un utilisateur en session (props groupesMembre, groupesSuivis, nom, oid, pid, prenom, roles)
@@ -49,7 +54,7 @@ module.exports = function (component) {
      * @throws {Error} Si y'avait déjà un user en session ou si personne n'a pas les propriétés minimales
      */
     function login (context, personne) {
-      if (context.session.user) throw Error('Il y avait déjà un utilisateur en session')
+      if (context.session.user) log.error(Error('Il y avait déjà un utilisateur en session'))
       // on vérifie qu'il a au moins ces propriétés
       ;['groupesMembre', 'groupesSuivis', 'nom', 'oid', 'pid', 'prenom', 'roles', 'permissions'].forEach(prop => {
         if (!personne.hasOwnProperty(prop)) throw new Error(`Paramètres invalides (${prop} manquant)`)
@@ -66,13 +71,24 @@ module.exports = function (component) {
     }
 
     /**
+     * Affecte authBaseId
+     * @param context
+     * @param baseId
+     */
+    function setAuthBaseId (context, baseId) {
+      context.session.authBaseId = baseId
+    }
+
+    /**
      * Service de gestion de la session (ça devrait être le seul endroit qui modifie context.session)
      * @service $session
      */
     return {
+      getAuthBaseId,
       getCurrentPersonne,
       login,
-      logout
+      logout,
+      setAuthBaseId
     }
   })
 }
