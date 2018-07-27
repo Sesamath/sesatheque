@@ -3,11 +3,12 @@ import React from 'react'
 import AceEditor from 'react-ace'
 import 'brace'
 import 'brace/mode/json'
+import 'brace/mode/xml'
 import 'brace/theme/github'
 import 'brace/ext/searchbox'
 import showInvalidField from '../hoc/showInvalidField'
 
-import './JsonEditor.scss'
+import './TextEditor.scss'
 
 /**
  * Formate un objet en string json (pretty)
@@ -25,9 +26,9 @@ function formatJSON (value) {
   }
 }
 
-const JsonEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate }) => (
+const TextEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate, mode }) => (
   <AceEditor
-    mode="json"
+    mode={mode}
     theme="github"
     fontSize={14}
     onChange={onChange}
@@ -40,14 +41,14 @@ const JsonEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate })
     wrapEnabled
     maxLines={Infinity}
     tabSize={2}
-    value={formatJSON(value)}
+    value={mode === 'json' ? formatJSON(value) : value}
     editorProps={{
       $blockScrolling: true
     }}
   />
 )
 
-JsonEditor.propTypes = {
+TextEditor.propTypes = {
   input: PropTypes.shape({
     value: PropTypes.oneOfType([
       PropTypes.string,
@@ -57,7 +58,8 @@ JsonEditor.propTypes = {
     onChange: PropTypes.func,
     onFocus: PropTypes.func
   }),
+  mode: PropTypes.string,
   onValidate: PropTypes.func
 }
 
-export default showInvalidField(JsonEditor)
+export default showInvalidField(TextEditor)

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {JsonField} from './fields'
+import {TextField} from './fields'
 
 class IframeHandler extends Component {
   constructor (props) {
@@ -69,7 +69,8 @@ class IframeHandler extends Component {
           </nav>
         ) : null}
         {this.props.allowManualEdition && this.state.manualEdition ? (
-          <JsonField
+          <TextField
+            mode="json"
             label="Script"
             name={this.props.name ||
               'parametres'}

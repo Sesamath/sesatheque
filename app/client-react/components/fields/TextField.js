@@ -1,20 +1,22 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Field} from 'redux-form'
-import JsonEditor from './inputs/JsonEditor'
+import TextEditor from './inputs/TextEditor'
 import addLabel from './hoc/addLabel'
 
-const JsonField = ({name, onValidate}) => (
+const TextField = ({name, onValidate, mode}) => (
   <Field
     name={name}
     onValidate={onValidate}
-    component={JsonEditor}
+    component={TextEditor}
+    mode={mode}
   />
 )
 
-JsonField.propTypes = {
+TextField.propTypes = {
+  mode: PropTypes.string,
   name: PropTypes.string,
   onValidate: PropTypes.func
 }
 
-export default addLabel(JsonField)
+export default addLabel(TextField)
