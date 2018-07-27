@@ -30,7 +30,7 @@
  */
 'use strict'
 const uuid = require('an-uuid')
-const {getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
+const {exists, getRidComponents} = require('sesatheque-client/src/sesatheques')
 const {stringify} = require('sesajstools')
 
 const tools = require('../lib/tools')
@@ -149,91 +149,111 @@ module.exports = function (component) {
     // pour vérifier l'intégrité des relations
 
     EntityRessource.beforeStore(function (next) {
+      const logAndNext = (errorMessage) => {
+        const error = Error(errorMessage)
+        log.error(error)
+        next(error)
+      }
+
+      // un identifiant pour les messages d'erreur
+      const id = this.oid ||
+        this.rid ||
+        (this.origine && this.idOrigine && `${this.origine}/${this.idOrigine}`) ||
+        this.titre
+
+      // type et titre obligatoire
+      if (!this.type) return next(Error(`Ressource sans type, impossible à sauvegarder (${id})`))
+      if (!this.titre) return next(Error(`Ressource sans titre, impossible à sauvegarder (${id})`))
+
       try {
-        // pour les messages d'erreur
-        const id = this.oid ||
-          this.rid ||
-          (this.origine && this.idOrigine && `${this.origine}/${this.idOrigine}`) ||
-          this.titre
-
-        // check type
-        if (!this.type) throw new Error('Ressource sans type, impossible à sauvegarder')
-        // check origine et idOrigine
-        if (this.origine) {
-          if (this.origine === myBaseId) {
-            // on vérifie la cohérence oid = idOrigine
-            if (this.idOrigine && this.oid) {
-              if (this.oid != this.idOrigine) { // eslint-disable-line eqeqeq
-                throw new Error(`Ressource incohérente (oid ${this.oid} avec origine ${this.origine} et idOrigine ${this.idOrigine})`)
-              }
-              // sinon tout est normal
-            } else if (this.oid) {
-              this.idOrigine = this.oid
-            } else if (this.idOrigine) {
-              this.oid = this.idOrigine
-            }
-            // sinon ni l'un ni l'autre, faudra le mettre en afterStore
-          } else if (this.idOrigine) {
-            // on vérifie qu'on essaie pas d'enregistrer localement une ressource qui viendrait d'ailleurs
-            // TODO (Daniel) : j'ai commenté temporairement car sur mon dump toutes mes origines sont différentes de mes oid ?
-            // if (this.oid && this.idOrigine === this.oid) throw new Error(`Cette ressource ${this.origine}/${this.idOrigine}) devrait être enregistrée sur ${this.origine}`)
-          } else {
-            return next(new Error(`origine sans idOrigine (${this.oid ? this.oid : 'creation'})`))
-          }
-        } else if (this.type !== 'error') {
-          // on pourrait mettre d'office une origine myBaseId ici, mais c'est le boulot du contrôleur
-          // ça pourrait masquer une vraie erreur d'aiguillage
-          return next(new Error(`propriété origine obligatoire (${this.oid ? this.oid : 'creation'})`))
-        }
-
-        // check rid
+        // on peut écraser une ressource en fournissant son rid (sans son oid),
+        // on commence par vérifier ça
         if (this.rid) {
           const [baseId, oid] = getRidComponents(this.rid)
-          if (baseId === myBaseId) {
-            // check oid
-            if (!this.oid) this.oid = oid
-            else if (this.oid != oid) throw new Error(`oid ${this.oid} et rid ${this.rid} incohérents`) // eslint-disable-line eqeqeq
-            // si y'a pas d'origine on en met une
-            if (!this.origine) this.origine = myBaseId
-            // si on est l'origine on fixe idOrigine s'il n'y est pas
-            if (this.origine === myBaseId) {
-              if (!this.idOrigine) this.idOrigine = this.oid
-              if (this.idOrigine != this.oid) throw new Error(`idOrigine ${this.idOrigine} et rid ${this.rid} incohérents`) // eslint-disable-line eqeqeq
-            }
+          if (baseId !== myBaseId) return logAndNext(`Ressource avec rid ${this.rid} qui correspond à une autre Sésathèque (${baseId})`)
+          if (this.oid) {
+            if (this.oid !== oid) return logAndNext(`Ressource avec rid ${this.rid} incohérent avec son oid ${this.oid}`)
           } else {
-            throw new Error(`Cette ressource ${this.oid || this.rid} doit être enregistrée sur ${baseId} (et non ici ${myBaseId})`)
+            this.oid = oid
           }
         } else if (this.oid) {
-          this.rid = myBaseId + '/' + this.oid
+          this.rid = `${myBaseId}/${this.oid}`
+        } // else rid sera fixé en afterStore d'après l'oid créé
+
+        // check origine et idOrigine, qui peuvent être tous deux vides à ce stade
+        if (this.origine === myBaseId) {
+          // ressource créée ici, on vérifie la cohérence oid = idOrigine dans ce cas
+          if (this.idOrigine && this.oid) {
+            if (this.oid !== this.idOrigine) {
+              return logAndNext(Error(`Ressource incohérente (oid ${this.oid} avec origine ${this.origine} et idOrigine ${this.idOrigine})`))
+            } // sinon c'est cohérent et tout va bien
+          } else if (this.oid) {
+            // oid sans idOrigine, on fixe
+            this.idOrigine = this.oid
+          } else if (this.idOrigine) {
+            // idOrigine sans oid (ni rid qui aurait fixé oid plus haut)
+            // => c'est une ressource qui existe déjà dans la base,
+            // pas normal de n'avoir donné ni rid ni oid => on jette
+            return logAndNext(`ressource ${this.origine}/${this.idOrigine} existante fournie sans rid ni oid`)
+          }
+        } else if (this.origine) {
+          // on vérifie qu'on essaie pas d'enregistrer ici une ressource d'une autre sésathèque
+          // (à priori un pb de dump, ou un post vers l'api de la mauvaise sesathèque)
+          if (exists(this.origine)) {
+            return logAndNext(`Cette ressource ${this.origine}/${this.idOrigine}) devrait être enregistrée sur ${this.origine}`)
+          } else if (!this.idOrigine) {
+            return logAndNext(`origine sans idOrigine (${id})`)
+          }
+        } else if (this.type === 'error') {
+          // le seul cas où on vérifie pas origine/idOrigine,
+          // on note quand même dans le log qu'on enregistre une erreur
+          log.dataError('store d’une ressource de type error', this)
+        } else {
+          // pas d'origine on pourrait mettre d'office une origine myBaseId ici, mais c'est le boulot
+          // du contrôleur, le faire ici pourrait masquer une vraie erreur d'aiguillage
+          return logAndNext(`propriété origine obligatoire (${id})`)
         }
+
         // check aliasOf
         if (this.aliasOf) {
           // y'a eu des 'undefined' enregistrés à une époque…
           // @todo virer ça après update34
-          if (this.aliasOf === 'undefined') {
+          if (this.aliasOf === 'undefined' || this.aliasOf === '') {
             delete this.aliasOf
           } else {
-            // peu importe la base, on veut juste un check
+            // on vérifie que ça pointe vers une base connue
             try {
-              getBaseIdFromRid(this.aliasOf)
+              getRidComponents(this.aliasOf)
             } catch (error) {
-              if (this.oid) throw Error(`aliasOf invalide ${this.aliasOf} pour ${this.oid}`)
-              throw Error(`aliasOf invalide ${this.aliasOf}`)
+              return logAndNext(`aliasOf ${this.aliasOf} invalide (ressource ${id})`)
             }
           }
         }
-        // on vire un éventuel token
-        if (this.token) delete this.token
-        // on génère la clé si elle manque
-        if (this.restriction && !this.cle) {
-          this.cle = uuid()
+
+        // on génère la clé si elle manque, on la vire si elle n'est plus nécessaire
+        if (this.publie && !this.restriction) {
+          // public
+          if (this.cle) delete this.cle
+        } else {
+          // prive
+          if (!this.cle) this.cle = uuid()
         }
-        // pas de parametres sur les arbres
-        if (this.type === 'arbre' && this.parametres) delete this.parametres
+
+        // pas de parametres sur les arbres mais une propriété enfants obligatoire
+        if (this.type === 'arbre') {
+          if (this.parametres) delete this.parametres
+          // @todo remettre ça après passage de l'update 34
+          // if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
+          if (!Array.isArray(this.enfants)) this.enfants = []
+        }
+
         // date de création
         if (!this.dateCreation) this.dateCreation = new Date()
-        // date de mise à jour
-        this.dateMiseAJour = new Date()
+        // date de mise à jour, sauf en cas de réindexation
+        // (si c'est pas reindex c'est un autre batch qui indique ça)
+        // @todo gérer dateMiseAJour dans le contrôleur
+        if (!this.$byPassDuplicate) this.dateMiseAJour = new Date()
+
         // cohérence de la restriction
         if (this.restriction === configRessource.constantes.restriction.groupe && (!this.groupes || !this.groupes.length)) {
           log.dataError(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)

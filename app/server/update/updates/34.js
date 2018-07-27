@@ -31,12 +31,14 @@
 'use strict'
 
 const flow = require('an-flow')
+const uuid = require('an-uuid')
+
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
 const updateLog = require('an-log')('update' + updateNum)
 const {application: {baseId}} = require('../../config')
 
 module.exports = {
-  name: 'nettoie les rid et pid en doublon, réindexe tout',
+  name: 'nettoie les doublons de rid, cle, pid, réindexe tout',
   description: '',
   run: function run (next) {
     const EntityGroupe = lassi.service('EntityGroupe')
@@ -50,6 +52,8 @@ module.exports = {
 
     let nbDoublonsPid = 0
     let nbDoublonsRid = 0
+    let nbEmptyRid = 0
+    let nbDoublonsCle = 0
     flow().seq(function () {
       EntityPersonne.getCollection().aggregate([
         {
@@ -99,7 +103,6 @@ module.exports = {
       ]).toArray(this)
     }).seqEach(function (result) {
       nbDoublonsRid++
-      const nextRessource = this
       const {_id: {rid}} = result
       flow().seq(function () {
         updateLog.error(`rid ${rid} en ${result.count} exemplaires`)
@@ -110,9 +113,68 @@ module.exports = {
         updateLog(`rid invalide pour ${ressource.oid}, ${ressource.rid} => ${rid}`)
         ressource.rid = rid
         $ressourceRepository.save(ressource, this)
-      }).done(nextRessource)
+      }).done(this)
     }).seq(function () {
       if (!nbDoublonsRid) updateLog('Il n’y avait aucun rid en doublon')
+
+      // on passe aux rid vides
+      EntityRessource.match('rid').in(['', 'undefined', 'null']).grab(this)
+    }).seqEach(function (ressource) {
+      nbEmptyRid++
+      ressource.rid = `${baseId}/${ressource.oid}`
+      $ressourceRepository.save(ressource, this)
+    }).seq(function () {
+      // rid null, devrait pas y en avoir mais…
+      EntityRessource.match('rid').isNull().grab(this)
+    }).seqEach(function (ressource) {
+      nbEmptyRid++
+      ressource.rid = `${baseId}/${ressource.oid}`
+      $ressourceRepository.save(ressource, this)
+    }).seq(function () {
+      if (nbEmptyRid) updateLog(`${nbEmptyRid} rid vides corrigés`)
+      else updateLog('Il n’y avait aucun rid vide')
+
+      // on passe aux clés, via updateMany nettement plus efficace
+      // on vire les clés vides (pour passer en index unique on veut null et pas chaîne vide)
+      // https://docs.mongodb.com/manual/reference/method/db.collection.updateMany/
+      EntityRessource.getCollection().updateMany({cle: ''}, {$unset: {cle: '', '_data.cle': ''}})
+      // on vire les clés des ressources publiques
+      EntityRessource.getCollection().updateMany({publie: true, restriction: 0}, {$unset: {cle: '', '_data.cle': ''}})
+
+      // on passe aux doublons de clés (pb lors du fork où on a pas créée de nouvelle clé)
+      EntityRessource.getCollection().aggregate([
+        {
+          $match: {cle: {$ne: null}}
+        },
+        {
+          $group: {
+            _id: {cle: '$cle'},
+            count: {$sum: 1}
+          }
+        }, {
+          $match: {count: {$gt: 1}}
+        }
+      ]).toArray(this)
+    }).seqEach(function (result) {
+      const {_id: {cle}} = result
+      let nieme = 0
+      flow().seq(function () {
+        updateLog.error(`cle ${cle} en ${result.count} exemplaires`)
+        EntityRessource.match('cle').equals(cle).grab(this)
+      }).seqEach(function (ressource) {
+        // on change pas le 1er
+        nieme++
+        if (nieme === 1) return this()
+        nbDoublonsCle++
+        const cle = uuid()
+        updateLog(`cle en doublon pour ${ressource.oid}, ${ressource.cle} => ${cle}`)
+        ressource.cle = cle
+        $ressourceRepository.save(ressource, this)
+      }).done(this)
+    }).seq(function () {
+      if (nbDoublonsCle) updateLog(`${nbDoublonsCle} doublons de clé modifiés`)
+      else updateLog('Il n’y avait aucune cle en doublon')
+
       updateLog('Réindexation de toute les entities')
       this(null, ['EntityArchive', 'EntityExternalRef', 'EntityGroupe', 'EntityPersonne', 'EntityRessource', 'EntityUpdate'])
     }).seqEach(function (entityName) {
