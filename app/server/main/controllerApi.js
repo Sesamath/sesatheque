@@ -34,7 +34,7 @@ const config = require('../config')
 const {checkSesalab, checkSesatheque} = require('../checkConfig')
 
 module.exports = function mainApiControllersFactory (component) {
-  component.controller('api', function mainApiControllers ($session) {
+  component.controller('api', function mainApiControllers () {
     /**
      * Retourne la baseUrl d'une baseId de sesatheque
      * (connue par configuration ou déclarée ici par un client)

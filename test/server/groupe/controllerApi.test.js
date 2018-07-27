@@ -42,23 +42,26 @@ import boot from '../boot'
 import {expect} from 'chai'
 import groupes from '../../fixtures/groupes'
 import {
-  createAndLogUser,
   createGroupe,
+  createPersonne,
   itBlocksUser,
-  itIsSuccessfull
+  itIsSuccessfull,
+  login,
+  logout
 } from '../helpers'
 import {purge} from '../populate'
 import utilisateurs from '../../fixtures/utilisateurs'
+const personne = utilisateurs[0]
 
 // services Lassi chargés dans le before
-let api
+let agent
 let apiTokenEncoded
 let $settings
 
 describe('API groupe', () => {
   before(() => boot().then(({superTestAgent, lassi}) => {
     if (!superTestAgent) return Promise.reject(new Error('boot KO supertest non chargé'))
-    api = superTestAgent
+    agent = superTestAgent
 
     if (!lassi) return Promise.reject(new Error('boot KO lassi'))
     $settings = lassi.service('$settings')
@@ -72,7 +75,7 @@ describe('API groupe', () => {
 
   context('sans avoir de session', () => {
     it(`empèche la récupération des groupes pour un compte non identifié`, async () => {
-      const response = await api
+      const response = await agent
         .get(`/api/groupes/perso`)
         .set('Content-Type', 'application/json')
 
@@ -81,18 +84,21 @@ describe('API groupe', () => {
   })
 
   context('avec une session', () => {
-    beforeEach(async () => {
+    before(async () => {
       await purge()
-      return createAndLogUser(api, utilisateurs[0])
+      return createPersonne(personne)
     })
+    beforeEach(() => login(agent, personne))
+    afterEach(() => logout(agent))
+    after(() => purge())
 
     it(`création d'un groupe`, async () => {
       // On s'approprie le groupe de fixture
       const groupeToCreate = groupes[0]
       delete groupeToCreate.oid // Force une création
-      groupeToCreate.gestionnaires = [utilisateurs[0].oid]
+      groupeToCreate.gestionnaires = [personne.oid]
 
-      let response = await api
+      let response = await agent
         .post(`/api/groupe`)
         .send(groupeToCreate)
         .set('Content-Type', 'application/json')
@@ -103,7 +109,7 @@ describe('API groupe', () => {
       expect(response.body.creationDate).to.exist
       expect(response.body.ouvert).to.equal(groupeToCreate.ouvert)
       expect(response.body.public).to.equal(groupeToCreate.public)
-      expect(response.body.gestionnaires).to.be.an('array').that.includes(utilisateurs[0].oid)
+      expect(response.body.gestionnaires).to.be.an('array').that.includes(personne.oid)
 
       return response
     })
@@ -112,14 +118,14 @@ describe('API groupe', () => {
       const groupeName = `group-${Math.random()}`
 
       // Création
-      let response = await api
+      let response = await agent
         .get(`/api/groupe/ajouter/${groupeName}`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
       itIsSuccessfull(response)
 
       // Récupération puis vérifications
-      response = await api
+      response = await agent
         .get(`/api/groupe/byNom/${groupeName}`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
@@ -127,7 +133,7 @@ describe('API groupe', () => {
       itIsSuccessfull(response)
       expect(response.body.oid).to.exist
       expect(response.body.nom).to.equal(groupeName)
-      expect(response.body.gestionnaires).to.be.an('array').that.includes(utilisateurs[0].oid)
+      expect(response.body.gestionnaires).to.be.an('array').that.includes(personne.oid)
       expect(response.body.ouvert).to.equal(false)
       expect(response.body.public).to.equal(true)
 
@@ -135,7 +141,7 @@ describe('API groupe', () => {
     })
 
     it(`tente la récupération d'un groupe qui n'existe pas (depuis un oid)`, async () => {
-      let response = await api
+      let response = await agent
         .get(`/api/groupe/groupe-qui-existe-pas`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
@@ -145,8 +151,8 @@ describe('API groupe', () => {
     })
 
     it(`tente la récupération d'un groupe qui existe (depuis un oid)`, async () => {
-      const groupe = await createGroupe(groupes[0], [utilisateurs[0].oid])
-      let response = await api
+      const groupe = await createGroupe(groupes[0], [personne.oid])
+      let response = await agent
         .get(`/api/groupe/${groupe.oid}`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
@@ -159,7 +165,7 @@ describe('API groupe', () => {
     })
 
     it(`tente la récupération d'un groupe qui n'existe pas (depuis un nom)`, async () => {
-      let response = await api
+      let response = await agent
         .get(`/api/groupe/byNom/groupe-qui-existe-pas`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
@@ -169,8 +175,8 @@ describe('API groupe', () => {
     })
 
     it(`tente la récupération d'un groupe qui existe (depuis un nom)`, async () => {
-      await createGroupe(groupes[0], [utilisateurs[0].oid])
-      let response = await api
+      await createGroupe(groupes[0], [personne.oid])
+      let response = await agent
         .get(`/api/groupe/byNom/${groupes[0].nom}`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
@@ -181,7 +187,7 @@ describe('API groupe', () => {
     })
 
     it(`récupère les groupes d'un utilisateur`, async () => {
-      let response = await api
+      let response = await agent
         .get(`/api/groupes/perso`)
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)

@@ -4,33 +4,32 @@ const EntityGroupe = () => lassi.service('EntityGroupe')
 const EntityPersonne = () => lassi.service('EntityPersonne')
 
 /**
- * Crée un utilisateur et le log via l'API
- * @param {string} agent
- * @param {Object} personne
- * @param {function} done
+ * Login via l'api d'un utilisateur (qui doit exister en base)
+ * @param {supertestAgent} agent
+ * @param {Personne} personne
+ * @return {Promise}
  */
-export const createAndLogUser = async (agent, personne) => {
-  // On s'assure qu'il n'y a pas une autre session en cours
-  await agent
-    .post('/api/test/logout')
-    .set('Content-Type', 'application/json')
+export const login = async (agent, personne) => agent
+  .post('/api/test/login')
+  .set('Content-Type', 'application/json')
+  .send({personne})
+  .expect(200)
 
-  // On crée l'utilisateur en base
-  const personneEntity = await createPersonne(personne)
-
-  // On se connecte à l'aide de ce nouvel utilisateur
-  await agent
-    .post('/api/test/login')
-    .set('Content-Type', 'application/json')
-    .send({personne: personneEntity})
-    .expect(200)
-}
+/**
+ * Logout via l'API
+ * @param {supertestAgent} agent
+ * @return {Promise}
+ */
+export const logout = (agent) => agent
+  .get('/api/test/logout')
+  .set('Content-Type', 'application/json')
+  .expect(200)
 
 /**
  * Crée un utilisateur en base
- * @param {string} agent
- * @param {string} user
- * @return {Promise} Une promesse
+ * @param {supertestAgent} agent
+ * @param {Personne} personne
+ * @return {Promise}
  */
 export const createPersonne = (personne) => {
   return new Promise((resolve, reject) => {
