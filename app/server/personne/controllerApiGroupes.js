@@ -147,7 +147,6 @@ module.exports = function (component) {
           if (!groupes[nom]) missing.add(nom)
         })
         if (!missing.size) return this()
-        // faut aller chercher les groupes manquants
         const next = this
         $groupeRepository.fetchListByNom(Array.from(missing), (error, groupes) => {
           if (error) next(error)

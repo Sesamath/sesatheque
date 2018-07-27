@@ -137,10 +137,16 @@ module.exports = {
       // on passe aux clés, via updateMany nettement plus efficace
       // on vire les clés vides (pour passer en index unique on veut null et pas chaîne vide)
       // https://docs.mongodb.com/manual/reference/method/db.collection.updateMany/
-      EntityRessource.getCollection().updateMany({cle: ''}, {$unset: {cle: '', '_data.cle': ''}})
+      // http://mongodb.github.io/node-mongodb-native/3.1/api/Collection.html#updateMany
+      const filter = {cle: ''}
+      const update = {$unset: {cle: '', '_data.cle': ''}}
+      EntityRessource.getCollection().updateMany(filter, update, {}, this)
+    }).seq(function () {
       // on vire les clés des ressources publiques
-      EntityRessource.getCollection().updateMany({publie: true, restriction: 0}, {$unset: {cle: '', '_data.cle': ''}})
-
+      const filter = {publie: true, restriction: 0}
+      const update = {$unset: {cle: '', '_data.cle': ''}}
+      EntityRessource.getCollection().updateMany(filter, update, {}, this)
+    }).seq(function () {
       // on passe aux doublons de clés (pb lors du fork où on a pas créée de nouvelle clé)
       EntityRessource.getCollection().aggregate([
         {
