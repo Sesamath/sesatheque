@@ -33,7 +33,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const config = require('../config')
+const {application: {staticMaxAge, staging}} = require('../config')
 
 const envSesathequeConf = process.env.SESATHEQUE_CONF
 
@@ -63,7 +63,7 @@ module.exports = function (mainComponent) {
     // nos ressources statiques générées par webpack
     const expressOptions = {
       fsPath: path.join(root, 'build'),
-      maxAge: config.application.staticMaxAge || '7d'
+      maxAge: staticMaxAge || '7d'
     }
     if (envSesathequeConf) expressOptions.fsPath = path.join(expressOptions.fsPath, envSesathequeConf)
     this.serve('/', expressOptions)
@@ -75,7 +75,7 @@ module.exports = function (mainComponent) {
     // sauf en dev (c'est webpack-dev-server qui gère)
     // sauf en test (docker n'a pas de dossier build)
     // => pour prod et preprod
-    if (config.application.staging.includes('prod')) {
+    if (staging.includes('prod')) {
       const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
       const reactPagePath = path.resolve(root, buildDir, 'index.html')
       const reactPage = fs.readFileSync(reactPagePath)

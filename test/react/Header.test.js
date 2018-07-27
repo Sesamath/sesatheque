@@ -3,11 +3,11 @@ import TestRenderer from 'react-test-renderer'
 import {application} from '../../_private/test'
 import {expect} from 'chai'
 import {Header} from '../../app/client-react/components/Header'
-import {personne} from '../fixtures/utilisateurs.js'
+import utilisateurs from '../fixtures/utilisateurs.js'
 import {MemoryRouter} from 'react-router'
 
 const props = {
-  personne,
+  personne: utilisateurs[0],
   loginLinks: [{href: application.baseUrl}],
   logoutUrl: application.baseUrl,
   sso: {
