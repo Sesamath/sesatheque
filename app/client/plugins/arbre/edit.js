@@ -64,7 +64,7 @@ function edit (arbre, options, saveCallback) {
    * @param node
    */
   function addLinkApercu (links, node) {
-    const url = node.a_attr && node.a_attr[ 'data-displayurl' ]
+    const url = node.a_attr && node.a_attr.href
     // Apercu sur tous les éléments dont on a une ref
     if (!url) return
     links.apercu = {
