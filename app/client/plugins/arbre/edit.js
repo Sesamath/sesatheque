@@ -45,9 +45,13 @@ addSesatheques(sesatheques)
 
 // @todo Reste à ajouter un options.eachEnfant pour modifier à la volée les enfants sur l'arbre de destination et empêcher le chargement des arbres en aliasOf (sinon ça les intègre d'office), en ajoutant sur ces éléments un menu de clic droit "incorporer tout le contenu ici"
 
-// @todo ajouter l'aperçu
-
 // @todo régler le pb des css (actuellement avec un dom.addCss de la css construite par webpack, faut fusionner avec les autres)
+
+// @todo réparer les css qui manquent, $treeError ne se voit plus du tout (classe css error) et les polices sont crades
+
+// @todo remettre les icones sur les actions du clic droit
+
+// @todo voir si on peut ouvrir l'édition dans un nouvel onglet
 
 /**
  * Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
@@ -312,8 +316,9 @@ function edit (arbre, options, saveCallback) {
       // on met une fct car le résultat dépend de l'item sur lequel on fait un clic droit
       const items = {}
       const isRacine = (node.parent === '#')
-      const isArbreSansRef = node.a_attr[ 'data-type' ] === 'arbre' && !node.a_attr[ 'data-aliasof' ]
-      const isArbreRef = node.a_attr[ 'data-type' ] === 'arbre' && node.a_attr[ 'data-aliasof' ]
+      const isArbre = node.a_attr[ 'data-type' ] === 'arbre'
+      const isArbreSansRef = isArbre && !node.a_attr[ 'data-aliasof' ]
+      const isArbreRef = isArbre && node.a_attr[ 'data-aliasof' ]
       // on peut supprimer n'importe quel item sauf la racine
       if (!isRacine) {
         items.remove = {
@@ -341,15 +346,20 @@ function edit (arbre, options, saveCallback) {
           label: 'Renommer',
           action: actionRename
         }
-      }
-      // un raccourci pour aller éditer une ref
-      if (isArbreRef && !isRacine) {
-        items.editRef = {
-          label: 'Éditer',
-          action: actionEdit
+      } else if (isArbreRef && !isRacine) {
+        // un raccourci pour aller éditer une ref
+        const editUrl = node.a_attr['data-editurl']
+        if (editUrl) {
+          log('lien éditer vers', editUrl)
+          items.editRef = {
+            label: 'Éditer',
+            action: actionEdit
+            // href: editUrl // ça injecte toujours # :-/
+          }
         }
+      } else if (!isArbre) {
+        addLinkApercu(items, node)
       }
-      addLinkApercu(items, node)
       log('clic droit sur', node)
       cb(items)
     }
