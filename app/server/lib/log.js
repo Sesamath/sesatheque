@@ -183,7 +183,6 @@ function log (message, objectToDump, filter, options) {
   out(message, objectToDump, filter, null, options)
 }
 
-
 /**
  * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données (config.logs.dataError)
  * @memberOf log

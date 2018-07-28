@@ -37,6 +37,7 @@
     "maj": "git pull && npm install && npm run build",
     "mongo": "./scripts/mongoApp",
     "mongo:commun": "./scripts/mongoApp -g ./_private/commun.js",
+    "mongo:test": "./scripts/mongoApp -g ./_private/test.js",
     "start": "env NODE_ENV=production node app/server/start.js",
     "start:commun": "env NODE_ENV=production SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm run start:commun & npm start",

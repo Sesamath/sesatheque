@@ -56,6 +56,7 @@ describe('controller api ressource', () => {
   let $settings
   // nos helpers
   let checkDb
+  let checkHttp
   let cleanVolatileProperties
   let getTestRessources
   let purgeOnError
@@ -71,6 +72,7 @@ describe('controller api ressource', () => {
     apiTokenEncoded = encodeURIComponent(apiToken)
     const h = helpersFactory(lassi, superTestClient)
     checkDb = h.checkDb
+    checkHttp = h.checkHttp
     cleanVolatileProperties = h.cleanVolatileProperties
     getTestRessources = h.getTestRessources
     purgeOnError = h.purgeOnError
@@ -78,7 +80,7 @@ describe('controller api ressource', () => {
     return purge()
   }))
 
-  it.only('POST enregistre une ressource et retourne son oid', function () {
+  it('POST enregistre une ressource et retourne son oid', function () {
     const getPostPromise = (ressource) => _superTestClient
       .post('/api/ressource')
       .set('Content-Type', 'application/json')
@@ -87,6 +89,7 @@ describe('controller api ressource', () => {
       .expect(200)
       .then(res => {
         const result = res.body
+        if (result.error) console.error(result.error)
         expect(result).not.to.have.property('error')
         expect(result).to.have.property('oid')
         const {oid} = result
@@ -224,7 +227,7 @@ describe('controller api ressource', () => {
 
   describe('GET /api/ressource/… sur ressource publique', () => {
     let ressources
-    const getGlobalPromise = (urlConstructor) => Promise.all(ressources.map(r => h.checkHttp(urlConstructor(r), r)))
+    const getGlobalPromise = (urlConstructor) => Promise.all(ressources.map(r => checkHttp(urlConstructor(r), r)))
 
     before(() => purge()
       .then(() => populate({ressources: 6, personnes: 6}))

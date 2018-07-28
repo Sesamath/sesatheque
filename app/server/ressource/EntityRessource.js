@@ -189,7 +189,7 @@ module.exports = function (component) {
     })
 
     EntityRessource
-      .defineIndex('rid', {unique: true})
+      .defineIndex('rid', {unique: true, sparse: true}) // rid est obligatoire, mais on l'a pas encore à la création… => sparse
       .defineIndex('cle', {unique: true, sparse: true}) // pour loadByCle
       .defineIndex('aliasOf', 'string')
       .defineIndex('origine', 'string')
@@ -340,7 +340,6 @@ module.exports = function (component) {
 
         // pas de parametres sur les arbres mais une propriété enfants obligatoire
         if (this.type === 'arbre') {
-          if (this.parametres) delete this.parametres
           // @todo remettre ça après passage de l'update 35
           // if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
           if (!Array.isArray(this.enfants)) this.enfants = []
