@@ -128,9 +128,9 @@ module.exports = function (component) {
           type: 'array',
           items: {$ref: '#/definitions/relation'}
         },
-        auteurs: {$ref: '#/definitions/arrayOfMixedId'},
-        auteursParents: {$ref: '#/definitions/arrayOfMixedId'},
-        contributeurs: {$ref: '#/definitions/arrayOfMixedId'},
+        auteurs: {$ref: '#/definitions/arrayOfMixId'},
+        auteursParents: {$ref: '#/definitions/arrayOfMixId'},
+        contributeurs: {$ref: '#/definitions/arrayOfMixId'},
         groupes: {$ref: '#/definitions/arrayOfStrings'},
         groupesAuteurs: {$ref: '#/definitions/arrayOfStrings'},
         langue: {type: 'string'},
@@ -139,18 +139,16 @@ module.exports = function (component) {
         dateCreation: {instanceof: 'Date'},
         dateMiseAJour: {instanceof: 'Date'},
         version: {type: 'integer', minimum: 1},
-        inc: {type: 'integer', minimum: 1},
-        indexable: {type: 'boolean'}
+        inc: {type: 'integer', minimum: 0},
+        indexable: {type: 'boolean'},
+        archiveOid: {type: 'string'}
       },
       additionalProperties: false,
       required: ['titre', 'type'],
       definitions: {
-        arrayOfMixedId: {
+        arrayOfMixId: {
           type: 'array',
-          items: {
-            type: 'string',
-            pattern: '^[a-z0-9]+/[a-z0-9_-]+$'
-          }
+          items: {$ref: '#/definitions/mixId'}
         },
         arrayOfStrings: {
           type: 'array',
@@ -165,13 +163,20 @@ module.exports = function (component) {
             titre: {type: 'string'},
             type: {type: 'string'},
             aliasOf: {type: 'string'},
+            public: {type: 'boolean'},
+            resume: {type: 'string'},
+            description: {type: 'string'},
+            commentaires: {type: 'string'},
             enfants: {
               type: 'array',
               items: {$ref: '#/definitions/enfant'}
             }
           },
-          additionalProperties: false,
           required: ['titre', 'type']
+        },
+        mixId: {
+          type: 'string',
+          pattern: '^[a-zA-Z0-9_-]+/[a-z0-9_-]+$'
         },
         relation: {
           type: 'array',
@@ -327,7 +332,7 @@ module.exports = function (component) {
         // on génère la clé si elle manque, on la vire si elle n'est plus nécessaire
         if (this.publie && !this.restriction) {
           // public
-          if (this.cle) delete this.cle
+          if (this.hasOwnProperty('cle')) delete this.cle
         } else {
           // prive
           if (!this.cle) this.cle = uuid()
