@@ -200,7 +200,7 @@ module.exports = function (component) {
         var msg = 'start-pers-' + context.post.id
         log.perf(context.response, msg)
       }
-      if (!$accessControl.hasGenericPermission('createGroupe', context)) $json.denied(context)
+      if (!$accessControl.hasGenericPermission('createGroupe', context)) return $json.denied(context)
       const nom = context.arguments.nom
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)

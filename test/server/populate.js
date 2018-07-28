@@ -203,7 +203,7 @@ export function populate (options, done) {
 }
 
 /**
- * Efface toutes les ressources et personnes de la base
+ * Efface toutes les collections de la base (sauf EntityUpdate)
  * @param {errorCallback} [done]
  * @return {Promise|undefined} Promise si done n'est pas fourni
  */
@@ -216,19 +216,41 @@ export function purge (done) {
       })
     })
   }
-  boot().then(({lassi}) => {
-    const EntityPersonne = lassi.service('EntityPersonne')
-    const EntityRessource = lassi.service('EntityRessource')
-    EntityPersonne.match().purge((error) => {
-      if (error) return done(error)
-      personnes.clear()
-      pOids = []
-      EntityRessource.match().purge((error) => {
-        if (error) return done(error)
-        ressources.clear()
-        rOids = []
-        done()
-      })
+  const purgeEntity = (def) => new Promise((resolve, reject) => {
+    def.match().purge((error) => error ? reject(error) : resolve())
+  })
+  let _lassi
+  boot()
+    .then(({lassi}) => {
+      _lassi = lassi
+      return Promise.all([
+        lassi.service('EntityPersonne'),
+        lassi.service('EntityRessource'),
+        lassi.service('EntityGroupe'),
+        lassi.service('EntityArchive')
+        // on ne purge pas EntityUpdate pour conserver dans la base de test
+        // le dernier update et gagner du temps à chaque boot des tests
+      ].map(purgeEntity))
     })
-  }).catch(done)
+    .then(() => {
+      // on flush nos variables internes
+      personnes.clear()
+      ressources.clear()
+      pOids = []
+      rOids = []
+      // et le cache
+      return _lassi.service('$cache').purge(done)
+    })
+    .catch(done)
+}
+
+/**
+ * Purge une collection
+ * @param {string} entityName
+ * @return {Promise}
+ */
+export function purgeOne (entityName) {
+  return boot().then(({lassi}) => new Promise((resolve, reject) => {
+    lassi.service(entityName).match().purge((error) => error ? reject(error) : resolve())
+  }))
 }

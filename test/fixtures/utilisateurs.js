@@ -8,13 +8,11 @@ module.exports = [
     prenom: 'Valide',
     email: 'prof.valide@email.com',
     roles: {
-      indexateur: true,
-      editeur: true,
       formateur: true,
       acces_correction: true
     },
     permissions: [],
-    groupesMembre: ['sesamath indexation'],
+    groupesMembre: [],
     groupesSuivis: []
   }
 ]
