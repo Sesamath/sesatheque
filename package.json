@@ -2,9 +2,8 @@
   "name": "Sesatheque",
   "version": "1.2.1",
   "engines": {
-    "node": ">6"
+    "node": ">=8.6.0"
   },
-  "private": true,
   "license": "AGPL-3.0",
   "repository": {
     "type": "git+ssh",
@@ -140,8 +139,8 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
     "bugsnag-js": "^4.4.0",
-    "chai": "^3.5.0",
-    "chai-as-promised": "^6.0.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "copy-webpack-plugin": "^4.5.2",
     "css-loader": "^0.28.11",
     "eslint": "^4.19.1",
