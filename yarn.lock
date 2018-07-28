@@ -4624,7 +4624,7 @@ knacss@^7.0.5:
 
 "lassi@git+https://framagit.org/Sesamath/lassi.git#2.4.1":
   version "2.4.1"
-  resolved "git+https://framagit.org/Sesamath/lassi.git#36eba91ba744ce2da6e2f446d8268963c3f9076b"
+  resolved "git+https://framagit.org/Sesamath/lassi.git#4a01bb693d576dae7df0a817b684a3f66a410ac4"
   dependencies:
     ajv "^6.1.1"
     ajv-errors "^1.0.0"
