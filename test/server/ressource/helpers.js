@@ -100,9 +100,9 @@ export default function helpersFactory (lassi, superTestClient) {
         const ressource = res.body
         cleanVolatileProperties(expected)
         expect(ressource).to.have.property('oid', expected.oid)
-        expect(ressource.error).to.be.empty
-        expect(ressource.errors).to.be.empty
-        expect(ressource.warnings).to.be.empty
+        expect(ressource).not.to.have.property('error')
+        expect(ressource).not.to.have.property('errors')
+        expect(ressource).not.to.have.property('warnings')
         Object.keys(expected).forEach(k => {
           // if (expected[k] instanceof Date) expect(ressource[k]).to.equals(expected[k].toISOString(), `pb sur propriété ${k}`)
           // else expect(ressource[k]).to.deep.equal(expected[k], `pb sur propriété ${k}`)
