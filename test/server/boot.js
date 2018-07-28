@@ -96,48 +96,50 @@ const shutdown = (done) => {
  * @param {number} [delay=3000] Le nb de ms à attendre après le boot pour éteindre
  * @return {Promise} qui sera résolue en passant un objet {superTestClient, lassi}
  */
-const getBootPromise = (delay) => new Promise((resolve, reject) => {
-  try {
-    const finish = () => {
-      // on éteindra après delay ms (rappeller boot reset le timer)
-      resetTimer(delay)
-      return resolve(resolvedValue)
-    }
-    // sera appelé sur l'événement startup de lassi
-    const afterBootCallback = () => {
-      if (!resolvedValue.lassi) throw new Error('Il y a eu un pb dans la méthode boot, lassi n’est pas disponible')
-      /** @type supertestClient */
-      resolvedValue.superTestClient = supertest(resolvedValue.lassi.express)
-      /** @type supertestAgent */
-      resolvedValue.superTestAgent = supertest.agent(resolvedValue.lassi.express)
-      resolvedValue.testsDone = () => resetTimer(100)
-      isBooted = true
-      finish()
-    }
-    if (isBooted) return finish()
-    if (resolvedValue.lassi) {
-      // le boot a démarré mais l'événement startup n'est pas encore arrivé
-      log('waiting for boot')
-      resolvedValue.lassi.on('startup', finish)
-      return
-    }
-
-    // on enregistre notre sesatheque de test
-    sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
-    // on configure an-log d'après la conf
-    // les logs de l'appli sont dans le dossier configuré dans _private/test.js
-    // possibilité de modifier le logLevel là-bas
-    anLog.config(config.lassiLogger)
-    // boot
-    app(afterBootCallback).then((lassiInstance) => {
-      // on est dans le then mais afterBootCallback n'a pas encore été appelée (à priori)
-      anLog.config(config.lassiLogger)
-      resolvedValue.lassi = lassiInstance
-      // finish sera appelé dans afterBootCallback
-    }).catch(log.error)
-  } catch (error) {
-    reject(error)
+const getBootPromise = (delay) => new Promise((resolve) => {
+  const finish = () => {
+    // on éteindra après delay ms (rappeller boot reset le timer)
+    // c'est pour que mocha rende la main, même si on l'appelle sur un seul fichier
+    // sinon faudrait boot & shutdown à chaque test, bcp trop long
+    resetTimer(delay)
+    return resolve(resolvedValue)
   }
+  // sera appelé sur l'événement startup de lassi
+  const afterBootCallback = () => {
+    if (!resolvedValue.lassi) throw new Error('Il y a eu un pb dans la méthode boot, lassi n’est pas disponible')
+    /** @type supertestClient */
+    resolvedValue.superTestClient = supertest(resolvedValue.lassi.express)
+    /** @type supertestAgent */
+    resolvedValue.superTestAgent = supertest.agent(resolvedValue.lassi.express)
+    resolvedValue.testsDone = () => resetTimer(100)
+    isBooted = true
+    finish()
+  }
+  if (isBooted) return finish()
+
+  // si le boot a démarré mais que l'événement startup n'est pas encore arrivé, faut l'attendre
+  if (resolvedValue.lassi) {
+    log('waiting for boot')
+    resolvedValue.lassi.on('startup', finish)
+    return
+  }
+
+  // on enregistre notre sesatheque de test
+  sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
+  // on configure an-log d'après la conf
+  // les logs de l'appli sont dans le dossier configuré dans _private/test.js
+  // possibilité de modifier le logLevel là-bas
+  anLog.config(config.lassiLogger)
+  // boot
+  app(afterBootCallback).then((lassiInstance) => {
+    // le boot retourne lassi en synchrone et afterBootCallback est appelée sur l'event startup
+    // donc on est dans le then mais afterBootCallback n'a pas encore été appelée
+
+    // anLog est pénible…
+    anLog.config(config.lassiLogger)
+    resolvedValue.lassi = lassiInstance
+    // finish sera appelé dans afterBootCallback
+  }).catch(log.error)
 })
 
 module.exports = getBootPromise
