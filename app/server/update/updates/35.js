@@ -54,6 +54,8 @@ module.exports = {
     let nbDoublonsRid = 0
     let nbEmptyRid = 0
     let nbDoublonsCle = 0
+    let nbSsTitre = 0
+
     flow().seq(function () {
       EntityPersonne.getCollection().aggregate([
         {
@@ -180,6 +182,16 @@ module.exports = {
     }).seq(function () {
       if (nbDoublonsCle) updateLog(`${nbDoublonsCle} doublons de clé modifiés`)
       else updateLog('Il n’y avait aucune cle en doublon')
+
+      // et on a aussi des titres vides !
+      EntityRessource.match('titre').in(['', 'undefined', 'null', null]).grab(this)
+    }).seqEach(function (ressource) {
+      nbSsTitre++
+      ressource.titre = 'Sans titre'
+      $ressourceRepository.save(ressource, this)
+    }).seq(function () {
+      if (nbSsTitre) updateLog(`${nbSsTitre} ressource(s) sans titre (=> « Sans titre »)`)
+      else updateLog('Il n’y avait aucune ressource sans titre')
 
       updateLog('Réindexation de toute les entities')
       this(null, ['EntityArchive', 'EntityExternalRef', 'EntityGroupe', 'EntityPersonne', 'EntityRessource', 'EntityUpdate'])
