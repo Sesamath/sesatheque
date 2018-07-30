@@ -20,6 +20,7 @@ import GroupesPerso from './components/groupes/GroupesPerso'
 import GroupeEdition from './components/groupes/GroupeEdition'
 import GroupesOuverts from './components/groupes/GroupesOuverts'
 import GroupesPublics from './components/groupes/GroupesPublics'
+import NotFound from './components/NotFound'
 import {getCurrentSession} from './actions/session'
 import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
@@ -57,6 +58,7 @@ const App = () => (
             <Route exact path="/groupes/perso" component={GroupesPerso} />
             <Route exact path="/groupes/ouverts" component={GroupesOuverts} />
             <Route exact path="/groupes/publics" component={GroupesPublics} />
+            <Route component={NotFound} />
           </Switch>
         </div>
         <Footer />
