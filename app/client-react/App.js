@@ -12,6 +12,7 @@ import Footer from './components/Footer'
 import Description from './components/Description'
 import MentionsLegales from './components/MentionsLegales'
 import Preview from './components/Preview'
+import QueryError from './components/QueryErrorWatcher'
 import ResourceCreate from './components/ResourceCreate'
 import ResourceForm from './components/ResourceForm'
 import ResourceSearch from './components/ResourceSearch'
@@ -40,6 +41,7 @@ const App = () => (
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <Fragment>
+        <QueryError />
         <Header />
         <div id="main">
           <Notifications />
