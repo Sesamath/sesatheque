@@ -288,7 +288,7 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           // on peut fixer nos headers directement sur la réponse
           // context.response.append('Content-Length', reactPagelength)
           // mais express ajoute Content-Length lui-même
-          data.content = reactPage.content
+          data.content = reactPage
         } else if (isJson) {
           if (!data.error) data.error = msg // sinon on laisse celle qu'il y avait probablement plus explicite
         } else {

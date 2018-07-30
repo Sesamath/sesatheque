@@ -76,13 +76,13 @@ module.exports = function (mainComponent) {
     // sauf en test (docker n'a pas de dossier build)
     // => pour prod et preprod
     // pour la page html react, c'est la même sur toutes les routes
-    const {content} = require('../reactPage')
+    const reactPage = require('../reactPage')
     const options = {
       headers: {
         'Content-Type': 'text/html'
       }
     }
-    const sendReactPage = (context) => context.raw(content, options)
+    const sendReactPage = (context) => context.raw(reactPage, options)
 
     // cf app/client-react/App.js pour ne pas en oublier
     const reactRoutes = [

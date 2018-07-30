@@ -35,7 +35,6 @@ const path = require('path')
 const {application: {staging}} = require('./config')
 
 let content = ''
-let length = 0
 
 if (staging.includes('prod')) {
   const envSesathequeConf = process.env.SESATHEQUE_CONF
@@ -44,10 +43,6 @@ if (staging.includes('prod')) {
   const reactPagePath = path.resolve(root, buildDir, 'index.html')
   const file = fs.readFileSync(reactPagePath)
   content = file.toString()
-  length = Buffer.byteLength(file, 'utf8')
 }
 
-module.exports = {
-  content,
-  length
-}
+module.exports = content
