@@ -16,9 +16,9 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
 const path = require('path')
 const autoprefixer = require('autoprefixer')
-const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
 const {version} = require('./package')
@@ -35,9 +35,6 @@ if (baseUrl.substr(-1) !== '/') baseUrl += '/'
 // la conf identique dev/prod
 const conf = {
   mode: isProd ? 'production' : 'development',
-  optimization: {
-    noEmitOnErrors: true
-  },
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
@@ -54,6 +51,8 @@ const conf = {
     editArbre: './app/plugins/arbre/public/edit.js'
     // pour editGraphe et showParcours, on copie tel quel plus bas
   },
+  // cf https://webpack.js.org/configuration/output/#output-filename
+  // pour les variables utilisables
   output: {
     path: path.resolve(__dirname, 'build'),
     publicPath: baseUrl,
@@ -89,10 +88,7 @@ const conf = {
   },
   module: {
     rules: [
-      {
-        test: /app\/client\/.*\.js/,
-        loader: 'babel-loader'
-      },
+      {test: /app\/client\/.*\.js/, loader: 'babel-loader'},
       {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
@@ -110,12 +106,8 @@ const conf = {
       {
         test: /\.s?css$/,
         rules: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader'
-          },
+          {loader: 'style-loader'},
+          {loader: 'css-loader'},
           {
             loader: 'postcss-loader',
             options: {
@@ -131,10 +123,7 @@ const conf = {
               ]
             }
           },
-          {
-            test: /\.scss$/,
-            loader: 'sass-loader'
-          }
+          {test: /\.scss$/, loader: 'sass-loader'}
         ]
       },
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
@@ -148,7 +137,6 @@ const conf = {
     // cf https://github.com/jantimon/html-webpack-plugin#options
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
-      {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
@@ -162,7 +150,38 @@ const conf = {
       inject: false
     })
   ],
+
+  // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
+  optimization: {
+    // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
+    // noEmitOnErrors: false,
+
+    minimizer: [
+      // we specify a custom UglifyJsPlugin here to get source maps in production
+      // cf https://stackoverflow.com/a/49059746
+      // sinon par défaut y'a du uglify en prod mais sans sourceMap
+      new UglifyJsPlugin({
+        cache: true,
+        parallel: true,
+        uglifyOptions: {
+          compress: false,
+          ecma: 6,
+          mangle: true
+        },
+        sourceMap: true
+      })
+    ]
+
+    // cf https://webpack.js.org/plugins/split-chunks-plugin/
+    // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
+    // splitChunks: {
+    //   maxSize: 201000 // bytes
+    // }
+  },
+  // cf https://webpack.js.org/configuration/stats/
   stats: {
+    // utile en mode watch
+    builtAt: true,
     // Nice colored output
     colors: true
   }
@@ -175,10 +194,6 @@ if (process.env.SESATHEQUE_CONF) {
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
   conf.output.path = path.resolve(__dirname, 'build', process.env.SESATHEQUE_CONF)
-}
-
-if (isProd) {
-  conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
 }
 
 if (appConfig.devServer) {
