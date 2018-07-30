@@ -33,7 +33,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const {application: {staticMaxAge, staging}} = require('../config')
+const {application: {staticMaxAge}} = require('../config')
 
 const envSesathequeConf = process.env.SESATHEQUE_CONF
 
@@ -75,30 +75,28 @@ module.exports = function (mainComponent) {
     // sauf en dev (c'est webpack-dev-server qui gère)
     // sauf en test (docker n'a pas de dossier build)
     // => pour prod et preprod
-    if (staging.includes('prod')) {
-      // pour la page html react, c'est la même sur toutes les routes
-      const {content} = require('../reactPage')
-      const options = {
-        headers: {
-          'Content-Type': 'text/html'
-        }
+    // pour la page html react, c'est la même sur toutes les routes
+    const {content} = require('../reactPage')
+    const options = {
+      headers: {
+        'Content-Type': 'text/html'
       }
-      const sendReactPage = (context) => context.raw(content, options)
-
-      // cf app/client-react/App.js pour ne pas en oublier
-      const reactRoutes = [
-        // '/', inutile car /build/index.html passe avant
-        '/mentionsLegales',
-        '/ressource/ajouter',
-        '/ressource/modifier/:oid',
-        '/ressource/apercevoir/:oid',
-        '/ressource/decrire/:oid',
-        '/ressource/rechercher',
-        '/ressources'
-      ]
-
-      reactRoutes.forEach(route => this.get(route, sendReactPage))
     }
+    const sendReactPage = (context) => context.raw(content, options)
+
+    // cf app/client-react/App.js pour ne pas en oublier
+    const reactRoutes = [
+      // '/', inutile car /build/index.html passe avant
+      '/mentionsLegales',
+      '/ressource/ajouter',
+      '/ressource/modifier/:oid',
+      '/ressource/apercevoir/:oid',
+      '/ressource/decrire/:oid',
+      '/ressource/rechercher',
+      '/ressources'
+    ]
+
+    reactRoutes.forEach(route => this.get(route, sendReactPage))
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
     // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)

@@ -32,15 +32,22 @@
 
 const fs = require('fs')
 const path = require('path')
+const {application: {staging}} = require('./config')
 
-const envSesathequeConf = process.env.SESATHEQUE_CONF
-const root = path.resolve(__dirname, '..', '..')
-const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
-const reactPagePath = path.resolve(root, buildDir, 'index.html')
-const file = fs.readFileSync(reactPagePath)
-const content = file.toString()
+let content = ''
+let length = 0
+
+if (staging.includes('prod')) {
+  const envSesathequeConf = process.env.SESATHEQUE_CONF
+  const root = path.resolve(__dirname, '..', '..')
+  const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
+  const reactPagePath = path.resolve(root, buildDir, 'index.html')
+  const file = fs.readFileSync(reactPagePath)
+  content = file.toString()
+  length = Buffer.byteLength(file, 'utf8')
+}
 
 module.exports = {
   content,
-  length: Buffer.byteLength(file, 'utf8')
+  length
 }
