@@ -172,10 +172,6 @@ if (process.env.SESATHEQUE_CONF) {
   conf.output.path = path.resolve(__dirname, 'build', process.env.SESATHEQUE_CONF)
 }
 
-if (isProd) {
-  conf.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: true, sourcemap: true }))
-}
-
 if (appConfig.devServer) {
   const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
   conf.devServer = {
