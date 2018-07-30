@@ -44,12 +44,12 @@ const conf = {
     client: 'sesatheque-client',
     page: './app/client/page/index.js',
     display: './app/client/display/index.js',
-    edit: './app/client/edit/index.js',
+    // edit: './app/client/edit/index.js', // tous les éditeurs sont en react
     import: './app/client/edit/import.js',
     react: './app/client-react/index.js',
-    // arbre passe par babel
+    // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
     editArbre: './app/plugins/arbre/public/edit.js'
-    // pour editGraphe et showParcours, on copie tel quel plus bas
+    // pour editGraphe et showParcours, c'est copié tel quel plus bas (il a sa conf webpack de son coté)
   },
   // cf https://webpack.js.org/configuration/output/#output-filename
   // pour les variables utilisables
@@ -58,8 +58,10 @@ const conf = {
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
+    // chunkFilename: '[id].js', // ça n'évite pas le ~ dans les noms de fichier variables exportées…
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
+    // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
     library: 'st[name]',
     // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library,
     // ici var => globale
@@ -174,9 +176,12 @@ const conf = {
 
     // cf https://webpack.js.org/plugins/split-chunks-plugin/
     // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
-    // splitChunks: {
-    //   maxSize: 201000 // bytes
-    // }
+    /*, splitChunks: {
+      // IMPORTANT car sinon, avec notre `filename: '[name].js` et `library: 'st[name]`
+      // on se retrouve avec du `var stclient~2a42e354 = …` dans build/client~2a42e354.js
+      automaticNameDelimiter: '_', // faut un caractère compatible avec un nom de variable js
+      maxSize: 201000 // bytes, mais si on met ça on a plus de react.js, seulement des react_<chunckhasch>.js
+    } */
   },
   // cf https://webpack.js.org/configuration/stats/
   stats: {
