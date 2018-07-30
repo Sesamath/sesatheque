@@ -85,7 +85,7 @@ export const deleteRessource = (oid, success) => (dispatch) => {
  */
 export const forkAlias = (oid) => (dispatch, getState) => {
   return Promise.resolve(dispatch(clearRessource()))
-    .then(() => GET(`/api/forkAlias/${oid}`))
+    .then(() => GET(`/api/createAlias/${oid}`))
     .then((ressource) => dispatch(setRessource(ressource)))
     .catch((error) => {
       console.error(error)
