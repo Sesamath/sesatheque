@@ -42,8 +42,7 @@ const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
 
-// pour le shema
-const restrictionMax = Object.keys(configRessource.constantes.restriction).length - 1
+const schema = require('./EntityRessource.schema')
 
 const myBaseId = config.application.baseId
 
@@ -92,101 +91,7 @@ module.exports = function (component) {
       }
     })
 
-    EntityRessource.validateJsonSchema({
-      type: 'object',
-      properties: {
-        oid: {type: 'string'},
-        rid: {type: 'string'},
-        aliasOf: {type: 'string'},
-        cle: {type: 'string'},
-        origine: {type: 'string'},
-        idOrigine: {type: 'string'},
-        titre: {type: 'string'},
-        type: {type: 'string'},
-        resume: {type: 'string'},
-        description: {type: 'string'},
-        commentaires: {type: 'string'},
-        niveaux: {$ref: '#/definitions/arrayOfStrings'},
-        categories: {
-          type: 'array',
-          items: {type: 'integer'}
-        },
-        typePedagogiques: {
-          type: 'array',
-          items: {type: 'integer'}
-        },
-        typeDocumentaires: {
-          type: 'array',
-          items: {type: 'integer'}
-        },
-        parametres: {type: 'object'},
-        enfants: {
-          type: 'array',
-          items: {$ref: '#/definitions/enfant'}
-        },
-        relations: {
-          type: 'array',
-          items: {$ref: '#/definitions/relation'}
-        },
-        auteurs: {$ref: '#/definitions/arrayOfMixId'},
-        auteursParents: {$ref: '#/definitions/arrayOfMixId'},
-        contributeurs: {$ref: '#/definitions/arrayOfMixId'},
-        groupes: {$ref: '#/definitions/arrayOfStrings'},
-        groupesAuteurs: {$ref: '#/definitions/arrayOfStrings'},
-        langue: {type: 'string'},
-        publie: {type: 'boolean'},
-        restriction: {type: 'integer', minimum: 0, maximum: restrictionMax},
-        dateCreation: {instanceof: 'Date'},
-        dateMiseAJour: {instanceof: 'Date'},
-        version: {type: 'integer', minimum: 1},
-        inc: {type: 'integer', minimum: 0},
-        indexable: {type: 'boolean'},
-        archiveOid: {type: 'string'}
-      },
-      additionalProperties: false,
-      required: ['titre', 'type'],
-      definitions: {
-        arrayOfMixId: {
-          type: 'array',
-          items: {$ref: '#/definitions/mixId'}
-        },
-        arrayOfStrings: {
-          type: 'array',
-          items: {
-            type: 'string',
-            minLength: 1
-          }
-        },
-        enfant: {
-          type: 'object',
-          properties: {
-            titre: {type: 'string'},
-            type: {type: 'string'},
-            aliasOf: {type: 'string'},
-            public: {type: 'boolean'},
-            resume: {type: 'string'},
-            description: {type: 'string'},
-            commentaires: {type: 'string'},
-            enfants: {
-              type: 'array',
-              items: {$ref: '#/definitions/enfant'}
-            }
-          },
-          required: ['titre', 'type']
-        },
-        mixId: {
-          type: 'string',
-          pattern: '^[a-zA-Z0-9_-]+/[a-z0-9_-]+$'
-        },
-        relation: {
-          type: 'array',
-          items: [
-            {type: 'integer'},
-            {type: 'string'}
-          ]
-        }
-      }
-    })
+    EntityRessource.validateJsonSchema(schema)
 
     EntityRessource
       .defineIndex('rid', {unique: true, sparse: true}) // rid est obligatoire, mais on l'a pas encore à la création… => sparse
