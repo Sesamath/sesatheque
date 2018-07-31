@@ -219,7 +219,7 @@ function load (ressource, options, next) {
   // le display du plugin
   const pluginName = ressource.type
   const pluginDisplay = displays[pluginName]
-  if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
+  if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
 
   try {
     if (options.container) dom.empty(options.container)
