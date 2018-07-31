@@ -588,9 +588,9 @@ module.exports = function (component) {
      * Ne deviendra une vraie ressource clonée que si on l'édite
      * Retourne {@link Ref}
      * Utiliser la méthode sesatheque-client:cloneItem
-     * @route GET /api/externalClone/:baseId/:oid
+     * @route GET /api/createAlias/:baseId/:oid
      */
-    controller.get('externalClone/:baseId/:oid', function (context) {
+    controller.get('createAlias/:baseId/:oid', function (context) {
       const {baseId, oid} = context.arguments
       const rid = `${baseId}/${oid}`
       const myBaseId = config.application.baseId
@@ -604,7 +604,7 @@ module.exports = function (component) {
           this(new Error(`La sésathèque ${baseId} n'est pas déclarée comme source possible de cette sésathèque`))
         }
       }).seq(function (ressource) {
-        log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
+        log.debug('createAlias a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
         // on passe par Ref pour filtrer ce qu'on garde (pour un alias, seulement ce que ref utilise)
         const aliasData = new Ref(ressource)
         // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
