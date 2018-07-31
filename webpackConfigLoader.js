@@ -6,7 +6,9 @@ const version = require('./package').version
  */
 const safeConfig = {
   application: {
-    staging: config.application.staging
+    staging: config.application.staging,
+    baseId: config.application.baseId,
+    baseUrl: config.application.baseUrl
   },
   baseId: config.application.baseId,
   baseUrl: config.application.baseUrl,

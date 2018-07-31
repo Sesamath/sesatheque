@@ -1,11 +1,12 @@
 import React from 'react'
-import {JsonField} from './fields'
+import {TextField} from './fields'
 
 const EditorSimple = () => (
   <fieldset>
-    <JsonField
+    <TextField
       label="Paramètres"
       name="parametres"
+      mode="json"
     />
   </fieldset>
 )

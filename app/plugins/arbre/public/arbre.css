@@ -1,0 +1,28 @@
+#display {
+    position: relative;
+    margin: 0 auto;
+    padding: 0;
+    clear: both;
+}
+
+#display #apercu {
+    width: 100%;
+    min-height: 500px;
+    resize: both;
+    overflow: auto;
+    border: 1px solid black
+}
+
+.jstree-themeicon-custom {
+    display: inline-block;
+    text-decoration: none;
+    margin: 4px 0 0 2px !important;
+    padding: 0;
+    width: 16px;
+    height: 24px !important;
+}
+
+#srcGroup, #dstGroup {
+    float: left;
+    width: 47%;
+}
