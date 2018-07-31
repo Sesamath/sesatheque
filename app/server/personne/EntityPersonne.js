@@ -79,6 +79,28 @@ module.exports = function (component) {
       Personne.call(this, data)
     })
 
+    EntityPersonne.validateJsonSchema({
+      type: 'object',
+      properties: {
+        oid: {type: 'string'},
+        pid: {type: 'string'},
+        nom: {type: 'string'},
+        prenom: {type: 'string'},
+        email: {type: 'string'},
+        roles: {type: 'array', items: {type: 'string'}},
+        permissions: {type: 'array', items: {type: 'string'}},
+        groupesMembre: {type: 'array', items: {type: 'string'}},
+        groupesSuivis: {type: 'array', items: {type: 'string'}},
+        infos: {type: 'object'},
+        dateCreation: {instanceof: 'Date'}
+      },
+      additionalProperties: false,
+      required: [
+        'nom',
+        'pid'
+      ]
+    })
+
     EntityPersonne.beforeStore = function (next) {
       // recalculé d'après les roles à chaque create/load (dans le constructeur),
       // mais on le fait aussi ici pour le garantir avant persistance (pas grave) mais surtout mise en cache
