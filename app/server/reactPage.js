@@ -28,52 +28,21 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
-/**
- * Ce test crée une ressource puis la supprime
- * l'appeler directement en lui passant --prod ou --dev pour tester la sésathèque de prod ou dev
- * ou --token pour lui passer un token
- *
- */
-
 'use strict'
-/* eslint-env mocha */
-import {expect} from 'chai'
-import boot from './boot'
 
-describe('prend un 404 sur les urls inexistantes', function () {
-  const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
-  let _superTestClient
-  const setClient = ({superTestClient}) => {
-    if (!superTestClient) return Promise.reject(new Error('pas de client express après le boot'))
-    _superTestClient = superTestClient
-    return Promise.resolve()
-  }
-  this.timeout(60000)
-  before(() => boot().then(setClient))
+const fs = require('fs')
+const path = require('path')
+const {application: {staging}} = require('./config')
 
-  paths.forEach(path => {
-    // on retourne une promesse
-    it(`404 sur ${path}`, () =>
-      _superTestClient
-        .get(path)
-        .expect(404)
-        .expect('Content-Type', /text\/html/)
-        // .expect(404, /Cette page ou ce fichier n’existe pas/)
-        // .expect('Content-Type', /text\/plain/)
-    )
-  })
-  paths.forEach(path => {
-    it(`404 sur /api${path}`, () =>
-      _superTestClient
-        .get('/api' + path)
-        .expect(404)
-        .expect('Content-Type', /application\/json/)
-        .then(res => {
-          expect(res.body.success).not.to.be.ok
-          expect(res.body.error).to.be.ok
-          expect(res.body.error).to.contain('n’existe pas')
-        })
-    )
-  })
-})
+let content = ''
+
+if (staging.includes('prod')) {
+  const envSesathequeConf = process.env.SESATHEQUE_CONF
+  const root = path.resolve(__dirname, '..', '..')
+  const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
+  const reactPagePath = path.resolve(root, buildDir, 'index.html')
+  const file = fs.readFileSync(reactPagePath)
+  content = file.toString()
+}
+
+module.exports = content
