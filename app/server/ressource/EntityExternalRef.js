@@ -66,7 +66,7 @@ module.exports = function entityExternalRefFactory (component) {
        * @type {string}
        */
       this.rid = rid
-      if (!data.creationDate) this.creationDate = new Date()
+      if (!data.dateCreation) this.dateCreation = new Date()
     })
 
     EntityExternalRef.validateJsonSchema({
@@ -75,10 +75,10 @@ module.exports = function entityExternalRefFactory (component) {
         oid: {type: 'string'},
         baseId: {type: 'string'},
         rid: {type: 'string'},
-        creationDate: {instanceof: 'Date'}
+        dateCreation: {instanceof: 'Date'}
       },
       additionalProperties: false,
-      required: ['oid', 'baseId', 'rid', 'creationDate']
+      required: ['oid', 'baseId', 'rid', 'dateCreation']
     })
 
     EntityExternalRef
