@@ -62,23 +62,26 @@ describe('controller api ressource', () => {
   let purgeOnError
 
   // boot + récup des services et config nécessaires à nos tests
-  before(() => boot().then(({superTestClient, lassi}) => {
-    if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
-    if (!lassi) return Promise.reject(new Error('boot KO lassi'))
-    _superTestClient = superTestClient
-    $settings = lassi.service('$settings')
-    const apiToken = $settings.get('apiTokens')[0]
-    if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
-    apiTokenEncoded = encodeURIComponent(apiToken)
-    const h = helpersFactory(lassi, superTestClient)
-    checkDb = h.checkDb
-    checkHttp = h.checkHttp
-    cleanVolatileProperties = h.cleanVolatileProperties
-    getTestRessources = h.getTestRessources
-    purgeOnError = h.purgeOnError
-    // on démarre sur une base vide
-    return purge()
-  }))
+  before(function () {
+    this.timeout(10000)
+    return boot().then(({superTestClient, lassi}) => {
+      if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
+      if (!lassi) return Promise.reject(new Error('boot KO lassi'))
+      _superTestClient = superTestClient
+      $settings = lassi.service('$settings')
+      const apiToken = $settings.get('apiTokens')[0]
+      if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
+      apiTokenEncoded = encodeURIComponent(apiToken)
+      const h = helpersFactory(lassi, superTestClient)
+      checkDb = h.checkDb
+      checkHttp = h.checkHttp
+      cleanVolatileProperties = h.cleanVolatileProperties
+      getTestRessources = h.getTestRessources
+      purgeOnError = h.purgeOnError
+      // on démarre sur une base vide
+      return purge()
+    })
+  })
 
   it('POST enregistre une ressource et retourne son oid', function () {
     const getPostPromise = (ressource) => _superTestClient
@@ -126,7 +129,10 @@ describe('controller api ressource', () => {
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
-        .then(() => checkDb(ressource))
+        .then(({body}) => {
+          if (body.error) return Promise.reject(Error(body.error))
+          checkDb(ressource)
+        })
     }
     return populate({ressources: 10, personnes: 6})
       .then(() => Promise.all(getRessources().map(checkOne)))
@@ -139,10 +145,12 @@ describe('controller api ressource', () => {
       const {oid} = ressource
       cleanVolatileProperties(ressource)
       // on ajoute un auteur
-      const existingPids = ressource.auteurs.concat(ressource.contributeurs)
-      ressource.auteurs.push(getRandomPersonne(true, existingPids))
+      const excludedPids = ressource.auteurs.concat(ressource.contributeurs)
+      ressource.auteurs.push(getRandomPersonne(true, excludedPids))
+      // on incrémente version et inc
       ressource.inc++
       ressource.version++
+      // mais on ne poste que oid & auteurs
       const postData = {
         oid,
         auteurs: ressource.auteurs
@@ -152,7 +160,10 @@ describe('controller api ressource', () => {
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
-        .then(() => checkDb(ressource))
+        .then(({body}) => {
+          if (body.error) return Promise.reject(Error(body.error))
+          checkDb(ressource)
+        })
     }
     return populate({ressources: 10, personnes: 6})
       .then(() => Promise.all(getRessources().map(checkOne)))

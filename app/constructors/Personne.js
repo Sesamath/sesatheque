@@ -97,11 +97,16 @@ function Personne (initObj) {
    * @default undefined
    */
   this.groupesSuivis = initObj.groupesSuivis || []
-  /**
-   * date de création
-   * @type {Date}
-   */
-  this.dateCreation = initObj.dateCreation || new Date()
+
+  if (initObj.dateCreation) {
+    /**
+     * date de création
+     * @type {Date}
+     */
+    this.dateCreation = typeof initObj.dateCreation === 'string' ? new Date(initObj.dateCreation) : initObj.dateCreation
+  } else {
+    this.dateCreation = new Date()
+  }
   /**
    * D'autres propriétés regroupées dans cet objet, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
    * @type {Object}

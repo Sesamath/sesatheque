@@ -31,6 +31,8 @@
 
 'use strict'
 
+const Ressource = require('../../constructors/Ressource')
+
 const ressourceSchema = require('./EntityRessource.schema')
 const properties = {...ressourceSchema.properties, dateArchivage: {instanceof: 'Date'}}
 const required = [...ressourceSchema.required, 'dateArchivage']
@@ -49,9 +51,12 @@ module.exports = function (component) {
     EntityArchive.construct(function (data) {
       if (!data) throw Error('constructeur d’archive appelé sans ressource ni archive')
       if (!data.rid || !data.hasOwnProperty('version')) throw Error('rid et version sont obligatoires pour archiver une ressource')
-      Object.assign(this, data)
+      const ressource = new Ressource(data)
+      Object.assign(this, ressource)
+
       // on ajoute une date d'archivage si y'en a pas
-      if (!this.dateArchivage) this.dateArchivage = new Date()
+      this.dateArchivage = data.dateArchivage || new Date()
+
       // on force l'unicité en imposant l'oid à partir de ressourceOid + version
       // mais à priori y'a plus l'oid de la ressource dans ce qu'on nous passe (pour forcer la création, et ne pas risquer de se mélanger les oid)
       const ressourceOid = this.rid.substr(this.rid.indexOf('/') + 1)
