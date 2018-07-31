@@ -30,6 +30,8 @@
  */
 'use strict'
 
+import 'client-react/styles/display.scss'
+
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const page = require('../../../client/page/index')

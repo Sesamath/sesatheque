@@ -41,6 +41,8 @@ import {sesatheques} from '../../../server/config'
 import page from '../../../client/page/index'
 import * as stJstree from './lib'
 
+import 'client-react/styles/display.scss'
+
 addSesatheques(sesatheques)
 
 /**

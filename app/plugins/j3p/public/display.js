@@ -30,6 +30,8 @@
  */
 'use strict'
 
+import 'client-react/styles/display.scss'
+
 var log = require('sesajstools/utils/log')
 var sjtUrl = require('sesajstools/http/url')
 
