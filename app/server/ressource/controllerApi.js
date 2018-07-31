@@ -565,7 +565,9 @@ module.exports = function (component) {
             if (alias) return $json.sendOk(context, {oid: alias.oid})
             // faut le créer
             const data = {}
-            ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => {
+            // faut pas prendre la clé qui doit être unique, et reste attachée à la ressource
+            // d'origine), le beforeStore en recréera une nouvelle
+            ;['titre', 'type', 'categories', 'publie', 'restriction'].forEach((p) => {
               data[p] = ressource[p]
             })
             data.aliasOf = myBaseId + '/' + ressource.oid
@@ -612,10 +614,10 @@ module.exports = function (component) {
         aliasData.auteurs = [pid]
         aliasData.origine = config.application.baseId
         aliasData.dateCreation = new Date()
-        // important sinon une ressource non restreinte mais pas publiée se retrouverait avec un alias public,
-        // et ça afficherait des pbs de droits à la consultation
         aliasData.publie = ressource.publie
         aliasData.restriction = ressource.restriction
+        // il faut virer la clé de la ressource d'origine (elle doit rester unique), beforeStore la recréera
+        if (aliasData.cle) delete aliasData.cle
         // la relation vers l'original est inutile pour un alias,
         // elle sera ajoutée lors de l'édition de cette alias (qui deviendra une ressource),
         // mais on doit conserver les autres relations
