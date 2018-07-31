@@ -126,13 +126,6 @@ module.exports = {
       ressource.rid = `${baseId}/${ressource.oid}`
       $ressourceRepository.save(ressource, this)
     }).seq(function () {
-      // rid null, devrait pas y en avoir mais…
-      EntityRessource.match('rid').isNull().grab(this)
-    }).seqEach(function (ressource) {
-      nbEmptyRid++
-      ressource.rid = `${baseId}/${ressource.oid}`
-      $ressourceRepository.save(ressource, this)
-    }).seq(function () {
       if (nbEmptyRid) updateLog(`${nbEmptyRid} rid vides corrigés`)
       else updateLog('Il n’y avait aucun rid vide')
 

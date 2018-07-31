@@ -39,6 +39,7 @@ const _ = require('lodash')
 const path = require('path')
 const config = require('./config')
 const myBaseId = config.application.baseId
+const reactPage = require('./reactPage')
 
 /**
  * Listener beforeTransport, qui finalise les datas pour les vues
@@ -279,8 +280,15 @@ module.exports = function ($accessControl, $routes, $flashMessage) {
           default:
             msg = 'Ooops, une erreur ' + context.status + ' est survenue'
         }
-        if (isHtml) {
-          prepareErrorHtmlData(data, 'erreur ' + context.status, msg)
+        // isHtml n'est vrai qu'avec du context.layout, qui n'existe pas sur les 404
+        if (!isJson) {
+          // faut préciser ça sinon le content-type va imposer le transport html qui veut un template
+          context.transport = 'raw'
+          context.contentType = 'text/html'
+          // on peut fixer nos headers directement sur la réponse
+          // context.response.append('Content-Length', reactPagelength)
+          // mais express ajoute Content-Length lui-même
+          data.content = reactPage
         } else if (isJson) {
           if (!data.error) data.error = msg // sinon on laisse celle qu'il y avait probablement plus explicite
         } else {

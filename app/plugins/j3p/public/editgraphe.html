@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur de graphe j3p</title>
+  <link rel="stylesheet" type="text/css" href="/editGraphe.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="/editGraphe.js"></script>
+<script type="application/javascript">
+  // une fct en global que notre parent appellera
+  function load (ressource, loadCb) {
+    // quand le js sera chargé
+    var root = document.getElementById('root')
+    if (typeof j3p_editGraphe !== 'undefined') j3p_editGraphe.default(root, ressource, loadCb)
+    else root.innerText = 'Problème de chargement d’editgraphe ' + typeof j3p_editGraphe
+  }
+</script>
+</body>
+</html>

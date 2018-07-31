@@ -16,9 +16,9 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
 const path = require('path')
 const autoprefixer = require('autoprefixer')
-const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
 const {version} = require('./package')
@@ -35,9 +35,6 @@ if (baseUrl.substr(-1) !== '/') baseUrl += '/'
 // la conf identique dev/prod
 const conf = {
   mode: isProd ? 'production' : 'development',
-  optimization: {
-    noEmitOnErrors: true
-  },
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
@@ -47,20 +44,24 @@ const conf = {
     client: 'sesatheque-client',
     page: './app/client/page/index.js',
     display: './app/client/display/index.js',
-    edit: './app/client/edit/index.js',
+    // edit: './app/client/edit/index.js', // tous les éditeurs sont en react
     import: './app/client/edit/import.js',
     react: './app/client-react/index.js',
-    // arbre passe par babel
-    editArbre: './app/client/plugins/arbre/edit.js'
-    // pour editGraphe et showParcours, on copie tel quel plus bas
+    // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
+    editArbre: './app/plugins/arbre/public/edit.js'
+    // pour editGraphe et showParcours, c'est copié tel quel plus bas (il a sa conf webpack de son coté)
   },
+  // cf https://webpack.js.org/configuration/output/#output-filename
+  // pour les variables utilisables
   output: {
     path: path.resolve(__dirname, 'build'),
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
+    // chunkFilename: '[id].js', // ça n'évite pas le ~ dans les noms de fichier variables exportées…
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
+    // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
     library: 'st[name]',
     // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library,
     // ici var => globale
@@ -74,7 +75,11 @@ const conf = {
     steDisplay: 'display'
   }, */
   resolve: {
-    extensions: ['.js', '.json', '.jsx']
+    extensions: ['.js', '.json', '.jsx'],
+    alias: {
+      'client-react': path.resolve(__dirname, 'app/client-react'),
+      plugins: path.resolve(__dirname, 'app/plugins')
+    }
   },
   // pour nos loaders perso
   resolveLoader: {
@@ -85,17 +90,15 @@ const conf = {
   },
   module: {
     rules: [
-      {
-        test: /app\/client\/.*\.js/,
-        loader: 'babel-loader'
-      },
-      {test: /app\/client-react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
+      {test: /app\/client\/.*\.js/, loader: 'babel-loader'},
+      {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       // {test: /\.json$/, loader: 'json-loader'},
       {test: /app\/client\/.*\.html/, loader: 'file-loader'},
+      {test: /app\/plugins\/.*\.html/, loader: 'file-loader'},
       // editgraphe doit passer par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
@@ -105,12 +108,8 @@ const conf = {
       {
         test: /\.s?css$/,
         rules: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader'
-          },
+          {loader: 'style-loader'},
+          {loader: 'css-loader'},
           {
             loader: 'postcss-loader',
             options: {
@@ -126,10 +125,7 @@ const conf = {
               ]
             }
           },
-          {
-            test: /\.scss$/,
-            loader: 'sass-loader'
-          }
+          {test: /\.scss$/, loader: 'sass-loader'}
         ]
       },
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
@@ -143,7 +139,6 @@ const conf = {
     // cf https://github.com/jantimon/html-webpack-plugin#options
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
-      {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
@@ -157,7 +152,41 @@ const conf = {
       inject: false
     })
   ],
+
+  // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
+  optimization: {
+    // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
+    // noEmitOnErrors: false,
+
+    minimizer: [
+      // we specify a custom UglifyJsPlugin here to get source maps in production
+      // cf https://stackoverflow.com/a/49059746
+      // sinon par défaut y'a du uglify en prod mais sans sourceMap
+      new UglifyJsPlugin({
+        cache: true,
+        parallel: true,
+        uglifyOptions: {
+          compress: false,
+          ecma: 6,
+          mangle: true
+        },
+        sourceMap: true
+      })
+    ]
+
+    // cf https://webpack.js.org/plugins/split-chunks-plugin/
+    // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
+    /*, splitChunks: {
+      // IMPORTANT car sinon, avec notre `filename: '[name].js` et `library: 'st[name]`
+      // on se retrouve avec du `var stclient~2a42e354 = …` dans build/client~2a42e354.js
+      automaticNameDelimiter: '_', // faut un caractère compatible avec un nom de variable js
+      maxSize: 201000 // bytes, mais si on met ça on a plus de react.js, seulement des react_<chunckhasch>.js
+    } */
+  },
+  // cf https://webpack.js.org/configuration/stats/
   stats: {
+    // utile en mode watch
+    builtAt: true,
     // Nice colored output
     colors: true
   }

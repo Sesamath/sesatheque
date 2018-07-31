@@ -145,7 +145,7 @@ const configRessource = {
   // modifs à répercuter dans npm-sesatheque-client
   /**
    * La liste des types que l'on peut éditer dans une sésatheque (ils seront cloné en ressources à l'édition, les autres resteront des alias, ils peuvent être supprimés mais pas modifiés)
-   * Utilisé par clone et externalClone pour savoir s'il faut cloner une ressource ou juste créer un alias
+   * Utilisé par clone et createAlias pour savoir s'il faut cloner une ressource ou juste créer un alias
    */
   editable: {
     arbre: true,

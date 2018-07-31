@@ -57,7 +57,6 @@ describe('<Description />', () => {
       })
     }
     expect(bloc.children).to.have.length(expectedLength)
-    // console.log(firstResource)
   }
 
   it('affiche les infos d’une ressource', () => {
