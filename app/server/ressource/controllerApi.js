@@ -969,7 +969,7 @@ module.exports = function (component) {
         .seq(function (ressource) {
           if (!ressource) return $json.notFound(context, `La ressource n'existe pas`)
           if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context, 'Vous n’avez pas de droits suffisants pour dupliquer cette ressource')
-          if (!ressource.aliasOf) $json.sendError(context, 'Cette ressource n’est pas un alias')
+          if (!ressource.aliasOf) return $json.sendError(context, 'Cette ressource n’est pas un alias')
 
           $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
             if (error) return $json.sendError(context, error)
