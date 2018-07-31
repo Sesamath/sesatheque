@@ -1,8 +1,17 @@
 import {GET, POST, DELETE} from '../utils/httpMethods'
 import {addNotification} from './notifications'
+import {
+  currentPersonneGroupesUrl,
+  saveGroupeUrl,
+  groupeUrl,
+  groupeJoinUrl,
+  groupeFollowUrl,
+  groupeLeaveUrl,
+  groupeIgnoreUrl
+} from '../apiRoutes'
 
 export const loadGroupes = () => dispatch =>
-  GET('/api/groupes/perso')
+  GET(currentPersonneGroupesUrl())
     .then(({success, error, groupes, groupesAdmin, groupesMembre, groupesSuivis}) => {
       if (success) {
         return dispatch({
@@ -23,7 +32,7 @@ const saveGroupeAction = (groupe, isNew) => ({
 })
 
 export const saveGroupe = (groupe, success = () => {}) => dispatch =>
-  POST('/api/groupe', {body: groupe})
+  POST(saveGroupeUrl(), {body: groupe})
     .then(responseGroup => {
       const isNew = !groupe.oid
       dispatch(saveGroupeAction(responseGroup, isNew))
@@ -49,7 +58,7 @@ const deleteGroupeAction = (nom) => ({
 })
 
 export const deleteGroupe = (nom, success = () => {}) => dispatch =>
-  DELETE(`/api/groupe/${encodeURIComponent(nom)}`)
+  DELETE(groupeUrl({nom}))
     .then(() => {
       dispatch(deleteGroupeAction(nom))
     })
@@ -73,7 +82,7 @@ const leaveGroupeAction = (nom) => ({
 })
 
 export const leaveGroupe = (nom, success = () => {}) => dispatch =>
-  GET(`/api/groupe/quitter/${encodeURIComponent(nom)}`)
+  GET(groupeLeaveUrl())
     .then(() => {
       dispatch(leaveGroupeAction(nom))
     })
@@ -97,7 +106,7 @@ const ignoreGroupeAction = (nom) => ({
 })
 
 export const ignoreGroupe = (nom, success = () => {}) => dispatch =>
-  GET(`/api/groupe/ignorer/${encodeURIComponent(nom)}`)
+  GET(groupeIgnoreUrl({nom}))
     .then(() => {
       dispatch(ignoreGroupeAction(nom))
     })
@@ -121,7 +130,7 @@ const joinGroupeAction = groupe => ({
 })
 
 export const joinGroupe = (nom, success = () => {}) => dispatch =>
-  GET(`/api/groupe/rejoindre/${encodeURIComponent(nom)}`)
+  GET(groupeJoinUrl({nom}))
     .then(groupe => {
       dispatch(joinGroupeAction(groupe))
     })
@@ -145,7 +154,7 @@ const followGroupeAction = groupe => ({
 })
 
 export const followGroupe = (nom, success = () => {}) => dispatch =>
-  GET(`/api/groupe/suivre/${encodeURIComponent(nom)}`)
+  GET(groupeFollowUrl({nom}))
     .then(groupe => {
       dispatch(followGroupeAction(groupe))
     })
