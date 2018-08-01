@@ -37,6 +37,8 @@ const sjtObj = require('sesajstools/utils/object')
 const config = require('../config')
 const configRessource = require('../ressource/config')
 
+const sanitizeSearchFactory = require('./serviceAccessControl.search')
+
 module.exports = function (component) {
   component.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
     /**
@@ -839,7 +841,7 @@ module.exports = function (component) {
     }
 
     // on ajoute les méthodes isolées dans leur helper
-    $accessControl.sanitizeSearch = require('./serviceAccessControl.search')($accessControl)
+    $accessControl.sanitizeSearch = sanitizeSearchFactory($accessControl)
 
     return $accessControl
   })

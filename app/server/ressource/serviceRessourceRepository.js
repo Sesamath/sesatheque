@@ -824,7 +824,7 @@ module.exports = function (ressourceComponent) {
      * @memberOf $ressourceRepository
      * @param {searchQuery} searchQuery Les critères de tri
      * @param {searchQueryOptions} queryOptions Les options (skip & limit + orderBy éventuel)
-     * @param {ressourcesCallback} next appelée avec (error, ressources)
+     * @param {ressourcesCallback} next appelée avec (error, {ressources, total})
      */
     function search (searchQuery, queryOptions, next) {
       grabSearchCount(searchQuery, function (error, total) {
