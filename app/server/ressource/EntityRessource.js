@@ -91,7 +91,7 @@ module.exports = function (component) {
 
     EntityRessource
       .defineIndex('rid', 'string')
-      .defineIndex('cle', 'string') // pour loadByCle
+      .defineIndex('cle') // pour loadByCle
       .defineIndex('aliasOf', 'string')
       .defineIndex('origine', 'string')
       .defineIndex('idOrigine', 'string')

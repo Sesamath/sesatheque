@@ -6,6 +6,7 @@ import resourceLoader from '../hoc/resourceLoader'
 import NavMenu from './NavMenu'
 import {formats, listes, labels} from '../../server/ressource/config'
 import {baseId} from '../../server/config'
+
 import './Description.scss'
 
 const {jour: dateFormat} = formats

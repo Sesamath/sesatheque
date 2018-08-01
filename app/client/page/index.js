@@ -41,10 +41,13 @@ const sjtUrl = require('sesajstools/http/url')
 
 const autosize = require('./autosize')
 const refreshAuth = require('./refreshAuth')
+const inBrowser = (typeof window) !== 'undefined'
 // lui s'ajoute tout seul à window, suffit de le charger
-require('./bugsnag')
+if (inBrowser) {
+  require('./bugsnag')
+}
 
-const w = window
+const w = inBrowser ? window : {}
 const wd = w.document
 
 /**

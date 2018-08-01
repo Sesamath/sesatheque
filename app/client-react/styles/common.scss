@@ -1,7 +1,7 @@
 /* ----------------------------- */
 /* Config                        */
 /* ----------------------------- */
-@import "styles/config.scss";
+@import "./config.scss";
 
 /* ----------------------------- */
 /* Knacss                        */
@@ -27,6 +27,5 @@
 /* ----------------------------- */
 /* Fonts                         */
 /* ----------------------------- */
-@import "styles/display.scss";
-@import "styles/fonts.scss";
-@import "styles/forms.scss";
+@import "./fonts.scss";
+@import "./forms.scss";

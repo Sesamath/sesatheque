@@ -565,7 +565,9 @@ module.exports = function (component) {
             if (alias) return $json.sendOk(context, {oid: alias.oid})
             // faut le créer
             const data = {}
-            ;['titre', 'type', 'categories', 'publie', 'restriction', 'cle'].forEach((p) => {
+            // faut pas prendre la clé qui doit être unique, et reste attachée à la ressource
+            // d'origine), le beforeStore en recréera une nouvelle
+            ;['titre', 'type', 'categories', 'publie', 'restriction'].forEach((p) => {
               data[p] = ressource[p]
             })
             data.aliasOf = myBaseId + '/' + ressource.oid
@@ -588,9 +590,9 @@ module.exports = function (component) {
      * Ne deviendra une vraie ressource clonée que si on l'édite
      * Retourne {@link Ref}
      * Utiliser la méthode sesatheque-client:cloneItem
-     * @route GET /api/externalClone/:baseId/:oid
+     * @route GET /api/createAlias/:baseId/:oid
      */
-    controller.get('externalClone/:baseId/:oid', function (context) {
+    controller.get('createAlias/:baseId/:oid', function (context) {
       const {baseId, oid} = context.arguments
       const rid = `${baseId}/${oid}`
       const myBaseId = config.application.baseId
@@ -604,7 +606,7 @@ module.exports = function (component) {
           this(new Error(`La sésathèque ${baseId} n'est pas déclarée comme source possible de cette sésathèque`))
         }
       }).seq(function (ressource) {
-        log.debug('externalClone a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
+        log.debug('createAlias a récupéré la ressource', ressource, 'clone', {max: 5000, indent: 2})
         // on passe par Ref pour filtrer ce qu'on garde (pour un alias, seulement ce que ref utilise)
         const aliasData = new Ref(ressource)
         // on récupère les auteursParents d'origine que l'on cumule avec les auteurs de l'original
@@ -612,10 +614,10 @@ module.exports = function (component) {
         aliasData.auteurs = [pid]
         aliasData.origine = config.application.baseId
         aliasData.dateCreation = new Date()
-        // important sinon une ressource non restreinte mais pas publiée se retrouverait avec un alias public,
-        // et ça afficherait des pbs de droits à la consultation
         aliasData.publie = ressource.publie
         aliasData.restriction = ressource.restriction
+        // il faut virer la clé de la ressource d'origine (elle doit rester unique), beforeStore la recréera
+        if (aliasData.cle) delete aliasData.cle
         // la relation vers l'original est inutile pour un alias,
         // elle sera ajoutée lors de l'édition de cette alias (qui deviendra une ressource),
         // mais on doit conserver les autres relations
@@ -969,7 +971,7 @@ module.exports = function (component) {
         .seq(function (ressource) {
           if (!ressource) return $json.notFound(context, `La ressource n'existe pas`)
           if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context, 'Vous n’avez pas de droits suffisants pour dupliquer cette ressource')
-          if (!ressource.aliasOf) $json.sendError(context, 'Cette ressource n’est pas un alias')
+          if (!ressource.aliasOf) return $json.sendError(context, 'Cette ressource n’est pas un alias')
 
           $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
             if (error) return $json.sendError(context, error)

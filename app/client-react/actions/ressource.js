@@ -84,8 +84,8 @@ export const deleteRessource = (oid, success) => (dispatch) => {
  * @return {promisedThunk}
  */
 export const forkAlias = (oid) => (dispatch, getState) => {
-  return Promise.resolve(dispatch(clearRessource()))
-    .then(() => GET(`/api/forkAlias/${oid}`))
+  dispatch(clearRessource())
+  return GET(`/api/forkAlias/${oid}`)
     .then((ressource) => dispatch(setRessource(ressource)))
     .catch((error) => {
       console.error(error)
@@ -108,7 +108,7 @@ export const saveRessource = (
   return POST(`/api/ressource?format=full`, {body: ressource})
     .then((responseRessource) => {
       dispatch(setRessource(responseRessource))
-      return responseRessource.oid
+      return responseRessource
     })
     .then(success)
     .then(() => {

@@ -4,34 +4,24 @@ import {renameProp} from 'recompose'
 import {reduxForm} from 'redux-form'
 import {Prompt} from 'react-router'
 import MetaForm from './MetaForm'
-import EditorArbre from './EditorArbre'
-import EditorEcjs from './EditorEcjs'
-import EditorExternal from './EditorExternal'
-import EditorIep from './EditorIep'
-import EditorJ3p from './EditorJ3p'
-import EditorMathGraph from './EditorMathGraph'
 import EditorSimple from './EditorSimple'
-import EditorUrl from './EditorUrl'
 import GroupContainer from './GroupContainer'
 import aliasForker from '../hoc/aliasForker'
 import resourceLoader from '../hoc/resourceLoader'
 import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
-import validate from '../utils/validate'
+import commonValidate from '../utils/validate'
+import {editors} from 'plugins'
 
-const typeToData = {
-  arbre: EditorArbre,
-  calkc: EditorSimple,
-  ec2: EditorSimple,
-  ecjs: EditorEcjs,
-  iep: EditorIep,
-  j3p: EditorJ3p,
-  mathgraph: EditorMathGraph,
-  mental: EditorSimple,
-  poseur: EditorSimple,
-  tep: EditorSimple,
-  url: EditorUrl
+const validate = (values) => {
+  const errors = commonValidate(values)
+  const {type} = values
+  const typeValidate = editors[type] && editors[type].validate
+  if (typeValidate) {
+    typeValidate(values, errors)
+  }
+  return errors
 }
 
 const ResourceForm = ({
@@ -47,9 +37,10 @@ const ResourceForm = ({
   updateStoreFromEditor,
   setUpdateStoreFromEditor,
   saveRessource,
-  pristine
+  pristine,
+  initialize
 }) => {
-  const Editor = typeToData[type] || EditorExternal
+  const Editor = (editors[type] && editors[type].editor) || EditorSimple
 
   return (
     <Fragment>
@@ -75,7 +66,8 @@ const ResourceForm = ({
             onClick={(e) => {
               e.persist()
               return Promise.resolve(updateStoreFromEditor())
-                .then(() => handleSubmit(saveRessource)(e))
+                .then(() => handleSubmit(
+                  values => saveRessource(values, initialize))(e))
             }}
           >
             Enregistrer
@@ -98,7 +90,8 @@ ResourceForm.propTypes = {
   updateStoreFromEditor: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func,
   saveRessource: PropTypes.func,
-  pristine: PropTypes.bool
+  pristine: PropTypes.bool,
+  initialize: PropTypes.func
 }
 
 export default ensureLogged(
