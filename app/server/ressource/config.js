@@ -139,6 +139,7 @@ const configRessource = {
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
   listesOrdonnees: {
     niveaux: common.ordre.niveaux,
+    categories: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     typeDocumentaires: [9, 5, 6, 12, 11, 1, 2],
     typePedagogiques: [3, 9, 91, 92, 191, 7, 2, 81, 82, 13, 141, 151, 21, 22]
   }, // fin des listes
