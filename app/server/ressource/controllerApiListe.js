@@ -220,9 +220,9 @@ module.exports = function (component) {
       const {queryOptions} = $accessControl.sanitizeSearch(context)
       const query = {auteurs: [pid]}
       flow().seq(function () {
-        $ressourceRepository.grabSearch(query, queryOptions, this)
-      }).seq(function (result) {
-        sendListe(context, null, {...result, query, queryOptions})
+        $ressourceRepository.search(query, queryOptions, this)
+      }).seq(function ({ressources, total}) {
+        sendListe(context, null, ressources, {total, query, queryOptions})
       }).catch(function (error) {
         $json.sendError(context, error)
       })
