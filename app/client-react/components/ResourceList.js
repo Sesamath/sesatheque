@@ -54,6 +54,7 @@ export const ResourceList = ({
         <thead>
           <tr>
             <th></th>
+            <th>Type</th>
             <th>Identifiant</th>
             <th>Titre</th>
             <th colSpan="4">Actions</th>
@@ -68,6 +69,7 @@ export const ResourceList = ({
           }) => (
             <tr key={oid}>
               <td><img src={icons[type]} alt="thumbnail" /></td>
+              <td>{type}</td>
               <td>{oid}</td>
               <td>{titre}</td>
               <td colSpan="4" className="links">
