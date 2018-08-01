@@ -2,6 +2,11 @@ import {DELETE, GET, POST} from '../utils/httpMethods'
 import {addNotification} from './notifications'
 import getUrls from 'sesatheque-client/src/getUrls'
 import {baseUrl} from '../../server/config'
+import {
+  ressourceCloneUrl,
+  ressourceUrl,
+  ressourceForkAliasUrl
+} from '../apiRoutes'
 
 /**
  * Retourne l'action de type SET_RESSOURCE pour affecter une ressource dans le store
@@ -31,7 +36,7 @@ const clearRessource = () => ({
  */
 export const cloneRessource = (oid, success) => (dispatch) => {
   // ça c'est une anomalie du controleur, ça devrait être /ressource/clone/:oid, vu que les routes risquent de changer on laisse
-  return GET(`/api/clone/${oid}`)
+  return GET(ressourceCloneUrl({oid}))
     .then(({oid}) => {
       if (!oid) throw Error('La réponse n’est pas au format attendu')
 
@@ -54,7 +59,7 @@ export const cloneRessource = (oid, success) => (dispatch) => {
  * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
  */
 export const deleteRessource = (oid, success) => (dispatch) => {
-  return DELETE(`/api/ressource/${oid}`)
+  return DELETE(ressourceUrl({oid}))
     .then(() => {
       return dispatch(clearRessource())
     })
@@ -84,7 +89,7 @@ export const deleteRessource = (oid, success) => (dispatch) => {
  * @return {promisedThunk}
  */
 export const forkAlias = (oid) => (dispatch, getState) =>
-  GET(`/api/forkAlias/${oid}`)
+  GET(ressourceForkAliasUrl({oid}))
     .then((ressource) => dispatch(setRessource(ressource)))
     .catch((error) => {
       console.error(error)
@@ -103,7 +108,7 @@ export const saveRessource = (
   ressource,
   success = () => {}
 ) => (dispatch) => {
-  return POST(`/api/ressource?format=full`, {body: ressource})
+  return POST(ressourceUrl({format: 'full'}), {body: ressource})
     .then((responseRessource) => {
       dispatch(setRessource(responseRessource))
       return responseRessource
@@ -134,7 +139,7 @@ export const loadRessource = (oid) => (dispatch, getState) => {
   // (au cas où le load plante)
   // Si le dispatch throw (à cause d'un reducer qui plante) ça remontera (sans renvoyer de promesse)
   return Promise.resolve(dispatch(clearRessource()))
-    .then(() => GET(`/api/ressource/${oid}?format=full`))
+    .then(() => GET(ressourceUrl({oid, format: 'full'})))
     .then((ressource) => dispatch(setRessource(ressource)))
     .catch((error) => {
       console.error(error)
