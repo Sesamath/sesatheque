@@ -11,11 +11,15 @@ const ResourceSearch = (props) => {
     niveaux: [],
     typePedagogiques: [],
     typeDocumentaires: [],
-    langue: '',
-    publie: true,
-    restriction: 0
+    langue: ''
   }
   const initialValues = {...defaultFormValues, ...query}
+  if (!query) {
+    // resourceListProvider n'a pas fait d'analyse en imposant éventuellement publié et restriction
+    // on l'ajoute aux valeurs initiales
+    initialValues.publie = true
+    initialValues.restriction = 0
+  }
   // c'est le hash qui impose form / liste, ou à défaut la présence d'une query
   const isFormOpen = hash === '#form' || (hash !== '#results' && !query)
   const title = isFormOpen ? 'Recherche' : 'Résultat de la recherche'

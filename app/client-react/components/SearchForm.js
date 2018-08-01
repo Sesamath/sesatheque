@@ -23,6 +23,23 @@ const type = [anyOption, ...listes.type]
 
 const SearchForm = ({handleSubmit, isOpen, query}) => {
   if (isOpen) {
+    const restrictionOptions = [...listes.restriction]
+    let widgetPublie
+    // faire une recherche sur un auteur ou un groupe est le seul cas où on peut ne pas préciser publie et restriction
+    if (query && (query.auteurs || query.groupes)) {
+      // on ajoute l'option any à restriction
+      restrictionOptions.unshift(anyOption)
+      // et on transforme le switch publié en select (pour SelectField value doit être une string, ou un ReactNode, mais pas un booléen)
+      const publieOptions = [
+        anyOption,
+        {value: 'true', label: 'oui'},
+        {value: 'false', label: 'non'}
+      ]
+      widgetPublie = (<SelectField label={labels.publie} options={publieOptions} name="publie"/>)
+    } else {
+      widgetPublie = (<SwitchField className="center" label={labels.publie} name="publie"/>)
+    }
+
     return (
       <form onSubmit={handleSubmit}>
         <fieldset>
@@ -44,12 +61,9 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
             />
             <SelectField
               label={labels.restriction}
-              options={listes.restriction}
+              options={restrictionOptions}
               name="restriction"/>
-            <SwitchField
-              className="center"
-              label={labels.publie}
-              name="publie"/>
+            {widgetPublie}
 
             <InputField
               label={labels.oid}
