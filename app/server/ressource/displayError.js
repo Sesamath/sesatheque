@@ -1,5 +1,5 @@
 /**
- * This file is part of Sesatheque.
+ * controller file is part of Sesatheque.
  *   Copyright 2014-2015, Association Sésamath
  *
  * Sesatheque is free software: you can redistribute it and/or modify
@@ -12,6 +12,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
+ *
  * along with Sesatheque (LICENCE.txt).
  * @see http://www.gnu.org/licenses/agpl.txt
  *
@@ -31,50 +32,33 @@
 
 'use strict'
 
-module.exports = function (component) {
-  component.service('$flashMessages', function () {
-    /**
-     * Un service pour stocker des message en session, en vue de les afficher à la prochaine page html (par le listener beforeTransport)
-     * @service $flashMessages
-     */
-    var $flashMessages = {}
+const rawOptions = {headers: {'Content-Type': 'text/html'}}
 
-    /**
-     * Ajoute un message en session
-     * @param {Context} context
-     * @param message
-     * @param level
-     * @memberOf $flashMessages
-     */
-    $flashMessages.add = function (context, message, level) {
-      if (['info', 'warning', 'error'].indexOf(level) < 0) level = 'info'
-      if (!context.session.flashMessages) context.session.flashMessages = []
-      context.session.flashMessages.push({
-        cssClass: level,
-        value: message
-      })
-    }
+/**
+ * Retourne le code html de la page pour afficher la ressource (à priori dans une iframe, pas de header / footer ici)
+ * @param {Ressource} ressource
+ * @returns {string}
+ */
+module.exports = function displayError (context, error) {
+  if (!error) throw Error('Pour afficher une erreur il faut la fournir')
+  const errorMessage = error.message || error
+  let titre = 'Erreur'
+  if (context.status) titre += ' ' + context.status
 
-    /**
-     * Retourne les messages en session et les efface
-     * @param {Context} context
-     * @memberOf $flashMessages
-     */
-    $flashMessages.getAndPurge = function (context) {
-      var data
-      if (context.session.flashMessages) {
-        data = {
-          flashBloc: {
-            $view: 'flash',
-            messages: context.session.flashMessages
-          }
-        }
-        delete context.session.flashMessages
-      }
-
-      return data
-    }
-
-    return $flashMessages
-  })
+  const page = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta charset="utf-8" />
+  <meta name="robots" content="noindex"/>
+  <title>${titre}</title>
+</head>
+<body class="iframe">
+  <div id="root" role="document">
+    <div id="errors">${errorMessage}</div>
+  </div>
+</body>
+</html>
+`
+  context.raw(page, rawOptions)
 }

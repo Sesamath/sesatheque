@@ -17,10 +17,8 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 const path = require('path')
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const appConfig = require('./app/server/config')
-const {version} = require('./package')
 
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
@@ -129,16 +127,7 @@ const conf = {
       {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
-    ]),
-    // utile pour mettre des variables dans le html au build
-    new HtmlWebpackPlugin({
-      title: appConfig.application.name,
-      version: version,
-      template: './app/server/views/index.html',
-      filename: 'index.html',
-      // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
-      inject: false
-    })
+    ])
   ],
   stats: {
     // Nice colored output

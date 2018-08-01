@@ -1,2 +1,0 @@
-{>wrapper widget="checkboxes" o=liste /}
-{?liste.new}{>wrapper widget="text" o=liste.new /}{/liste.new}

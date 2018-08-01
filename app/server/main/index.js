@@ -63,9 +63,6 @@ module.exports = function mainComponentFactory (lassi) {
   require('./controllerMain')(mainComponent)
   // pour /api/checkSesalab et /api/checkSesatheque
   require('./controllerApi')(mainComponent)
-  require('./servicePage')(mainComponent)
-  require('./serviceFlashMessages')(mainComponent)
-  require('./serviceForm')(mainComponent)
   require('./serviceJson')(mainComponent)
 
   // pour la doc

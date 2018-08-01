@@ -1,6 +1,0 @@
-<div class="form-group" id="groupParametres">
-  Pour modifier ces valeurs (mais aussi le titre ou les relations), il faut le faire sur <a href="http://ressources.sesamath.net/coll/">http://ressources.sesamath.net/coll/</a>.
-  {#parametres readonly="true"}
-  {>wrapper widget="textarea" o=parametres cols=50 rows=5 /}
-  {/parametres}
-</div>

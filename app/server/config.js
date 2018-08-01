@@ -102,8 +102,6 @@ const config = {
     title: 'Sésathèque',
     // h1 de la page d'accueil
     homeTitle: 'Bienvenue sur cette Sésathèque',
-    // le chemin par défaut des fichiers dust
-    defaultViewsPath: 'app/server/views',
     // mis dans _private/config.js car dépendant de l'instance
     baseId: toBeConfigured, // l'id de cette sésathèque
     baseUrl: toBeConfigured

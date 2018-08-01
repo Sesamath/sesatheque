@@ -30,19 +30,29 @@
  */
 'use strict'
 
-const fs = require('fs')
-const path = require('path')
-const {application: {staging}} = require('./config')
+const {version} = require('../../../package')
+const {application: {name}} = require('../config')
 
-let content = ''
+const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Médiathèque de ressources pour l'éducation">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" sizes="16x16" href="/favicon.png?${version}">
+  <title>${name}</title>
+</head>
+<body>
+<div id="root" role="document"></div>
+<script
+  type="application/javascript"
+  src="/react.js?${version}"
+></script>
+</body>
+</html>
+`
+const rawOptions = {headers: {'Content-Type': 'text/html'}}
 
-if (staging.includes('prod')) {
-  const envSesathequeConf = process.env.SESATHEQUE_CONF
-  const root = path.resolve(__dirname, '..', '..')
-  const buildDir = envSesathequeConf ? `build/${envSesathequeConf}` : 'build'
-  const reactPagePath = path.resolve(root, buildDir, 'index.html')
-  const file = fs.readFileSync(reactPagePath)
-  content = file.toString()
+module.exports = function displayReactPage (context) {
+  context.raw(html, rawOptions)
 }
-
-module.exports = content

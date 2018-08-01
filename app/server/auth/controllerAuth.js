@@ -31,17 +31,19 @@
 
 'use strict'
 
+const displayError = require('../ressource/displayError')
+
 /**
  * Controleur pour gérer l'authentification
  * @controller controllerAuth
  * @extends Controller
  */
 module.exports = function (component) {
-  component.controller(function ($auth, $accessControl, $ressourcePage, $flashMessages) {
+  component.controller(function ($auth, $accessControl) {
     function redirectOrError (context) {
       context.layout = 'page'
       if (context.get.redirect) context.redirect(context.get.redirect)
-      else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
+      else displayError(context, 'Utilisateur déjà connecté')
     }
 
     const controller = this
@@ -73,7 +75,7 @@ module.exports = function (component) {
           $auth.logout(context)
         } else {
           context.layout = 'page'
-          $ressourcePage.printError(context, new Error('Utilisateur déjà déconnecté (ou jamais connecté)'), 200)
+          displayError(context, 'Utilisateur déjà déconnecté (ou jamais connecté)')
         }
       })
 
@@ -82,19 +84,12 @@ module.exports = function (component) {
        * @route GET /validation
        */
       controller.get('validation', function (context) {
-        if ($accessControl.isAuthenticated(context)) {
-          redirectOrError(context)
-        } else {
-          $auth.validate(context, function (error, personne) {
-            if (error) {
-              $ressourcePage.printError(context, error)
-            } else {
-              if (personne && personne.pid) $flashMessages.add(context, 'Authentification réussie', 'info')
-              var uri = context.get.redirect || '/'
-              context.redirect(uri)
-            }
-          })
-        }
+        if ($accessControl.isAuthenticated(context)) return redirectOrError(context)
+        $auth.validate(context, function (error) {
+          if (error) return displayError(context, error)
+          const uri = context.get.redirect || '/'
+          context.redirect(uri)
+        })
       })
 
       /**

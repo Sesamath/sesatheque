@@ -1,2 +1,0 @@
-<a href="/" id="logo">Header : {?title}{title}{:else}Bibliothèque Sésamath{/title}</a>
-

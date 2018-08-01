@@ -43,17 +43,11 @@ var Ref = require('../../constructors/Ref')
 var xmls = ['cp', 'ce1', 'ce2', 'cm1', 'cm2', '6eme']
 
 /**
- * Controleur /importEc/ pour importer les xml calculatice
+ * Controleur /importEc/ pour importer les xml calculatice (appelé par le site ressources, après réplication des js calculatice)
  * @controller controllerImportEc
- * @requires $ressourceRepository {@link $ressourceRepository]
- * @requires $ressourceConverter
- * @requires $accessControl
- * @requires $personneControl
- * @requires $ressourcePage
- * @requires $routes
  */
 module.exports = function (component) {
-  component.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json, $personneControl, $ressourcePage, $routes) {
+  component.controller('importEc', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $json) {
     /**
      * Met à jour un arbre calculatice
      * @route GET /importEc/:xml

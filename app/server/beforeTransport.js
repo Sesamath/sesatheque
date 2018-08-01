@@ -31,365 +31,125 @@
 
 'use strict'
 
-/*
- * jsdoc tient absolument à mettre listeners dans un namespace controllerRessource mettre un tag class ou module (avec ou sans kind) ne change rien
- */
-
-const _ = require('lodash')
-const path = require('path')
-const config = require('./config')
-const myBaseId = config.application.baseId
-const reactPage = require('./reactPage')
+const {isEmpty} = require('lodash')
+const reactPage = require('./main/displayReactPage')
 
 /**
- * Listener beforeTransport, qui finalise les datas pour les vues
- * (toutes, pas seulement celles qui concernent les ressources, il est dans le composant ressource pour être chargé
- * après l'init des services qu'il utilise)
- * On aurait pu le mettre dans un controleur sur * mais avec un listener on est sûr de passer après tous les contrôleurs
- * @param $accessControl
- * @param $routes
- * @param $flashMessage
- * @returns {function}
+ * Ajoute des infos dans debug.log
+ * @private
+ * @param context
+ * @param data
  */
-module.exports = function ($accessControl, $routes, $flashMessage) {
-  /**
-   * Ajoute les liens contextuels à une ressource dans data.actions, et refreshAuth.js si on est sur du /public/
-   * @private
-   * @param context
-   * @param data
-   */
-  function addActions (context, data) {
-    if (context.ressource && context.ressource.oid) {
-      var links = []
-      var ressource = context.ressource
-      var oid = context.ressource.oid
-      if ($accessControl.hasPermission('read', context, ressource)) {
-        links.push({
-          href: $routes.getAbs('describe', ressource, context),
-          value: 'Description',
-          icon: 'file-alt', // material icons description
-          iconTextClass: 'gt-medium-only',
-          selected: (context.tab === 'describe')
-        })
+function debug (context, data) {
+  log.debug(
+    `beforeTransport sur ${getReqHttp(context)} (${context.contentType}) avec status ${context.status} et les data`,
+    data,
+    'beforeTransport',
+    {max: 1000}
+  )
+}
 
-        links.push({
-          href: $routes.getAbs('preview', ressource, context),
-          value: 'Aperçu',
-          icon: 'eye-slash', // material icons pageview
-          iconTextClass: 'gt-medium-only',
-          selected: (context.tab === 'preview')
-        })
-        // si c'est un alias on ajoute du target _blank aussi sur le preview
-        if (ressource.aliasOf && ressource.aliasOf.indexOf(myBaseId + '/') !== 0) links[links.length - 1].attributes = [{name: 'target', value: '_blank'}]
+/**
+ * Retourne la chaine de la requete http (ex : 'GET /path/to/something?args')
+ * @private
+ * @param context
+ * @returns {string}
+ */
+const getReqHttp = (context) => context.request.method + ' ' + context.request.parsedUrl.pathname + (context.request.parsedUrl.search || '')
 
-        links.push({
-          href: $routes.getAbs('display', ressource, context),
-          value: 'Voir',
-          icon: 'eye', // material icons open_in_new était pas terrible
-          iconTextClass: 'gt-medium-only',
-          attributes: [
-            {name: 'target', value: '_blank'}
-          ]
-        })
-        // pour tous les suivants, on met les liens mais on les cache si on a pas les droits,
-        // c'est le js qui les affichera si on est dans /public/ donc sans session
-        links.push({
-          idLi: 'buttonEdit',
-          href: $routes.getAbs('edit', oid, context),
-          value: 'Modifier',
-          icon: 'edit', // material icons mode_edit
-          iconTextClass: 'gt-medium-only',
-          selected: (context.tab === 'edit'),
-          hiddenLi: !$accessControl.hasPermission('update', context, ressource)
-        })
-        links.push({
-          idLi: 'buttonDuplicate',
-          href: $routes.getAbs('create') + '?clone=' + oid,
-          value: 'Dupliquer',
-          icon: 'copy', // material icons call_split
-          iconTextClass: 'gt-medium-only',
-          selected: (context.tab === 'create' && context.request.originalUrl.indexOf('clone=') > -1),
-          hiddenLi: !$accessControl.hasPermission('create', context)
-        })
-        links.push({
-          idLi: 'buttonDelete',
-          href: $routes.getAbs('delete', oid, context),
-          value: 'Supprimer',
-          icon: 'trash', // material icons delete
-          iconTextClass: 'gt-medium-only',
-          selected: (context.tab === 'delete'),
-          hiddenLi: !$accessControl.hasPermission('delete', context, ressource)
-        })
-      } else {
-        log.error(new Error('On a une ressource dans beforeTransport::addActions sans les droits pour la lire'))
+/**
+ * Le listener beforeTransport, qui ne gère que les réponses de l'api, tous les autres contrôleurs (html à priori)
+ * utilisent context.raw (donc se passent du transport lassi)
+ * - gère les erreurs en les formattant
+ * - ajoute des infos dans debug.log si on est pas en prod
+ * @listens lassi#event:beforeTransport
+ * @param {Context} context
+ * @param {Object} data L'objet qui sera envoyé au transport
+ */
+module.exports = function beforeTransport (context, data) {
+  const reqHttp = getReqHttp(context)
+  const isJson = context.contentType === 'application/json' || context.request.originalUrl.substr(0, 5) === '/api/'
+  const isVide = isEmpty(data)
+
+  log.debug('beforeTransport sur ' + reqHttp)
+  // au cas où deux controleurs veuillent envoyer une réponse, on coupe le 2e tout de suite
+  // (pas la peine d'appeler le transport qui dira que la réponse est déjà partie)
+  if (context.isSent) return log.error(new Error('2e passage dans beforeTransport'))
+  context.isSent = true
+
+  // pour options on fait rien, le middleware CORS gère ça
+  if (context.request.method === 'OPTIONS') {
+    context.status = 200
+    return
+  }
+
+  if (!isJson) {
+    // si c'est pas du json, vide ou pas on traite ça comme une 404 avec react
+    if (!isVide) log.error('On arrive dans beforeTransport avec du contenu non json, la 404 react a été envoyée mais y’a un pb', data)
+    context.status = 404
+    context.transport = 'raw' // sinon le content-type va imposer le transport html qui veut un template dust
+    context.contentType = 'text/html'
+    // on peut fixer nos headers directement sur la réponse
+    // context.response.append('Content-Length', reactPagelength)
+    // mais express ajoute Content-Length lui-même
+    data.content = reactPage
+    return
+  }
+
+  // tout le reste ne concerne que l'api
+  context.contentType = 'application/json'
+
+  // Gestion des erreurs (lassi ne l'a pas encore fait)
+  if (context.error) {
+    // erreurs 500
+    log.error('erreur 500 sur ' + reqHttp, context.error)
+    context.status = 500
+    data.success = false
+    // on façonne notre erreur 500
+    let errorMsg = context.error.toString()
+    // on évite le un message incompréhensible pour l'utilisateur (le dev ira dans les logs)
+    if (errorMsg.startsWith('TypeError')) errorMsg = 'Erreur interne : problème de types incohérents'
+    else errorMsg = 'Erreur interne : ' + errorMsg
+
+    // @todo passer en data.message une fois le service $json homogénéisé
+    if (data.error) data.error += '\n' + errorMsg
+    else data.error = errorMsg
+    // on vient de le traiter, pas la peine que lassi le fasse aussi
+    delete context.error
+
+  // si le contrôleur a déjà formaté une erreur, on s'en occupe pas
+  } else if (data.success === false && (data.message || data.error)) {
+    return
+  } else {
+    if (isVide) {
+      log.debug(reqHttp + ' : pas de status ni content => 404')
+      context.status = 404
+    }
+
+    // si y'a un status d'erreur sans message on l'ajoute
+    if (context.status > 400 && !data.error && !data.message) {
+      log.debug('erreur ' + context.status, data)
+      let message
+      switch (context.status) {
+        case 404:
+          message = 'Cette page ou ce fichier n’existe pas'
+          break
+        case 401:
+          message = 'Authentification requise'
+          break
+        case 403:
+          message = 'Droits insuffisants'
+          break
+        default:
+          message = 'Ooops, une erreur ' + context.status + ' est survenue'
       }
-
-      data.actions = {links}
-      // le js est ajouté par addNavigation
-    }
-  } // addActions
-
-  /**
-   * Ajoute le menu (boutons dans le header) dans data.navigation
-   * @private
-   * @param context
-   * @param data
-   */
-  function addNavigation (context, data) {
-    var links = []
-    var canCreate = $accessControl.hasPermission('create', context)
-    var myPid = $accessControl.getCurrentUserPid(context) || ''
-    // lien ajout
-    links.push({
-      id: 'buttonAdd',
-      href: $routes.getAbs('create', null, context),
-      value: 'Ajouter une ressource',
-      icon: 'plus-circle',
-      hidden: !canCreate
-    })
-    // un lien vers la recherche
-    links.push({
-      id: 'buttonSearch',
-      href: $routes.getAbs('search', null, context),
-      value: 'Recherche',
-      icon: 'search'
-    })
-    // un lien mes ressources
-    links.push({
-      id: 'buttonMyRessources',
-      href: $routes.getAbs('search', null, context) + '?auteurs=' + myPid,
-      value: 'Mes ressources',
-      icon: 'bookmark',
-      hidden: !canCreate
-    })
-    // mes groupes
-    links.push({
-      id: 'buttonMyGroupes',
-      href: '/groupe/perso',
-      value: 'Mes groupes',
-      icon: 'users',
-      hidden: !myPid
-    })
-    // on peut tout ajouter
-    data.navigation = {
-      links: links
-    }
-    // et on ajoute notre js qui les gère si on est sur du /public/
-    if (context.request.originalUrl.indexOf('/public/') > -1) {
-      if (!data.jsBloc) data.jsBloc = {$view: 'js'}
-      if (!data.jsBloc.jsCode) data.jsBloc.jsCode = ''
-      data.jsBloc.jsCode += 'stpage.refreshAuth();'
+      data.success = false
+      data.message = message
+      // @todo supprimer ça dès que tout le monde ne regardera que message
+      data.error = message
     }
   }
 
-  /**
-   * Ajoute des infos dans debug.log
-   * @private
-   * @param context
-   * @param data
-   */
-  function debug (context, data) {
-    var reqHttp = getReqHttp(context)
-    var isJson = getIsJson(context)
-    var isHtml = getIsHtml(context)
-    if (isHtml || isJson) {
-      log.debug(
-        'listener on beforeTransport sur ' + reqHttp + ' (' + context.contentType + ' status ' + context.status + ') avec les data ',
-        data,
-        'beforeTransport',
-        {max: 1000}
-      )
-    }
-  }
-
-  /**
-   * Gére les pages d'erreur, fixe le contentType (et $layout pour le html d'après context.layout)
-   * et ajoute les messages flash éventuels
-   * @private
-   * @param {Context} context
-   * @param data
-   */
-  function errorHandler (context, data) {
-    var reqHttp = getReqHttp(context)
-    var isJson = getIsJson(context)
-    var isHtml = getIsHtml(context)
-
-    if (context.method === 'get' || context.method === 'post') {
-      // on fixe déjà le contentType s'il ne l'est pas
-      if (context.contentType) {
-        // on signale une incohérence sans changer le contentType
-        if (isJson && context.contentType !== 'application/json') {
-          log.error(new Error('On a un appel ' + reqHttp + ' avec un contentType ' + context.contentType))
-        }
-        if (isHtml && context.contentType !== 'text/html') {
-          log.error(new Error('On a un layout html ' + context.layout + ' avec un contentType ' + context.contentType))
-        }
-      } else if (isHtml) {
-        context.contentType = 'text/html'
-      } else if (isJson) {
-        context.contentType = 'application/json'
-      }
-      // ajout du layout, page si non précisé
-      if (isHtml && !data.$layout) data.$layout = path.join(__dirname, 'views', 'layout-' + (context.layout || 'page'))
-    }
-
-    /**
-     * Gestion des erreurs (lassi ne l'a pas encore fait)
-     */
-    if (context.error) {
-      // erreurs 500 détectée par lassi qui l'a récupéré mais pas notre code
-      // (qui manipule les data mais n'affecte pas context.error)
-      log.error('lassi a récupéré une erreur 500 sur ' + reqHttp, context.error)
-      context.status = 500
-      // on façonne notre erreur 500
-      var errorMsg = context.error.toString()
-      // on évite le un message incompréhensible pour l'utilisateur (le dev ira dans les logs)
-      if (errorMsg.indexOf('TypeError') === 0) errorMsg = 'Erreur interne : problème de types incohérents'
-      else errorMsg = 'Erreur interne : ' + errorMsg
-      if (isJson) {
-        if (data.error) data.error += '\n' + errorMsg
-        else data.error = errorMsg
-      } else if (isHtml) {
-        prepareErrorHtmlData(data, 'Erreur interne', errorMsg)
-      } else {
-        data.content = errorMsg
-      }
-      delete context.error // on vient de le traiter, pas la peine que lassi le fasse aussi
-    } else {
-      // erreur 404 ?
-      const isVide = _.isEmpty(data)
-      // log.debug('dans beforeTransport page isVide ' + isVide)
-      if (!context.status && isVide && context.method !== 'options') {
-        context.status = 404
-        log.debug(reqHttp + ' : pas de status ni content => 404')
-      }
-      // et on gère ici les autres erreurs
-      if (context.status && context.status > 400) {
-        log.debug('erreur ' + context.status + (isJson ? ' api' : ' html'), data)
-        var msg
-        switch (context.status) {
-          case 404:
-            msg = 'Cette page ou ce fichier n’existe pas'
-            break
-          case 401:
-          case 403:
-            // $accessControl pas dispo ici
-            if (context.session && context.session.user && context.session.user.pid) msg = 'Droits insuffisants'
-            else msg = 'Authentification requise'
-            break
-          default:
-            msg = 'Ooops, une erreur ' + context.status + ' est survenue'
-        }
-        // isHtml n'est vrai qu'avec du context.layout, qui n'existe pas sur les 404
-        if (!isJson) {
-          // faut préciser ça sinon le content-type va imposer le transport html qui veut un template
-          context.transport = 'raw'
-          context.contentType = 'text/html'
-          // on peut fixer nos headers directement sur la réponse
-          // context.response.append('Content-Length', reactPagelength)
-          // mais express ajoute Content-Length lui-même
-          data.content = reactPage
-        } else if (isJson) {
-          if (!data.error) data.error = msg // sinon on laisse celle qu'il y avait probablement plus explicite
-        } else {
-          data.content = msg
-        }
-      }
-    }
-
-    // messages flash, vérif des vues erreurs et warnings, ajout du titre en data
-    if (isHtml) {
-      // on ajoute d'éventuels messages flash si on est en html (erreur ou pas)
-      var flashData = $flashMessage.getAndPurge(context)
-      if (flashData) _.merge(data, flashData)
-      // s'il n'y est pas, on met le titre en data pour que le layout l'affiche aussi (l'appelant peut en mettre 2 ≠)
-      if (data.$metas && data.$metas.title && !data.titre) {
-        data.titre = data.$metas.title
-      }
-    }
-  } // errorHandler
-
-  /**
-   * Retourne true si c'est du json (d'après contentType ou url qui démarre par /api/)
-   * @private
-   * @param context
-   * @returns {boolean}
-   */
-  function getIsJson (context) {
-    return context.contentType === 'application/json' || context.request.originalUrl.substr(0, 5) === '/api/'
-  }
-
-  /**
-   * Retourne true si c'est une page html (pas de layout fixé et pas json)
-   * @private
-   * @param context
-   * @returns {boolean}
-   */
-  function getIsHtml (context) {
-    return !getIsJson(context) && !!context.layout
-  }
-
-  /**
-   * Retourne la chaine de la requete http (ex : 'GET /path/to/something?args')
-   * @private
-   * @param context
-   * @returns {string}
-   */
-  function getReqHttp (context) {
-    return context.request.method + ' ' + context.request.parsedUrl.pathname + (context.request.parsedUrl.search || '')
-  }
-
-  /**
-   * Ajoute à data nos params par défaut s'il n'existent pas
-   * @todo régler le doublon avec $page.addError
-   * @private
-   * @param data     Les données que l'on modifie
-   * @param title    Le titre à mettre s'il n'y en avait pas
-   * @param errorMsg Le message d'erreur à mettre s'il n'y en avait pas déjà un
-   */
-  function prepareErrorHtmlData (data, title, errorMsg) {
-    if (!data.hasOwnProperty('$metas')) data.$metas = {}
-    data.$metas.title = title
-    if (!data.errors) data.errors = { $view: 'errors' }
-    if (!data.errors.errorMessages) data.errors.errorMessages = [errorMsg.replace(/Error[\s]*:[\s]*/, '')]
-    log.debug('on a généré des data pour une erreur', data, 'beforeTransport', {max: 2000})
-  } // prepareErrorHtmlData
-
-  /**
-   * Le listener de beforeTransport qui
-   * - gère les erreurs en les formattant
-   * - ajoute $layout d'après context.layout sur les pages html
-   * - ajoute menu de navigation et menu contextuel d'une ressource sur le layout page
-   * - ajoute des infos dans debug.log si on est pas en prod
-   * @listens lassi#event:beforeTransport
-   * @param {Context} context
-   * @param {Object} data
-   */
-  function beforeTransport (context, data) {
-    log.debug('beforeTransport sur ' + getReqHttp(context))
-    // au cas où deux controleurs veuillent envoyer une réponse, on coupe le 2e tout de suite
-    // (pas la peine d'appeler le transport qui dira que la réponse est déjà partie)
-    if (context.isSent) return log.error(new Error('2e passage dans beforeTransport'))
-    context.isSent = true
-
-    // pour options on fait rien, le middleware CORS gère ça
-    if (context.request.method === 'OPTIONS') {
-      context.status = 200
-      return
-    }
-
-    // gestion d'erreur
-    errorHandler(context, data)
-
-    // sur les pages html on ajoute les menus
-    if (context.layout === 'page') {
-      addNavigation(context, data)
-      addActions(context, data)
-    } // context.layout
-
-    // on envoie toutes les réponses dans le log de debug
-    if (!global.isProd) debug(context, data)
-  }
-
-  return beforeTransport
+  // on envoie toutes les réponses dans le log de debug
+  if (!global.isProd) debug(context, data)
 }

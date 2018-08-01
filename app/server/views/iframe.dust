@@ -1,5 +1,0 @@
-{!
-    template inclus dans layout-page.dust pour mettre une iframe
-    on nous fournit la variable url seulement
-!}
-<iframe id="previewIframe" src="{url}"></iframe>
