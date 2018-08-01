@@ -51,7 +51,7 @@ module.exports = function (component) {
           type: 'array',
           items: {type: 'string'}
         },
-        creationDate: {instanceof: 'Date'}
+        dateCreation: {instanceof: 'Date'}
       },
       additionalProperties: false,
       required: [
@@ -73,7 +73,7 @@ module.exports = function (component) {
     })
 
     EntityGroupe.beforeStore(function (next) {
-      if (!this.creationDate) this.creationDate = new Date()
+      if (!this.dateCreation) this.dateCreation = new Date()
       if (!this.gestionnaires || !this.gestionnaires.length) return next(new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`))
       // _.uniq plus rapide que Array.from(new Set(initialArray))
       // https://jsperf.com/lodash-uniq-vs-set-vs-jquery-uniquesort

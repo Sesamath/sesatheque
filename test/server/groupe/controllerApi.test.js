@@ -148,10 +148,10 @@ describe('API groupe', () => {
       // On doit être dans les gestionnaires
       groupeToCreate.gestionnaires = [testUser.oid]
       itIsSuccessfull(response, groupeToCreate)
-      // et on teste aussi oid & creationDate
+      // et on teste aussi oid & dateCreation
       expect(response.body.oid).to.exist
-      expect(response.body.creationDate).to.exist
-      const creationTimestamp = (new Date(response.body.creationDate)).getTime()
+      expect(response.body.dateCreation).to.exist
+      const creationTimestamp = (new Date(response.body.dateCreation)).getTime()
       expect(creationTimestamp > start).to.be.true
       expect(creationTimestamp < start + 2000).to.be.true
 

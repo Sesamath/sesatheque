@@ -30,8 +30,7 @@
  */
 'use strict'
 
-const config = require('../config')
-const myBaseId = config.application.baseId
+const {application: {baseId: myBaseId}, sesatheques} = require('../config')
 const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
 
 module.exports = function entityExternalRefFactory (component) {
@@ -43,59 +42,47 @@ module.exports = function entityExternalRefFactory (component) {
      * registry pour les sésathèques qui veulent être notifiées lors d'un changement sur une ressource
      * @entity EntityExternalRef
      * @extends Entity
+     * @throws s'il manque baseId ou rid, ou si l'un des deux est incohérent (rid doit pointer sur une de nos ressources, baseId ne doit pas être la nôtre)
      */
     EntityExternalRef.construct(function (data) {
-      if (!data) data = {}
+      if (!data || !data.baseId || !data.rid) throw Error('Il faut passer au moins baseId et rid pour créer une EntityExternalRef')
+      const {baseId, rid} = data
+      if (getBaseIdFromRid(rid) !== myBaseId) throw Error(`Cette EntityExternalRef ne doit pas être gérée ici (${myBaseId}, alors que rid vaut ${this.rid}`)
+      if (!exists(baseId)) throw Error(`${this.baseId} inconnue`)
+      if (!sesatheques.some(s => s.baseId === this.baseId)) throw Error(`${this.baseId} n’est pas déclaré en config, impossible de mettre un listener ici pour la prévenir en cas de modif sur ${this.rid}`)
       /**
-       * Oid de ce "listener"
+       * Oid de ce "listener", concaténation de baseId et rid (avec séparateur -), permet d'imposer l'unicité baseId/rid
+       * en attendant que lassi gère des index unique combinés
        * @type {string}
        */
-      this.oid = data.oid
+      this.oid = `${baseId}-${rid.replace('/', '-')}`
       /**
-       * baseId de la sésathèque qui veut être prévenue lors d'une modif
+       * baseId de la sésathèque qui veut être prévenue lors d'une modif du rid ici
        * @type {string}
        */
-      this.baseId = data.baseId
+      this.baseId = baseId
       /**
-       * rid de la ressource à surveiller
+       * rid de la ressource à surveiller ici
        * @type {string}
        */
-      this.rid = data.rid
+      this.rid = rid
+      if (!data.dateCreation) this.dateCreation = new Date()
+    })
+
+    EntityExternalRef.validateJsonSchema({
+      type: 'object',
+      properties: {
+        oid: {type: 'string'},
+        baseId: {type: 'string'},
+        rid: {type: 'string'},
+        dateCreation: {instanceof: 'Date'}
+      },
+      additionalProperties: false,
+      required: ['oid', 'baseId', 'rid', 'dateCreation']
     })
 
     EntityExternalRef
-      .defineIndex('baseId', 'string')
-      .defineIndex('rid', 'string')
-
-    EntityExternalRef.beforeStore(function (next) {
-      try {
-        // vérifications d'intégrité
-        if (!this.baseId) throw new Error('EntityExternalRef sans baseId')
-        if (!this.rid) throw new Error('EntityExternalRef sans rid')
-        if (getBaseIdFromRid(this.rid) !== myBaseId) throw new Error(`Cette EntityExternalRef ne doit pas être gérée ici (${myBaseId}, alors que rid vaut ${this.rid}`)
-        if (!exists(this.baseId)) throw new Error(`${this.baseId} inconnue`)
-        if (!config.sesatheques.find(s => s.baseId === this.baseId)) throw new Error(`${this.baseId} n’est pas déclaré en config, impossible de mettre un listener ici pour la prévenir en cas de modif sur ${this.rid}`)
-        // on a passé toutes les vérifs, sans oid on vérifie qu'on a pas déjà un listener
-        // pour ce couple baseId / rid
-        if (this.oid) return next()
-        EntityExternalRef
-          .match('baseId').equals(this.baseId)
-          .match('rid').equals(this.rid)
-          .grab(function (error, extRefs) {
-            if (error) return next(error)
-            if (extRefs.length === 0) return next()
-            // y'en a au moins un, on garde le premier
-            this.oid = extRefs[0].oid
-            next()
-            // on vire d'éventuels surnuméraires…
-            if (extRefs.length > 1) {
-              log.error(new Error(`ExternalRef en doublon (${extRefs.length}) pour ${this.rid} sur ${this.baseId}`))
-              extRefs.slice(1).forEach(extRef => extRef.delete(log.error))
-            }
-          })
-      } catch (error) {
-        next(error)
-      }
-    })
+      .defineIndex('baseId')
+      .defineIndex('rid')
   })
 }

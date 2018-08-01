@@ -64,7 +64,7 @@ describe('EntityPersonne', () => {
   beforeEach(purge)
   afterEach(purge)
 
-  it('create (avec permissions set)', () => {
+  it('create (avec permissions set n’importe comment)', () => {
     // on teste un create avec tous les rôles définis en config, plus un inconnu
     const configRoles = $settings.get('components.personne.roles')
     const rolesList = Object.keys(configRoles)
@@ -77,7 +77,7 @@ describe('EntityPersonne', () => {
       personneData.permissions = unknownPermissions
       const personne = EntityPersonne.create(personneData)
       // ça on le vérifie séparément après
-      if (isKnownRole) delete personneData.permissions
+      delete personneData.permissions
       checkPersonne(personne, personneData)
       if (isKnownRole) {
         // les permissions d'un rôle sont fixée par la config, ça écrase tout ce qu'on peut passer au constructeur

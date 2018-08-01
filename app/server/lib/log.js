@@ -39,10 +39,8 @@
 
 const fs = require('fs')
 const moment = require('moment')
-const _ = require('lodash')
 const config = require('../config')
 const sjt = require('sesajstools')
-const applog = require('an-log')(config.application.name)
 
 /**
  * Retourne une writeStream sur le fichier passé en arguments (qui sera ouvert dans le dossier de log défini dans la conf)
@@ -64,12 +62,11 @@ function getLogStream (log, verbose) {
       } else {
         streamsQuiet.push(stream)
       }
-      applog('app', 'ouverture du log ' + file)
     } else {
-      applog('app', 'ouverture du log ' + file + ' KO')
+      console.error(Error(`impossible d’ouvrir le log ${file}`))
     }
   } catch (error) {
-    applog('app', "ERROR : impossible d'ouvrir " + file)
+    console.error(`impossible d’ouvrir le log ${file}`, error)
   }
 
   return stream
@@ -127,8 +124,14 @@ function out (message, objectToDump, filter, stream, options) {
   }
 }
 
-// en cli on est chargé avant qu'il puisse configurer anLog
-if (process.argv.some(arg => /cli\.js/.test(arg))) applog.setLogLevel(0)
+/**
+ * Retourne le préfixe avec la date courante entre crochet
+ * @private
+ * @returns {string}
+ */
+const getPrefix = () => `[${moment().format('YYYY-MM-DD HH:mm:ss.SSS')}] `
+
+let disabled = false
 
 // si le dossier de log n'existe pas on le crée
 const logDir = config.logs.dir
@@ -152,8 +155,6 @@ const errorDataOutputStream = getLogStream(config.logs.dataError, true)
 /** un log pour mesure de performances */
 let perfOutputStream
 
-const env = process.env.NODE_ENV || 'dev'
-
 /**
  * Les messages à exclure
  * (une valeur à true excluera les debug de ce type dans le log de debug)
@@ -162,37 +163,40 @@ const env = process.env.NODE_ENV || 'dev'
 const exclusions = {}
 
 /**
- * Retourne le préfixe avec la date courante entre crochet
- * @private
- * @returns {string}
+ * Méthode qui écrit en console si l'on est pas en prod (ne fait rien en prod)
+ * @service log
+ * @type {function}
+ * @param {string|object} message
+ * @param {Object}        [objectToDump] Un objet éventuel qui sera rendu en json avec indentation
+ * @param {string}        [filter]       Un nom de filtre pour exclusion éventuelle
+ * @param {Object}        [options]      Passer les propriétés facultatives
+ *                                         indent pour indenter objectToDump du nombre d'espaces demandés,
+ *                                         max pour modifier la limite de la sortie (200 par défaut)
  */
-const getPrefix = () => `[${moment().format('YYYY-MM-DD HH:mm:ss.SSS')}] `
-
-// log
-if (env === 'prod') {
-  global.log = function () { } // jshint ignore:line
-  applog('app', "fonction log désactivée avec l'environnement : " + env)
-} else {
-  /**
-   * Méthode qui écrit en console si l'on est pas en prod (ne fait rien en prod)
-   * @service log
-   * @type {function}
-   * @param {string|object} message
-   * @param {Object}        [objectToDump] Un objet éventuel qui sera rendu en json avec indentation
-   * @param {string}        [filter]       Un nom de filtre pour exclusion éventuelle
-   * @param {Object}        [options]      Passer les propriétés facultatives
-   *                                         indent pour indenter objectToDump du nombre d'espaces demandés,
-   *                                         max pour modifier la limite de la sortie (200 par défaut)
-   */
-  global.log = function (message, objectToDump, filter, options) { // jshint ignore:line
-    // (log étant défini en global dans la conf jshint il râle si on le redéfini)
-    if (arguments.length === 3 && typeof filter === 'object') {
-      options = filter
-      filter = 'info'
-    }
-    out(message, objectToDump, filter, null, options)
+function log (message, objectToDump, filter, options) {
+  if (disabled) return
+  // (log étant défini en global dans la conf jshint il râle si on le redéfini)
+  if (arguments.length === 3 && typeof filter === 'object') {
+    options = filter
+    filter = 'info'
   }
-  applog('app', "fonction de log activée avec l'environnement : " + env)
+  out(message, objectToDump, filter, null, options)
+}
+
+/**
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données (config.logs.dataError)
+ * @memberOf log
+ * @param message
+ * @param objectToDump
+ * @param filter
+ */
+log.dataError = function dataError (message, objectToDump, filter) {
+  // on peut être utilisé comme callback
+  if (arguments.length === 0) return
+  // pour les dataError, on met un max élevé s'il est pas précisé
+  if (!filter) filter = {}
+  if (!filter.max) filter.max = 50000
+  out(message, objectToDump, filter, errorDataOutputStream, {max: 2000})
 }
 
 // log.debug
@@ -208,7 +212,7 @@ if (config.logs.debug) {
    * @param [filter]
    * @param options
    */
-  log.debug = function (message, objectToDump, filter, options) {
+  log.debug = function debug (message, objectToDump, filter, options) {
     if (arguments.length === 3 && typeof filter === 'object') {
       options = filter
       filter = 'info'
@@ -221,15 +225,63 @@ if (config.logs.debug) {
       exclusions[filter] = true
     })
   }
-
-  applog('app', 'fonction log.debug activée vers ' + config.logs.debug + ", avec l'environnement : " + env)
 } else {
   log.debug = function () {}
-  applog('app', "fonction log.debug désactivée avec l'environnement : " + env)
 }
+
+/**
+ * Rend log() muet
+ */
+log.disable = () => { disabled = true }
+/**
+ * Rend log() bavard
+ */
+log.enable = () => { disabled = false }
+
+/**
+ * Active un filtre (le créé si besoin)
+ * @memberOf log
+ * @param {string} filter Le filtre à appliquer (pour exclure les messages qui le contiennent)
+ */
+log.exclude = (filter) => { exclusions[filter] = true }
+
+/**
+ * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur (config.logs.error)
+ * @name error
+ * @memberOf log
+ * @param message
+ * @param objectToDump
+ * @param filter
+ */
+log.error = function logError (message, objectToDump, filter) {
+  // on peut être utilisé comme callback
+  if (arguments.length === 0) return
+  if (typeof message === 'string' || message instanceof Error) {
+    out(message, objectToDump, filter, errorOutputStream, {max: 2000})
+  } else {
+    // bizarre, on génère une vraie erreur avec sa trace
+    out(new Error(`log.error appelé sans message ni erreur, avec un type ${typeof message} :`), message, filter, errorOutputStream, {max: 2000})
+    if (objectToDump) out('l’objet passé initialement', objectToDump, filter, errorOutputStream, {max: 2000})
+  }
+}
+
+/**
+ * log.error si error, rien sinon
+ * @memberOf log
+ * @param {Error|string} [error]
+ */
+log.ifError = (error) => error && log.error(error)
+
+/**
+ * Désactive un filtre
+ * @memberOf log
+ * @param {string} filter Le filtre à enlever (les messages qui le contiennent redeviennent actifs)
+ */
+log.include = (filter) => { exclusions[filter] = false }
 
 // log.perf
 if (config.logs.perf) {
+  const getElapsed = (start = 0) => Date.now() - start
   perfOutputStream = getLogStream(config.logs.perf)
   out('start log (démarrage appli)', null, null, perfOutputStream)
   /**
@@ -244,7 +296,7 @@ if (config.logs.perf) {
     const timer = !noTimer
     if (response.perf && response.perf.msg) {
       response.perf.msg += '\t' + strToAdd
-      if (timer) response.perf.msg += ' ' + log.getElapsed(response.perf.start) + 'ms'
+      if (timer) response.perf.msg += ' ' + getElapsed(response.perf.start) + 'ms'
     }
   }
   /**
@@ -276,94 +328,13 @@ if (config.logs.sql) {
 }
 */
 
-// Et les autres méthodes toujours valides
-
-/**
- * Retourne le nb de ms écoulées depuis start
- * @param {number} [start=0] Passer un top de départ (timestamp en ms)
- */
-log.getElapsed = function (start) {
-  let ts = (new Date()).getTime()
-  if (start) ts -= start
-
-  return ts
-}
-
-/**
- * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur (config.logs.error), en dev comme en prod
- * @memberOf log
- * @param message
- * @param objectToDump
- * @param filter
- */
-log.error = function (message, objectToDump, filter) {
-  // on peut être utilisé comme callback
-  if (arguments.length === 0) return
-  if (typeof message === 'string' || message instanceof Error) {
-    out(message, objectToDump, filter, errorOutputStream, {max: 2000})
-  } else {
-    // bizarre, on génère une vraie erreur avec sa trace
-    out(new Error(`log.error appelé sans message ni erreur, avec un type ${typeof message} :`), message, filter, errorOutputStream, {max: 2000})
-    if (objectToDump) out('l’objet passé initialement', objectToDump, filter, errorOutputStream, {max: 2000})
-  }
-}
-
-/**
- * log.error si error, rien sinon
- * @param {Error|string} [error]
- */
-log.ifError = function (error) {
-  if (error) log.error(error)
-}
-
-/**
- * Ajoute un message (avec éventuellement le dump d'un objet) dans le log d'erreur de données (config.logs.dataError)
- * @memberOf log
- * @param message
- * @param objectToDump
- * @param filter
- */
-log.dataError = function (message, objectToDump, filter) {
-  // on peut être utilisé comme callback
-  if (arguments.length === 0) return
-  // pour les dataError, on met un max élevé s'il est pas précisé
-  if (!filter) filter = {}
-  if (!filter.max) filter.max = 50000
-  out(message, objectToDump, filter, errorDataOutputStream, {max: 2000})
-}
-
-/**
- * Active un filtre (le créé si besoin)
- * @memberOf log
- * @param {string} filter Le filtre à appliquer (pour exclure les messages qui le contiennent)
- */
-log.exclude = function (filter) {
-  exclusions[filter] = true
-}
-
-/**
- * Désactive un filtre
- * @memberOf log
- * @param {string} filter Le filtre à enlever (les messages qui le contiennent redeviennent actifs)
- */
-log.include = function (filter) {
-  exclusions[filter] = false
-}
-
 // Et on fermera nos streams au shutdown
 if (global.lassi) {
   global.lassi.on('shutdown', function () {
-    applog('app', 'shutdown event in log')
-
-    if (streamsQuiet.length) {
-      _.each(streamsQuiet, function (stream) {
-        stream.end()
-      })
-    }
+    streamsQuiet.forEach(stream => stream.end())
     if (streamsVerbose.length) {
-      _.each(streamsVerbose, function (stream) {
-        stream.end(getPrefix() + 'log closed by pid ' + process.pid + ' on shutdown\n', this)
-      })
+      const msg = `${getPrefix()} log closed by pid ${process.pid} on shutdown\n`
+      streamsVerbose.forEach(stream => stream.end(msg))
     }
   })
 }

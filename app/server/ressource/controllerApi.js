@@ -159,6 +159,8 @@ module.exports = function (component) {
         // faut la charger, ne serait-ce que pour savoir si elle existe
         if (ressourcePostee.oid) { // par oid
           $ressourceRepository.load(ressourcePostee.oid, next)
+        } else if (ressourcePostee.rid) { // ou par rid
+          $ressourceRepository.load(ressourcePostee.rid, next)
         } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
           $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
         } else {
@@ -166,7 +168,7 @@ module.exports = function (component) {
           // l'idOrigine n'est pas obligatoire si c'est une création ici ($ressourceRepository.save créera une clé si besoin
           if (ressourcePostee.origine !== myBaseId && !ressourcePostee.idOrigine) {
             log.debug('ressource postée invalide', ressourcePostee)
-            next(new Error('Il faut fournir oid ou au moins origine'))
+            next(new Error('Il faut fournir oid, rid ou au moins origine'))
           } else {
             next()
           }
