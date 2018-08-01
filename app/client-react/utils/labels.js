@@ -17,6 +17,6 @@ export function getRestrictionString ({restriction, groupes}) {
       else restrictionString = 'ERREUR : restriction à un groupe alors que la ressource n’est publiée dans aucun'
     } // sinon on a pas l'info et on dit rien (form de recherche par ex)
   }
-  console.log(`restriction ${restriction} donne ${restrictionString}`)
+
   return restrictionString
 }
