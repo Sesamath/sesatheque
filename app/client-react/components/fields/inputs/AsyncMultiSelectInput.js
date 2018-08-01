@@ -3,8 +3,6 @@ import React from 'react'
 import {Async as Select} from 'react-select'
 import showInvalidField from '../hoc/showInvalidField'
 
-import 'react-select/dist/react-select.css'
-
 /**
  * Redux-form react-select input with async loaded options
  * @todo factor with MultiSelectInput

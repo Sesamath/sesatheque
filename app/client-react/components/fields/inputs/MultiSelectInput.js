@@ -3,7 +3,14 @@ import React from 'react'
 import Select from 'react-select'
 import showInvalidField from '../hoc/showInvalidField'
 
-import 'react-select/dist/react-select.css'
+const getValue = (value, options, isMulti) => {
+  const find = (val) => options.find(({value: itemValue}) => val === itemValue)
+  if (isMulti) {
+    return value.map(find)
+  }
+
+  return find(value)
+}
 
 const MultiSelectInput = ({
   input: {name, onFocus, onBlur, onChange, value},
@@ -15,10 +22,10 @@ const MultiSelectInput = ({
 }) => (
   <Select
     clearable={multi}
-    value={value}
+    value={getValue(value, options, multi)}
     name={name}
     onFocus={onFocus}
-    closeOnSelect={!multi}
+    closeMenuOnSelect={!multi}
     onChange={(selection) => {
       if (multi) {
         return onChange(selection.map(option => option.value))
@@ -32,7 +39,7 @@ const MultiSelectInput = ({
     options={options}
     disabled={disabled}
     noResultsText="Aucun résultat trouvé"
-    multi={multi}
+    isMulti={multi}
   />
 )
 
