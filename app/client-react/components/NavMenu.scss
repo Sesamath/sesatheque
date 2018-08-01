@@ -16,6 +16,13 @@
         color: white;
       }
 
+      /**
+       * On cache l'îcone de lien externe exceptionnellement pour le menu
+       */
+      a[target="_blank"]:after {
+        display: none !important;
+      }
+
       span {
         margin-top: 7px;
       }
