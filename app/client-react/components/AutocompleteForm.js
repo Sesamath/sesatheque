@@ -1,7 +1,6 @@
 import React, {Component, Fragment} from 'react'
 import {autocomplete, search} from 'sesatheque-client/src/client'
 import {debounce} from 'lodash'
-import {addSesatheques} from 'sesatheque-client/src/sesatheques'
 import config from '../../server/config'
 import {labels, listes} from '../../server/ressource/config'
 import {Async as Select} from 'react-select'
@@ -39,7 +38,6 @@ const getOptions = (input, callback) => {
 class AutocompleteForm extends Component {
   constructor (props) {
     super(props)
-    addSesatheques(config.sesatheques)
 
     this.state = {
       resources: [],
