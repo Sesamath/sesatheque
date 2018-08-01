@@ -1,12 +1,20 @@
-const addPrefix = route => (params, prefix) => {
-  if (prefix) {
-    return route(params, `${prefix}api`)
+// fonction qui permet l'ajout d'une baseUrl
+// devant la route. Pas utile si les routes
+// sont uniquement utilisées dans le cadre
+// du front react mais pourrait servir dans
+// sesatheque-client
+
+const addPrefix = route => (params, baseUrl) => {
+  if (baseUrl !== undefined) {
+    return route(params, `${baseUrl}api`)
   }
 
   return route(params, '/api')
 }
 
-// Routes utilisées dans le front react
+// Routes de l'api utilisées dans le
+// front react:
+
 const ressourceList = ({search}, prefix) => `${prefix}/liste?${search}`
 
 export const ressourceListUrl = addPrefix(ressourceList)
@@ -77,5 +85,3 @@ export const groupeLeaveUrl = addPrefix(groupeLeave)
 const groupeIgnore = ({nom}, prefix) => `${prefix}/groupe/ignorer/${encodeURIComponent(nom)}`
 
 export const groupeIgnoreUrl = addPrefix(groupeIgnore)
-
-// Routes utilisées ailleurs
