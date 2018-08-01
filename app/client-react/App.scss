@@ -4,8 +4,12 @@
   padding: 2rem;
 
   h1 {
-    margin-bottom: 0;
+    margin-bottom: 5px;
     color: $primary-color-light;
+  }
+
+  h2 {
+    margin-bottom: 15px;
   }
 
   /* ----------------------------- */
@@ -35,11 +39,17 @@
     }
   }
 
+  .btn--rounded {
+    margin-left: 10px;
+    border-radius: 5px;
+  }
+
 /* --------------------------------------------- */
 /* Écrase le style de knackcss sur les alertes   */
 /* --------------------------------------------- */
   .alert--danger, .alert--warning, .alert--info {
-    padding: 5px 10px;
+    padding: 10px 10px;
+    margin: 10px;
 
     i {
       margin-right: 5px;

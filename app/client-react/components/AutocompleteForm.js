@@ -18,6 +18,8 @@ const debouncedGET = debounce((input, callback) => {
     const options = []
     for (const filter in filters) {
       for (const value in filters[filter]) {
+        // Note : l'attribut "value" possède l'ensemble d'une option pour éviter
+        // un bug lié à l'unicité d'une clé qui provoque des comportements étranges avec react-select
         options.push({
           value: {filter, value: filters[filter][value]},
           label: filter
@@ -69,6 +71,7 @@ class AutocompleteForm extends Component {
   render () {
     return (
       <Fragment>
+        <h1>Recherche assistée (beta)</h1>
         <div className="grid-5">
           <Select
             className="col-4"
@@ -89,7 +92,7 @@ class AutocompleteForm extends Component {
             multi={true}
           />
           <button
-            className="btn"
+            className="btn btn--rounded"
             onClick={this.searchResources.bind(this)}>Rechercher</button>
         </div>
         <ResourceList
