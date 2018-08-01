@@ -131,9 +131,9 @@ const configRessource = {
     },
     restriction: {
       0: 'aucune',
-      1: 'corrigé',
-      2: 'groupe',
-      3: 'privé'
+      1: 'professeur',
+      2: 'groupe(s)',
+      3: 'auteur(s)'
     }
   },
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
