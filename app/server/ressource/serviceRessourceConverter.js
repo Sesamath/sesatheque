@@ -268,6 +268,7 @@ module.exports = function (component) {
      * pour transformer un alias en ressource autonome (quand on édite cet alias)
      * @param {Context} context
      * @param {Ressource} ressource
+     * @param {callbackRessource}
      */
     $ressourceConverter.forkAlias = function (myPid, ressource, callback) {
       flow().seq(function () {
@@ -278,7 +279,8 @@ module.exports = function (component) {
         $ressourceFetch.fetchOriginal(ressource.aliasOf, this)
       }).seq(function (ressourceOriginale) {
         if (!ressourceOriginale) {
-          // ce cas devrait être exclu, juste une assurance
+          // ce cas devrait être exclu (si l'original avait disparu on aurait dû être prévenu)
+          // mais vaut mieux vérifier
           log.error(`fetchOriginal(${ressource.aliasOf}) ne renvoie ni ressource ni erreur`)
           return callback(null)
         }
@@ -287,6 +289,8 @@ module.exports = function (component) {
         const forcedProps = {
           oid: ressource.oid,
           rid: ressource.rid,
+          // faudrait lui générer une nouvelle clé si besoin, le beforeStore s'en chargera, il suffit de lui virer l'actuelle
+          cle: undefined,
           origine: myBaseId,
           idOrigine: ressource.oid,
           auteurs: [myPid],
