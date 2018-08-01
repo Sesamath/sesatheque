@@ -3,14 +3,13 @@ import {autocomplete, search} from 'sesatheque-client/src/client'
 import {debounce} from 'lodash'
 import {addSesatheques} from 'sesatheque-client/src/sesatheques'
 import config from '../../server/config'
-import {listes} from '../../server/ressource/config'
+import {labels, listes} from '../../server/ressource/config'
 import {Async as Select} from 'react-select'
 import {ResourceList} from './ResourceList'
 import 'react-select/dist/react-select.css'
 
-const optionToText = (label, value) => {
-  return listes[label] ? listes[label][value] : value
-}
+const optionValueToText = (label, value) => listes[label] ? listes[label][value] : value
+const optionLabelToText = label => labels[label]
 
 const debouncedGET = debounce((input, callback) => {
   autocomplete(config.baseId, input, (error, filters) => {
@@ -31,7 +30,7 @@ const debouncedGET = debounce((input, callback) => {
 }, 500)
 
 const getOptions = (input, callback) => {
-  if (!input) return callback(null, ({ options: [] }))
+  if (!input || input.length <= 2) return callback(null, ({ options: [] }))
   debouncedGET(input, callback)
 }
 
@@ -60,11 +59,11 @@ class AutocompleteForm extends Component {
   }
 
   optionRenderer (option) {
-    return `${optionToText(option.label, option.value.value)} (${option.label})`
+    return `${optionValueToText(option.label, option.value.value)} (${optionLabelToText(option.label)})`
   }
 
   valueRenderer (option) {
-    return `${option.label} : ${optionToText(option.label, option.value.value)}`
+    return `${optionLabelToText(option.label)} : ${optionValueToText(option.label, option.value.value)}`
   }
 
   render () {
@@ -74,8 +73,10 @@ class AutocompleteForm extends Component {
           <Select
             className="col-4"
             value={this.state.selection}
-            clearable={false}
+            clearable={true}
             closeOnSelect={false}
+            onBlurResetsInput={false}
+            onCloseResetsInput={false}
             filterOption={() => (true)}
             removeSelected={false}
             onChange={selection => this.setState({selection})}
