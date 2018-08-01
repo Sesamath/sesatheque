@@ -1,5 +1,9 @@
 @import "styles/common.scss";
 
+a:after {
+  display: none;
+}
+
 #main {
   padding: 2rem;
 
@@ -60,21 +64,33 @@
       padding: 0;
     }
   }
-}
 
-/* ------------------------------------------- */
-/* Ajout d'une icône sur les liens externes    */
-/* ------------------------------------------- */
-a[target="_blank"] {
-  &:before {
-    @include fa-icon;
-    @extend .fa;
-    margin-right: 0.5rem;
-    vertical-align: 0.15rem;
-    font-size: 11px;
-    content: fa-content($fa-var-external-link-alt);
+  /* ------------------------------------------- */
+  /* Ajout d'une icône sur les liens externes    */
+  /* ------------------------------------------- */
+  a[target="_blank"] {
+    &:after {
+      @include fa-icon;
+      @extend .fa;
+      margin-left: 5px;
+      vertical-align: 0.12em;
+      font-size: 11px;
+      content: fa-content($fa-var-external-link-alt);
+    }
+  }
+
+  .switch:checked {
+    box-shadow: inset 2rem 0 0 $green-500, inset 0 0 0 1px $green-500 !important;
   }
 }
+
+/*
+ * Supprime les contours de selection Chrome
+ */
+*:focus {
+  outline: none !important;
+}
+
 
 /* ----------------------------- */
 /* Notifications                 */

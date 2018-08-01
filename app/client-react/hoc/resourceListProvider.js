@@ -4,6 +4,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {GET} from '../utils/httpMethods'
 import {listes} from '../../server/ressource/config'
+import {ressourceListUrl} from '../apiRoutes'
 
 const limitDefault = 25
 const limitMin = 5
@@ -29,7 +30,12 @@ const resourceListProvider = (WrappedComponent) => {
 
     fetchList () {
       const {query, queryOptions} = this.props
-      const url = '/api/liste?' + queryString.stringify({...query, ...queryOptions, format: 'light'})
+      const search = queryString.stringify({
+        ...query,
+        ...queryOptions,
+        format: 'light'
+      })
+      const url = ressourceListUrl({search})
 
       GET(url)
         .then(({liste, total}) => {

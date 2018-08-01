@@ -13,9 +13,10 @@ import {
 } from '../fields'
 import {saveGroupe} from '../../actions/groupes'
 import groupesLoader from './hoc/groupesLoader'
+import {personneByOidUrl} from '../../apiRoutes'
 
 const debouncedGET = debounce((input, callback) => {
-  GET(`/api/personne/byOid/${input}`)
+  GET(personneByOidUrl({oid: input}))
     .then(({user}) => {
       if (user === null) { return callback(null, ({ options: [] })) }
       const {oid, prenom, nom} = user
