@@ -64,13 +64,13 @@ module.exports = function (component) {
             if (config.categoriesToTypes[categorie]) {
               if (noTp) {
                 config.categoriesToTypes[categorie].typePedagogiques.forEach(function (tp) {
-                  ressource.typePedagogiques.push(tp)
+                  if (!ressource.typePedagogiques.includes(tp)) ressource.typePedagogiques.push(tp)
                 })
               }
               if (noTd) {
                 if (!Array.isArray(ressource.typeDocumentaires)) ressource.typeDocumentaires = []
-                config.categoriesToTypes[categorie].typeDocumentaires.forEach(function (tp) {
-                  ressource.typeDocumentaires.push(tp)
+                config.categoriesToTypes[categorie].typeDocumentaires.forEach(function (td) {
+                  if (!ressource.typeDocumentaires.includes(td)) ressource.typeDocumentaires.push(td)
                 })
               }
             }
