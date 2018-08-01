@@ -119,7 +119,6 @@ function restore (oid, version, done) {
     const overrides = {
       oid: ressource.oid,
       // on garde comme parent l'archive restaurée, qui ne sera donc pas en version - 1
-      archiveOid: archive.oid,
       version: ressource.version + 1,
       inc: ressource.inc + 1,
       dateArchivage: undefined

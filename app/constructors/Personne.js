@@ -80,7 +80,7 @@ function Personne (initObj) {
    */
   this.roles = initObj.roles || {}
   /**
-   * Liste des permissions, calculée d'après les roles au login, non sauvegardée donc à priori seulement en session
+   * Liste des permissions, calculée d'après les roles au create + beforeStore (pour les avoir toujours ok en cache)
    * @type {Object}
    * @default undefined
    */
@@ -92,11 +92,21 @@ function Personne (initObj) {
    */
   this.groupesMembre = initObj.groupesMembre || []
   /**
-   * groupes dont on suit les publications sans en être membre
+   * groupes dont on suit les publications
    * @type {string[]}
    * @default undefined
    */
   this.groupesSuivis = initObj.groupesSuivis || []
+
+  if (initObj.dateCreation) {
+    /**
+     * date de création
+     * @type {Date}
+     */
+    this.dateCreation = typeof initObj.dateCreation === 'string' ? new Date(initObj.dateCreation) : initObj.dateCreation
+  } else {
+    this.dateCreation = new Date()
+  }
   /**
    * D'autres propriétés regroupées dans cet objet, pour laisser la possibilité à des plugins d'ajouter facilement des infos,
    * @type {Object}

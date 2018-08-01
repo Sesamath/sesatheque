@@ -110,7 +110,7 @@ export const Header = ({
                 <i className="fa fa-ellipsis-v"></i>
               </NavLink>
               <ul>
-                <div>{`${personne.prenom} ${personne.nom}`}</div>
+                <li className="user--name">{`${personne.prenom} ${personne.nom}`}</li>
                 <li>
                   <NavLink
                     key="compte"

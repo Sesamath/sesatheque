@@ -41,6 +41,7 @@
 import {expect} from 'chai'
 import faker from 'faker/locale/fr'
 import fakeRessource from '../../fixtures/fakeRessource'
+import {purge} from '../populate'
 
 import config from '../../../app/server/config'
 const {application: {baseId: myBaseId}} = config
@@ -49,12 +50,11 @@ export default function helpersFactory (lassi, superTestClient) {
   const EntityRessource = lassi.service('EntityRessource')
 
   /**
-   * Une fonction à passer à un promise.catch()
+   * Une fonction à passer à un promise.catch() pour purger avant de renvoyer l'erreur
    * @type {function}
+   * @return {Promise} promesse rejetée
    */
-  const catcher = Promise.reject.bind(Promise)
-  // revient au même que
-  // const catcher = (error) => Promise.reject(error)
+  const purgeOnError = (error) => purge().then(() => Promise.reject(error))
 
   /**
    * Vérifie que ressourceExpected est bien en db
@@ -67,14 +67,10 @@ export default function helpersFactory (lassi, superTestClient) {
     EntityRessource.match('oid').equals(oid).grabOne((error, ressource) => {
       if (error) return reject(error)
       if (!ressource) return reject(new Error(`aucune resssource ${oid} en base`))
-      try {
-        // console.log(`pour ${ressource.oid} version en db ${ressource.version}`)
-        // Object.keys(ressourceExpected).forEach(p => expect(ressource[p]).to.deep.equals(ressourceExpected[p], `pb avec ${p} pour ${oid} : ${JSON.stringify(ressource[p])} ≠ ${JSON.stringify(ressourceExpected[p])}`))
-        Object.keys(ressourceExpected).forEach(p => expect(JSON.stringify(ressource[p])).to.equals(JSON.stringify(ressourceExpected[p]), `pb avec ${p} pour ${oid}`))
-        resolve()
-      } catch (error) {
-        reject(error)
-      }
+      // console.log(`pour ${ressource.oid} version en db ${ressource.version}`)
+      // Object.keys(ressourceExpected).forEach(p => expect(ressource[p]).to.deep.equals(ressourceExpected[p], `pb avec ${p} pour ${oid} : ${JSON.stringify(ressource[p])} ≠ ${JSON.stringify(ressourceExpected[p])}`))
+      Object.keys(ressourceExpected).forEach(p => expect(JSON.stringify(ressource[p])).to.equals(JSON.stringify(ressourceExpected[p]), `pb avec ${p} pour ${oid}`))
+      resolve()
     })
   })
 
@@ -113,7 +109,6 @@ export default function helpersFactory (lassi, superTestClient) {
         return Promise.reject(error)
       }
     })
-    .catch(catcher)
 
   /**
    * Nettoie une entity pour en faire un objet presque plain sans ses propriétés volatiles
@@ -204,7 +199,7 @@ export default function helpersFactory (lassi, superTestClient) {
   ]
 
   return {
-    catcher,
+    purgeOnError,
     checkDb,
     checkHttp,
     checkHttpResult,

@@ -37,6 +37,7 @@
     "maj": "git pull && npm install && npm run build",
     "mongo": "./scripts/mongoApp",
     "mongo:commun": "./scripts/mongoApp -g ./_private/commun.js",
+    "mongo:test": "./scripts/mongoApp -g ./_private/test.js",
     "start": "env NODE_ENV=production node app/server/start.js",
     "start:commun": "env NODE_ENV=production SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm run start:commun & npm start",
@@ -104,7 +105,7 @@
     "html-webpack-plugin": "^3.2.0",
     "ip": "^1.1.5",
     "knacss": "^7.0.5",
-    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.1",
+    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.3",
     "lodash": "4.17.5",
     "moment": "2.19.3",
     "morgan": "1.9.0",
@@ -126,7 +127,7 @@
     "sesaeditgraphe": "git+https://framagit.org/Sesamath/sesaeditgraphe.git",
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
-    "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.2.51"
+    "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.2.54"
   },
   "devDependencies": {
     "amdefine": "^1.0.1",

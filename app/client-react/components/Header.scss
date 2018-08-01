@@ -42,9 +42,10 @@ header {
         display: none;
         position: absolute; // pour qu'il n'agrandisse pas le header quand il s'ouvre
         top: 3rem; // pour démarrer à ras des boutons
-        right: 0;
+        right: 5px;
         padding-top: 2rem;
         list-style: none;
+        overflow: hidden;
 
         div {
           padding: 0.2rem;
@@ -52,13 +53,20 @@ header {
           background-color: $color-primary;
         }
 
-        ul {
-          padding: 0.5rem;
+        li.user--name {
+          padding-left: 20px;
+          padding-top: 20px;
+          text-align: center;
+        }
+
+        li:last-child {
+          padding-bottom: 15px;
         }
 
         li {
           width: 100%;
           padding: 0.5rem;
+          padding-right: 25px;
           margin: 0;
           background-color: $color-primary;
         }

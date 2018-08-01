@@ -19,12 +19,12 @@ export const ResourceList = ({
     // pas très normal…
     console.error(Error('ResourceList appelé sans query'))
     return (
-      <p>Aucun critère de recherche (<a href="#form">rechercher</a>).</p>
+      <p className="alert--info">Aucun critère de recherche (<a href="#form">rechercher</a>).</p>
     )
   }
   if (!total) {
     return (
-      <p>Aucune ressource ne correspond à vos critères de recherche (<a href="#form">modifier</a>).</p>
+      <p className="alert--info">Aucune ressource ne correspond à vos critères de recherche (<a href="#form">modifier</a>).</p>
     )
   }
   const {skip, limit} = queryOptions
@@ -48,12 +48,13 @@ export const ResourceList = ({
   )
 
   return (
-    <Fragment>
+    <div className="search-results">
       {subNav}
       <table className="table resourceList">
         <thead>
           <tr>
             <th></th>
+            <th>Type</th>
             <th>Identifiant</th>
             <th>Titre</th>
             <th colSpan="4">Actions</th>
@@ -68,6 +69,7 @@ export const ResourceList = ({
           }) => (
             <tr key={oid}>
               <td><img src={icons[type]} alt="thumbnail" /></td>
+              <td>{type}</td>
               <td>{oid}</td>
               <td>{titre}</td>
               <td colSpan="4" className="links">
@@ -107,7 +109,7 @@ export const ResourceList = ({
         </tbody>
       </table>
       {subNav}
-    </Fragment>
+    </div>
   )
 }
 

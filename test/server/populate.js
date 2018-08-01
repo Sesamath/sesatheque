@@ -91,10 +91,18 @@ export function getRandomPersonne (pidOnly, except) {
 export function getRandomRessource (ridOnly, except) {
   // console.log(`getRandomRessource avec ${ressources.size}`)
   if (!ressources.size) throw new Error('Les ressources n’ont pas encore été générées (il faut appeler populate)')
-  const i = Math.floor(Math.random() * rOids.length)
-  const oid = rOids[i]
-  const rid = `${myBaseId}/${oid}`
-  if (except && except.includes(rid)) return getRandomRessource(ridOnly, except)
+  // si on tombe sur un qui était exclu on recommence
+  let i
+  let oid
+  let rid
+  let retries = 0
+  do {
+    retries++
+    i = Math.floor(Math.random() * rOids.length)
+    oid = rOids[i]
+    rid = `${myBaseId}/${oid}`
+  } while (except && except.includes(rid) && retries < 100) // eslint-disable-line no-unmodified-loop-condition
+  if (retries === 100) throw Error('Après 100 essais on ne trouve pas de ressource qui ne soit pas exclue')
   if (ridOnly) return rid
   return ressources.get(oid)
 }

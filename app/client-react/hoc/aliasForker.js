@@ -34,11 +34,10 @@ const aliasForker = (ResourceForm) => {
     }
 
     render () {
-      if (this.props.ressource === null) return null
-      // si on édite un alias, ensuresIsForked appelle forkAlias qui dispatch un clearRessource,
-      // donc WrappedComponent ne devrait pas avoir le temps d'être rendu (ou aussitôt effacé)
-      // mais autant ne rien rendre
-      if (this.props.ressource.aliasOf) return null
+      // si on édite un alias, on ne rend rien
+      if (this.props.ressource.aliasOf) {
+        return null
+      }
 
       return (
         <ResourceForm {...this.props} />

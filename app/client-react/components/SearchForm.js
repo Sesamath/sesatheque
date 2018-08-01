@@ -4,6 +4,7 @@ import React from 'react'
 import {reduxForm} from 'redux-form'
 import {labels} from '../../server/ressource/config'
 import listes from '../utils/listesFromConfig'
+import {getRestrictionString} from '../utils/labels'
 import Classification from './Classification'
 import {
   InputField,
@@ -11,6 +12,7 @@ import {
   SwitchField
 } from './fields'
 import queryString from 'query-string'
+
 import './SearchForm.scss'
 
 const anyOption = {
@@ -82,9 +84,24 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
         <a href="#form">Modifier</a> les critères de recherche actuels
       </div>
       <ul className="tags">
-        {Object.keys(query).map(key => (
-          <li key={key}><span className="tag--info">{labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}</span></li>
-        ))}
+        {Object.keys(query).map(key => {
+          // les booléens et restriction doivent avoir une traduction plus parlante que leur valeur
+          const criteria = query[key]
+          let criteriaLabel
+          if (typeof criteria === 'boolean') {
+            criteriaLabel = criteria ? 'oui' : 'non'
+          } else if (key === 'restriction') {
+            criteriaLabel = getRestrictionString({restriction: criteria})
+          } else if (Array.isArray(criteria)) {
+            criteriaLabel = criteria.join(', ')
+          } else {
+            criteriaLabel = criteria
+          }
+
+          return (
+            <li key={key}><span className="tag--info">{labels[key]} : {criteriaLabel}</span></li>
+          )
+        })}
       </ul>
     </div>
   )

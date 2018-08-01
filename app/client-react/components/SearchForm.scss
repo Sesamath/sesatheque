@@ -4,7 +4,7 @@
 .search-box {
   border: 1px dashed #ccc;
   padding: 5px;
-  margin-bottom: 15px;
+  margin: 10px;
 
   .fr {
     padding: 0px 6px;
@@ -31,6 +31,7 @@
         display: inline-block;
         font-size: 0.9em;
         line-height: 1.4;
+        box-shadow: none;
       }
     }
   }
