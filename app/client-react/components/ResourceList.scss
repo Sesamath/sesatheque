@@ -4,11 +4,15 @@
   th {
     &:nth-child(1) {
       width: 30px;
+      text-align: center;
     }
     &:nth-child(2) {
-      width: 210px;
+      width: 80px;
     }
     &:nth-child(3) {
+      width: 210px;
+    }
+    &:nth-child(4) {
       width: 35%;
     }
   }
@@ -21,4 +25,8 @@
   .links a {
     padding: 5px;
   }
+}
+
+.search-results {
+  margin: 15px 10px;
 }

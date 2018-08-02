@@ -83,14 +83,14 @@ module.exports = function (component) {
       type: 'object',
       properties: {
         oid: {type: 'string'},
-        pid: {type: 'string'},
+        pid: {type: 'string', pattern: '^[a-zA-Z0-9_-]+/[a-z0-9_-]+$'},
         nom: {type: 'string'},
         prenom: {type: 'string'},
         email: {type: 'string'},
         roles: {type: 'object'},
         permissions: {type: 'object'},
-        groupesMembre: {type: 'array', items: {type: 'string'}},
-        groupesSuivis: {type: 'array', items: {type: 'string'}},
+        groupesMembre: {type: 'array', items: {type: 'string'}, uniqueItems: true},
+        groupesSuivis: {type: 'array', items: {type: 'string'}, uniqueItems: true},
         infos: {type: 'object'},
         dateCreation: {instanceof: 'Date'}
       },

@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 import {NavLink} from 'react-router-dom'
 import groupesListeLoader from './hoc/groupesListeLoader'
 import {followGroupe, ignoreGroupe} from './utils/groupesOperations'
+import {groupesPublicsUrl} from '../../apiRoutes'
 
 /**
  * La liste des groupes publics (auth)
@@ -85,7 +86,7 @@ const mapStateToProps = ({session}) => ({
 })
 
 // groupesListeLoader contient ensureLogged
-export default groupesListeLoader('/api/groupes/publics')(
+export default groupesListeLoader(groupesPublicsUrl())(
   connect(mapStateToProps, {followGroupe, ignoreGroupe})(
     GroupesPublics
   )

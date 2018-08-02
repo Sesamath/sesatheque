@@ -71,9 +71,8 @@ class IframeHandler extends Component {
         {this.props.allowManualEdition && this.state.manualEdition ? (
           <TextField
             mode="json"
-            label="Script"
-            name={this.props.name ||
-              'parametres'}
+            label="Paramètres"
+            name={this.props.name || 'parametres'}
             onValidate={this.onManualEditorChange.bind(this)}
           />
         ) : (

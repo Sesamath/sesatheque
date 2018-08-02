@@ -66,7 +66,7 @@ module.exports = function (component) {
     EntityArchive.validateJsonSchema(archiveSchema)
 
     EntityArchive
-      .defineIndex('rid', 'string')
-      .defineIndex('version', 'integer')
+      .defineIndex('rid')
+      .defineIndex('version')
   })
 }

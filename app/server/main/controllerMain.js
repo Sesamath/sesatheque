@@ -77,6 +77,7 @@ module.exports = function (mainComponent) {
     // cf app/client-react/App.js pour ne pas oublier de routes
     const reactRoutes = [
       // '/', inutile car /build/index.html passe avant
+      '/autocomplete',
       '/mentionsLegales',
       '/ressource/ajouter',
       '/ressource/modifier/:oid',
