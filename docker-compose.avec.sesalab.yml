@@ -4,9 +4,9 @@ services:
   mailhog:
     image: mailhog/mailhog
   mongo:
-    image: mongo
+    image: mongo:4.0
   redis:
-    image: redis
+    image: redis:3.2
 
   bibliotheque.local:
     build: ./docker/sesatheque
