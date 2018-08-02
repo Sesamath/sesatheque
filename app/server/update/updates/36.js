@@ -41,7 +41,7 @@ module.exports = {
   run: function run (next) {
     const EntityGroupe = lassi.service('EntityGroupe')
     // on utilise le cli de lassi pour reindexAll
-    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    const $entitiesCli = require('lassi/source/services/entities-cli')
     const reindexAll = $entitiesCli().commands().reindexAll
 
     // on renomme les propriétés en passant par du $set mongo, tant pis pour le cache

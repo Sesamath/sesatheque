@@ -59,14 +59,40 @@ module.exports = function (component) {
 
       // on force l'unicité en imposant l'oid à partir de ressourceOid + version
       // mais à priori y'a plus l'oid de la ressource dans ce qu'on nous passe (pour forcer la création, et ne pas risquer de se mélanger les oid)
-      const ressourceOid = this.rid.substr(this.rid.indexOf('/') + 1)
-      this.oid = ressourceOid + '-' + this.version
+      // @todo à décommenter après update 37
+      // const ressourceOid = this.rid.substr(this.rid.indexOf('/') + 1)
+      // this.oid = ressourceOid + '-' + this.version
     })
 
     EntityArchive.validateJsonSchema(archiveSchema)
 
     EntityArchive
-      .defineIndex('rid', 'string')
-      .defineIndex('version', 'integer')
+      .defineIndex('rid')
+      .defineIndex('version')
+
+    // @todo après l'update 37 passé partout, virer ce beforeStore et décommenter la génération de l'oid dans le constructeur
+    EntityArchive.beforeStore(function (next) {
+      // y'a eu un moment avec des enfants qui se sont retrouvés null…
+      if (this.enfants) {
+        if (this.type === 'arbre') this.enfants = this.enfants.filter(e => e)
+        else delete this.enfants
+      }
+      // idem pour ça
+      if (!this.parametres || Array.isArray(this.parametres)) this.parametres = {}
+
+      const ressourceOid = this.rid.substr(this.rid.indexOf('/') + 1)
+      const archiveOid = ressourceOid + '-' + this.version
+      const thisArchive = this
+      if (thisArchive.oid !== archiveOid) {
+        // faut virer cet entity avant d'appeler next qui va la recréer avec le bon oid
+        thisArchive.delete((error) => {
+          if (error) return next(error)
+          thisArchive.oid = archiveOid
+          next()
+        })
+      } else {
+        next()
+      }
+    })
   })
 }

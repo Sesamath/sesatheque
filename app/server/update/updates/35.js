@@ -47,7 +47,7 @@ module.exports = {
     const $groupeRepository = lassi.service('$groupeRepository')
     const $ressourceRepository = lassi.service('$ressourceRepository')
     // on utilise le cli de lassi pour reindexAll
-    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    const $entitiesCli = require('lassi/source/services/entities-cli')
     const reindexAll = $entitiesCli().commands().reindexAll
 
     let nbDoublonsPid = 0

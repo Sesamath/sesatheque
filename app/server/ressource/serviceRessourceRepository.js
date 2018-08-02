@@ -460,8 +460,7 @@ module.exports = function (ressourceComponent) {
      */
     function archive (ressource, next) {
       if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n’existe pas encore")
-      const data = Object.assign({}, ressource)
-      delete data.oid
+      const data = Object.assign({}, ressource, {oid: undefined})
       EntityArchive.create(data).store(next)
     }
 

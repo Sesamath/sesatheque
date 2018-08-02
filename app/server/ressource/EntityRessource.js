@@ -96,12 +96,12 @@ module.exports = function (component) {
     EntityRessource
       .defineIndex('rid', {unique: true, sparse: true}) // rid est obligatoire, mais on l'a pas encore à la création… => sparse
       .defineIndex('cle', {unique: true, sparse: true}) // pour loadByCle
-      .defineIndex('aliasOf', 'string')
-      .defineIndex('origine', 'string')
-      .defineIndex('idOrigine', 'string')
+      .defineIndex('aliasOf')
+      .defineIndex('origine')
+      .defineIndex('idOrigine')
       .defineIndex('type')
       .defineIndex('titre')
-      .defineIndex('niveaux', 'string')
+      .defineIndex('niveaux')
       .defineIndex('categories', 'integer')
       .defineIndex('typePedagogiques', 'integer')
       .defineIndex('typeDocumentaires', 'integer')
@@ -109,7 +109,7 @@ module.exports = function (component) {
       // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
       // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
       // (pour gérer les relations avec des oid externes)
-      .defineIndex('relations', 'string', function () {
+      .defineIndex('relations', function () {
         // on retourne pour chaque relation l'item lié, tant pis pour la nature de la relation
         return this.relations.map(relation => relation[1])
       })
@@ -120,17 +120,17 @@ module.exports = function (component) {
         if (!this.enfants || !this.enfants.length) return
         return getRidEnfants(this)
       })
-      .defineIndex('auteurs', 'string')
-      .defineIndex('auteursParents', 'string')
-      .defineIndex('contributeurs', 'string')
-      .defineIndex('iPids', 'string', function () {
+      .defineIndex('auteurs')
+      .defineIndex('auteursParents')
+      .defineIndex('contributeurs')
+      .defineIndex('iPids', function () {
         return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
       })
       // les groupes chez qui la ressource est publiée
       .defineIndex('groupes', {normalizer: getNormalizedName})
       // les groupes qui ont un droit d'écriture sur la ressource
       .defineIndex('groupesAuteurs', {normalizer: getNormalizedName})
-      .defineIndex('langue', 'string')
+      .defineIndex('langue')
       .defineIndex('publie', 'boolean')
       .defineIndex('indexable', 'boolean')
       .defineIndex('restriction', 'integer')
