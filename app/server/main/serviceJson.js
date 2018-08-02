@@ -31,8 +31,7 @@
 
 'use strict'
 
-const request = require('request')
-const defaultTimeout = 5000
+let $accessControl
 
 /**
  * Service contenant les méthodes communes aux contrôleurs qui répondent en json
@@ -41,14 +40,16 @@ const defaultTimeout = 5000
 module.exports = function (component) {
   component.service('$json', function () {
     /**
-     * Équivalent de context.denied en json
+     * Équivalent json de context.denied (qui renvoie du text/plain en 403), mais renvoie toujours du json,
+     * avec une 401 si on est pas authentifié (403 sinon)
      * @param {Context} context
-     * @param msg
+     * @param {string|Error} [msg=Authentification requise|Droits insuffisants] (mis dans le log d'erreur si c'est une Error)
      */
     function denied (context, msg) {
-      if (!msg) msg = 'Accès refusé'
-      context.status = 403
-      sendError(context, msg)
+      if (!$accessControl) $accessControl = lassi.service('$accessControl')
+      context.status = $accessControl.isAuthenticated(context) ? 403 : 401
+      if (!msg) msg = context.status === 401 ? 'Authentification requise' : 'Droits insuffisants'
+      sendKo(context, msg)
     }
 
     /**
@@ -57,67 +58,33 @@ module.exports = function (component) {
      * @param {string}  msg
      */
     function notFound (context, msg) {
-      if (!msg) msg = 'Contenu inexistant'
+      if (!msg) msg = 'Ce contenu n’existe pas'
       context.status = 404
-      sendError(context, msg)
-    }
-
-    /**
-     * Wrapper de request.post, pour envoyer des data en json et récupérer du json
-     * @param url
-     * @param data
-     * @param next
-     */
-    function post (url, data, next) {
-      const postOptions = {
-        url: url,
-        json: true,
-        content_type: 'charset=UTF-8',
-        timeout: defaultTimeout,
-        form: data
-      }
-      request.post(postOptions, function (error, response, body) {
-        if (error) return next(error)
-        if (body && body.error) return next(new Error(body.error))
-        next(null, body)
-      })
+      context.restKo(msg)
     }
 
     /**
      * Callback générique de sortie json
      * @param {Context} context
      * @param {string|string[]|Error} error
-     * @param data
+     * @param {object} data
      */
     function send (context, error, data) {
-      if (error) {
-        // on logge l'erreur si s'en est vraiment une (pas les strings simples)
-        if (error.stack) {
-          log.error(error)
-          error = error.toString()
-        } else if (Array.isArray(error)) {
-          error = error.join(', ')
-        }
-        sendError(context, error)
-      } else {
-        if (!data) data = {success: true}
-        log.debug('$json.send va renvoyer', data, 'api')
-        context.json(data)
-      }
+      if (error) sendKo(context, error)
+      else sendOk(context, data)
     }
 
     /**
-     * Envoie un message d'erreur {success:false, error: errorMessage}
-     * @param {Context}      context
-     * @param {Error|string} error
+     * Wrapper de context.restKo (qui log message si c'est une Error), renvoie du 200 avec {success: false, message: 'le message d’erreur'}
+     * @param {Context} context
+     * @param {string|Error} message
      */
-    function sendError (context, error) {
-      if (error && error instanceof Error) {
-        log.error(error)
-        error = error.toString()
+    function sendKo (context, message) {
+      if (message instanceof Error) {
+        log.error(message)
+        message = message.toString()
       }
-      log.debug("$json va renvoyer l'erreur", error, 'api')
-      context.json({success: false, error: error})
+      context.restKo(message)
     }
 
     /**
@@ -135,9 +102,8 @@ module.exports = function (component) {
     return {
       denied,
       notFound,
-      post,
       send,
-      sendError,
+      sendKo,
       sendOk
     }
   })

@@ -170,7 +170,7 @@ module.exports = function (component) {
       }).seq(function () {
         sendJson(context, null, response)
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
@@ -193,7 +193,7 @@ module.exports = function (component) {
           $json.sendOk(context, {user: {nom, oid, prenom}})
         }
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
   })

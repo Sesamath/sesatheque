@@ -82,11 +82,11 @@ module.exports = function (component) {
       log.debug('dans cb api deleteRessource ' + id)
       // faut charger la ressource pour vérifier les droits (elle est probablement en cache)
       $ressourceRepository.load(id, function (error, ressource) {
-        if (error) return $json.sendError(context, error)
+        if (error) return $json.sendKo(context, error)
         if (!ressource) return $json.notFound(context, `La ressource ${id} n’existe pas`)
         if (!$accessControl.hasPermission('delete', context, ressource)) return $json.denied(context, `Vous n’avez pas de droits suffisants pour supprimer cette ressource`)
         $ressourceRepository.remove(ressource.oid, function (error) {
-          if (error) return $json.sendError(context, error)
+          if (error) return $json.sendKo(context, error)
           $json.sendOk(context, {deleted: ressource.oid})
         })
       })
@@ -257,19 +257,16 @@ module.exports = function (component) {
       log.debug('externalUpdate avec', context.post)
       if (!$accessControl.hasAllRights(context)) return $json.denied(context)
       try {
-        if (!context.post.ref) return $json.sendError(context, 'ref manquante')
+        if (!context.post.ref) return $json.sendKo(context, 'ref manquante')
         const ref = new Ref(context.post.ref)
-        if (!ref.aliasOf) return $json.sendError(context, 'aliasOf manquant')
-        if (!ref.titre) return $json.sendError(context, 'titre manquant')
-        if (!ref.type) return $json.sendError(context, 'type manquant')
+        if (!ref.aliasOf) return $json.sendKo(context, 'aliasOf manquant')
+        if (!ref.titre) return $json.sendKo(context, 'titre manquant')
+        if (!ref.type) return $json.sendKo(context, 'type manquant')
         $ressourceRepository.updateParent(ref, function (error, nbArbres) {
-          if (error) {
-            log.error(error)
-            $json.sendError(context, error)
-          } else {
-            $json.sendOk(context)
-          }
-          // si aucun arbre n'a été mis à jour, c'est qu'on est enregistré pour cette ref sur sa sesatheque
+          if (error) $json.sendKo(context, error)
+          else $json.sendOk(context)
+
+          // la réponse est partie, mais si aucun arbre n'a été mis à jour, c'est qu'on est enregistré pour cette ref sur sa sesatheque
           // mais qu'on ne l'utilise plus, faut virer le listener pour éviter que ça ne se reproduise.
           if (nbArbres === 0) {
             log.dataError(`On nous a averti d’une modif de ${ref.aliasOf} mais plus aucune ressource ici ne la référence, on vire le listener`)
@@ -277,8 +274,7 @@ module.exports = function (component) {
           }
         })
       } catch (error) {
-        log.error(error)
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       }
     }
 
@@ -291,9 +287,9 @@ module.exports = function (component) {
       log.debug('registerListener avec', context.post)
       if (!$accessControl.hasAllRights(context)) return $json.denied(context)
       const {action, baseId, rids} = context.post
-      if (!action) return $json.sendError(context, 'action manquante')
-      if (!baseId) return $json.sendError(context, 'baseId manquante')
-      if (!Array.isArray(rids) || !rids.length) return $json.sendError(context, 'rids manquant')
+      if (!action) return $json.sendKo(context, 'action manquante')
+      if (!baseId) return $json.sendKo(context, 'baseId manquante')
+      if (!Array.isArray(rids) || !rids.length) return $json.sendKo(context, 'rids manquant')
 
       // ajouter un listener (pour prévenir baseId que rid a changé)
       if (action === 'add') {
@@ -322,7 +318,7 @@ module.exports = function (component) {
         }).seq(function () {
           $json.sendOk(context, warnings.length ? {warnings} : {})
         }).catch(function (error) {
-          $json.sendError(context, error)
+          $json.sendKo(context, error)
         })
 
         // retirer un listener (car baseId ne référence plus rid)
@@ -353,10 +349,10 @@ module.exports = function (component) {
         }).seq(function () {
           $json.sendOk(context, warnings.length ? {warnings} : {})
         }).catch(function (error) {
-          $json.sendError(context, error)
+          $json.sendKo(context, error)
         })
       } else {
-        $json.sendError(context, `action ${context.post.action} inconnue (add|remove)`)
+        $json.sendKo(context, `action ${context.post.action} inconnue (add|remove)`)
       }
     }
 
@@ -510,18 +506,18 @@ module.exports = function (component) {
      */
     controller.get('baseId', function (context) {
       const baseUrl = context.get.baseUrl
-      if (!baseUrl) return $json.sendError(context, 'baseUrl manquante')
+      if (!baseUrl) return $json.sendKo(context, 'baseUrl manquante')
       // on cherche d'abord dans les sesalabs
       const sesalab = config.sesalabs.find(sesalab => sesalab.baseUrl === baseUrl)
       if (sesalab) {
         if (sesalab.baseId) return $json.sendOk(context, {baseId: sesalab.baseId, type: 'sesalab'})
         log.error('pb de sesalab en configuration sans baseId', sesalab)
-        return $json.sendError(context, 'Problème de configuration de la Sésathèque')
+        return $json.sendKo(context, 'Problème de configuration de la Sésathèque')
       }
       // c'est pas un sesalab, on cherche une sésathèque
       const baseId = getBaseId(baseUrl, null)
       if (baseId) return $json.sendOk(context, {baseId, type: 'sesatheque'})
-      $json.sendError(context, `baseUrl ${baseUrl} inconnue`)
+      $json.sendKo(context, `baseUrl ${baseUrl} inconnue`)
     })
 
     /**
@@ -556,14 +552,14 @@ module.exports = function (component) {
           if (!ressource.relations) ressource.relations = []
           ressource.relations.push([configRessource.constantes.relations.estVersionDe, ressource.rid])
           $ressourceRepository.save(ressource, function (error, ressource) {
-            if (error) return $json.sendError(context, error)
+            if (error) return $json.sendKo(context, error)
             if (!ressource || !ressource.oid) return $json.send(context, new Error('L’enregistrement de la ressource a échoué'))
             $json.sendOk(context, {oid: ressource.oid})
           })
         } else {
           // pas éditable, on crée un alias, mais on regarde si on en a pas déjà un pour cette ressource et ce user
           $ressourceRepository.loadByAliasAndPid(myBaseId + '/' + oid, pid, function (error, alias) {
-            if (error) return $json.sendError(context, error.toString())
+            if (error) return $json.sendKo(context, error.toString())
             if (alias) return $json.sendOk(context, {oid: alias.oid})
             // faut le créer
             const data = {}
@@ -577,8 +573,8 @@ module.exports = function (component) {
             data.auteurs = [pid]
             alias = EntityRessource.create(data)
             alias.store(function (error, ressAlias) {
-              if (error) return $json.sendError(context, error)
-              if (!ressAlias || !ressAlias.oid) return $json.sendError(context, new Error('L’enregistrement de l’alias a échoué'))
+              if (error) return $json.sendKo(context, error)
+              if (!ressAlias || !ressAlias.oid) return $json.sendKo(context, new Error('L’enregistrement de l’alias a échoué'))
               $json.sendOk(context, {oid: ressAlias.oid})
             })
           })
@@ -635,7 +631,7 @@ module.exports = function (component) {
         // le context.json de lassi filtre les propriétés $ au 1er niveau, on ajoute un niveau (ici la propriété clone)…
         $json.send(context, null, {clone: refAlias})
       }).catch(function (error) {
-        $json.sendError(context, error.toString())
+        $json.sendKo(context, error.toString())
       })
     })
 
@@ -706,47 +702,6 @@ module.exports = function (component) {
     })
 
     /**
-     * Une route pour mathgraph qui répond en plain/text
-     * @route POST /api/action/mathgraph/:token
-     */
-    controller.post('action/mathgraph/:token', function (context) {
-      function sendError (error) {
-        // si on passe une string, c'est juste une info pour le client mg32 desktop
-        if (typeof error === 'string') return context.plain(`Erreur : ${error}`)
-        if (error.stack) log.error(error)
-        context.status = 500
-        context.plain('Erreur : ' + error.toString())
-      }
-
-      $ressourceRepository.getDeferred(context.arguments.token, function (error, data) {
-        if (error) return sendError(error)
-        if (!data) {
-          context.status = 404
-          return sendError('jeton invalide ou périmé')
-        }
-        if (data.action !== 'saveRessource' || !data.oid) return sendError(new Error('jeton valide mais données impossibles à traiter'))
-        // on peut traiter
-        $ressourceRepository.load(data.oid, function (error, ressource) {
-          if (error) return sendError(error)
-          if (!ressource) {
-            context.status = 404
-            return sendError(`la ressource d’identifiant ${data.oid} n’existe pas (ou plus)`)
-          }
-          if (ressource.type !== 'mathgraph') return sendError(`cette ressource n’est pas de type mathgraph (${ressource.type})`)
-          if (!context.post.base64) return sendError('impossible de trouver une figure dans les données envoyées')
-          // on ne vérifie pas les droits, on l'a fait à la mise en cache, et ici on a probablement pas de session
-          log.debug(`la ressource ${data.oid} avait la figure\n${ressource.parametres.figure}\nque l’on remplace par\n${context.post.base64}`)
-          ressource.parametres.figure = context.post.base64
-          $ressourceRepository.save(ressource, function (error, ressource) {
-            if (error) sendError(error)
-            else if (ressource) context.plain('La figure de la ressource ' + data.oid + ' a bien été mise à jour')
-            else sendError(new Error('Le save de la ressource ' + data.oid + ' ne remonte ni erreur ni ressource'))
-          })
-        })
-      })
-    })
-
-    /**
      * Forward un post vers un sesalab (au unload on ne peut pas poster en crossdomain,
      * on le fait en synchrone ici qui fera suivre)
      * @Route POST /api/deferPost
@@ -784,7 +739,7 @@ module.exports = function (component) {
         form: context.post
       }
       request.post(postOptions, function (error, response, body) {
-        if (error) return $json.sendError(error)
+        if (error) return $json.sendKo(error)
         log.debug('deferPost, après envoi vers ' + postOptions.url + ' de ', postOptions.form)
         log.debug('on récupère la réponse', response)
         log.debug('on récupère et le body', body)
@@ -848,7 +803,7 @@ module.exports = function (component) {
      */
     controller.get('autocomplete/:pattern', function (context) {
       const {pattern} = context.arguments
-      if (pattern.length < 2) return $json.sendError(context, 'Il faut au moins deux caractères')
+      if (pattern.length < 2) return $json.sendKo(context, 'Il faut au moins deux caractères')
       const filters = $ressourceAutocomplete.getFilters(context.arguments.pattern)
       // ça change très rarement, pas grave si faut attendre 3j pour qu'une modif de valeur
       // d'un champ contrôlé soit reflétée sur l'autocomplete
@@ -902,12 +857,12 @@ module.exports = function (component) {
         const debut = id.substr(0, slashPos)
         if (debut === myBaseId) id = id.substr(slashPos + 1)
         $ressourceRepository.load(id, function (error, ressource) {
-          if (error) $json.sendError(context, error.toString())
+          if (error) $json.Ko(context, error)
           else if (ressource) $json.sendOk(context, {rid: ressource.rid})
-          else $json.sendOk(context, {rid: null, error: 'pas de ressource ' + id})
+          else $json.sendKo(context, `cette ressource (${id}) n’existe pas`)
         })
       } else {
-        $json.sendError(context, 'id manquant')
+        $json.sendKo(context, 'id manquant')
       }
     })
 
@@ -973,17 +928,16 @@ module.exports = function (component) {
         .seq(function (ressource) {
           if (!ressource) return $json.notFound(context, `La ressource n'existe pas`)
           if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context, 'Vous n’avez pas de droits suffisants pour dupliquer cette ressource')
-          if (!ressource.aliasOf) return $json.sendError(context, 'Cette ressource n’est pas un alias')
+          if (!ressource.aliasOf) return $json.sendKo(context, 'Cette ressource n’est pas un alias')
 
           $ressourceConverter.forkAlias(myPid, ressource, (error, forkedRessource) => {
-            if (error) return $json.sendError(context, error)
+            if (error) return $json.sendKo(context, error)
             if (!forkedRessource) throw new Error('Une erreur s’est produite pendant la duplication de cet alias (forkAlias ne remonte ni erreur ni ressource')
             sendRessource(context, null, forkedRessource)
           })
         })
         .catch(function (error) {
-          log.error(error)
-          $json.sendError(context, error)
+          $json.sendKo(context, error)
         })
     })
 

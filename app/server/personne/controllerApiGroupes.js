@@ -71,7 +71,7 @@ module.exports = function (component) {
         $json.sendOk(context, {groupesAdmin: groupesAdmin})
       }).catch(function (error) {
         console.error(error)
-        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        $json.sendKo(context, 'Une erreur est survenue dans la récupération des groupes')
       })
     })
     controller.options('admin', optionsOk)
@@ -103,7 +103,7 @@ module.exports = function (component) {
         $json.sendOk(context, {groupesMembre: groupesMembre})
       }).catch(function (error) {
         console.error(error)
-        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        $json.sendKo(context, 'Une erreur est survenue dans la récupération des groupes')
       })
     })
     controller.options('membre', optionsOk)
@@ -160,7 +160,7 @@ module.exports = function (component) {
         addGestionnairesNames(context, groupe, this)
       }).seq(function () {
         $json.sendOk(context, response)
-      }).catch($json.sendError.bind(null, context))
+      }).catch($json.sendKo.bind(null, context))
     })
     controller.options('perso', optionsOk)
 
@@ -199,7 +199,7 @@ module.exports = function (component) {
         $json.sendOk(context, {groupesSuivis: groupesSuivis})
       }).catch(function (error) {
         console.error(error)
-        $json.sendError(context, 'Une erreur est survenue dans la récupération des groupes')
+        $json.sendKo(context, 'Une erreur est survenue dans la récupération des groupes')
       })
     })
     controller.options('suivis', optionsOk)
@@ -219,7 +219,7 @@ module.exports = function (component) {
           $json.sendOk(context, {groupes: groupesOuverts})
         }).catch(function (error) {
           console.error(error)
-          $json.sendError(context, 'Une erreur est survenue lors de la récupération des groupes ouverts')
+          $json.sendKo(context, 'Une erreur est survenue lors de la récupération des groupes ouverts')
         })
       } else {
         $json.denied(context, "Il faut s'authentifier avant pour récupérer les groupes ouverts")
@@ -242,7 +242,7 @@ module.exports = function (component) {
           $json.sendOk(context, {groupes: groupesPublics})
         }).catch(function (error) {
           console.error(error)
-          $json.sendError(context, 'Une erreur est survenue lors de la récupération des groupes publics')
+          $json.sendKo(context, 'Une erreur est survenue lors de la récupération des groupes publics')
         })
       } else {
         $json.denied(context, "Il faut s'authentifier avant pour récupérer les groupes ouverts")
