@@ -104,7 +104,11 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
       </div>
       <ul className="tags">
         {Object.keys(query).map(key => (
-          <li key={key}><span className="tag--info">{labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}</span></li>
+          <li key={key}>
+            <span className="tag--info">
+              {labels[key]} : {Array.isArray(query[key]) ? query[key].join(', ') : query[key]}
+            </span>
+          </li>
         ))}
       </ul>
     </div>
