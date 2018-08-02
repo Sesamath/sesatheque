@@ -1,4 +1,5 @@
-FROM node:8.11
+# cf https://github.com/docker-library/official-images/blob/master/library/node
+FROM node:10
 
 RUN git clone https://framagit.org/Sesamath/sesalab.git
 
