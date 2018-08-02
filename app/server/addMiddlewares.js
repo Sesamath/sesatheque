@@ -235,7 +235,7 @@ function afterSession (rail) {
       response.perf = {
         // message stocké en context qui sera écrit dans le listener beforeTransport
         msg: request.method + ' ' + request.originalUrl,
-        start: log.getElapsed(0)
+        start: Date.now()
       }
       // on est après body-parser (-2 pour le {} ajouté au stringify)
       // if (request.body) response.perf.msg += '\treceived: ' +(tools.stringify(request.body).length -2)

@@ -1,3 +1,4 @@
+import {NavLink} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import SearchForm from './SearchForm'
@@ -27,6 +28,7 @@ const ResourceSearch = (props) => {
   return (
     <Fragment>
       <h1>{title}</h1>
+      <div className="alert--warning"><i className="fa fa-exclamation-circle"></i> Vous pouvez aussi essayer la recherche assistée <NavLink to="/autocomplete">depuis cette page</NavLink></div>
       <SearchForm
         isOpen={isFormOpen}
         query={query}

@@ -75,13 +75,13 @@ function Groupe (initObj) {
    */
   this.gestionnaires = initObj.gestionnaires || []
   /**
-   * @name creationDate
+   * @name dateCreation
    * @type {Date}
    * @default undefined
    */
-  if (initObj.creationDate) {
-    if (typeof initObj.creationDate === 'string') this.creationDate = new Date(initObj.creationDate)
-    else if (initObj.creationDate instanceof Date) this.creationDate = initObj.creationDate
+  if (initObj.dateCreation) {
+    if (typeof initObj.dateCreation === 'string') this.dateCreation = new Date(initObj.dateCreation)
+    else if (initObj.dateCreation instanceof Date) this.dateCreation = initObj.dateCreation
   } // sinon, sera ajouté à l'écriture en Bdd
 }
 

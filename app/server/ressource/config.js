@@ -131,9 +131,9 @@ const configRessource = {
     },
     restriction: {
       0: 'aucune',
-      1: 'corrigé',
-      2: 'groupe',
-      3: 'privé'
+      1: 'professeur',
+      2: 'groupe(s)',
+      3: 'auteur(s)'
     }
   },
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
@@ -287,7 +287,6 @@ const configRessource = {
     dateMiseAJour: 'Date de mise à jour',
     version: 'Version',
     indexable: 'Indexable',
-    archiveOid: 'Version précédente',
     // facultatifs
     enfants: 'Enfants' // utilisé seulement pour les arbres (à la place de parametres)
   },
@@ -329,7 +328,6 @@ const configRessource = {
     dateMiseAJour: 'Date',
     version: 'Number',
     indexable: 'Boolean',
-    archiveOid: 'Number',
     // facultatifs
     enfants: 'Array'
   },

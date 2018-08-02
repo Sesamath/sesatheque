@@ -55,27 +55,33 @@ describe('controller api ressource', () => {
   let _superTestClient
   let $settings
   // nos helpers
-  let h
-  let catcher
   let checkDb
+  let checkHttp
   let cleanVolatileProperties
+  let getTestRessources
+  let purgeOnError
 
   // boot + récup des services et config nécessaires à nos tests
-  before(() => boot().then(({superTestClient, lassi}) => {
-    if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
-    if (!lassi) return Promise.reject(new Error('boot KO lassi'))
-    _superTestClient = superTestClient
-    $settings = lassi.service('$settings')
-    const apiToken = $settings.get('apiTokens')[0]
-    if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
-    apiTokenEncoded = encodeURIComponent(apiToken)
-    h = helpersFactory(lassi, superTestClient)
-    cleanVolatileProperties = h.cleanVolatileProperties
-    checkDb = h.checkDb
-    catcher = h.catcher
-    // on démarre sur une base vide
-    return purge()
-  }))
+  before(function () {
+    this.timeout(10000)
+    return boot().then(({superTestClient, lassi}) => {
+      if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
+      if (!lassi) return Promise.reject(new Error('boot KO lassi'))
+      _superTestClient = superTestClient
+      $settings = lassi.service('$settings')
+      const apiToken = $settings.get('apiTokens')[0]
+      if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
+      apiTokenEncoded = encodeURIComponent(apiToken)
+      const h = helpersFactory(lassi, superTestClient)
+      checkDb = h.checkDb
+      checkHttp = h.checkHttp
+      cleanVolatileProperties = h.cleanVolatileProperties
+      getTestRessources = h.getTestRessources
+      purgeOnError = h.purgeOnError
+      // on démarre sur une base vide
+      return purge()
+    })
+  })
 
   it('POST enregistre une ressource et retourne son oid', function () {
     const getPostPromise = (ressource) => _superTestClient
@@ -85,32 +91,27 @@ describe('controller api ressource', () => {
       .send(ressource)
       .expect(200)
       .then(res => {
-        try {
-          const result = res.body
-          // console.log(`après post de ${ressource.oid} ${ressource.rid} on récupère`, result)
-          // expect(result).to.have.property('success', true, 'pas de success')
-          expect(result).not.to.have.property('error')
-          expect(result).to.have.property('oid')
-          const {oid} = result
-          expect(result).to.deep.equal({oid}, 'pb sur le body retourné')
-          ressource.oid = oid
-          ressource.rid = `${myBaseId}/${oid}`
-          cleanVolatileProperties(ressource)
-          // la ressource n'existait pas donc le inc doit être incrémenté, la version aussi
-          // ressource.inc++
-          delete ressource.inc
-          delete ressource.version
-          return checkDb(ressource)
-        } catch (error) {
-          return Promise.reject(error)
-        }
-      }).catch(catcher)
+        const result = res.body
+        if (result.error) console.error(result.error)
+        expect(result).not.to.have.property('error')
+        expect(result).to.have.property('oid')
+        const {oid} = result
+        expect(result).to.deep.equal({oid}, 'pb sur le body retourné')
+        ressource.oid = oid
+        ressource.rid = `${myBaseId}/${oid}`
+        cleanVolatileProperties(ressource)
+        // la ressource n'existait pas donc le inc doit être incrémenté, la version aussi
+        // ressource.inc++
+        delete ressource.inc
+        delete ressource.version
+        return checkDb(ressource)
+      })
 
+    // purge puis poste et vérifie puis purge
     return purge()
-      .then(() => {
-        Promise.all(h.getTestRessources().map(getPostPromise))
-      }).then(purge)
-      .catch(catcher)
+      .then(() => Promise.all(getTestRessources().map(getPostPromise)))
+      .catch(purgeOnError)
+      .then(purge)
   })
 
   it('POST /api/ressource met à jour une ressource et incrémente inc si modif du résumé', function () {
@@ -128,13 +129,15 @@ describe('controller api ressource', () => {
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
-        .then(() => checkDb(ressource))
-        .catch(catcher)
+        .then(({body}) => {
+          if (body.error) return Promise.reject(Error(body.error))
+          checkDb(ressource)
+        })
     }
     return populate({ressources: 10, personnes: 6})
       .then(() => Promise.all(getRessources().map(checkOne)))
+      .catch(purgeOnError)
       .then(purge)
-      .catch(catcher)
   })
 
   it('POST /api/ressource met à jour une ressource et incrémente version et inc si modif des auteurs', () => {
@@ -142,12 +145,12 @@ describe('controller api ressource', () => {
       const {oid} = ressource
       cleanVolatileProperties(ressource)
       // on ajoute un auteur
-      const existingPids = ressource.auteurs.concat(ressource.contributeurs)
-      ressource.auteurs.push(getRandomPersonne(true, existingPids))
+      const excludedPids = ressource.auteurs.concat(ressource.contributeurs)
+      ressource.auteurs.push(getRandomPersonne(true, excludedPids))
+      // on incrémente version et inc
       ressource.inc++
       ressource.version++
-      // on vire ça des propriétés à vérifier car ça va changer
-      delete ressource.archiveOid
+      // mais on ne poste que oid & auteurs
       const postData = {
         oid,
         auteurs: ressource.auteurs
@@ -157,13 +160,15 @@ describe('controller api ressource', () => {
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
-        .then(() => checkDb(ressource))
-        .catch(catcher)
+        .then(({body}) => {
+          if (body.error) return Promise.reject(Error(body.error))
+          checkDb(ressource)
+        })
     }
     return populate({ressources: 10, personnes: 6})
       .then(() => Promise.all(getRessources().map(checkOne)))
+      .catch(purgeOnError)
       .then(purge)
-      .catch(catcher)
   })
 
   it('POST /api/ressource met à jour une ressource sans incrément si modif relations seulement', function () {
@@ -182,12 +187,11 @@ describe('controller api ressource', () => {
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
         .then(() => checkDb(ressource))
-        .catch(catcher)
     }
     return populate({ressources: 10, personnes: 6})
       .then(() => Promise.all(getRessources().map(checkOne)))
+      .catch(purgeOnError)
       .then(purge)
-      .catch(catcher)
   })
 
   it('DELETE prend un 403 si on veut effacer sans token', function () {
@@ -206,6 +210,7 @@ describe('controller api ressource', () => {
         expect(Object.keys(result)).to.have.lengthOf(2, 'Pb sur le nb de propriétés de result')
         return Promise.resolve()
       })
+      .catch(purgeOnError)
       .then(purge)
   })
 
@@ -227,20 +232,21 @@ describe('controller api ressource', () => {
         expect(Object.keys(result)).to.have.lengthOf(2, 'Pb sur le nb de propriétés de result')
         return Promise.resolve()
       })
+      .catch(purgeOnError)
       .then(purge)
-      .catch(catcher)
   })
 
   describe('GET /api/ressource/… sur ressource publique', () => {
     let ressources
-    const getGlobalPromise = (urlConstructor) => Promise.all(ressources.map(r => h.checkHttp(urlConstructor(r), r)))
+    const getGlobalPromise = (urlConstructor) => Promise.all(ressources.map(r => checkHttp(urlConstructor(r), r)))
 
     before(() => purge()
       .then(() => populate({ressources: 6, personnes: 6}))
       .then(() => {
         ressources = getRessources().map(cleanVolatileProperties)
         return Promise.resolve()
-      }).catch(catcher)
+      })
+      .catch(purgeOnError)
     )
 
     after(purge)

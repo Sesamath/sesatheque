@@ -6,6 +6,7 @@ import {Provider} from 'react-redux'
 import {Route, Switch} from 'react-router-dom'
 import {withContext, lifecycle} from 'recompose'
 import Account from './components/Account'
+import AutocompleteForm from './components/AutocompleteForm'
 import Header from './components/Header'
 import Home from './components/Home'
 import Footer from './components/Footer'
@@ -48,6 +49,7 @@ const App = () => (
           <Notifications />
           <Switch>
             <Route exact path="/" component={Home} />
+            <Route exact path="/autocomplete" component={AutocompleteForm} />
             <Route exact path="/compte" component={Account} />
             <Route exact path="/mentionsLegales" component={MentionsLegales} />
             <Route exact path="/ressource/ajouter" component={ResourceCreate} />

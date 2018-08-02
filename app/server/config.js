@@ -261,7 +261,6 @@ if (isTestEnv) {
   staging = 'dev'
 }
 config.application.staging = staging
-log(`staging : ${staging}`)
 
 // pour bugsnag (il faudra mettre apiKey en private sinon il sera pas instancié
 if (config.bugsnag && config.bugsnag.apiKey) {
@@ -326,7 +325,6 @@ if (config.sesatheques.length) {
     // - avec cette baseUrl ça renvoie false mais ne gêne pas
     // - avec une autre baseUrl ça throw
     config.sesatheques.forEach(({baseId, baseUrl}) => addSesatheque(baseId, baseUrl))
-    log(`Sésathèques OK (${config.sesatheques.map(({baseId, baseUrl}) => `${baseId} : ${baseUrl}`).join(', ')})`)
   }
 }
 
