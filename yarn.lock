@@ -7362,7 +7362,7 @@ serve-static@1.13.2, serve-static@^1.13.1:
 
 "sesatheque-client@git+https://framagit.org/Sesamath/sesatheque-client.git#1.2.54":
   version "1.2.54"
-  resolved "git+https://framagit.org/Sesamath/sesatheque-client.git#e4396a8a3d63ac344168bd09ffae173273d5a285"
+  resolved "git+https://framagit.org/Sesamath/sesatheque-client.git#391f734b45224067d1924aed62609697979cab61"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"

@@ -73,9 +73,12 @@ module.exports = function (component) {
     // @todo après l'update 37 passé partout, virer ce beforeStore et décommenter la génération de l'oid dans le constructeur
     EntityArchive.beforeStore(function (next) {
       // y'a eu un moment avec des enfants qui se sont retrouvés null…
-      if (this.enfants) this.enfants = this.enfants.filter(e => e)
+      if (this.enfants) {
+        if (this.type === 'arbre') this.enfants = this.enfants.filter(e => e)
+        else delete this.enfants
+      }
       // idem pour ça
-      // if (!this.parametres || Array.isArray(this.parametres)) this.parametres = {}
+      if (!this.parametres || Array.isArray(this.parametres)) this.parametres = {}
 
       const ressourceOid = this.rid.substr(this.rid.indexOf('/') + 1)
       const archiveOid = ressourceOid + '-' + this.version

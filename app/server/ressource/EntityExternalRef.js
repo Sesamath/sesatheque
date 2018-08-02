@@ -47,26 +47,38 @@ module.exports = function entityExternalRefFactory (component) {
     EntityExternalRef.construct(function (data) {
       if (!data || !data.baseId || !data.rid) throw Error('Il faut passer au moins baseId et rid pour créer une EntityExternalRef')
       const {baseId, rid} = data
-      if (getBaseIdFromRid(rid) !== myBaseId) throw Error(`Cette EntityExternalRef ne doit pas être gérée ici (${myBaseId}, alors que rid vaut ${this.rid}`)
-      if (!exists(baseId)) throw Error(`${this.baseId} inconnue`)
-      if (!sesatheques.some(s => s.baseId === this.baseId)) throw Error(`${this.baseId} n’est pas déclaré en config, impossible de mettre un listener ici pour la prévenir en cas de modif sur ${this.rid}`)
+      if (getBaseIdFromRid(rid) !== myBaseId) throw Error(`Cette EntityExternalRef ne doit pas être gérée ici (${myBaseId}, alors que rid vaut ${rid}`)
+      if (!exists(baseId)) throw Error(`${baseId} inconnue`)
+      if (!sesatheques.some(s => s.baseId === baseId)) throw Error(`${baseId} n’est pas déclaré en config, impossible de mettre un listener ici pour la prévenir en cas de modif de ${rid}  ${JSON.stringify(data)}`)
       /**
        * Oid de ce "listener", concaténation de baseId et rid (avec séparateur -), permet d'imposer l'unicité baseId/rid
        * en attendant que lassi gère des index unique combinés
        * @type {string}
        */
-      this.oid = `${baseId}-${rid.replace('/', '-')}`
+      // @todo après passage de l'update 37 partout, décommenter cette ligne et virer la suivante (ainsi que le beforeStore)
+      // this.oid = `${baseId}-${rid.replace('/', '-')}`
+      if (data.oid) this.oid = data.oid
+
       /**
        * baseId de la sésathèque qui veut être prévenue lors d'une modif du rid ici
        * @type {string}
        */
       this.baseId = baseId
+
       /**
        * rid de la ressource à surveiller ici
+       * (l'oid suffirait, mais on tient à ce que ceux qui nous causent passent le rid complet
+       * pour vérifier qu'on est bien la sésathèque qu'ils croient, et faudra leur renvoyer
+       * donc conserver le rid évite de déstructurer au stockage et restructurer à l'envoi de l'info)
        * @type {string}
        */
       this.rid = rid
-      if (!data.dateCreation) this.dateCreation = new Date()
+
+      if (data.dateCreation) {
+        this.dateCreation = typeof data.dateCreation === 'string' ? new Date(data.dateCreation) : data.dateCreation
+      } else {
+        this.dateCreation = new Date()
+      }
     })
 
     EntityExternalRef.validateJsonSchema({
@@ -84,5 +96,21 @@ module.exports = function entityExternalRefFactory (component) {
     EntityExternalRef
       .defineIndex('baseId')
       .defineIndex('rid')
+
+    // @todo après l'update 37 passé partout, virer ce beforeStore et décommenter la génération de l'oid dans le constructeur
+    EntityExternalRef.beforeStore(function (next) {
+      const expectedOid = `${this.baseId}-${this.rid.replace('/', '-')}`
+      const self = this
+      if (self.oid !== expectedOid) {
+        // faut virer cet entity avant d'appeler next qui va la recréer avec le bon oid
+        self.delete((error) => {
+          if (error) return next(error)
+          self.oid = expectedOid
+          next()
+        })
+      } else {
+        next()
+      }
+    })
   })
 }
