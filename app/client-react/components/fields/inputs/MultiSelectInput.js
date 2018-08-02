@@ -40,7 +40,11 @@ MultiSelectInput.propTypes = {
   multi: PropTypes.bool,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.node,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.bool
+    ]),
     label: PropTypes.string
   })),
   disabled: PropTypes.bool,

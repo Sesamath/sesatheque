@@ -21,24 +21,16 @@ const anyOption = {
 const langue = [anyOption, ...listes.langue]
 const type = [anyOption, ...listes.type]
 
+const publieSelectOptions = [
+  anyOption,
+  {value: true, label: 'oui'},
+  {value: false, label: 'non'}
+]
+
 const SearchForm = ({handleSubmit, isOpen, query}) => {
   if (isOpen) {
-    const restrictionOptions = [...listes.restriction]
-    let widgetPublie
     // faire une recherche sur un auteur ou un groupe est le seul cas où on peut ne pas préciser publie et restriction
-    if (query && (query.auteurs || query.groupes)) {
-      // on ajoute l'option any à restriction
-      restrictionOptions.unshift(anyOption)
-      // et on transforme le switch publié en select (pour SelectField value doit être une string, ou un ReactNode, mais pas un booléen)
-      const publieOptions = [
-        anyOption,
-        {value: 'true', label: 'oui'},
-        {value: 'false', label: 'non'}
-      ]
-      widgetPublie = (<SelectField label={labels.publie} options={publieOptions} name="publie"/>)
-    } else {
-      widgetPublie = (<SwitchField className="center" label={labels.publie} name="publie"/>)
-    }
+    const allowAnyOption = query && (query.auteurs || query.groupes)
 
     return (
       <form onSubmit={handleSubmit}>
@@ -61,9 +53,24 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
             />
             <SelectField
               label={labels.restriction}
-              options={restrictionOptions}
+              options={allowAnyOption ? [
+                anyOption,
+                ...listes.restriction
+              ] : listes.restriction}
               name="restriction"/>
-            {widgetPublie}
+            {allowAnyOption ? (
+              <SelectField
+                label={labels.publie}
+                options={publieSelectOptions}
+                name="publie"
+              />
+            ) : (
+              <SwitchField
+                className="center"
+                label={labels.publie}
+                name="publie"
+              />
+            )}
 
             <InputField
               label={labels.oid}

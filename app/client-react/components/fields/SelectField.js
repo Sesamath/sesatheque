@@ -28,7 +28,11 @@ SelectField.propTypes = {
   multi: PropTypes.bool,
   name: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.node,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.bool
+    ]),
     label: PropTypes.string
   })),
   placeholder: PropTypes.string
