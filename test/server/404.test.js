@@ -57,8 +57,10 @@ describe('prend un 404 sur les urls inexistantes', function () {
     it(`404 sur ${path}`, () =>
       _superTestClient
         .get(path)
-        .expect(404, /Cette page ou ce fichier n’existe pas/)
-        .expect('Content-Type', /text\/plain/)
+        .expect(404)
+        .expect('Content-Type', /text\/html/)
+        // .expect(404, /Cette page ou ce fichier n’existe pas/)
+        // .expect('Content-Type', /text\/plain/)
     )
   })
   paths.forEach(path => {

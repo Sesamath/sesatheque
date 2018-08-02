@@ -69,6 +69,7 @@ services:
       - ./tasks:/sesatheque/tasks
       - ./test:/sesatheque/test
       - ./webpack.config.js:/sesatheque/webpack.config.js
+      - ./webpack.config-test.js:/sesatheque/webpack.config-test.js
       - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
       - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
       - ./yarn.lock:/sesatheque/yarn.lock

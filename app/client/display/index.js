@@ -49,6 +49,7 @@ const consoleErrorSpy = require('../page/consoleErrorSpy')
 const errorCatcher = require('../page/errorCatcher')
 const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
+const {displays} = require('plugins')
 
 const wd = window.document
 
@@ -217,8 +218,8 @@ function load (ressource, options, next) {
 
   // le display du plugin
   const pluginName = ressource.type
-  const pluginDisplay = require('../plugins/' + pluginName + '/display')
-  if (!pluginDisplay) throw new Error("L'affichage des ressources de type ' + pluginName + ' n'est pas encore implémenté")
+  const pluginDisplay = displays[pluginName]
+  if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
 
   try {
     if (options.container) dom.empty(options.container)

@@ -6,6 +6,8 @@ import resourceLoader from '../hoc/resourceLoader'
 import NavMenu from './NavMenu'
 import {formats, listes, labels} from '../../server/ressource/config'
 import {baseId} from '../../server/config'
+import {getRestrictionString} from '../utils/labels'
+
 import './Description.scss'
 
 const {jour: dateFormat} = formats
@@ -62,31 +64,6 @@ export const Description = ({
   }
 }) => {
   // on précalcule quelques flags & labels pour la lisibilité
-  const hasGroupes = groupes && groupes.length
-
-  // la restriction
-  let restrictionString
-  if (restriction) {
-    restrictionString = `${labels.restriction}&nbsp;:&nbsp;`
-    switch (restriction) {
-      case 1:
-        restrictionString += 'professeur'
-        break
-      case 2:
-        if (hasGroupes) {
-          restrictionString += `groupe${groupes.length > 1 ? 's' : ''} ${groupes.join(', ')}`
-        } else {
-          restrictionString += 'ERREUR (restriction à un groupe sans préciser lequel)'
-        }
-        break
-      case 3:
-        restrictionString += 'auteur'
-        break
-      default: restrictionString += 'inconnue'
-    }
-  } else {
-    restrictionString = 'Public'
-  }
 
   // origine/idOrigine si y'a
   const externalId = (origine !== baseId && idOrigine) ? (<i> ({origine}/{idOrigine})</i>) : null
@@ -109,7 +86,7 @@ export const Description = ({
       />
       <div className="block ressource">
         <span className="btn fr tag">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
-        <span className="btn fr tag">{restrictionString}</span>
+        <span className="btn fr tag">{labels.restriction}&nbsp;:&nbsp;{getRestrictionString({restriction, groupes})}</span>
 
         <section className="grid-5 has-gutter">
           <div className="txtright">{labels.oid}&nbsp;:</div>

@@ -47,13 +47,14 @@ module.exports = {
     const $groupeRepository = lassi.service('$groupeRepository')
     const $ressourceRepository = lassi.service('$ressourceRepository')
     // on utilise le cli de lassi pour reindexAll
-    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    const $entitiesCli = require('lassi/source/services/entities-cli')
     const reindexAll = $entitiesCli().commands().reindexAll
 
     let nbDoublonsPid = 0
     let nbDoublonsRid = 0
     let nbEmptyRid = 0
     let nbDoublonsCle = 0
+
     flow().seq(function () {
       EntityPersonne.getCollection().aggregate([
         {
@@ -124,13 +125,6 @@ module.exports = {
       ressource.rid = `${baseId}/${ressource.oid}`
       $ressourceRepository.save(ressource, this)
     }).seq(function () {
-      // rid null, devrait pas y en avoir mais…
-      EntityRessource.match('rid').isNull().grab(this)
-    }).seqEach(function (ressource) {
-      nbEmptyRid++
-      ressource.rid = `${baseId}/${ressource.oid}`
-      $ressourceRepository.save(ressource, this)
-    }).seq(function () {
       if (nbEmptyRid) updateLog(`${nbEmptyRid} rid vides corrigés`)
       else updateLog('Il n’y avait aucun rid vide')
 
@@ -180,6 +174,17 @@ module.exports = {
     }).seq(function () {
       if (nbDoublonsCle) updateLog(`${nbDoublonsCle} doublons de clé modifiés`)
       else updateLog('Il n’y avait aucune cle en doublon')
+
+      // et on a aussi des titres vides !
+      const onEachEmptyTitle = (ressource, next) => {
+        console.log(ressource.oid)
+        ressource.titre = 'Sans titre'
+        $ressourceRepository.save(ressource, next)
+      }
+      EntityRessource.match('titre').in(['', 'undefined', 'null', null]).forEachEntity(onEachEmptyTitle, this)
+    }).seq(function (nbSsTitre) {
+      if (nbSsTitre) updateLog(`${nbSsTitre} ressource(s) sans titre (=> « Sans titre »)`)
+      else updateLog('Il n’y avait aucune ressource sans titre')
 
       updateLog('Réindexation de toute les entities')
       this(null, ['EntityArchive', 'EntityExternalRef', 'EntityGroupe', 'EntityPersonne', 'EntityRessource', 'EntityUpdate'])

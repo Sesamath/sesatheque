@@ -54,7 +54,7 @@ module.exports = function ($accessControl) {
     const wantedQuery = context.get
 
     if (wantedQuery.skip) {
-      queryOptions.skip = Math.min(0, Math.round(wantedQuery.skip) || 0)
+      queryOptions.skip = Math.max(0, Math.round(wantedQuery.skip) || 0)
     }
 
     if (wantedQuery.limit) {

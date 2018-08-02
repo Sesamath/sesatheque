@@ -33,6 +33,7 @@
 
 const Groupe = require('../../constructors/Groupe')
 const {getNormalizedName} = require('../lib/normalize')
+const {uniq} = require('lodash')
 
 module.exports = function (component) {
   component.entity('EntityGroupe', function ($cacheGroupe) {
@@ -48,9 +49,10 @@ module.exports = function (component) {
         public: {type: 'boolean'},
         gestionnaires: {
           type: 'array',
-          items: {type: 'string'}
+          items: {type: 'string'},
+          uniqueItems: true
         },
-        creationDate: {instanceof: 'Date'}
+        dateCreation: {instanceof: 'Date'}
       },
       additionalProperties: false,
       required: [
@@ -72,8 +74,11 @@ module.exports = function (component) {
     })
 
     EntityGroupe.beforeStore(function (next) {
-      if (!this.creationDate) this.creationDate = new Date()
+      if (!this.dateCreation) this.dateCreation = new Date()
       if (!this.gestionnaires || !this.gestionnaires.length) return next(new Error(`Impossible de sauvegarder un groupe sans gestionnaires (${this.nom})`))
+      // _.uniq plus rapide que Array.from(new Set(initialArray))
+      // https://jsperf.com/lodash-uniq-vs-set-vs-jquery-uniquesort
+      if (this.gestionnaires.length > 1) this.gestionnaires = uniq(this.gestionnaires)
       next()
     })
 
@@ -90,6 +95,6 @@ module.exports = function (component) {
       .defineIndex('nom', {normalizer: getNormalizedName, unique: true})
       .defineIndex('ouvert', 'boolean')
       .defineIndex('public', 'boolean')
-      .defineIndex('gestionnaires', 'string')
+      .defineIndex('gestionnaires')
   })
 }

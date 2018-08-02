@@ -28,12 +28,14 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
+
 const lassi = require('lassi')
 const config = require('./config')
 const log = require('./lib/log.js')
 const {merge} = require('sesajstools/utils/object')
+
+const {application: {name: appName, staging}} = config
 
 let lassiInstance
 
@@ -66,13 +68,14 @@ function boot (beforeBootstrapCb, options, afterBootCb) {
     // lassi charge en settings ${options.root}/config
     merge(lassiInstance.settings, options.config)
   }
-  const confApp = config.application
-  log(`Démarrage de l’application ${confApp.name} avec l'environnement ${confApp.staging}`)
 
   // notre fct de log en global
   global.log = log
-  // et ce flag bien pratique aussi
-  global.isProd = !options.cli && confApp.staging === 'prod'
+  // et ce flag pratique
+  global.isProd = /prod/.test(staging)
+  /* global isProd */
+  if (isProd || options.cli || staging === 'test') log.disable()
+  else log(`Démarrage de l’application ${appName} avec l'environnement ${staging}`)
 
   /**
    * Gestion des traces

@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import {saveRessource} from '../actions/ressource'
 
 const mapDispatchToProps = (dispatch) => ({
-  saveRessource: (values) => dispatch(saveRessource(values))
+  saveRessource: (values, success) => dispatch(saveRessource(values, success))
 })
 
 /**

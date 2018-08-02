@@ -38,9 +38,9 @@
 
 'use strict'
 /* eslint-env mocha */
+import faker from 'faker/locale/fr'
 import boot from '../boot'
 import {expect} from 'chai'
-import groupes from '../../fixtures/groupes'
 import {
   createGroupe,
   createPersonne,
@@ -50,152 +50,188 @@ import {
   logout
 } from '../helpers'
 import {purge} from '../populate'
+import groupes from '../../fixtures/groupes'
 import utilisateurs from '../../fixtures/utilisateurs'
-const personne = utilisateurs[0]
+
+const testUser = utilisateurs[0]
+const testGroup = groupes[0]
+
+// attention, cette commande purge en base mais pas dans le cache de l'api
+// const purgeGroupe = () => purgeOne('EntityGroupe')
 
 // services Lassi chargés dans le before
 let agent
-let apiTokenEncoded
-let $settings
 
 describe('API groupe', () => {
+  // let EntityGroupe
+  let $groupeRepository
+
+  /* const checkGroupe = (expected) => new Promise((resolve) => {
+    EntityGroupe.match('nom').equals(expected.nom).grab((error, groups) => {
+      expect(!error).to.be.true
+      expect(groupes).to.have.length(1)
+      const g = groups[0]
+      Object.entries(expected).forEach(([key, value]) => {
+        expect(g[key]).to.deep.equals(value, `Pb avec groupe.${key}`)
+      })
+      resolve()
+    })
+  }) */
+
+  // pour supprimer un groupe dans mongo et le cache de l'api
+  const deleteGroupe = (nom) => new Promise((resolve, reject) => {
+    $groupeRepository.delete(nom, (error) => error ? reject(error) : resolve())
+  })
+
   before(() => boot().then(({superTestAgent, lassi}) => {
     if (!superTestAgent) return Promise.reject(new Error('boot KO supertest non chargé'))
     agent = superTestAgent
-
     if (!lassi) return Promise.reject(new Error('boot KO lassi'))
-    $settings = lassi.service('$settings')
-
-    const apiToken = $settings.get('apiTokens')[0]
-    if (!apiToken) return Promise.reject(new Error('pas trouvé apiTokens en configuration'))
-    apiTokenEncoded = encodeURIComponent(apiToken)
-
+    // EntityGroupe = lassi.service('EntityGroupe')
+    $groupeRepository = lassi.service('$groupeRepository')
     return purge()
   }))
 
-  context('sans avoir de session', () => {
-    it(`empèche la récupération des groupes pour un compte non identifié`, async () => {
-      const response = await agent
-        .get(`/api/groupes/perso`)
-        .set('Content-Type', 'application/json')
+  after(() => purge())
 
-      itBlocksUser(response, `Il faut être authentifié pour récupérer ses groupes`)
+  context('sans avoir de session', () => {
+    it('/api/groupes/perso denied', async () => {
+      const response = await agent.get(`/api/groupes/perso`)
+      itBlocksUser(response, 'Il faut être authentifié pour récupérer ses groupes')
+      return Promise.resolve()
+    })
+
+    it('/api/groupe/ajouter/unNom denied', async () => {
+      const response = await agent.get(`/api/groupe/ajouter/unNom`)
+      itBlocksUser(response, 'Accès refusé')
+      return Promise.resolve()
+    })
+
+    it('POST /api/groupe denied', async () => {
+      const response = await agent
+        .post(`/api/groupe`)
+        .set('Content-Type', 'application/json')
+        .send(testGroup)
+      itBlocksUser(response, 'Vous devez être authentifié pour créer des groupes')
+      return Promise.resolve()
+    })
+
+    it('autorise la récupération par oid', async () => {
+      const groupe = await createGroupe(testGroup)
+      const response = await agent.get(`/api/groupe/${groupe.oid}`)
+      itIsSuccessfull(response, testGroup)
+      return deleteGroupe(testGroup.nom)
     })
   })
 
   context('avec une session', () => {
-    before(async () => {
-      await purge()
-      return createPersonne(personne)
+    beforeEach(async () => {
+      await createPersonne(testUser)
+      return login(agent, testUser)
     })
-    beforeEach(() => login(agent, personne))
-    afterEach(() => logout(agent))
-    after(() => purge())
+    afterEach(async () => {
+      await purge()
+      return logout(agent)
+    })
 
     it(`création d'un groupe`, async () => {
-      // On s'approprie le groupe de fixture
-      const groupeToCreate = groupes[0]
+      const groupeToCreate = testGroup
       delete groupeToCreate.oid // Force une création
-      groupeToCreate.gestionnaires = [personne.oid]
+      delete groupeToCreate.gestionnaires // on veut vérifier que l'api le rajoute
+      const start = Date.now()
 
-      let response = await agent
+      const response = await agent
         .post(`/api/groupe`)
         .send(groupeToCreate)
         .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
 
-      itIsSuccessfull(response)
+      // On doit être dans les gestionnaires
+      groupeToCreate.gestionnaires = [testUser.oid]
+      itIsSuccessfull(response, groupeToCreate)
+      // et on teste aussi oid & dateCreation
       expect(response.body.oid).to.exist
-      expect(response.body.creationDate).to.exist
-      expect(response.body.ouvert).to.equal(groupeToCreate.ouvert)
-      expect(response.body.public).to.equal(groupeToCreate.public)
-      expect(response.body.gestionnaires).to.be.an('array').that.includes(personne.oid)
+      expect(response.body.dateCreation).to.exist
+      const creationTimestamp = (new Date(response.body.dateCreation)).getTime()
+      expect(creationTimestamp > start).to.be.true
+      expect(creationTimestamp < start + 2000).to.be.true
 
-      return response
+      return deleteGroupe(testGroup.nom)
     })
 
     it(`création d'un groupe avec un nom seulement`, async () => {
-      const groupeName = `group-${Math.random()}`
+      const groupeName = faker.lorem.words(3)
+      const encodedName = encodeURIComponent(groupeName)
+      const expected = {
+        nom: groupeName,
+        ouvert: false,
+        public: true,
+        gestionnaires: [testUser.oid]
+      }
 
       // Création
-      let response = await agent
-        .get(`/api/groupe/ajouter/${groupeName}`)
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
+      let response = await agent.get(`/api/groupe/ajouter/${encodedName}`)
       itIsSuccessfull(response)
 
       // Récupération puis vérifications
-      response = await agent
-        .get(`/api/groupe/byNom/${groupeName}`)
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
-
-      itIsSuccessfull(response)
-      expect(response.body.oid).to.exist
-      expect(response.body.nom).to.equal(groupeName)
-      expect(response.body.gestionnaires).to.be.an('array').that.includes(personne.oid)
-      expect(response.body.ouvert).to.equal(false)
-      expect(response.body.public).to.equal(true)
-
-      return response
+      response = await agent.get(`/api/groupe/byNom/${encodedName}`)
+      itIsSuccessfull(response, expected)
+      return deleteGroupe(groupeName)
     })
 
     it(`tente la récupération d'un groupe qui n'existe pas (depuis un oid)`, async () => {
-      let response = await agent
-        .get(`/api/groupe/groupe-qui-existe-pas`)
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
-
+      let response = await agent.get(`/api/groupe/groupe-qui-existe-pas`)
       expect(response.status).to.equal(404)
-      return response
+      return Promise.resolve()
     })
 
     it(`tente la récupération d'un groupe qui existe (depuis un oid)`, async () => {
-      const groupe = await createGroupe(groupes[0], [personne.oid])
-      let response = await agent
-        .get(`/api/groupe/${groupe.oid}`)
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
-
-      expect(response.status).to.equal(200)
-      expect(response.body.oid).to.equal(groupe.oid)
-      expect(response.body.nom).to.equal(groupe.nom)
-
-      return response
+      const groupe = await createGroupe(testGroup)
+      let response = await agent.get(`/api/groupe/${groupe.oid}`)
+      itIsSuccessfull(response, testGroup)
+      return deleteGroupe(testGroup.nom)
     })
 
     it(`tente la récupération d'un groupe qui n'existe pas (depuis un nom)`, async () => {
-      let response = await agent
-        .get(`/api/groupe/byNom/groupe-qui-existe-pas`)
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
-
+      let response = await agent.get(`/api/groupe/byNom/groupe-qui-existe-pas`)
       expect(response.status).to.equal(404)
-      return response
+      return Promise.resolve()
     })
 
     it(`tente la récupération d'un groupe qui existe (depuis un nom)`, async () => {
-      await createGroupe(groupes[0], [personne.oid])
-      let response = await agent
-        .get(`/api/groupe/byNom/${groupes[0].nom}`)
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
-
-      expect(response.status).to.equal(200)
-
-      return response
+      await createGroupe(testGroup)
+      let response = await agent.get(`/api/groupe/byNom/${testGroup.nom}`)
+      itIsSuccessfull(response, testGroup)
+      return deleteGroupe(testGroup.nom)
     })
 
-    it(`récupère les groupes d'un utilisateur`, async () => {
-      let response = await agent
-        .get(`/api/groupes/perso`)
-        .set('Content-Type', 'application/json')
-        .set('X-ApiToken', apiTokenEncoded)
+    it(`/api/groupes/perso répond avec les bonnes propriétés`, async () => {
+      await createGroupe(testGroup)
+      const expectedGroup = {...testGroup, gestionnairesNames: [`${testUser.prenom} ${testUser.nom}`]}
+      const expected = {
+        groupes: {
+          [testGroup.nom]: expectedGroup
+        },
+        groupesAdmin: [testGroup.nom],
+        groupesMembre: [],
+        groupesSuivis: []
+      }
+      const response = await agent.get(`/api/groupes/perso`)
+      itIsSuccessfull(response, expected)
+      return deleteGroupe(testGroup.nom)
+    })
 
-      itIsSuccessfull(response)
-      expect(response.body.groupes).to.be.an('object')
-
-      return response
+    describe('/api/groupes/perso reflète les modifs', () => {
+      // on crée plusieurs groupes en base (ouverts & fermés, avec pour chaque cas
+      // admin|membre|suivi des groupes à nous et d'autres
+      it.skip('retourne nos groupesAdmin')
+      // on appelle l'api pour le quitter
+      it.skip('quit')
+      // puis pour le rejoindre
+      it.skip('join')
+      it.skip('retourne nos groupesMembre')
+      it.skip('follow')
+      it.skip('unfollow')
+      it.skip('retourne nos groupesSuivis')
     })
   })
 })

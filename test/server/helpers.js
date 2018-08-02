@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import {isObjectPlain} from 'sesajstools'
 
 const EntityGroupe = () => lassi.service('EntityGroupe')
 const EntityPersonne = () => lassi.service('EntityPersonne')
@@ -33,8 +34,7 @@ export const logout = (agent) => agent
  */
 export const createPersonne = (personne) => {
   return new Promise((resolve, reject) => {
-    const personneEntity = EntityPersonne().create(personne)
-    personneEntity.store((error, entity) => {
+    EntityPersonne().create(personne).store((error, entity) => {
       if (error) return reject(error)
       resolve(entity)
     })
@@ -48,19 +48,44 @@ export const createPersonne = (personne) => {
  */
 export const createGroupe = (groupe, personneOids) => {
   return new Promise((resolve, reject) => {
+    if (!personneOids) personneOids = []
     groupe.gestionnaires = [...groupe.gestionnaires, ...personneOids]
 
-    const groupeEntity = EntityGroupe().create(groupe)
-    groupeEntity.store((error, entity) => {
+    EntityGroupe().create(groupe).store((error, entity) => {
       if (error) return reject(error)
       resolve(entity)
     })
   })
 }
 
-export const itIsSuccessfull = (response) => {
+/**
+ * Vérifie récursivement que toCheck est identique à expected pour chacune des propriétés de expected
+ * (le test passe si toCheck a des propriétés en plus)
+ * @param expected
+ * @param toCheck
+ * @param path
+ */
+const checkObj = (expected, toCheck, path = '') => {
+  Object.entries(expected).forEach(([k, v]) => {
+    const myPath = `${path}${path ? '.' : ''}${k}`
+    expect(toCheck).to.have.property(k)
+    const toCheckValue = toCheck[k]
+    if (isObjectPlain(v)) checkObj(v, toCheckValue, myPath)
+    else if (Array.isArray(v)) expect(toCheckValue).to.deep.equals(v, `Pb sur la propriété ${myPath}`)
+    else if (v instanceof Date) expect(toCheckValue.toString()).to.equals(v.toString(), `Pb sur la propriété ${myPath}`)
+    else expect(toCheckValue).to.equals(v, `Pb sur la propriété ${myPath}`)
+  })
+}
+
+/**
+ * Vérifie que la réponse est ok (et que son body contient expected si fourni)
+ * @param response
+ * @param {object} [expected]
+ */
+export const itIsSuccessfull = (response, expected) => {
   expect(response.status).to.equal(200)
   expect(response.body.success).to.equal(true, `Expected success: true, got:  ${JSON.stringify(response.body)}`)
+  if (expected) checkObj(expected, response.body)
 }
 
 export const itFails = (response, expectedErrorMessage) => {
@@ -75,8 +100,18 @@ export const itNeedsAuth = (response, expectedErrorMessage) => {
   expect(response.body.error).to.equal(expectedErrorMessage)
 }
 
-export const itBlocksUser = (response, expectedErrorMessage) => {
-  expect(response.status).to.equal(403)
+/**
+ * Vérifie qu'on prend une 403, avec le bon message si fourni
+ * @param response
+ * @param {string|RegExp} [expectedErrorMessage]
+ * @param {number} [status=403]
+ */
+export const itBlocksUser = (response, expectedErrorMessage, status = 403) => {
+  expect(response.status).to.equal(status)
   expect(response.body.success).to.equal(false, `Expected success: false, got:  ${JSON.stringify(response.body)}`)
-  expect(response.body.error).to.equal(expectedErrorMessage)
+  if (typeof expectedErrorMessage === 'string') {
+    expect(response.body.error).to.equal(expectedErrorMessage)
+  } else if (expectedErrorMessage) {
+    expect(response.body.error).to.match(expectedErrorMessage)
+  }
 }

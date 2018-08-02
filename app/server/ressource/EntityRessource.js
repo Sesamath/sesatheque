@@ -42,6 +42,8 @@ const config = require('../config')
 // idem config.component.ressource, mais le require permet une meilleure autocompletion
 const configRessource = require('./config')
 
+const schema = require('./EntityRessource.schema')
+
 const myBaseId = config.application.baseId
 
 module.exports = function (component) {
@@ -69,7 +71,7 @@ module.exports = function (component) {
       }
 
       // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
-      // plus pratique ici que dans le constructeur qui ne peut faire de require
+      // plus pratique ici que dans le constructeur qui ne peut pas faire de require
       if (values) {
         if (values.dateCreation && !(values.dateCreation instanceof Date)) values.dateCreation = tools.toDate(values.dateCreation)
         if (values.dateMiseAJour && !(values.dateMiseAJour instanceof Date)) values.dateMiseAJour = tools.toDate(values.dateMiseAJour)
@@ -89,15 +91,17 @@ module.exports = function (component) {
       }
     })
 
+    EntityRessource.validateJsonSchema(schema)
+
     EntityRessource
-      .defineIndex('rid', 'string')
-      .defineIndex('cle', 'string') // pour loadByCle
-      .defineIndex('aliasOf', 'string')
-      .defineIndex('origine', 'string')
-      .defineIndex('idOrigine', 'string')
-      .defineIndex('type', 'string')
-      .defineIndex('titre', 'string')
-      .defineIndex('niveaux', 'string')
+      .defineIndex('rid', {unique: true, sparse: true}) // rid est obligatoire, mais on l'a pas encore à la création… => sparse
+      .defineIndex('cle', {unique: true, sparse: true}) // pour loadByCle
+      .defineIndex('aliasOf')
+      .defineIndex('origine')
+      .defineIndex('idOrigine')
+      .defineIndex('type')
+      .defineIndex('titre')
+      .defineIndex('niveaux')
       .defineIndex('categories', 'integer')
       .defineIndex('typePedagogiques', 'integer')
       .defineIndex('typeDocumentaires', 'integer')
@@ -105,7 +109,7 @@ module.exports = function (component) {
       // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
       // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
       // (pour gérer les relations avec des oid externes)
-      .defineIndex('relations', 'string', function () {
+      .defineIndex('relations', function () {
         // on retourne pour chaque relation l'item lié, tant pis pour la nature de la relation
         return this.relations.map(relation => relation[1])
       })
@@ -116,17 +120,17 @@ module.exports = function (component) {
         if (!this.enfants || !this.enfants.length) return
         return getRidEnfants(this)
       })
-      .defineIndex('auteurs', 'string')
-      .defineIndex('auteursParents', 'string')
-      .defineIndex('contributeurs', 'string')
-      .defineIndex('iPids', 'string', function () {
+      .defineIndex('auteurs')
+      .defineIndex('auteursParents')
+      .defineIndex('contributeurs')
+      .defineIndex('iPids', function () {
         return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
       })
       // les groupes chez qui la ressource est publiée
       .defineIndex('groupes', {normalizer: getNormalizedName})
       // les groupes qui ont un droit d'écriture sur la ressource
       .defineIndex('groupesAuteurs', {normalizer: getNormalizedName})
-      .defineIndex('langue', 'string')
+      .defineIndex('langue')
       .defineIndex('publie', 'boolean')
       .defineIndex('indexable', 'boolean')
       .defineIndex('restriction', 'integer')
@@ -233,7 +237,7 @@ module.exports = function (component) {
         // on génère la clé si elle manque, on la vire si elle n'est plus nécessaire
         if (this.publie && !this.restriction) {
           // public
-          if (this.cle) delete this.cle
+          if (this.hasOwnProperty('cle')) delete this.cle
         } else {
           // prive
           if (!this.cle) this.cle = uuid()
@@ -241,7 +245,6 @@ module.exports = function (component) {
 
         // pas de parametres sur les arbres mais une propriété enfants obligatoire
         if (this.type === 'arbre') {
-          if (this.parametres) delete this.parametres
           // @todo remettre ça après passage de l'update 35
           // if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
           if (!Array.isArray(this.enfants)) this.enfants = []

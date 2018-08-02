@@ -33,6 +33,7 @@
 
 const Personne = require('../../constructors/Personne')
 const sjtObj = require('sesajstools/utils/object')
+const {getNormalizedName} = require('../lib/normalize')
 
 /**
  * Entity pour un user
@@ -71,11 +72,33 @@ module.exports = function (component) {
 
     EntityPersonne.construct(function (values) {
       // on impose les permissions d'après les rôles définis en config
-      // faut copier pour pas modifier values.permissions
-      const data = values
+      // faut du shallow copy pour pas modifier values.permissions
+      const data = {...values}
       if (values.roles) data.permissions = getPermissions(values.roles)
       // avant d'appeler le constructeur
       Personne.call(this, data)
+    })
+
+    EntityPersonne.validateJsonSchema({
+      type: 'object',
+      properties: {
+        oid: {type: 'string'},
+        pid: {type: 'string', pattern: '^[a-zA-Z0-9_-]+/[a-z0-9_-]+$'},
+        nom: {type: 'string'},
+        prenom: {type: 'string'},
+        email: {type: 'string'},
+        roles: {type: 'object'},
+        permissions: {type: 'object'},
+        groupesMembre: {type: 'array', items: {type: 'string'}, uniqueItems: true},
+        groupesSuivis: {type: 'array', items: {type: 'string'}, uniqueItems: true},
+        infos: {type: 'object'},
+        dateCreation: {instanceof: 'Date'}
+      },
+      additionalProperties: false,
+      required: [
+        'nom',
+        'pid'
+      ]
     })
 
     EntityPersonne.beforeStore = function (next) {
@@ -99,16 +122,16 @@ module.exports = function (component) {
     })
 
     EntityPersonne
-      .defineIndex('pid', 'string')
-      .defineIndex('nom', 'string')
-      .defineIndex('email', 'string')
+      .defineIndex('pid')
+      .defineIndex('nom')
+      .defineIndex('email')
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
       // une callback qui renvoie la valeur (ou un tableau de valeurs)
       .defineIndex('roles', 'string', function () {
         if (!this.roles || typeof this.roles !== 'object') return
         return sjtObj.truePropertiesList(this.roles)
       })
-      .defineIndex('groupesMembre', 'string')
-      .defineIndex('groupesSuivis', 'string')
+      .defineIndex('groupesMembre', {normalizer: getNormalizedName})
+      .defineIndex('groupesSuivis', {normalizer: getNormalizedName})
   })
 }

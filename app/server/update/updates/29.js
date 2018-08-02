@@ -40,7 +40,7 @@ module.exports = {
   description: description,
   run: function run (next) {
     // on utilise le cli de lassi
-    const $entitiesCli = require('lassi/source/services/entities-cli.js')
+    const $entitiesCli = require('lassi/source/services/entities-cli')
     // reindexAll est une commande de entities-cli
     const reindexAll = $entitiesCli().commands().reindexAll
     flow().seq(function () {

@@ -131,9 +131,9 @@ const configRessource = {
     },
     restriction: {
       0: 'aucune',
-      1: 'corrigé',
-      2: 'groupe',
-      3: 'privé'
+      1: 'professeur',
+      2: 'groupe(s)',
+      3: 'auteur(s)'
     }
   },
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
@@ -145,7 +145,7 @@ const configRessource = {
   // modifs à répercuter dans npm-sesatheque-client
   /**
    * La liste des types que l'on peut éditer dans une sésatheque (ils seront cloné en ressources à l'édition, les autres resteront des alias, ils peuvent être supprimés mais pas modifiés)
-   * Utilisé par clone et externalClone pour savoir s'il faut cloner une ressource ou juste créer un alias
+   * Utilisé par clone et createAlias pour savoir s'il faut cloner une ressource ou juste créer un alias
    */
   editable: {
     arbre: true,
@@ -287,7 +287,6 @@ const configRessource = {
     dateMiseAJour: 'Date de mise à jour',
     version: 'Version',
     indexable: 'Indexable',
-    archiveOid: 'Version précédente',
     // facultatifs
     enfants: 'Enfants' // utilisé seulement pour les arbres (à la place de parametres)
   },
@@ -329,7 +328,6 @@ const configRessource = {
     dateMiseAJour: 'Date',
     version: 'Number',
     indexable: 'Boolean',
-    archiveOid: 'Number',
     // facultatifs
     enfants: 'Array'
   },
