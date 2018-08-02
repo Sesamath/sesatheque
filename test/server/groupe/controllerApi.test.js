@@ -97,13 +97,13 @@ describe('API groupe', () => {
   context('sans avoir de session', () => {
     it('/api/groupes/perso denied', async () => {
       const response = await agent.get(`/api/groupes/perso`)
-      itBlocksUser(response, 'Il faut être authentifié pour récupérer ses groupes')
+      itBlocksUser(response, 'Il faut être authentifié pour récupérer ses groupes', 401)
       return Promise.resolve()
     })
 
     it('/api/groupe/ajouter/unNom denied', async () => {
       const response = await agent.get(`/api/groupe/ajouter/unNom`)
-      itBlocksUser(response, 'Accès refusé')
+      itBlocksUser(response, 'Authentification requise', 401)
       return Promise.resolve()
     })
 
@@ -112,7 +112,7 @@ describe('API groupe', () => {
         .post(`/api/groupe`)
         .set('Content-Type', 'application/json')
         .send(testGroup)
-      itBlocksUser(response, 'Vous devez être authentifié pour créer des groupes')
+      itBlocksUser(response, 'Vous devez être authentifié pour créer des groupes', 401)
       return Promise.resolve()
     })
 

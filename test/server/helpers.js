@@ -110,8 +110,8 @@ export const itBlocksUser = (response, expectedErrorMessage, status = 403) => {
   expect(response.status).to.equal(status)
   expect(response.body.success).to.equal(false, `Expected success: false, got:  ${JSON.stringify(response.body)}`)
   if (typeof expectedErrorMessage === 'string') {
-    expect(response.body.error).to.equal(expectedErrorMessage)
+    expect(response.body.message).to.equal(expectedErrorMessage)
   } else if (expectedErrorMessage) {
-    expect(response.body.error).to.match(expectedErrorMessage)
+    expect(response.body.message).to.match(expectedErrorMessage)
   }
 }

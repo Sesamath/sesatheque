@@ -93,10 +93,8 @@ describe('controller api ressource', () => {
       .then(res => {
         const result = res.body
         if (result.error) console.error(result.error)
-        expect(result).not.to.have.property('error')
-        expect(result).to.have.property('oid')
         const {oid} = result
-        expect(result).to.deep.equal({oid}, 'pb sur le body retourné')
+        expect(result).to.deep.equal({success: true, oid}, 'pb sur le body retourné')
         ressource.oid = oid
         ressource.rid = `${myBaseId}/${oid}`
         cleanVolatileProperties(ressource)
@@ -194,19 +192,19 @@ describe('controller api ressource', () => {
       .then(purge)
   })
 
-  it('DELETE prend un 403 si on veut effacer sans token', function () {
+  it('DELETE prend un 401 si on veut effacer sans token ni session', function () {
     return populate({ressources: 1, personnes: 1})
       .then(() => {
         const ressource = getRandomRessource()
         return _superTestClient
           .delete(`/api/ressource/${ressource.oid}`)
-          .expect(403)
+          .expect(401)
           .expect('Content-type', /application\/json/)
       })
       .then((res) => {
         const result = res.body
         expect(result).to.have.property('success', false, 'Pb sur result.success')
-        expect(result, 'Pb sur result.error').to.have.property('error')
+        expect(result, 'Pb sur result.error').to.have.property('message')
         expect(Object.keys(result)).to.have.lengthOf(2, 'Pb sur le nb de propriétés de result')
         return Promise.resolve()
       })
