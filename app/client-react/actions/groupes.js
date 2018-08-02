@@ -1,17 +1,17 @@
 import {GET, POST, DELETE} from '../utils/httpMethods'
 import {addNotification} from './notifications'
 import {
-  currentPersonneGroupesUrl,
-  saveGroupeUrl,
-  groupeUrl,
-  groupeJoinUrl,
-  groupeFollowUrl,
-  groupeLeaveUrl,
-  groupeIgnoreUrl
+  getGroupesPersoUrl,
+  getSaveGroupeUrl,
+  getGroupeUrl,
+  getGroupeJoinUrl,
+  getGroupeFollowUrl,
+  getGroupeLeaveUrl,
+  getGroupeIgnoreUrl
 } from '../apiRoutes'
 
 export const loadGroupes = () => dispatch =>
-  GET(currentPersonneGroupesUrl())
+  GET(getGroupesPersoUrl())
     .then(({success, error, groupes, groupesAdmin, groupesMembre, groupesSuivis}) => {
       if (success) {
         return dispatch({
@@ -32,7 +32,7 @@ const saveGroupeAction = (groupe, isNew) => ({
 })
 
 export const saveGroupe = (groupe, success = () => {}) => dispatch =>
-  POST(saveGroupeUrl(), {body: groupe})
+  POST(getSaveGroupeUrl(), {body: groupe})
     .then(responseGroup => {
       const isNew = !groupe.oid
       dispatch(saveGroupeAction(responseGroup, isNew))
@@ -58,7 +58,7 @@ const deleteGroupeAction = (nom) => ({
 })
 
 export const deleteGroupe = (nom, success = () => {}) => dispatch =>
-  DELETE(groupeUrl({nom}))
+  DELETE(getGroupeUrl({nom}))
     .then(() => {
       dispatch(deleteGroupeAction(nom))
     })
@@ -82,7 +82,7 @@ const leaveGroupeAction = (nom) => ({
 })
 
 export const leaveGroupe = (nom, success = () => {}) => dispatch =>
-  GET(groupeLeaveUrl())
+  GET(getGroupeLeaveUrl())
     .then(() => {
       dispatch(leaveGroupeAction(nom))
     })
@@ -106,7 +106,7 @@ const ignoreGroupeAction = (nom) => ({
 })
 
 export const ignoreGroupe = (nom, success = () => {}) => dispatch =>
-  GET(groupeIgnoreUrl({nom}))
+  GET(getGroupeIgnoreUrl({nom}))
     .then(() => {
       dispatch(ignoreGroupeAction(nom))
     })
@@ -130,7 +130,7 @@ const joinGroupeAction = groupe => ({
 })
 
 export const joinGroupe = (nom, success = () => {}) => dispatch =>
-  GET(groupeJoinUrl({nom}))
+  GET(getGroupeJoinUrl({nom}))
     .then(groupe => {
       dispatch(joinGroupeAction(groupe))
     })
@@ -154,7 +154,7 @@ const followGroupeAction = groupe => ({
 })
 
 export const followGroupe = (nom, success = () => {}) => dispatch =>
-  GET(groupeFollowUrl({nom}))
+  GET(getGroupeFollowUrl({nom}))
     .then(groupe => {
       dispatch(followGroupeAction(groupe))
     })
