@@ -23,8 +23,17 @@ const anyOption = {
 const langue = [anyOption, ...listes.langue]
 const type = [anyOption, ...listes.type]
 
+const publieSelectOptions = [
+  anyOption,
+  {value: true, label: 'oui'},
+  {value: false, label: 'non'}
+]
+
 const SearchForm = ({handleSubmit, isOpen, query}) => {
   if (isOpen) {
+    // faire une recherche sur un auteur ou un groupe est le seul cas où on peut ne pas préciser publie et restriction
+    const allowAnyOption = query && (query.auteurs || query.groupes)
+
     return (
       <form onSubmit={handleSubmit}>
         <fieldset>
@@ -46,12 +55,24 @@ const SearchForm = ({handleSubmit, isOpen, query}) => {
             />
             <SelectField
               label={labels.restriction}
-              options={listes.restriction}
+              options={allowAnyOption ? [
+                anyOption,
+                ...listes.restriction
+              ] : listes.restriction}
               name="restriction"/>
-            <SwitchField
-              className="center"
-              label={labels.publie}
-              name="publie"/>
+            {allowAnyOption ? (
+              <SelectField
+                label={labels.publie}
+                options={publieSelectOptions}
+                name="publie"
+              />
+            ) : (
+              <SwitchField
+                className="center"
+                label={labels.publie}
+                name="publie"
+              />
+            )}
 
             <InputField
               label={labels.oid}

@@ -96,11 +96,7 @@ const resourceListProvider = (WrappedComponent) => {
     // on normalise query, en ne conservant que les entrées utiles
     // avec cast en int pour les index numériques et affectation des valeurs par défaut
     const query = {}
-    // checkbox
-    query.publie = ['true', '', undefined].includes(parsedSearch.publie)
-    // restriction en int, 0 par défaut
-    query.restriction = listes.restriction[parsedSearch.restriction] ? Number(parsedSearch.restriction) : 0
-    // pour les autres valeurs uniques (select ou input), on récupère tel quel si non vide
+    // pour les valeurs uniques (select ou input), on récupère tel quel si non vide
     ;['titre', 'type', 'langue', 'oid', 'origine', 'idOrigine', 'auteurs', 'groupes'].forEach(prop => {
       if (parsedSearch[prop]) query[prop] = parsedSearch[prop]
     })
@@ -124,6 +120,17 @@ const resourceListProvider = (WrappedComponent) => {
         if (values.length) query[prop] = values
       }
     })
+
+    // faire une recherche sur un auteur ou un groupe est le seul cas où on peut ne pas préciser publie et restriction
+    if (query.auteurs || query.groupes) {
+      if (parsedSearch.publie) query.publie = parsedSearch.publie !== 'false'
+      if (parsedSearch.restriction) query.restriction = listes.restriction[parsedSearch.restriction] ? Number(parsedSearch.restriction) : 0
+    } else {
+      // cas standard, checkbox pour publié, à true par défaut
+      query.publie = ['true', '', undefined].includes(parsedSearch.publie)
+      // et restriction en int, à 0 par défaut
+      query.restriction = listes.restriction[parsedSearch.restriction] ? Number(parsedSearch.restriction) : 0
+    }
 
     return query
   }
