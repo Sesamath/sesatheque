@@ -5,7 +5,6 @@ import config from '../../server/config'
 import {labels, listes} from '../../server/ressource/config'
 import {Async as Select} from 'react-select'
 import {ResourceList} from './ResourceList'
-import 'react-select/dist/react-select.css'
 
 const optionValueToText = (label, value) => listes[label] ? listes[label][value] : value
 const optionLabelToText = label => labels[label]
