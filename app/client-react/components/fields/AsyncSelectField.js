@@ -36,7 +36,6 @@ AsyncSelectField.propTypes = {
   multi: PropTypes.bool,
   name: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.node,
     label: PropTypes.string
   })),
   placeholder: PropTypes.string

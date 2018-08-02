@@ -44,7 +44,6 @@ AsyncMultiSelectInput.propTypes = {
   loadOptions: PropTypes.func,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.node,
     label: PropTypes.string
   })),
   disabled: PropTypes.bool,
