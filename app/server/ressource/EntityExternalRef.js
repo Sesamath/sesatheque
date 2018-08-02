@@ -55,9 +55,7 @@ module.exports = function entityExternalRefFactory (component) {
        * en attendant que lassi gère des index unique combinés
        * @type {string}
        */
-      // @todo après passage de l'update 37 partout, décommenter cette ligne et virer la suivante (ainsi que le beforeStore)
-      // this.oid = `${baseId}-${rid.replace('/', '-')}`
-      if (data.oid) this.oid = data.oid
+      this.oid = `${baseId}-${rid.replace('/', '-')}`
 
       /**
        * baseId de la sésathèque qui veut être prévenue lors d'une modif du rid ici
@@ -96,21 +94,5 @@ module.exports = function entityExternalRefFactory (component) {
     EntityExternalRef
       .defineIndex('baseId')
       .defineIndex('rid')
-
-    // @todo après l'update 37 passé partout, virer ce beforeStore et décommenter la génération de l'oid dans le constructeur
-    EntityExternalRef.beforeStore(function (next) {
-      const expectedOid = `${this.baseId}-${this.rid.replace('/', '-')}`
-      const self = this
-      if (self.oid !== expectedOid) {
-        // faut virer cet entity avant d'appeler next qui va la recréer avec le bon oid
-        self.delete((error) => {
-          if (error) return next(error)
-          self.oid = expectedOid
-          next()
-        })
-      } else {
-        next()
-      }
-    })
   })
 }
