@@ -4629,9 +4629,9 @@ knacss@^7.0.5:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/knacss/-/knacss-7.0.6.tgz#6dd2e3610db586248c742350adad0d30f5a9b276"
 
-"lassi@git+https://framagit.org/Sesamath/lassi.git#2.4.3":
-  version "2.4.3"
-  resolved "git+https://framagit.org/Sesamath/lassi.git#e648e480ea5627dd4a39fb7da28ad74b71d98d0d"
+"lassi@git+https://framagit.org/Sesamath/lassi.git#2.4.4":
+  version "2.4.4"
+  resolved "git+https://framagit.org/Sesamath/lassi.git#520f278bd9675e8013b84b87610c353c173acad4"
   dependencies:
     ajv "^6.1.1"
     ajv-errors "^1.0.0"
@@ -7362,7 +7362,7 @@ serve-static@1.13.2, serve-static@^1.13.1:
 
 "sesatheque-client@git+https://framagit.org/Sesamath/sesatheque-client.git#1.2.54":
   version "1.2.54"
-  resolved "git+https://framagit.org/Sesamath/sesatheque-client.git#47f974dfd2d2464661b31a193f6b3b1f9cc2d1e1"
+  resolved "git+https://framagit.org/Sesamath/sesatheque-client.git#e4396a8a3d63ac344168bd09ffae173273d5a285"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"

@@ -30,8 +30,15 @@
  */
 'use strict'
 
-const {constantes: {restriction}} = require('./config')
-const restrictionMax = Object.keys(restriction).length - 1
+const {constantes: {categories, niveaux, relations, restriction, typeDocumentaires, typePedagogiques}} = require('./config')
+
+// pour éviter de refaire ces Object.values au runtime à chaque validate on les construit ici au 1er appel
+const categoriesValues = Object.values(categories)
+const niveauxValues = Object.values(niveaux)
+const relationPredicatValues = Object.values(relations)
+const restrictionValues = Object.values(restriction)
+const typeDocumentairesValues = Object.values(typeDocumentaires)
+const typePedagogiquesValues = Object.values(typePedagogiques)
 
 module.exports = {
   type: 'object',
@@ -47,18 +54,37 @@ module.exports = {
     resume: {type: 'string'},
     description: {type: 'string'},
     commentaires: {type: 'string'},
-    niveaux: {$ref: '#/definitions/arrayOfStrings'},
+    niveaux: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: niveauxValues
+      },
+      uniqueItems: true
+    },
     categories: {
       type: 'array',
-      items: {type: 'integer'}
+      items: {
+        type: 'integer',
+        enum: categoriesValues
+      },
+      uniqueItems: true
     },
     typePedagogiques: {
       type: 'array',
-      items: {type: 'integer'}
+      items: {
+        type: 'integer',
+        enum: typePedagogiquesValues
+      },
+      uniqueItems: true
     },
     typeDocumentaires: {
       type: 'array',
-      items: {type: 'integer'}
+      items: {
+        type: 'integer',
+        enum: typeDocumentairesValues
+      },
+      uniqueItems: true
     },
     parametres: {type: 'object'},
     enfants: {
@@ -76,7 +102,7 @@ module.exports = {
     groupesAuteurs: {$ref: '#/definitions/arrayOfStrings'},
     langue: {type: 'string'},
     publie: {type: 'boolean'},
-    restriction: {type: 'integer', minimum: 0, maximum: restrictionMax},
+    restriction: {type: 'integer', enum: restrictionValues},
     dateCreation: {instanceof: 'Date'},
     dateMiseAJour: {instanceof: 'Date'},
     version: {type: 'integer', minimum: 1},
@@ -84,19 +110,23 @@ module.exports = {
     indexable: {type: 'boolean'},
     archiveOid: {type: 'string'}
   },
+
   additionalProperties: false,
   required: ['titre', 'type'],
+
   definitions: {
     arrayOfMixId: {
       type: 'array',
-      items: {$ref: '#/definitions/mixId'}
+      items: {$ref: '#/definitions/mixId'},
+      uniqueItems: true
     },
     arrayOfStrings: {
       type: 'array',
       items: {
         type: 'string',
         minLength: 1
-      }
+      },
+      uniqueItems: true
     },
     enfant: {
       type: 'object',
@@ -122,9 +152,13 @@ module.exports = {
     relation: {
       type: 'array',
       items: [
-        {type: 'integer'},
-        {type: 'string'}
-      ]
+        // le 1er élément de chaque relation est un prédicat
+        {type: 'integer', enum: relationPredicatValues},
+        // le 2e est un rid
+        {$ref: '#/definitions/mixId'}
+      ],
+      minItems: 2,
+      maxItems: 2
     }
   }
 }

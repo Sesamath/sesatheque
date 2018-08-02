@@ -49,7 +49,8 @@ module.exports = function (component) {
         public: {type: 'boolean'},
         gestionnaires: {
           type: 'array',
-          items: {type: 'string'}
+          items: {type: 'string'},
+          uniqueItems: true
         },
         dateCreation: {instanceof: 'Date'}
       },
@@ -94,6 +95,6 @@ module.exports = function (component) {
       .defineIndex('nom', {normalizer: getNormalizedName, unique: true})
       .defineIndex('ouvert', 'boolean')
       .defineIndex('public', 'boolean')
-      .defineIndex('gestionnaires', 'string')
+      .defineIndex('gestionnaires')
   })
 }
