@@ -44,6 +44,7 @@ AsyncMultiSelectInput.propTypes = {
   loadOptions: PropTypes.func,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
+    // value peut être de n'importe quel type parmi string|boolean|number, si on passe autre chose react-select râlera
     label: PropTypes.string
   })),
   disabled: PropTypes.bool,
