@@ -10,7 +10,7 @@ import {
   SwitchField,
   InputField,
   TextareaField,
-  AsyncSelectField
+  SelectField
 } from '../fields'
 import {saveGroupe} from '../../actions/groupes'
 import groupesLoader from './hoc/groupesLoader'
@@ -53,8 +53,9 @@ const debouncedGET = debounce((input, setOptions) => {
     })
 }, 500)
 
+const emptyInputRe = /^\s*$/
 const getOptions = (input, setOptions) => {
-  if (!input) return setOptions([])
+  if (emptyInputRe.test(input)) return setOptions([])
   debouncedGET(input, setOptions)
 }
 
@@ -109,12 +110,13 @@ const GroupeEdition = ({
           Ajouter des gestionnaires
           <span className="remarque"> (saisir l’identifiant d’un utilisateur, ATTENTION l’ajout est irrévocable)</span>
 
-          <AsyncSelectField
+          <SelectField
             components={{ MultiValueRemove }}
             placeholder="Saisir un oid"
             name="gestionnaires"
             loadOptions={getOptions}
             isMulti
+            isClearable={false}
           />
         </label>
       </fieldset>

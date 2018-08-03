@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Select from 'react-select'
+import Select, {Async as AsyncSelect} from 'react-select'
 import showInvalidField from '../hoc/showInvalidField'
 
 const getValue = (value, options, isMulti) => {
@@ -17,42 +17,64 @@ const SelectInput = ({
   meta: {error, warning, touched},
   placeholder,
   options,
-  disabled,
-  isMulti = false
-}) => (
-  <Select
-    clearable={isMulti}
-    value={getValue(value, options, isMulti)}
-    name={name}
-    onFocus={onFocus}
-    closeMenuOnSelect={!isMulti}
-    onChange={(selection) => {
-      if (isMulti) {
-        return onChange(selection.map(option => option.value))
-      }
+  isDisabled,
+  isMulti = false,
+  isClearable,
+  loadOptions,
+  components
+}) => {
+  const isAsync = !!loadOptions
+  const SelectComponent = isAsync ? AsyncSelect : Select
 
-      return onChange(selection.value)
-    }}
-    onBlur={() => onBlur(value)}
-    placeholder={placeholder}
-    removeSelected={true}
-    options={options}
-    disabled={disabled}
-    noResultsText="Aucun résultat trouvé"
-    isMulti={isMulti}
-  />
-)
+  return (
+    <SelectComponent
+      components={components}
+      isClearable={typeof isClearable === 'boolean' ? isClearable : isMulti}
+      value={isAsync ? value : getValue(value, options, isMulti)}
+      name={name}
+      onFocus={onFocus}
+      onBlur={() => onBlur(value)}
+      closeMenuOnSelect={!isMulti}
+      onChange={(selection, {action, removedValue}) => {
+        if (['pop-value', 'remove-value'].includes(action) && removedValue.isUndeletable) {
+          return
+        }
+
+        if (isAsync) {
+          return onChange(selection)
+        }
+
+        if (isMulti) {
+          return onChange(selection.map(option => option.value))
+        }
+
+        return onChange(selection.value)
+      }}
+      placeholder={placeholder}
+      removeSelected
+      options={options}
+      isDisabled={isDisabled}
+      loadOptions={loadOptions}
+      noOptionsMessage={() => 'Aucun résultat trouvé'}
+      loadingMessage={() => 'Recherche en cours'}
+      isMulti={isMulti}
+    />
+  )
+}
 
 SelectInput.propTypes = {
   isMulti: PropTypes.bool,
+  isClearable: PropTypes.bool,
+  isDisabled: PropTypes.bool,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
     // value peut être de n'importe quel type parmi string|boolean|number, si on passe autre chose react-select râlera
     label: PropTypes.string
   })),
-  disabled: PropTypes.bool,
   input: PropTypes.shape({}),
-  meta: PropTypes.shape({})
+  meta: PropTypes.shape({}),
+  loadOptions: PropTypes.func,
+  components: PropTypes.object
 }
 
 export default showInvalidField(SelectInput)
