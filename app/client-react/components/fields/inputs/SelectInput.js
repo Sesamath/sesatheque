@@ -12,22 +12,22 @@ const getValue = (value, options, isMulti) => {
   return find(value)
 }
 
-const MultiSelectInput = ({
+const SelectInput = ({
   input: {name, onFocus, onBlur, onChange, value},
   meta: {error, warning, touched},
   placeholder,
   options,
   disabled,
-  multi = false
+  isMulti = false
 }) => (
   <Select
-    clearable={multi}
-    value={getValue(value, options, multi)}
+    clearable={isMulti}
+    value={getValue(value, options, isMulti)}
     name={name}
     onFocus={onFocus}
-    closeMenuOnSelect={!multi}
+    closeMenuOnSelect={!isMulti}
     onChange={(selection) => {
-      if (multi) {
+      if (isMulti) {
         return onChange(selection.map(option => option.value))
       }
 
@@ -39,12 +39,12 @@ const MultiSelectInput = ({
     options={options}
     disabled={disabled}
     noResultsText="Aucun résultat trouvé"
-    isMulti={multi}
+    isMulti={isMulti}
   />
 )
 
-MultiSelectInput.propTypes = {
-  multi: PropTypes.bool,
+SelectInput.propTypes = {
+  isMulti: PropTypes.bool,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
     // value peut être de n'importe quel type parmi string|boolean|number, si on passe autre chose react-select râlera
@@ -55,4 +55,4 @@ MultiSelectInput.propTypes = {
   meta: PropTypes.shape({})
 }
 
-export default showInvalidField(MultiSelectInput)
+export default showInvalidField(SelectInput)

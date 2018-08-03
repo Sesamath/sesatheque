@@ -12,20 +12,22 @@ import addLabel from './hoc/addLabel'
 const AsyncSelectField = ({
   disabled,
   label,
-  multi,
+  isMulti,
   name,
   options,
   placeholder,
-  loadOptions
+  loadOptions,
+  components
 }) => (
   <Field
     placeholder={placeholder || label}
     name={name}
     options={options}
-    multi={multi}
+    isMulti={isMulti}
     component={AsyncMultiSelectInput}
     disabled={disabled}
     loadOptions={loadOptions}
+    components={components}
   />
 )
 
@@ -33,7 +35,7 @@ AsyncSelectField.propTypes = {
   loadOptions: PropTypes.func,
   disabled: PropTypes.bool,
   label: PropTypes.string,
-  multi: PropTypes.bool,
+  isMulti: PropTypes.bool,
   name: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
     // value peut être de n'importe quel type parmi string|boolean|number, si on passe autre chose

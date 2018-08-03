@@ -2,6 +2,7 @@ import {push} from 'connected-react-router'
 import {debounce} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {components} from 'react-select'
 import {withProps} from 'recompose'
 import {formValues, reduxForm} from 'redux-form'
 import {GET} from '../../utils/httpMethods'
@@ -15,27 +16,46 @@ import {saveGroupe} from '../../actions/groupes'
 import groupesLoader from './hoc/groupesLoader'
 import {personneByOidUrl} from '../../apiRoutes'
 
-const debouncedGET = debounce((input, callback) => {
+const {MultiValueRemove: DefaultMultiValueRemove} = components
+
+const MultiValueRemove = ({
+  data,
+  ...props
+}) => (data.isUndeletable ? null : (
+  <DefaultMultiValueRemove
+    data={data}
+    {...props}
+  />
+))
+
+MultiValueRemove.propTypes = {
+  data: PropTypes.shape({})
+}
+
+const debouncedGET = debounce((input, setOptions) => {
   GET(personneByOidUrl({oid: input}))
     .then(({user}) => {
-      if (user === null) { return callback(null, ({ options: [] })) }
+      if (user === null) {
+        return setOptions([])
+      }
       const {oid, prenom, nom} = user
 
-      return callback(null, {
-        options: [
-          {
-            value: oid,
-            label: `${prenom} ${nom} (${oid})`
-          }
-        ]
-      })
+      return setOptions([
+        {
+          value: oid,
+          label: `${prenom} ${nom} (${oid})`
+        }
+      ])
     })
-    .catch(error => callback(error, null))
+    .catch(error => {
+      console.error(error)
+      setOptions([])
+    })
 }, 500)
 
-const getOptions = (input, callback) => {
-  if (!input) return callback(null, ({ options: [] }))
-  debouncedGET(input, callback)
+const getOptions = (input, setOptions) => {
+  if (!input) return setOptions([])
+  debouncedGET(input, setOptions)
 }
 
 /**
@@ -90,10 +110,11 @@ const GroupeEdition = ({
           <span className="remarque"> (saisir l’identifiant d’un utilisateur, ATTENTION l’ajout est irrévocable)</span>
 
           <AsyncSelectField
+            components={{ MultiValueRemove }}
             placeholder="Saisir un oid"
             name="gestionnaires"
             loadOptions={getOptions}
-            multi
+            isMulti
           />
         </label>
       </fieldset>
@@ -149,7 +170,7 @@ const getInitialValues = ({
   const gestionnairesItems = gestionnaires.map((oid, index) => ({
     value: oid,
     label: `${gestionnairesNames[index]} (${oid})`,
-    clearableValue: false
+    isUndeletable: true
   }))
   const initialValues = {
     ...others,

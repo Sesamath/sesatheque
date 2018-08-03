@@ -15,30 +15,33 @@ const AsyncMultiSelectInput = ({
   options,
   disabled,
   loadOptions,
-  multi
+  isMulti,
+  components
 }) => (
   <Select
-    clearable={false}
+    components={components}
+    isClearable={false}
     value={value}
     name={name}
     onFocus={onFocus}
     closeOnSelect={false}
     onChange={(selection) => {
+      console.log(selection)
       onChange(selection)
     }}
     onBlur={() => onBlur(value)}
     placeholder={placeholder}
     options={options}
     disabled={disabled}
-    noResultsText="Aucun résultat trouvé"
-    multi={multi}
+    noOptionsMessage={() => 'Aucun résultat trouvé'}
+    loadingMessage={() => 'Recherche en cours'}
+    isMulti={isMulti}
     loadOptions={loadOptions}
-    loadingPlaceholder="Recherche en cours"
   />
 )
 
 AsyncMultiSelectInput.propTypes = {
-  multi: PropTypes.bool,
+  isMulti: PropTypes.bool,
   loadOptions: PropTypes.func,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({

@@ -18,13 +18,13 @@ const Classification = ({detailed}) => (
         name="categories"
         label={labels.categories}
         options={listes.categories}
-        multi
+        isMulti
       />
       <SelectField
         name="niveaux"
         label={labels.niveaux}
         options={listes.niveaux}
-        multi
+        isMulti
       />
       {detailed ? (
         <Fragment>
@@ -32,13 +32,13 @@ const Classification = ({detailed}) => (
             name="typePedagogiques"
             label={labels.typePedagogiques}
             options={listes.typePedagogiques}
-            multi
+            isMulti
           />
           <SelectField
             name="typeDocumentaires"
             label={labels.typeDocumentaires}
             options={listes.typeDocumentaires}
-            multi
+            isMulti
           />
         </Fragment>
       ) : null}
