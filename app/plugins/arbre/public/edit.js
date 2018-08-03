@@ -124,8 +124,8 @@ function edit (arbre, options, saveCallback) {
    * @private
    */
   function addLoadSrc () {
-    dom.addElement(container, 'span', null, 'arbre source à charger ')
-    inputRef = dom.addElement(container, 'input', {id: 'loadRef', type: 'text', style: {margin: '0 1em'}})
+    const labelArbreSource = dom.addElement(container, 'label', null, 'Arbre source à charger ')
+    inputRef = dom.addElement(labelArbreSource, 'input', {id: 'loadRef', type: 'text', style: {margin: '0 1em'}})
     $inputRef = $(inputRef)
     // enter doit pas valider le form mais charger la ref
     $inputRef.keypress(function (event) {
@@ -187,11 +187,11 @@ function edit (arbre, options, saveCallback) {
     addLoadSrc()
     // la recherche
     const searchContainer = dom.addElement(container, 'div', { class: 'search' })
-    dom.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ')
-    searchInput = dom.addElement(searchContainer, 'input', { type: 'text' })
+    const searchInputLabel = dom.addElement(searchContainer, 'label', null, 'Mettre en valeur les titres contenant ')
+    searchInput = dom.addElement(searchInputLabel, 'input', { type: 'text' })
 
     srcGroup = dom.addElement(container, 'div', { id: 'srcGroup' })
-    dom.addElement(srcGroup, 'span', null, 'arbre source')
+    dom.addElement(srcGroup, 'span', {class: 'bold'}, 'arbre source')
     divSrcTree = dom.addElement(srcGroup, 'div')
 
     const dstGroup = dom.addElement(container, 'div', { id: 'dstGroup' })
