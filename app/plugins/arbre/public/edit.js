@@ -41,6 +41,7 @@ import 'jstree/dist/themes/default/style.css'
 import { addSesatheques, exists, fetchPublicRef } from 'sesatheque-client/src/fetch'
 import { addNode, build, getEnfants } from './lib'
 import {sesatheques} from '../../../server/config'
+import {icons} from 'plugins'
 
 addSesatheques(sesatheques)
 
@@ -76,6 +77,24 @@ function edit (arbre, options, saveCallback) {
       label: 'Aperçu',
       action: function () {
         iframeApercu.src = url
+      }
+    }
+  }
+
+  /**
+   * Ajoute le lien d'aperçu externe aux links
+   * @param {object} links l'objet contextmenu.items de jstree
+   * @param node
+   */
+  function addLinkApercuBlank (links, node) {
+    const url = node.a_attr && node.a_attr.href
+    if (!url) return
+
+    links.apercuBlank = {
+      label: 'Voir dans un nouvel onglet',
+      action: function () {
+        const tab = window.open(url, '_blank')
+        tab.focus()
       }
     }
   }
@@ -229,7 +248,7 @@ function edit (arbre, options, saveCallback) {
       const parentNode = inst.get_node(data.reference)
       log('node parent', parentNode)
       const newNode = {
-        icon: 'arbreJstNode',
+        icon: icons['arbre'],
         a_attr: { 'data-type': 'arbre' }
       }
       inst.create_node(parentNode, newNode, 'last', createCb)
@@ -245,7 +264,7 @@ function edit (arbre, options, saveCallback) {
     }
 
     // Aller éditer la ressource
-    function actionEdit (data) {
+    function actionEdit (blank, data) {
       // on a un bind sur le node
       const inst = $dstTree.jstree(true)
       const node = inst.get_node(data.reference)
@@ -258,7 +277,12 @@ function edit (arbre, options, saveCallback) {
           if (slashPos) {
             const id = aliasOf.substr(slashPos + 1)
             if (id) {
-              window.location = '/ressource/modifier/' + id
+              if (blank) {
+                const tab = window.open(`/ressource/modifier/${id}`, '_blank')
+                tab.focus()
+              } else {
+                window.location = '/ressource/modifier/' + id
+              }
               return
             }
           }
@@ -354,12 +378,17 @@ function edit (arbre, options, saveCallback) {
           log('lien éditer vers', editUrl)
           items.editRef = {
             label: 'Éditer',
-            action: actionEdit
-            // href: editUrl // ça injecte toujours # :-/
+            action: actionEdit.bind(this, false)
+          }
+
+          items.editRefBlank = {
+            label: 'Éditer dans un nouvel onglet',
+            action: actionEdit.bind(this, true)
           }
         }
       } else if (!isArbre) {
         addLinkApercu(items, node)
+        addLinkApercuBlank(items, node)
       }
       log('clic droit sur', node)
       cb(items)
@@ -410,6 +439,8 @@ function edit (arbre, options, saveCallback) {
           // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
           const links = {}
           addLinkApercu(links, node)
+          addLinkApercuBlank(links, node)
+
           // ajout du 'charger ici'
           const aliasOf = node.a_attr && node.a_attr[ 'data-aliasof' ]
           if (aliasOf && node.a_attr[ 'data-type' ] === 'arbre') {
