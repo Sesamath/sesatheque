@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import {NavLink} from 'react-router-dom'
 import groupesListeLoader from './hoc/groupesListeLoader'
 import {joinGroupe, leaveGroupe} from './utils/groupesOperations'
-import {groupesOuvertsUrl} from '../../apiRoutes'
+import {getGroupesOuvertsUrl} from '../../apiRoutes'
 
 /**
  * La liste des groupes ouverts (auth)
@@ -89,6 +89,6 @@ const mapDispatchToProps = {
 }
 
 // groupesListeLoader contient ensureLogged
-export default groupesListeLoader(groupesOuvertsUrl())(
+export default groupesListeLoader(getGroupesOuvertsUrl())(
   connect(mapStateToProps, mapDispatchToProps)(GroupesOuverts)
 )
