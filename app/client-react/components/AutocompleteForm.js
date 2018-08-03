@@ -6,7 +6,6 @@ import {labels, listes} from '../../server/ressource/config'
 import {Async as Select} from 'react-select'
 import {ResourceList} from './ResourceList'
 
-
 class OptionValue {
   constructor (filter, filterValue) {
     this.filter = filter
@@ -37,9 +36,9 @@ const debouncedGET = debounce((input, callback) => {
   })
 }, 500)
 
-const getOptions = (input, callback) => {
-  if (!input || input.length <= 2) return callback([])
-  debouncedGET(input, callback)
+const getOptions = (input, setOptions) => {
+  if (!input || input.length <= 2) return setOptions([])
+  debouncedGET(input, setOptions)
 }
 
 class AutocompleteForm extends Component {
