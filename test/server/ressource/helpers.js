@@ -91,23 +91,18 @@ export default function helpersFactory (lassi, superTestClient) {
   const checkHttpResult = (stc, expected) => stc
     .expect(200)
     .expect('Content-type', /application\/json/)
-    .then((res) => {
-      try {
-        const ressource = res.body
-        cleanVolatileProperties(expected)
-        expect(ressource).to.have.property('oid', expected.oid)
-        expect(ressource).not.to.have.property('error')
-        expect(ressource).not.to.have.property('errors')
-        expect(ressource).not.to.have.property('warnings')
-        Object.keys(expected).forEach(k => {
-          // if (expected[k] instanceof Date) expect(ressource[k]).to.equals(expected[k].toISOString(), `pb sur propriété ${k}`)
-          // else expect(ressource[k]).to.deep.equal(expected[k], `pb sur propriété ${k}`)
-          expect(JSON.stringify(ressource[k])).to.equal(JSON.stringify(expected[k]), `pb sur propriété ${k}`)
-        })
-        return Promise.resolve()
-      } catch (error) {
-        return Promise.reject(error)
-      }
+    .then(({body: {message, data: ressource}}) => {
+      expect(message).to.equal('OK')
+      cleanVolatileProperties(expected)
+      expect(ressource).to.have.property('oid', expected.oid)
+      expect(ressource).not.to.have.property('error')
+      expect(ressource).not.to.have.property('errors')
+      expect(ressource).not.to.have.property('warnings')
+      Object.keys(expected).forEach(k => {
+        // if (expected[k] instanceof Date) expect(ressource[k]).to.equals(expected[k].toISOString(), `pb sur propriété ${k}`)
+        // else expect(ressource[k]).to.deep.equal(expected[k], `pb sur propriété ${k}`)
+        expect(JSON.stringify(ressource[k])).to.equal(JSON.stringify(expected[k]), `pb sur propriété ${k}`)
+      })
     })
 
   /**

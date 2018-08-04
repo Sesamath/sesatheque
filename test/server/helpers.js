@@ -84,34 +84,36 @@ const checkObj = (expected, toCheck, path = '') => {
  */
 export const itIsSuccessfull = (response, expected) => {
   expect(response.status).to.equal(200)
-  expect(response.body.success).to.equal(true, `Expected success: true, got:  ${JSON.stringify(response.body)}`)
-  if (expected) checkObj(expected, response.body)
-}
-
-export const itFails = (response, expectedErrorMessage) => {
-  expect(response.status).to.equal(200)
-  expect(response.body.success).to.equal(false, `Expected success: false, got:  ${JSON.stringify(response.body)}`)
-  expect(response.body.error).to.equal(expectedErrorMessage)
-}
-
-export const itNeedsAuth = (response, expectedErrorMessage) => {
-  expect(response.status).to.equal(401)
-  expect(response.body.success).to.equal(false, `Expected success: false, got:  ${JSON.stringify(response.body)}`)
-  expect(response.body.error).to.equal(expectedErrorMessage)
+  expect(response.body).to.have.property('message')
+  expect(response.body.message).to.equal('OK', `Expected message: OK, got:  ${JSON.stringify(response.body)}`)
+  if (expected) checkObj(expected, response.body.data)
 }
 
 /**
- * Vérifie qu'on prend une 403, avec le bon message si fourni
+ * Vérifie qu'on prend le code d'erreur status, avec le bon message si fourni
  * @param response
  * @param {string|RegExp} [expectedErrorMessage]
- * @param {number} [status=403]
+ * @param {number} status
  */
-export const itBlocksUser = (response, expectedErrorMessage, status = 403) => {
+export const itFails = (response, expectedErrorMessage, status) => {
   expect(response.status).to.equal(status)
-  expect(response.body.success).to.equal(false, `Expected success: false, got:  ${JSON.stringify(response.body)}`)
   if (typeof expectedErrorMessage === 'string') {
     expect(response.body.message).to.equal(expectedErrorMessage)
   } else if (expectedErrorMessage) {
     expect(response.body.message).to.match(expectedErrorMessage)
   }
 }
+
+/**
+ * Vérifie qu'on prend une 401, avec le bon message si fourni
+ * @param response
+ * @param {string|RegExp} [expectedErrorMessage]
+ */
+export const itNeedsAuth = (response, expectedErrorMessage) => itFails(response, expectedErrorMessage, 401)
+
+/**
+ * Vérifie qu'on prend une 403, avec le bon message si fourni
+ * @param response
+ * @param {string|RegExp} [expectedErrorMessage]
+ */
+export const itBlocksAuthUser = (response, expectedErrorMessage) => itFails(response, expectedErrorMessage, 403)

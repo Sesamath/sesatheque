@@ -48,36 +48,6 @@ function controllerTestFactory (component) {
   // Les routes suivantes n'existent que pour les tests, cf index.js, pour répondre à des test client par mocha
   component.controller('test', function ($session, $json) {
     const controller = this
-    let EntityPersonne
-    /**
-     * Connecte un utilisateur à son compte
-     * ATTENTION : Cette route doit exister seulement pour les tests
-     * @route POST /test/api/login
-     */
-    this.post('api/login', function (context) {
-      if (!EntityPersonne) EntityPersonne = lassi.service('EntityPersonne')
-      const {personne: {oid, pid}} = context.post
-      flow().seq(function () {
-        if (oid) EntityPersonne.match('oid').equals(oid).grabOne(this)
-        else if (pid) EntityPersonne.match('pid').equals(pid).grabOne(this)
-        else context.restKo('personne sans oid ni pid, login impossible')
-      }).seq(function (personne) {
-        if (!personne) return context.restKo(`La personne ${oid || pid} n’existe pas`)
-        $session.login(context, personne)
-        context.rest({message: 'Utilisateur login', personne})
-      }).catch(function (error) {
-        context.restKo(error)
-      })
-    })
-
-    /**
-     * Déconnecte un utilisateur
-     * @route GET /test/api/logout
-     */
-    this.get('api/logout', function (context) {
-      $session.logout(context)
-      context.rest({message: 'Utilisateur logout'})
-    })
 
     // les routes d'erreurs
     Object.entries(errors).forEach(([code, message]) => {
@@ -130,10 +100,41 @@ function controllerTestFactory (component) {
   // faut aussi mettre des routes sur le préfixe /api si on veut tester des requêtes avec body
   // car le body-parser json n'agit que sur ces routes
   component.controller('api/test', function ($session, $json) {
+    let EntityPersonne
+
     // réponse ok avec le contenu qu'on nous envoie
     this.all('echo', function (context) {
       const data = Object.keys(context.post).length ? context.post : undefined
       $json.sendOk(context, data)
+    })
+    /**
+     * Connecte un utilisateur à son compte
+     * ATTENTION : Cette route doit exister seulement pour les tests
+     * @route POST /test/api/login
+     */
+    this.post('login', function (context) {
+      if (!EntityPersonne) EntityPersonne = lassi.service('EntityPersonne')
+      const {personne: {oid, pid}} = context.post
+      flow().seq(function () {
+        if (oid) EntityPersonne.match('oid').equals(oid).grabOne(this)
+        else if (pid) EntityPersonne.match('pid').equals(pid).grabOne(this)
+        else context.restKo('personne sans oid ni pid, login impossible')
+      }).seq(function (personne) {
+        if (!personne) return context.restKo(`La personne ${oid || pid} n’existe pas`)
+        $session.login(context, personne)
+        context.rest({message: 'Utilisateur login', personne})
+      }).catch(function (error) {
+        context.restKo(error)
+      })
+    })
+
+    /**
+     * Déconnecte un utilisateur
+     * @route GET /test/api/logout
+     */
+    this.get('logout', function (context) {
+      $session.logout(context)
+      context.rest({message: 'Utilisateur logout'})
     })
   })
 }
