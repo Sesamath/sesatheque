@@ -7364,9 +7364,9 @@ serve-static@1.13.2, serve-static@^1.13.1:
     request "2.82.0"
     sesajstools "git+https://framagit.org/Sesamath/sesajstools.git"
 
-"sesatheque-client@git+https://framagit.org/Sesamath/sesatheque-client.git#1.2.54":
-  version "1.2.54"
-  resolved "git+https://framagit.org/Sesamath/sesatheque-client.git#2a0d33b286511aa69f4671c865cd6804cee871af"
+"sesatheque-client@git+https://framagit.org/Sesamath/sesatheque-client.git#1.3.0":
+  version "1.3.0"
+  resolved "git+https://framagit.org/Sesamath/sesatheque-client.git#06e134a7f0590f4b39db3802a54595529ca882a2"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
