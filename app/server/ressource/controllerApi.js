@@ -799,6 +799,7 @@ module.exports = function (component) {
 
     /**
      * Retourne une liste de filtres de recherche qui matchent pattern
+     * Retourne un objet {filters: searchFilter[]}, chaque élément du tableau étant searchFilter ({index: string, value: string|number})
      * @route GET /api/autocomplete/:pattern
      */
     controller.get('autocomplete/:pattern', function (context) {
