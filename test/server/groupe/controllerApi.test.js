@@ -44,7 +44,7 @@ import {expect} from 'chai'
 import {
   createGroupe,
   createPersonne,
-  itBlocksUser,
+  // itBlocksUser,
   itNeedsAuth,
   itIsSuccessfull,
   login,
