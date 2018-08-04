@@ -40,6 +40,7 @@
 /* eslint-env mocha */
 import {expect} from 'chai'
 import boot from './boot'
+import {getHtml} from '../../app/server/main/reactPage'
 
 describe('prend un 404 sur les urls inexistantes', function () {
   const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
@@ -52,26 +53,24 @@ describe('prend un 404 sur les urls inexistantes', function () {
   this.timeout(60000)
   before(() => boot().then(setClient))
 
+  const reactPage = getHtml()
+
   paths.forEach(path => {
     // on retourne une promesse
-    it(`404 sur ${path}`, () =>
+    it(`404 sur ${path} avec la page react`, () =>
       _superTestClient
         .get(path)
-        .expect(404)
+        .expect(404, reactPage)
         .expect('Content-Type', /text\/html/)
-        // .expect(404, /Cette page ou ce fichier n’existe pas/)
-        // .expect('Content-Type', /text\/plain/)
     )
   })
   paths.forEach(path => {
-    it(`404 sur /api${path}`, () =>
+    it(`404 sur /api${path} avec un message KO`, () =>
       _superTestClient
         .get('/api' + path)
         .expect(404)
         .expect('Content-Type', /application\/json/)
         .then(res => {
-          expect(res.body.success).not.to.be.ok
-          expect(res.body.message).to.be.ok
           expect(res.body.message).to.contain('n’existe pas')
         })
     )

@@ -127,7 +127,7 @@ module.exports = function beforeTransport (context, data) {
     context.status = 404
     if (isJson) {
       log.debug(reqHttp + ' : pas de status ni content => 404')
-      data.message = 'Not Found'
+      data.message = 'Ce contenu n’existe pas'
     } else {
       // toujours la page react
       context.contentType = 'text/html'
