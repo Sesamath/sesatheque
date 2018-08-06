@@ -73,7 +73,7 @@ function notifyError (data) {
 module.exports = function (component) {
   component.controller('api', function ($ressourceRepository, $ressourceConverter, $ressourceControl, $accessControl, $personneControl, $personneRepository, $json, EntityRessource, EntityExternalRef, $ressourceFetch, $ressourceRemote, $ressourceAutocomplete) {
     /**
-     * Efface une ressource d'après son id, appellera denied ou sendJson avec error ou deleted:id
+     * Efface une ressource d'après son id, appellera $json.sendOk avec deleted:oid (ou une erreur)
      * @private
      * @param {Context} context
      * @param id ou oid ou origine/idOrigine
@@ -367,13 +367,13 @@ module.exports = function (component) {
       let errorMsg
       if (error) {
         errorMsg = (typeof error === 'string') ? error : error.toString()
-        $json.send(context, null, {arrayOnly: [{text: 'Erreur : ' + errorMsg}]})
+        $json.sendOk(context, {arrayOnly: [{text: 'Erreur : ' + errorMsg}]})
       } else if (!Array.isArray(data)) {
         log.error(new Error("sendJsonJstreeArray appelé avec autre chose qu'un array"))
-        $json.send(context, null, data)
+        $json.sendOk(context, data)
       } else {
-        log.debug('sendJson va renvoyer le tableau', data, 'api')
-        $json.send(context, null, {arrayOnly: data})
+        log.debug('$json va renvoyer le tableau', data, 'api')
+        $json.sendOk(context, {arrayOnly: data})
       }
     }
 

@@ -297,7 +297,7 @@ module.exports = function (component) {
     })
 
     /**
-     * Efface un groupe d'après son nom, appellera denied ou sendJson avec error ou deleted:nom
+     * Efface un groupe d'après son nom, appellera denied ou $json avec error ou deleted:nom
      * @private
      * @param {Context} context
      * @param nom
