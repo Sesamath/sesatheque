@@ -56,6 +56,7 @@ const configRessource = {
       url: 'page externe'
     },
     niveaux: common.niveaux,
+    // Attention, il ne faut pas modifier les données suivantes, elles sont utilisées à de nombreux endroits dans le code
     categories: {
       1: 'Activité fixe',
       2: 'Activité animée',

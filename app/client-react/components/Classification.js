@@ -4,6 +4,9 @@ import {labels} from '../../server/ressource/config'
 import listes from '../utils/listesFromConfig'
 import {SelectField} from './fields'
 
+// on exclut la catégorie "À déterminer":
+const categories = listes.categories.filter(({value}) => value !== 9)
+
 /**
  * Pure component pour afficher les select multiples categories, niveaux, typePedagogiques, typeDocumentaires.
  * Doit être dans un redux-form
@@ -17,7 +20,7 @@ const Classification = ({detailed}) => (
       <SelectField
         name="categories"
         label={labels.categories}
-        options={listes.categories}
+        options={categories}
         isMulti
       />
       <SelectField
