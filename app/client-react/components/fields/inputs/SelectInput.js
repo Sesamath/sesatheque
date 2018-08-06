@@ -28,6 +28,7 @@ const SelectInput = ({
 
   return (
     <SelectComponent
+      classNamePrefix="react-select"
       components={components}
       isClearable={typeof isClearable === 'boolean' ? isClearable : isMulti}
       value={isAsync ? value : getValue(value, options, isMulti)}

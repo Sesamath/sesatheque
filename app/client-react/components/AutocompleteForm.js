@@ -75,6 +75,7 @@ class AutocompleteForm extends Component {
         <h1>Recherche assistée (beta)</h1>
         <div className="grid-5">
           <Select
+            classNamePrefix="react-select"
             className="col-4"
             value={this.state.selection}
             clearable
