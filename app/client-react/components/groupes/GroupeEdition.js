@@ -14,7 +14,7 @@ import {
 } from '../fields'
 import {saveGroupe} from '../../actions/groupes'
 import groupesLoader from './hoc/groupesLoader'
-import {personneByOidUrl} from '../../apiRoutes'
+import {getPersonneByOidUrl} from '../../apiRoutes'
 
 const {MultiValueRemove: DefaultMultiValueRemove} = components
 
@@ -33,7 +33,7 @@ MultiValueRemove.propTypes = {
 }
 
 const debouncedGET = debounce((input, setOptions) => {
-  GET(personneByOidUrl({oid: input}))
+  GET(getPersonneByOidUrl({oid: input}))
     .then(({user}) => {
       if (user === null) {
         return setOptions([])

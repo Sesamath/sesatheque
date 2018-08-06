@@ -1,5 +1,5 @@
 import {GET} from '../utils/httpMethods'
-import {currentPersonneUrl} from '../apiRoutes'
+import {getCurrentPersonneUrl} from '../apiRoutes'
 
 const receiveCurrentSession = session => ({
   type: 'RECEIVE_CURRENT_SESSION',
@@ -7,7 +7,7 @@ const receiveCurrentSession = session => ({
 })
 
 export const getCurrentSession = () => dispatch =>
-  GET(currentPersonneUrl())
+  GET(getCurrentPersonneUrl())
     .then((session) => {
       dispatch(receiveCurrentSession(session))
     })
