@@ -95,6 +95,6 @@ module.exports = function (component) {
       .defineIndex('nom', {normalizer: getNormalizedName, unique: true})
       .defineIndex('ouvert', 'boolean')
       .defineIndex('public', 'boolean')
-      .defineIndex('gestionnaires')
+      .defineIndex('gestionnaires', 'string')
   })
 }
