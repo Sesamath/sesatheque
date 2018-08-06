@@ -53,7 +53,7 @@ class AutocompleteForm extends Component {
 
   filterOption ({value}) {
     const key = value.toString()
-    return !this.state.selection.some(option => option.value.toString() === key)
+    return this.state.selection.every(option => option.value.toString() !== key)
   }
 
   searchResources () {
