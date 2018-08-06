@@ -4,7 +4,8 @@ import {labels} from '../../server/ressource/config'
 import listes from '../utils/listesFromConfig'
 import {SelectField} from './fields'
 
-const categories = listes.categories.filter(categorie => categorie.label !== 'À déterminer')
+// on exclut la catégorie "À déterminer":
+const categories = listes.categories.filter(({value}) => value !== 9)
 
 /**
  * Pure component pour afficher les select multiples categories, niveaux, typePedagogiques, typeDocumentaires.
