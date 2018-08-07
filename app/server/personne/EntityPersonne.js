@@ -92,7 +92,10 @@ module.exports = function (component) {
         groupesMembre: {type: 'array', items: {type: 'string'}, uniqueItems: true},
         groupesSuivis: {type: 'array', items: {type: 'string'}, uniqueItems: true},
         infos: {type: 'object'},
-        dateCreation: {instanceof: 'Date'}
+        dateCreation: {instanceof: 'Date'},
+        // cette propriété n'est pas gérée ici, mais elle envoyé par sesalab-sso,
+        // en attendant d'avoir un wrapper dans $auth pour gérer le login on l'accepte
+        structures: {type: 'array'} // à priori des array de {oid: string, value: Object}
       },
       additionalProperties: false,
       required: [

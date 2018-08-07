@@ -27,7 +27,7 @@ const MetaForm = () => (
         <SelectField
           label={labels.type}
           name="type"
-          disabled
+          isDisabled
           options={listes.type}
         />
         <SelectField
