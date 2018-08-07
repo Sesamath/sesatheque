@@ -117,7 +117,7 @@ const form = {
     niveaux: [],
     langue: 'fra',
     publie: true,
-    restriction: '0'
+    restriction: 0
   },
   onSubmit: (values, dispatch) => {
     const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}`))
