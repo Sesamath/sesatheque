@@ -34,6 +34,6 @@ const html = require('./buildReactPage')
 
 const rawOptions = {headers: {'Content-Type': 'text/html'}}
 
-module.exports = function displayReactPage(context) {
+module.exports = function displayReactPage (context) {
   context.raw(html, rawOptions)
 }

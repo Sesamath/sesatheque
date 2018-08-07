@@ -18,7 +18,6 @@ const path = require('path')
 const autoprefixer = require('autoprefixer')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const {html} = require('./app/server/main/displayReactPage')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
