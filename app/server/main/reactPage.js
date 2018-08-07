@@ -72,7 +72,7 @@ const getHtml = () => html
 function displayReactPage (context, data, contentToAdd) {
   // sinon le content-type va imposer le transport html qui veut un template dust
   context.contentType = 'text/html'
-  context.raw(html)
+  context.raw(html, {})
   // on peut fixer nos headers directement sur la réponse
   // context.response.append('Content-Length', reactPagelength)
   // mais express ajoute Content-Length lui-même

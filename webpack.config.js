@@ -199,6 +199,7 @@ if (appConfig.devServer) {
     port: appConfig.devServer.port,
     historyApiFallback: true,
     proxy: {
+      '/': nodeUrl,
       '/api': nodeUrl,
       '/images': nodeUrl,
       '/medias': nodeUrl,
