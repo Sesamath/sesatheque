@@ -4,7 +4,7 @@
  * @param {Response} response
  */
 const handleResponse = (response) => {
-  const {headers, status, statusText} = response
+  const {headers, status, statusText, ok} = response
   const contentType = headers.get('content-type')
   if (!contentType.startsWith('application/json')) {
     // ça peut arriver, notamment sur des erreurs 500 ou 503 (backend unavailable)
@@ -12,7 +12,7 @@ const handleResponse = (response) => {
   }
   return response.json()
     .then(result => {
-      if (response.status > 399) throw Error(result.message || `Erreur ${status} ${statusText}`)
+      if (!ok) throw Error(result.message || `Erreur ${status} ${statusText}`)
       return result.data || result.message
     })
 }
