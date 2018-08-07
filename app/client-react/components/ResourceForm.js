@@ -12,7 +12,7 @@ import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
 import commonValidate from '../utils/validate'
-import {editors} from 'plugins'
+import editors from 'plugins/editors'
 
 const validate = (values) => {
   const errors = commonValidate(values)

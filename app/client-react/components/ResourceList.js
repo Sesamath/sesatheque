@@ -6,7 +6,7 @@ import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
 import queryString from 'query-string'
 import './ResourceList.scss'
-import {icons} from 'plugins'
+import icons from 'plugins/icons'
 
 export const ResourceList = ({
   handlePageClick,

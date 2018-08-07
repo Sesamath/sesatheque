@@ -1,13 +1,22 @@
 import {GET} from '../utils/httpMethods'
 import {currentPersonneUrl} from '../apiRoutes'
+import {addNotification} from './notifications'
 
 const receiveCurrentSession = session => ({
   type: 'RECEIVE_CURRENT_SESSION',
   payload: {session}
 })
 
-export const getCurrentSession = () => dispatch =>
-  GET(currentPersonneUrl())
-    .then((session) => {
-      dispatch(receiveCurrentSession(session))
+export const getCurrentSession = () => dispatch => {
+  const requestSuccess = (session) => {
+    dispatch(receiveCurrentSession(session))
+  }
+  const requestError = (error) => dispatch(addNotification({
+      level: 'error',
+      message: `La récupération de la session a échoué : ${error.message}`
     })
+  )
+
+  return GET(currentPersonneUrl())
+    .then(requestSuccess, requestError)
+}
