@@ -96,12 +96,12 @@ module.exports = function (component) {
     EntityRessource
       .defineIndex('rid', {unique: true, sparse: true}) // rid est obligatoire, mais on l'a pas encore à la création… => sparse
       .defineIndex('cle', {unique: true, sparse: true}) // pour loadByCle
-      .defineIndex('aliasOf', 'string')
-      .defineIndex('origine', 'string')
-      .defineIndex('idOrigine', 'string')
-      .defineIndex('type', 'string')
-      .defineIndex('titre', 'string')
-      .defineIndex('niveaux', 'string')
+      .defineIndex('aliasOf')
+      .defineIndex('origine')
+      .defineIndex('idOrigine')
+      .defineIndex('type')
+      .defineIndex('titre')
+      .defineIndex('niveaux')
       .defineIndex('categories', 'integer')
       .defineIndex('typePedagogiques', 'integer')
       .defineIndex('typeDocumentaires', 'integer')

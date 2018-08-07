@@ -122,9 +122,9 @@ module.exports = function (component) {
     })
 
     EntityPersonne
-      .defineIndex('pid', 'string')
-      .defineIndex('nom', 'string')
-      .defineIndex('email', 'string')
+      .defineIndex('pid')
+      .defineIndex('nom')
+      .defineIndex('email')
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
       // une callback qui renvoie la valeur (ou un tableau de valeurs)
       .defineIndex('roles', 'string', function () {
