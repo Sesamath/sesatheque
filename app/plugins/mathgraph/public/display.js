@@ -160,7 +160,7 @@ module.exports = function display (ressource, options, next) {
         // on ajoute une cb si qq veut le résultat
         if (resultatCallback) {
           // cb sur le bouton save
-          mtgOptions.onSaveCallback = save.bind(null, false)
+          mtgOptions.functionOnSave = save.bind(null, false)
           // + listener unload
           if (container.addEventListener) {
             container.addEventListener('unload', () => { if (isLoaded) save(true) })
