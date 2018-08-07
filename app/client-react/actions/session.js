@@ -12,10 +12,9 @@ export const getCurrentSession = () => dispatch => {
     dispatch(receiveCurrentSession(session))
   }
   const requestError = (error) => dispatch(addNotification({
-      level: 'error',
-      message: `La récupération de la session a échoué : ${error.message}`
-    })
-  )
+    level: 'error',
+    message: `La récupération de la session a échoué : ${error.message}`
+  }))
 
   return GET(currentPersonneUrl())
     .then(requestSuccess, requestError)

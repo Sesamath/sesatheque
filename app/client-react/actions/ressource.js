@@ -128,10 +128,9 @@ export const saveRessource = (
     return success(responseRessource)
   }
   const requestError = (error) => dispatch(addNotification({
-      level: 'error',
-      message: `La sauvegarde a échoué : ${error.message}`
-    })
-  )
+    level: 'error',
+    message: `La sauvegarde a échoué : ${error.message}`
+  }))
 
   return POST(ressourceUrl({format: 'full'}), {body: ressource})
     .then(requestSuccess, requestError)
