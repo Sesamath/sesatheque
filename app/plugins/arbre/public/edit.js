@@ -39,7 +39,6 @@ import 'jstree/dist/themes/default/style.min.css'
 import './arbre.css'
 import 'jstree/dist/themes/default/style.css'
 import { addSesatheques, exists, fetchPublicRef } from 'sesatheque-client/src/fetch'
-import '../../../client/page/bugsnag'
 import { addNode, build, getEnfants } from './lib'
 import {sesatheques} from '../../../server/config'
 

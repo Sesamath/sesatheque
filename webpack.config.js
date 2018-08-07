@@ -43,6 +43,7 @@ const conf = {
     // apiClient: './app/client/apiClient.js',
     client: 'sesatheque-client',
     page: './app/client/page/index.js',
+    bugsnag: './app/client/page/bugsnag.js',
     display: './app/client/display/index.js',
     // edit: './app/client/edit/index.js', // tous les éditeurs sont en react
     import: './app/client/edit/import.js',
