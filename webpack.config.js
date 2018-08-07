@@ -211,6 +211,7 @@ if (appConfig.devServer) {
     historyApiFallback: true,
     proxy: {
       '/api': nodeUrl,
+      '/public': nodeUrl,
       '/images': nodeUrl,
       '/medias': nodeUrl,
       '/vendor': nodeUrl,

@@ -3,6 +3,26 @@
     margin: 0 auto;
     padding: 0;
     clear: both;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 11pt;
+}
+
+
+#display label {
+    font-weight: bold;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.search {
+    margin-bottom: 20px;
+}
+
+.rmq {
+    color: #777;
+    font-size: 10pt;
 }
 
 #display #apercu {
