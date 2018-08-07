@@ -43,9 +43,9 @@ const autosize = require('./autosize')
 const refreshAuth = require('./refreshAuth')
 const inBrowser = (typeof window) !== 'undefined'
 // lui s'ajoute tout seul à window, suffit de le charger
-// if (inBrowser) {
-//   require('./bugsnag')
-// }
+if (inBrowser) {
+  require('./bugsnag')
+}
 
 const w = inBrowser ? window : {}
 const wd = w.document
