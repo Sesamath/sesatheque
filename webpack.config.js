@@ -17,6 +17,8 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 const path = require('path')
 const autoprefixer = require('autoprefixer')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const {html} = require('./app/server/main/displayReactPage')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
@@ -133,8 +135,6 @@ const conf = {
     ]
   },
   plugins: [
-    // génération du html pour react
-    // cf https://github.com/jantimon/html-webpack-plugin#options
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
@@ -191,6 +191,14 @@ if (process.env.SESATHEQUE_CONF) {
 }
 
 if (appConfig.devServer) {
+  conf.plugins.push(
+    new HtmlWebpackPlugin({
+      template: './app/server/main/buildReactPage.js',
+      filename: 'index.html',
+      // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
+      inject: false
+    })
+  )
   const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
   conf.devServer = {
     contentBase: conf.output.path,
