@@ -1,13 +1,13 @@
 import {GET, POST, DELETE} from '../utils/httpMethods'
 import {addNotification} from './notifications'
 import {
-  currentPersonneGroupesUrl,
-  saveGroupeUrl,
-  groupeUrl,
-  groupeJoinUrl,
-  groupeFollowUrl,
-  groupeLeaveUrl,
-  groupeIgnoreUrl
+  getGroupesPersoUrl,
+  getSaveGroupeUrl,
+  getGroupeUrl,
+  getGroupeJoinUrl,
+  getGroupeFollowUrl,
+  getGroupeLeaveUrl,
+  getGroupeIgnoreUrl
 } from '../apiRoutes'
 
 export const loadGroupes = () => dispatch => {
@@ -27,7 +27,7 @@ export const loadGroupes = () => dispatch => {
     })
   )
 
-  return GET(currentPersonneGroupesUrl())
+  return GET(getGroupesPersoUrl())
     .then(requestSuccess, requestError)
 }
 
@@ -61,7 +61,7 @@ export const saveGroupe = (
     })
   )
 
-  return POST(saveGroupeUrl(), {body: groupe})
+  return POST(getSaveGroupeUrl(), {body: groupe})
     .then(requestSuccess, requestError)
 }
 
@@ -88,7 +88,7 @@ export const deleteGroupe = (nom, success = () => {}) => dispatch => {
     })
   )
 
-  return DELETE(groupeUrl({nom}))
+  return DELETE(getGroupeUrl({nom}))
     .then(requestSuccess, requestError)
 }
 
@@ -118,7 +118,7 @@ export const leaveGroupe = (
     })
   )
 
-  return GET(groupeLeaveUrl())
+  return GET(getGroupeLeaveUrl())
     .then(requestSuccess, requestError)
 }
 
@@ -149,7 +149,7 @@ export const ignoreGroupe = (
     })
   )
 
-  return GET(groupeIgnoreUrl({nom}))
+  return GET(getGroupeIgnoreUrl({nom}))
     .then(requestSuccess, requestError)
 }
 
@@ -179,7 +179,7 @@ export const joinGroupe = (
     })
   )
 
-  return GET(groupeJoinUrl({nom}))
+  return GET(getGroupeJoinUrl({nom}))
     .then(requestSuccess, requestError)
 }
 
@@ -209,6 +209,6 @@ export const followGroupe = (
     })
   )
 
-  return GET(groupeFollowUrl({nom}))
+  return GET(getGroupeFollowUrl({nom}))
     .then(requestSuccess, requestError)
 }

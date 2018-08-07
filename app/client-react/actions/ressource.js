@@ -3,9 +3,9 @@ import {addNotification} from './notifications'
 import getUrls from 'sesatheque-client/src/getUrls'
 import {baseUrl} from '../../server/config'
 import {
-  ressourceCloneUrl,
-  ressourceUrl,
-  ressourceForkAliasUrl
+  getRessourceCloneUrl,
+  getRessourceUrl,
+  getForkAliasUrl
 } from '../apiRoutes'
 
 /**
@@ -54,7 +54,7 @@ export const cloneRessource = (
   }))
 
   // ça c'est une anomalie du controleur, ça devrait être /ressource/clone/:oid, vu que les routes risquent de changer on laisse
-  return GET(ressourceCloneUrl({oid}))
+  return GET(getRessourceCloneUrl({oid}))
     .then(requestSuccess, requestError)
 }
 
@@ -80,7 +80,7 @@ export const deleteRessource = (
     message: `La suppression a échoué : ${error.message}`
   }))
 
-  return DELETE(ressourceUrl({oid}))
+  return DELETE(getRessourceUrl({oid}))
     .then(requestSuccess, requestError)
 }
 
@@ -106,7 +106,7 @@ export const forkAlias = (oid) => (dispatch, getState) => {
     }))
   }
 
-  return GET(ressourceForkAliasUrl({oid}))
+  return GET(getForkAliasUrl({oid}))
     .then(requestSuccess, requestError)
 }
 
@@ -132,7 +132,7 @@ export const saveRessource = (
     message: `La sauvegarde a échoué : ${error.message}`
   }))
 
-  return POST(ressourceUrl({format: 'full'}), {body: ressource})
+  return POST(getRessourceUrl({format: 'full'}), {body: ressource})
     .then(requestSuccess, requestError)
 }
 
@@ -158,6 +158,6 @@ export const loadRessource = (oid) => (dispatch, getState) => {
   // (au cas où le load plante)
   // Si le dispatch throw (à cause d'un reducer qui plante) ça remontera (sans renvoyer de promesse)
   return Promise.resolve(dispatch(clearRessource()))
-    .then(() => GET(ressourceUrl({oid, format: 'full'})))
+    .then(() => GET(getRessourceUrl({oid, format: 'full'})))
     .then(requestSuccess, requestError)
 }

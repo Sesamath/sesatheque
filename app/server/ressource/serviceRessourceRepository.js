@@ -191,7 +191,7 @@ module.exports = function (ressourceComponent) {
             if (typeof value === 'string' && value.includes('%')) {
               lassiQuery.match(prop).like(value)
             } else {
-              lassiQuery.match(prop).equals(values)
+              lassiQuery.match(prop).equals(value)
             }
           }
         } else {

@@ -1,5 +1,5 @@
 import {GET} from '../utils/httpMethods'
-import {currentPersonneUrl} from '../apiRoutes'
+import {getCurrentPersonneUrl} from '../apiRoutes'
 import {addNotification} from './notifications'
 
 const receiveCurrentSession = session => ({
@@ -16,6 +16,6 @@ export const getCurrentSession = () => dispatch => {
     message: `La récupération de la session a échoué : ${error.message}`
   }))
 
-  return GET(currentPersonneUrl())
+  return GET(getCurrentPersonneUrl())
     .then(requestSuccess, requestError)
 }

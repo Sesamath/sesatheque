@@ -1,87 +1,188 @@
-// fonction qui permet l'ajout d'une baseUrl
-// devant la route. Pas utile si les routes
-// sont uniquement utilisées dans le cadre
-// du front react mais pourrait servir dans
-// sesatheque-client
+/**
+ * Routes de l'api utilisées dans le front react:
+ * @module apiRoutes
+ */
 
-const addPrefix = route => (params, baseUrl) => {
-  if (baseUrl !== undefined) {
-    return route(params, `${baseUrl}api`)
-  }
+/**
+ * @callback routeGetter
+ * @param {object} routeArgs les arguments de la route
+ * @param {string} [baseUrl] Le fournir pour avoir des routes absolue (http…/api/), sinon les routes commenceront par /api/
+ */
 
-  return route(params, '/api')
+/**
+ * Envelopper un getter pour fixer baseUrl si fourni
+ * Pas utile si les routes sont uniquement utilisées dans le cadre
+ * du front react mais pourrait servir dans sesatheque-client
+ * @private
+ * @param {routeGetter} getRoute
+ * @param {string[]} [argsNeeded] La liste des arguments obligatoires (throw s'ils sont vides undefined)
+ * @todo throw si un arg est une chaîne vide. Il faut d'abord s'assurer que le front ne le fait jamais
+ * @returns {routeGetter}
+ */
+const wrapper = (getRoute, argsNeeded = []) => (params, baseUrl) => {
+  argsNeeded.forEach(arg => {
+    if (params[arg] === undefined) throw Error(`${arg} est un argument obligatoire pour cette route`)
+    // les autres valeurs falsy seront castées en string dans l'url
+  })
+  return (baseUrl ? `${baseUrl}api/` : '/api/') + getRoute(params)
 }
 
-// Routes de l'api utilisées dans le
-// front react:
+const liste = ({search}) => `liste?${search}`
+/**
+ * Liste de ressource
+ * @type {Function}
+ * @param {object} urlParams
+ * @param {string} urlParams.search La queryString de la recherche (sans le ?)
+ * @param {string} [baseUrl]
+ */
+export const getRessourceListUrl = wrapper(liste, ['search'])
 
-const ressourceList = ({search}, prefix) => `${prefix}/liste?${search}`
+const personneByOid = ({oid}) => `personne/byOid/${oid}`
+/**
+ * Personne d'après son oid
+ * @type {routeGetter}
+ * @param {object} urlParams
+ * @param {string} urlParams.oid
+ * @param {string} [baseUrl]
+ * @returns {string}
+ */
+export const getPersonneByOidUrl = wrapper(personneByOid, ['oid'])
 
-export const ressourceListUrl = addPrefix(ressourceList)
+const groupesOuverts = () => `groupes/ouverts`
+/**
+ * Liste des groupes ouverts
+ * @param {object} [urlParams] ignoré
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupesOuvertsUrl = wrapper(groupesOuverts)
 
-const personneByOid = ({oid}, prefix) => `${prefix}/personne/byOid/${oid}`
+const groupesPublics = () => `groupes/publics`
+/**
+ * Liste des groupes publics
+ * @param {object} [urlParams] ignoré
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupesPublicsUrl = wrapper(groupesPublics)
 
-export const personneByOidUrl = addPrefix(personneByOid)
+const personneCurrent = () => `personne/current`
+/**
+ * User courant
+ * @param {object} [urlParams] ignoré
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getCurrentPersonneUrl = wrapper(personneCurrent)
 
-const groupesOuverts = (_, prefix) => `${prefix}/groupes/ouverts`
+const clone = ({oid}) => `clone/${oid}`
+/**
+ * Cloner une ressource
+ * @param {object} urlParams
+ * @param {string} urlParams.oid
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getRessourceCloneUrl = wrapper(clone, ['oid'])
 
-export const groupesOuvertsUrl = addPrefix(groupesOuverts)
+const ressourceUrl = ({oid, format}) => 'ressource' + (oid ? `/${oid}` : '') + (format ? `?format=${format}` : '')
+/**
+ * Récupérer ou modifier une ressource, avec oid pour GET & DELETE, sans pour POST
+ * (toujours sur la route /ressource/ donc avec credentials)
+ * @param {object} urlParams
+ * @param {string} [urlParams.oid]
+ * @param {string} [urlParams.format] passer full pour avoir la résolution des refs externes
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getRessourceUrl = wrapper(ressourceUrl)
 
-const groupesPublics = (_, prefix) => `${prefix}/groupes/publics`
+const createAlias = ({baseId, oid}) => `createAlias/${baseId}/${oid}`
+/**
+ * Créer un alias d'une ressource (interne ou externe, suivant baseId)
+ * (route utilisée par sesatheque-client mais pas le front react)
+ * @param {object} urlParams
+ * @param {string} urlParams.baseId
+ * @param {string} urlParams.oid
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getCreateAliasUrl = wrapper(createAlias, ['baseId', 'oid'])
 
-export const groupesPublicsUrl = addPrefix(groupesPublics)
+const forkAlias = ({oid}) => `forkAlias/${oid}`
+/**
+ * fork un alias pour en faire une ressource à part entière
+ * @param {object} urlParams
+ * @param {string} urlParams.oid
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getForkAliasUrl = wrapper(forkAlias, ['oid'])
 
-const currentPersonne = (_, prefix) => `${prefix}/personne/current`
+const groupesPerso = () => `groupes/perso`
+/**
+ * Liste des groupes du user courant
+ * @param {object} [urlParams] ignoré
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupesPersoUrl = wrapper(groupesPerso)
 
-export const currentPersonneUrl = addPrefix(currentPersonne)
+const saveGroupe = () => `groupe`
+/**
+ * Modifier (ou créer) un groupe (POST)
+ * @param {object} [urlParams] ignoré
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getSaveGroupeUrl = wrapper(saveGroupe)
 
-const ressourceClone = ({oid}, prefix) => `${prefix}/clone/${oid}`
+const groupe = ({nom}) => `groupe/${encodeURIComponent(nom)}`
+/**
+ * groupe d'après son nom (GET ou DELETE)
+ * @param {object} urlParams
+ * @param {string} urlParams.nom
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupeUrl = wrapper(groupe, ['nom'])
 
-export const ressourceCloneUrl = addPrefix(ressourceClone)
+const groupeJoin = ({nom}) => `groupe/rejoindre/${encodeURIComponent(nom)}`
+/**
+ * Rejoindre un groupe (pour le user courant)
+ * @param {object} urlParams
+ * @param {string} urlParams.nom
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupeJoinUrl = wrapper(groupeJoin, ['nom'])
 
-const ressource = ({oid, format}, prefix) => {
-  const search = format ? `?format=${format}` : ''
-  if (oid) {
-    return `${prefix}/ressource/${oid}${search}`
-  }
+const groupeFollow = ({nom}) => `groupe/suivre/${encodeURIComponent(nom)}`
+/**
+ * Suivre un groupe (pour le user courant)
+ * @param {object} urlParams
+ * @param {string} urlParams.nom
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupeFollowUrl = wrapper(groupeFollow, ['nom'])
 
-  return `${prefix}/ressource${search}`
-}
+const groupeLeave = ({nom}) => `groupe/quitter/${encodeURIComponent(nom)}`
+/**
+ * Quitter un groupe (pour le user courant)
+ * @param {object} urlParams
+ * @param {string} urlParams.nom
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupeLeaveUrl = wrapper(groupeLeave, ['nom'])
 
-export const ressourceUrl = addPrefix(ressource)
-
-const ressourceCreateAlias = ({baseId, oid}, prefix) => `${prefix}/createAlias/${baseId}/${oid}`
-
-export const ressourceCreateAliasUrl = addPrefix(ressourceCreateAlias)
-
-const ressourceForkAlias = ({oid}, prefix) => `${prefix}/forkAlias/${oid}`
-
-export const ressourceForkAliasUrl = addPrefix(ressourceForkAlias)
-
-const currentPersonneGroupes = (_, prefix) => `${prefix}/groupes/perso`
-
-export const currentPersonneGroupesUrl = addPrefix(currentPersonneGroupes)
-
-const saveGroupe = (_, prefix) => `${prefix}/groupe`
-
-export const saveGroupeUrl = addPrefix(saveGroupe)
-
-const groupe = ({nom}, prefix) => `${prefix}/groupe/${encodeURIComponent(nom)}`
-
-export const groupeUrl = addPrefix(groupe)
-
-const groupeJoin = ({nom}, prefix) => `${prefix}/groupe/rejoindre/${encodeURIComponent(nom)}`
-
-export const groupeJoinUrl = addPrefix(groupeJoin)
-
-const groupeFollow = ({nom}, prefix) => `${prefix}/groupe/suivre/${encodeURIComponent(nom)}`
-
-export const groupeFollowUrl = addPrefix(groupeFollow)
-
-const groupeLeave = ({nom}, prefix) => `${prefix}/groupe/quitter/${encodeURIComponent(nom)}`
-
-export const groupeLeaveUrl = addPrefix(groupeLeave)
-
-const groupeIgnore = ({nom}, prefix) => `${prefix}/groupe/ignorer/${encodeURIComponent(nom)}`
-
-export const groupeIgnoreUrl = addPrefix(groupeIgnore)
+const groupeIgnore = ({nom}) => `groupe/ignorer/${encodeURIComponent(nom)}`
+/**
+ * Ne plus suivre un groupe (pour le user courant)
+ * @param {object} urlParams
+ * @param {string} urlParams.nom
+ * @param {string} [baseUrl]
+ * @type {routeGetter}
+ */
+export const getGroupeIgnoreUrl = wrapper(groupeIgnore, ['nom'])
