@@ -29,11 +29,8 @@ const publieSelectOptions = [
   {value: false, label: 'non'}
 ]
 
-const SearchForm = ({handleSubmit, isOpen, query}) => {
+const SearchForm = ({handleSubmit, isOpen, query, allowAnyOption}) => {
   if (isOpen) {
-    // faire une recherche sur un auteur ou un groupe est le seul cas où on peut ne pas préciser publie et restriction
-    const allowAnyOption = query && (query.auteurs || query.groupes)
-
     return (
       <form onSubmit={handleSubmit}>
         <fieldset>
@@ -154,7 +151,8 @@ const formDef = reduxForm({
 SearchForm.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  query: PropTypes.object
+  query: PropTypes.object,
+  allowAnyOption: PropTypes.bool
 }
 
 export default formDef(SearchForm)
