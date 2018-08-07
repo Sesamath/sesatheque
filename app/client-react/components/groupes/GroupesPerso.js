@@ -195,7 +195,7 @@ Groupe.propTypes = {
 // la fct générique d'affichage d'une liste
 const List = ({list, component, groupes, ...others}) => {
   const missing = list.filter(nom => !groupes[nom])
-  if (missing.length) throw Error(`l'api a renvoyé des listes incohérentes, il manque les groupes « ${missing.join(' », « ')} »`)
+  if (missing.length) console.error(Error(`l'api a renvoyé des listes incohérentes, il manque les groupes « ${missing.join(' », « ')} »`))
   return (
     <ul className="liste">
       {missing.map(nom => (
