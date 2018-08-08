@@ -17,7 +17,6 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 const path = require('path')
 const autoprefixer = require('autoprefixer')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
@@ -191,30 +190,14 @@ if (process.env.SESATHEQUE_CONF) {
 }
 
 if (appConfig.devServer) {
-  conf.plugins.push(
-    new HtmlWebpackPlugin({
-      template: './app/server/main/buildReactPage.js',
-      filename: 'index.html',
-      // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
-      inject: false
-    })
-  )
   const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
   conf.devServer = {
     contentBase: conf.output.path,
     host: appConfig.devServer.host,
     disableHostCheck: true, // au cas où host ne serait pas dans les dns
     port: appConfig.devServer.port,
-    historyApiFallback: true,
     proxy: {
-      '/api': nodeUrl,
-      '/public': nodeUrl,
-      '/images': nodeUrl,
-      '/medias': nodeUrl,
-      '/vendor': nodeUrl,
-      '/sesasso': nodeUrl,
-      '/sesalabSso': nodeUrl,
-      '/ressource/voir': nodeUrl
+      '/': nodeUrl
     }
   }
 }
