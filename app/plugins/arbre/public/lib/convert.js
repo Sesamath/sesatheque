@@ -30,7 +30,7 @@
  */
 'use strict'
 
-import {icons} from 'plugins'
+import icons from 'plugins/icons'
 import getUrls from 'sesatheque-client/src/getUrls'
 import arbreNodeRef from '../images/arbreRef.gif'
 // import log from 'sesajstools/utils/log'
