@@ -260,7 +260,7 @@ module.exports = function (component) {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
         if (!grp) return $json.sendKo(context, `Le groupe ${nom} n’existe pas`)
-        if (!grp.ouvert && !isManaged(context, grp)) return $json.sendKo(context, `Vous n’avez pas les droits suffisant pour suivre le groupe ${nom}`)
+        if (!grp.public && !isManaged(context, grp)) return $json.sendKo(context, `Vous n’avez pas les droits suffisant pour suivre le groupe ${nom}`)
         groupe = grp
         followGroup(context, nom, this)
       }).seq(function () {
@@ -284,7 +284,7 @@ module.exports = function (component) {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
         if (!grp) return $json.sendKo(context, `Le groupe ${nom} n’existe pas`)
-        if (!grp.public && !isMemberOf(context, grp) && !isManaged(context, grp)) return $json.sendKo(context, `Vous n’avez pas les droits suffisant pour rejoindre le groupe ${nom}`)
+        if (!grp.ouvert && !isMemberOf(context, grp) && !isManaged(context, grp)) return $json.sendKo(context, `Vous n’avez pas les droits suffisant pour rejoindre le groupe ${nom}`)
         groupe = grp
         joinGroup(context, nom, this)
       }).seq(function () {

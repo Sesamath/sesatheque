@@ -76,7 +76,7 @@ module.exports = function (mainComponent) {
     // (en dev on sera pas appelé car c'est webpack-dev-server qui gère)
     // cf app/client-react/App.js pour ne pas oublier de routes
     const reactRoutes = [
-      // '/', inutile car /build/index.html passe avant
+      '/',
       '/autocomplete',
       '/mentionsLegales',
       '/ressource/ajouter',
