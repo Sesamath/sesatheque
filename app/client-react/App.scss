@@ -48,6 +48,12 @@ a:after {
     border-radius: 5px;
   }
 
+  [class*="btn--"] {
+    i {
+      padding-right: 5px;
+    }
+  }
+
 /* --------------------------------------------- */
 /* Écrase le style de knackcss sur les alertes   */
 /* --------------------------------------------- */
