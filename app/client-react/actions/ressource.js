@@ -34,23 +34,28 @@ const clearRessource = () => ({
  * @param {string} oid
  * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
  */
-export const cloneRessource = (oid, success) => (dispatch) => {
+export const cloneRessource = (
+  oid,
+  success = () => {}
+) => (dispatch) => {
+  const requestSuccess = ({oid}) => {
+    dispatch(addNotification({
+      level: 'info',
+      message: 'La ressource a été dupliquée'
+    }))
+
+    if (!oid) throw Error('La réponse n’est pas au format attendu')
+
+    return success(oid)
+  }
+  const requestError = (error) => dispatch(addNotification({
+    level: 'error',
+    message: `La duplication a échouée : ${error.message}`
+  }))
+
   // ça c'est une anomalie du controleur, ça devrait être /ressource/clone/:oid, vu que les routes risquent de changer on laisse
   return GET(getRessourceCloneUrl({oid}))
-    .then(({oid}) => {
-      if (!oid) throw Error('La réponse n’est pas au format attendu')
-
-      dispatch(addNotification({
-        level: 'info',
-        message: 'La ressource a été dupliquée'
-      }))
-      return oid
-    })
-    .then(success)
-    .catch((error) => dispatch(addNotification({
-      level: 'error',
-      message: `La duplication a échouée : ${error.message}`
-    })))
+    .then(requestSuccess, requestError)
 }
 
 /**
@@ -58,22 +63,25 @@ export const cloneRessource = (oid, success) => (dispatch) => {
  * @param {string} oid
  * @returns {promisedThunk} qui supprime puis dispatch clearRessource & redirect
  */
-export const deleteRessource = (oid, success) => (dispatch) => {
+export const deleteRessource = (
+  oid,
+  success = () => {}
+) => (dispatch) => {
+  const requestSuccess = () => {
+    dispatch(addNotification({
+      level: 'info',
+      message: 'La ressource a été supprimée'
+    }))
+    dispatch(clearRessource())
+    return success()
+  }
+  const requestError = (error) => dispatch(addNotification({
+    level: 'error',
+    message: `La suppression a échoué : ${error.message}`
+  }))
+
   return DELETE(getRessourceUrl({oid}))
-    .then(() => {
-      return dispatch(clearRessource())
-    })
-    .then(() => {
-      return dispatch(addNotification({
-        level: 'info',
-        message: 'La ressource a été supprimée'
-      }))
-    })
-    .then(success)
-    .catch((error) => dispatch(addNotification({
-      level: 'error',
-      message: `La suppression a échouée : ${error.message}`
-    })))
+    .then(requestSuccess, requestError)
 }
 
 /**
@@ -88,16 +96,19 @@ export const deleteRessource = (oid, success) => (dispatch) => {
  * @param {string} oid
  * @return {promisedThunk}
  */
-export const forkAlias = (oid) => (dispatch, getState) =>
-  GET(getForkAliasUrl({oid}))
-    .then((ressource) => dispatch(setRessource(ressource)))
-    .catch((error) => {
-      console.error(error)
-      dispatch(addNotification({
-        level: 'error',
-        message: `Impossible d'éditer cette ressource : ${error.message}`
-      }))
-    })
+export const forkAlias = (oid) => (dispatch, getState) => {
+  const requestSuccess = (ressource) => dispatch(setRessource(ressource))
+  const requestError = (error) => {
+    console.error(error)
+    dispatch(addNotification({
+      level: 'error',
+      message: `Impossible d'éditer cette ressource : ${error.message}`
+    }))
+  }
+
+  return GET(getForkAliasUrl({oid}))
+    .then(requestSuccess, requestError)
+}
 
 /**
  * Retourne l'actionCreator qui va sauvegarder la ressource via un POST sur l'api
@@ -108,22 +119,21 @@ export const saveRessource = (
   ressource,
   success = () => {}
 ) => (dispatch) => {
+  const requestSuccess = (responseRessource) => {
+    dispatch(addNotification({
+      level: 'info',
+      message: 'La ressource a été sauvegardée'
+    }))
+    dispatch(setRessource(responseRessource))
+    return success(responseRessource)
+  }
+  const requestError = (error) => dispatch(addNotification({
+    level: 'error',
+    message: `La sauvegarde a échoué : ${error.message}`
+  }))
+
   return POST(getRessourceUrl({format: 'full'}), {body: ressource})
-    .then((responseRessource) => {
-      dispatch(setRessource(responseRessource))
-      return responseRessource
-    })
-    .then(success)
-    .then(() => {
-      return dispatch(addNotification({
-        level: 'info',
-        message: 'La ressource a été sauvegardée'
-      }))
-    })
-    .catch((error) => dispatch(addNotification({
-      level: 'error',
-      message: `La sauvegarde a échouée : ${error.message}`
-    })))
+    .then(requestSuccess, requestError)
 }
 
 /**
@@ -135,17 +145,19 @@ export const loadRessource = (oid) => (dispatch, getState) => {
   const currentRessource = getState().ressource
   if (currentRessource && currentRessource.oid === oid) return
 
+  const requestSuccess = (ressource) => dispatch(setRessource(ressource))
+
+  const requestError = (error) => {
+    console.error(error)
+    dispatch(addNotification({
+      level: 'error',
+      message: `Impossible de charger la ressource : ${error.message}`
+    }))
+  }
   // On lance toujours un clear avant load pour ne pas garder l'ancienne dans le store
   // (au cas où le load plante)
   // Si le dispatch throw (à cause d'un reducer qui plante) ça remontera (sans renvoyer de promesse)
   return Promise.resolve(dispatch(clearRessource()))
     .then(() => GET(getRessourceUrl({oid, format: 'full'})))
-    .then((ressource) => dispatch(setRessource(ressource)))
-    .catch((error) => {
-      console.error(error)
-      dispatch(addNotification({
-        level: 'error',
-        message: `Impossible de charger la ressource : ${error.message}`
-      }))
-    })
+    .then(requestSuccess, requestError)
 }
