@@ -91,7 +91,7 @@ module.exports = function (component) {
      * @param {string|Error} error
      */
     function sendKo (context, error) {
-      let message
+      let message = error
       if (error instanceof Error) {
         log.error(error)
         message = error.toString()
