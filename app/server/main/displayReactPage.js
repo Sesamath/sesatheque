@@ -28,22 +28,12 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
-// la route /debug est gérée par app/main/controllerDebug.js
-/**
- * Controleur de la route /debug/ressource (existe seulement si on est pas en prod)
- * @Controller controlleurDebug
- * @requires {@link $ressourceRepository}
- */
-module.exports = function (component) {
-  component.controller('debug/ressource', function ($ressourceRepository, EntityRessource) {
-    this.get('headers', function (context) {
-      context.json({success: true, headers: context.request.headers})
-    })
-    this.post('headers', function (context) {
-      context.json({success: true, headers: context.request.headers})
-    })
-  })
+const html = require('./buildReactPage')
+
+const rawOptions = {headers: {'Content-Type': 'text/html'}}
+
+module.exports = function displayReactPage (context) {
+  context.raw(html, rawOptions)
 }

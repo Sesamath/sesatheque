@@ -1,4 +1,0 @@
-{! flashBloc !}
-{#messages}
-<p class="flash {cssClass}">{value}</p>
-{/messages}

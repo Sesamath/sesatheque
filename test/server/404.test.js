@@ -71,8 +71,8 @@ describe('prend un 404 sur les urls inexistantes', function () {
         .expect('Content-Type', /application\/json/)
         .then(res => {
           expect(res.body.success).not.to.be.ok
-          expect(res.body.error).to.be.ok
-          expect(res.body.error).to.contain('n’existe pas')
+          expect(res.body.message).to.be.ok
+          expect(res.body.message).to.contain('n’existe pas')
         })
     )
   })

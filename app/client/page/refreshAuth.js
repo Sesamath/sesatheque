@@ -80,7 +80,6 @@ module.exports = function refreshAuth () {
           var data = response.authBloc
           var authBloc = document.getElementById('auth')
           if (authBloc) {
-            // Cf views/auth.dust
             dom.empty(authBloc)
             var a = dom.addElement(authBloc, 'a', {href: '#'})
             dom.addElement(a, 'i', {class: 'fa fa-user'})

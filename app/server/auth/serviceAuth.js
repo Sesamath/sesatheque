@@ -31,15 +31,16 @@
 
 'use strict'
 
-const _ = require('lodash')
+const {isEmpty} = require('lodash')
 const modLog = require('an-log')('$auth')
 
+const displayError = require('../ressource/displayError')
 /**
  * Service d'authentification, qui sert de proxy vers les différents authClient enregistrés
  * @service $auth
  */
 module.exports = function (component) {
-  component.service('$auth', function ($accessControl, $ressourcePage) {
+  component.service('$auth', function ($accessControl) {
     /**
      * Vérifie qu'un service d'authentification est conforme pour pouvoir l'ajouter
      * @private
@@ -117,7 +118,7 @@ module.exports = function (component) {
     function addClient (authClient) {
       try {
         checkValidClient(authClient)
-        if (_.isEmpty(clients)) {
+        if (isEmpty(clients)) {
           // faut activer le controleur
           if (deferredInitController) deferredInitController()
         }
@@ -135,7 +136,7 @@ module.exports = function (component) {
      */
     function deferController (initController) {
       modLog('adding', 'controller')
-      if (_.isEmpty(clients)) deferredInitController = initController
+      if (isEmpty(clients)) deferredInitController = initController
       else initController()
     }
 
@@ -283,11 +284,11 @@ module.exports = function (component) {
     function login (context) {
       if ($accessControl.isAuthenticated(context)) {
         if (context.get.redirect) context.redirect(context.get.redirect)
-        else $ressourcePage.printError(context, new Error('Utilisateur déjà connecté'), 200)
+        else displayError(context, 'Utilisateur déjà connecté')
       } else {
-        var client = getClient(context)
+        const client = getClient(context)
         if (client instanceof Error) {
-          $ressourcePage.printError(context, client)
+          displayError(context, client)
         } else {
           client.login(context)
         }
@@ -304,11 +305,11 @@ module.exports = function (component) {
       if ($accessControl.isAuthenticated(context)) {
         $accessControl.logout(context)
         var client = getClient(context)
-        if (client instanceof Error) $ressourcePage.printError(context, client)
+        if (client instanceof Error) displayError(context, client)
         else client.logout(context)
       } else {
         log.debug('Pas de user en session', context.session)
-        $ressourcePage.printError(context, new Error("Pas d'utilisateur connecté (donc personne à déconnecter)"))
+        displayError(context, 'Pas d’utilisateur connecté (donc personne à déconnecter)')
       }
     }
 

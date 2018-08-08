@@ -28,53 +28,28 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
-module.exports = function (component) {
-  component.service('$flashMessages', function () {
-    /**
-     * Un service pour stocker des message en session, en vue de les afficher à la prochaine page html (par le listener beforeTransport)
-     * @service $flashMessages
-     */
-    var $flashMessages = {}
+const {version} = require('../../../package')
+const {application: {name}} = require('../config')
 
-    /**
-     * Ajoute un message en session
-     * @param {Context} context
-     * @param message
-     * @param level
-     * @memberOf $flashMessages
-     */
-    $flashMessages.add = function (context, message, level) {
-      if (['info', 'warning', 'error'].indexOf(level) < 0) level = 'info'
-      if (!context.session.flashMessages) context.session.flashMessages = []
-      context.session.flashMessages.push({
-        cssClass: level,
-        value: message
-      })
-    }
+const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Médiathèque de ressources pour l'éducation">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" sizes="16x16" href="/favicon.png?${version}">
+  <title>${name}</title>
+</head>
+<body>
+<div id="root" role="document"></div>
+<script
+  type="application/javascript"
+  src="/react.js?${version}"
+></script>
+</body>
+</html>
+`
 
-    /**
-     * Retourne les messages en session et les efface
-     * @param {Context} context
-     * @memberOf $flashMessages
-     */
-    $flashMessages.getAndPurge = function (context) {
-      var data
-      if (context.session.flashMessages) {
-        data = {
-          flashBloc: {
-            $view: 'flash',
-            messages: context.session.flashMessages
-          }
-        }
-        delete context.session.flashMessages
-      }
-
-      return data
-    }
-
-    return $flashMessages
-  })
-}
+module.exports = html

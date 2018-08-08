@@ -21,7 +21,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
-const {version} = require('./package')
 
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
@@ -136,22 +135,11 @@ const conf = {
     ]
   },
   plugins: [
-    // génération du html pour react
-    // cf https://github.com/jantimon/html-webpack-plugin#options
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
-    ]),
-    // utile pour mettre des variables dans le html au build
-    new HtmlWebpackPlugin({
-      title: appConfig.application.name,
-      version: version,
-      template: './app/server/views/index.html',
-      filename: 'index.html',
-      // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
-      inject: false
-    })
+    ])
   ],
 
   // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
@@ -203,6 +191,14 @@ if (process.env.SESATHEQUE_CONF) {
 }
 
 if (appConfig.devServer) {
+  conf.plugins.push(
+    new HtmlWebpackPlugin({
+      template: './app/server/main/buildReactPage.js',
+      filename: 'index.html',
+      // on ne veut pas qu'il mette toutes nos entries en <head> ou <script>
+      inject: false
+    })
+  )
   const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
   conf.devServer = {
     contentBase: conf.output.path,

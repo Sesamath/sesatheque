@@ -2,8 +2,8 @@ const handleErrors = (response) => response.json()
   .then(json => {
     const {success} = json
     if (success === false) {
-      const {error: errorMessage} = json
-      const error = new Error(errorMessage)
+      const {message: errorMessage} = json
+      const error = Error(errorMessage)
       error.status = response.status
       error.success = success
 

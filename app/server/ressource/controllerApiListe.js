@@ -131,7 +131,7 @@ module.exports = function (component) {
       const params = $accessControl.sanitizeSearch(context)
 
       $ressourceRepository.search(params.query, params.queryOptions, function (error, result) {
-        if (error) return $json.sendError(context, error)
+        if (error) return $json.sendKo(context, error)
 
         const {ressources, total} = result
         params.total = total
@@ -148,8 +148,8 @@ module.exports = function (component) {
      */
     controller.get('auteurs', function (context) {
       const pids = context.get.pids && context.get.pids.split(',').filter(pid => pid.indexOf('/') > 0)
-      if (!pids) return $json.sendError(context, 'Argument pids manquant')
-      if (!pids.length) return $json.sendError(context, 'Aucun auteur demandé')
+      if (!pids) return $json.sendKo(context, 'Argument pids manquant')
+      if (!pids.length) return $json.sendKo(context, 'Aucun auteur demandé')
       const {queryOptions} = $accessControl.sanitizeSearch(context)
       const {limit, skip} = queryOptions
       const query = {'auteurs': []}
@@ -201,8 +201,7 @@ module.exports = function (component) {
 
         $json.sendOk(context, retour)
       }).catch(function (error) {
-        log.error(error)
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
@@ -224,7 +223,7 @@ module.exports = function (component) {
       }).seq(function ({ressources, total}) {
         sendListe(context, null, ressources, {total, query, queryOptions})
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
   })

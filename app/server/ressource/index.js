@@ -47,12 +47,9 @@ module.exports = function ressourceComponentFactory (lassi) {
   require('./serviceRessourceControl')(ressourceComponent)
 
   require('./serviceRessourceConverter')(ressourceComponent)
-  require('./serviceRessourcePage')(ressourceComponent)
 
-  // les pages html de consultation / modification
+  // les pages display
   require('./controllerRessource')(ressourceComponent)
-  // un controleur html pour des pages publiques sans session
-  require('./controllerPublic')(ressourceComponent)
   // l'api json
   require('./controllerApi')(ressourceComponent)
   require('./controllerApiListe')(ressourceComponent)

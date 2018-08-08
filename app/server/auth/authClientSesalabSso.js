@@ -30,7 +30,8 @@
  */
 'use strict'
 
-const myBaseUrl = require('../config').application.baseUrl
+const {application: {baseUrl: myBaseUrl}} = require('../config')
+const displayError = require('../ressource/displayError')
 
 /**
  * Enregistre un authClient (de sesalab-sso) auprès du service $auth
@@ -44,7 +45,6 @@ module.exports = function (authName, authBaseId) {
   const $sesalabSsoClient = lassi.service('$sesalabSsoClient')
   const $auth = lassi.service('$auth')
   const $accessControl = lassi.service('$accessControl')
-  const $page = lassi.service('$page')
 
   /**
    * Renvoie les liens à mettre dans le panneau authentifié d'une personne loggée chez nous
@@ -89,7 +89,7 @@ module.exports = function (authName, authBaseId) {
     next()
   })
 
-  $sesalabSsoClient.setErrorCallback($page.printError)
+  $sesalabSsoClient.setErrorCallback(displayError)
 
   // et on enregistre ce client (c'est ce addClient qui râlera si authBaseId est pas autorisée via la conf)
   $auth.addClient({
