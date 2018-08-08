@@ -32,7 +32,7 @@
 'use strict'
 
 const {isEmpty} = require('lodash')
-const reactPage = require('./main/displayReactPage')
+const {getHtml: getReactPageHtml} = require('./main/reactPage')
 
 /**
  * Ajoute des infos dans debug.log
@@ -67,11 +67,6 @@ const getReqHttp = (context) => context.request.method + ' ' + context.request.p
  * @param {Object} data L'objet qui sera envoyé au transport
  */
 module.exports = function beforeTransport (context, data) {
-  const reqHttp = getReqHttp(context)
-  const isJson = context.contentType === 'application/json' || context.request.originalUrl.substr(0, 5) === '/api/'
-  const isVide = isEmpty(data)
-
-  log.debug('beforeTransport sur ' + reqHttp)
   // au cas où deux controleurs veuillent envoyer une réponse, on coupe le 2e tout de suite
   // (pas la peine d'appeler le transport qui dira que la réponse est déjà partie)
   if (context.isSent) return log.error(new Error('2e passage dans beforeTransport'))
@@ -83,71 +78,67 @@ module.exports = function beforeTransport (context, data) {
     return
   }
 
-  if (!isJson) {
-    // si c'est pas du json, vide ou pas on traite ça comme une 404 avec react
-    if (!isVide) log.error('On arrive dans beforeTransport avec du contenu non json, la 404 react a été envoyée mais y’a un pb', data)
-    context.status = 404
-    context.transport = 'raw' // sinon le content-type va imposer le transport html qui veut un template dust
-    context.contentType = 'text/html'
-    // on peut fixer nos headers directement sur la réponse
-    // context.response.append('Content-Length', reactPagelength)
-    // mais express ajoute Content-Length lui-même
-    data.content = reactPage
-    return
+  const url = context.request.originalUrl // démarre avec un /
+  const reqHttp = getReqHttp(context)
+
+  // force json sur /api (en râlant si c'était pas le cas)
+  if (url.startsWith('/api/')) {
+    if (!context.contentType) {
+      log.error(Error(`réponse /api/ sans contentType, faut passer par $json ! (${reqHttp})`))
+      context.contentType = 'application/json'
+    } else if (context.contentType !== 'application/json') {
+      log.error(Error(`route /api/ avec un contentType ${context.contentType} (${reqHttp})`))
+    }
   }
 
-  // tout le reste ne concerne que l'api
-  context.contentType = 'application/json'
+  const isJson = context.contentType === 'application/json'
+  // const isTest = context.contentType === 'application/json' || url.startsWith('/test/')
+  const isVide = isEmpty(data)
 
-  // Gestion des erreurs (lassi ne l'a pas encore fait)
+  // Gestion de l'erreur sur le contexte (lassi ne l'a pas encore fait)
   if (context.error) {
-    // erreurs 500
-    log.error('erreur 500 sur ' + reqHttp, context.error)
-    context.status = 500
-    data.success = false
+    // erreur 500, sauf si un autre code d'erreur a déjà été précisé
+    if (!context.status || context.status < 400) context.status = 500
     // on façonne notre erreur 500
-    let errorMsg = context.error.toString()
-    // on évite le un message incompréhensible pour l'utilisateur (le dev ira dans les logs)
+    let errorMsg = context.error.message || context.error
+    // on évite le message incompréhensible pour l'utilisateur (le dev ira dans les logs)
     if (errorMsg.startsWith('TypeError')) errorMsg = 'Erreur interne : problème de types incohérents'
+    // le reste devrait rester rarissime, on laisse tout pour l'avoir en notification coté client
+    // (les utilisateurs joignent parfois les captures d'écran aux signalements)
     else errorMsg = 'Erreur interne : ' + errorMsg
 
-    // @todo passer en data.message une fois le service $json homogénéisé
-    if (data.error) data.error += '\n' + errorMsg
-    else data.error = errorMsg
+    if (isJson) {
+      // si y'avait déjà un message on le laisse intact
+      if (!data.message) data.message = errorMsg
+    } else {
+      // text/plain
+      context.contentType = 'text/plain'
+      data.content = errorMsg
+    }
+
+    // on log
+    log.error(`erreur ${context.status} sur ${reqHttp}`, context.error)
+
     // on vient de le traiter, pas la peine que lassi le fasse aussi
     delete context.error
 
-  // si le contrôleur a déjà formaté une erreur, on s'en occupe pas
-  } else if (data.success === false && (data.message || data.error)) {
-    return
-  } else {
-    if (isVide) {
+  // cas aucun contenu
+  } else if (isVide) {
+    context.status = 404
+    if (isJson) {
       log.debug(reqHttp + ' : pas de status ni content => 404')
-      context.status = 404
+      data.message = 'Ce contenu n’existe pas'
+    } else {
+      // toujours la page react
+      context.contentType = 'text/html'
+      context.transport = 'raw' // sinon le contentType impose le transport avec vues dust
+      data.content = getReactPageHtml()
     }
 
-    // si y'a un status d'erreur sans message on l'ajoute
-    if (context.status > 400 && !data.error && !data.message) {
-      log.debug('erreur ' + context.status, data)
-      let message
-      switch (context.status) {
-        case 404:
-          message = 'Cette page ou ce fichier n’existe pas'
-          break
-        case 401:
-          message = 'Authentification requise'
-          break
-        case 403:
-          message = 'Droits insuffisants'
-          break
-        default:
-          message = 'Ooops, une erreur ' + context.status + ' est survenue'
-      }
-      data.success = false
-      data.message = message
-      // @todo supprimer ça dès que tout le monde ne regardera que message
-      data.error = message
-    }
+  // sinon ça doit être bon, mais on râle s'il manque la prop message sur le json
+  // (sans l'ajouter, c'est au contrôleur de le faire)
+  } else if (isJson && !data.message) {
+    log.error(Error(`json sans propriété message sur ${reqHttp}`), data)
   }
 
   // on envoie toutes les réponses dans le log de debug

@@ -64,15 +64,18 @@ module.exports = function (component) {
           })
       })
     })
+
     // on liste toutes les entrées à partir de 2 caractères (ça fait un objet avec bcp d'entrées
-    // mais toutes les valeurs sont des refs à un objet existant, pas si lourd en RAM
+    // mais toutes les valeurs sont des refs à un objet existant, pas si lourd en RAM),
+    // ça permet de construire cet objet une seule fois au chargement du module
     const patternToFilters = {}
     Object.entries(knownValues).forEach(([value, filters]) => {
       patternToFilters[value] = filters
       if (value.length < 3) return // pas d'autre pattern que la valeur
+      // sinon on enregistre aussi tous les patterns avec moins de lettres (3 min)
       let i = 2
       while (i++ < value.length) {
-        const pattern = value.substr(0, i)
+        const pattern = value.substr(0, i) // démarre à une longueur 3
         if (patternToFilters[pattern]) {
           patternToFilters[pattern] = patternToFilters[pattern].concat(filters)
         } else {
@@ -85,7 +88,7 @@ module.exports = function (component) {
      * @typedef searchFilter
      * @type Object
      * @property {string} index La propriété de Ressource sur laquelle filtrer
-     * @property {string|number} value La valeur à chercher
+     * @property {string|number} value La valeur à filtrer
      */
     /**
      * Retourne les filtres de recherche qui peuvent correspondre à ce pattern

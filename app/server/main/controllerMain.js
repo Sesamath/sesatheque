@@ -34,7 +34,7 @@ const fs = require('fs')
 const path = require('path')
 
 const {application: {staticMaxAge}} = require('../config')
-const displayReactPage = require('./displayReactPage')
+const {displayReactPage} = require('./reactPage')
 
 const envSesathequeConf = process.env.SESATHEQUE_CONF
 

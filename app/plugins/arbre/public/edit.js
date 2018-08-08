@@ -41,7 +41,7 @@ import 'jstree/dist/themes/default/style.css'
 import { addSesatheques, exists, fetchPublicRef } from 'sesatheque-client/src/fetch'
 import { addNode, build, getEnfants } from './lib'
 import {sesatheques} from '../../../server/config'
-import {icons} from 'plugins'
+import icons from 'plugins/icons'
 
 addSesatheques(sesatheques)
 

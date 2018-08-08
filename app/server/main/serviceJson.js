@@ -34,7 +34,14 @@
 let $accessControl
 
 /**
+ * @typedef sesathequeJsonResponse
+ * @type Object
+ * @property {string} message Jamais vide (OK si rien de spécial)
+ * @property {Object|undefined} [data] Le contenu de la réponse s'il y en a
+ */
+/**
  * Service contenant les méthodes communes aux contrôleurs qui répondent en json
+ * Il garanti de toujours avoir la propriété message et éventuellement une propriété data
  * @service $json
  */
 module.exports = function (component) {
@@ -43,24 +50,28 @@ module.exports = function (component) {
      * Équivalent json de context.denied (qui renvoie du text/plain en 403), mais renvoie toujours du json,
      * avec une 401 si on est pas authentifié (403 sinon)
      * @param {Context} context
-     * @param {string|Error} [msg=Authentification requise|Droits insuffisants] (mis dans le log d'erreur si c'est une Error)
+     * @param {string|Error} [message=Authentification requise|Droits insuffisants] (mis dans le log d'erreur si c'est une Error)
      */
-    function denied (context, msg) {
+    function denied (context, message) {
       if (!$accessControl) $accessControl = lassi.service('$accessControl')
-      context.status = $accessControl.isAuthenticated(context) ? 403 : 401
-      if (!msg) msg = context.status === 401 ? 'Authentification requise' : 'Droits insuffisants'
-      sendKo(context, msg)
+      if ($accessControl.isAuthenticated(context)) {
+        context.status = 403
+        if (!message) message = 'Droits insuffisants'
+      } else {
+        context.status = 401
+        if (!message) message = 'Authentification requise'
+      }
+      context.json({message})
     }
 
     /**
      * Équivalent de context.notFound en json
      * @param {Context} context
-     * @param {string}  msg
+     * @param {string}  [message=Ce contenu n’existe pas]
      */
-    function notFound (context, msg) {
-      if (!msg) msg = 'Ce contenu n’existe pas'
+    function notFound (context, message = 'Ce contenu n’existe pas') {
       context.status = 404
-      context.restKo(msg)
+      context.json({message})
     }
 
     /**
@@ -71,32 +82,34 @@ module.exports = function (component) {
      */
     function send (context, error, data) {
       if (error) sendKo(context, error)
-      else sendOk(context, data)
+      else context.json({message: 'OK', data})
     }
 
     /**
-     * Wrapper de context.restKo (qui log message si c'est une Error), renvoie du 200 avec {success: false, message: 'le message d’erreur'}
+     * Envoie une réponse 400 en json (log error si c'est une Error)
      * @param {Context} context
-     * @param {string|Error} message
+     * @param {string|Error} error
      */
-    function sendKo (context, message) {
-      if (message instanceof Error) {
-        log.error(message)
-        message = message.toString()
+    function sendKo (context, error) {
+      let message
+      if (error instanceof Error) {
+        log.error(error)
+        message = error.toString()
+      } else if (typeof error !== 'string') {
+        if (error) log.error('erreur invalide', error)
+        message = 'Requête invalide'
       }
-      context.restKo(message)
+      context.status = 400
+      context.json({message})
     }
 
     /**
-     * Callback générique de sortie json avec {success:true}, et d'éventuelles autres data
+     * Callback générique de sortie json avec {message: 'OK'}, et éventuelles data
      * @param {Context} context
-     * @param {object} [data] des données à ajouter au {success:true}
+     * @param {object} [data] données à envoyer
      */
     function sendOk (context, data) {
-      if (!data) data = {}
-      data.success = true
-      log.debug('sendOk va renvoyer', data, 'api')
-      context.json(data)
+      context.json({message: 'OK', data})
     }
 
     return {

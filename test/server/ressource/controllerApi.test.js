@@ -90,16 +90,17 @@ describe('controller api ressource', () => {
       .set('X-ApiToken', apiTokenEncoded)
       .send(ressource)
       .expect(200)
-      .then(res => {
-        const result = res.body
-        if (result.error) console.error(result.error)
-        const {oid} = result
-        expect(result).to.deep.equal({success: true, oid}, 'pb sur le body retourné')
+      .then(({body: {message, data}}) => {
+        expect(message).to.equal('OK')
+        const {oid} = data
+        expect(!!oid).to.be.true
         ressource.oid = oid
         ressource.rid = `${myBaseId}/${oid}`
         cleanVolatileProperties(ressource)
-        // la ressource n'existait pas donc le inc doit être incrémenté, la version aussi
-        // ressource.inc++
+        // la ressource n'existait pas donc le inc et version ont été incrémenté, la version aussi
+        // y'a un bug sur l'init de inc & version, on verra plus tard…
+        // ressource.inc = 0
+        // ressource.version = 1
         delete ressource.inc
         delete ressource.version
         return checkDb(ressource)
@@ -127,8 +128,9 @@ describe('controller api ressource', () => {
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
-        .then(({body}) => {
-          if (body.error) return Promise.reject(Error(body.error))
+        .expect(200)
+        .then(({body: {message, data}}) => {
+          expect(message).to.equal('OK')
           checkDb(ressource)
         })
     }
@@ -158,8 +160,9 @@ describe('controller api ressource', () => {
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
-        .then(({body}) => {
-          if (body.error) return Promise.reject(Error(body.error))
+        .expect(200)
+        .then(({body: {message, data}}) => {
+          expect(message).to.equal('OK')
           checkDb(ressource)
         })
     }
@@ -184,6 +187,7 @@ describe('controller api ressource', () => {
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
+        .expect(200)
         .then(() => checkDb(ressource))
     }
     return populate({ressources: 10, personnes: 6})
@@ -201,11 +205,10 @@ describe('controller api ressource', () => {
           .expect(401)
           .expect('Content-type', /application\/json/)
       })
-      .then((res) => {
-        const result = res.body
-        expect(result).to.have.property('success', false, 'Pb sur result.success')
-        expect(result, 'Pb sur result.error').to.have.property('message')
-        expect(Object.keys(result)).to.have.lengthOf(2, 'Pb sur le nb de propriétés de result')
+      .then(({body}) => {
+        expect(body).to.have.property('message')
+        expect(body.message).to.contains('pas de droits suffisants')
+        expect(Object.keys(body)).to.have.lengthOf(1, 'Pb sur le nb de propriétés de result')
         return Promise.resolve()
       })
       .catch(purgeOnError)
@@ -223,12 +226,11 @@ describe('controller api ressource', () => {
           .expect(200)
           .expect('Content-type', /application\/json/)
       })
-      .then((res) => {
-        const result = res.body
-        expect(result).to.have.property('success', true, 'Pb sur result.success')
-        expect(result).to.have.property('deleted', ressource.oid, 'Pb sur result.deleted')
+      .then(({body: result}) => {
+        expect(result).to.have.property('message', 'OK', 'Pb sur result.message')
+        expect(result).to.have.property('data')
+        expect(result.data).to.have.property('deleted', ressource.oid, 'Pb sur result.deleted')
         expect(Object.keys(result)).to.have.lengthOf(2, 'Pb sur le nb de propriétés de result')
-        return Promise.resolve()
       })
       .catch(purgeOnError)
       .then(purge)

@@ -69,7 +69,7 @@ module.exports = function (component) {
      * @param {string[]} [listOptions.warnings]
      */
     function sendListe (context, error, ressources, {query, queryOptions, total}) {
-      if (error) return $json.send(context, error)
+      if (error) return $json.sendKo(context, error)
       // @todo virer ça dès que tout le monde nous appellera avec ces infos
       if (!queryOptions) queryOptions = {}
       if (total === undefined) total = ressources.length

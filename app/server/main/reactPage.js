@@ -30,40 +30,24 @@
  */
 'use strict'
 
-const flow = require('an-flow')
+const html = require('./buildReactPage')
+const getHtml = () => html
 
-module.exports = function controllersApiTestFactory (component) {
-  // Les routes suivantes n'existent que pour les tests, cf index.js
-  component.controller('api/test', function controllersApiTest ($session) {
-    let EntityPersonne
-    /**
-     * Connecte un utilisateur à son compte
-     * ATTENTION : Cette route doit exister seulement pour les tests
-     * @route POST /api/test/login
-     */
-    this.post('login', function (context) {
-      if (!EntityPersonne) EntityPersonne = lassi.service('EntityPersonne')
-      const {personne: {oid, pid}} = context.post
-      flow().seq(function () {
-        if (oid) EntityPersonne.match('oid').equals(oid).grabOne(this)
-        else if (pid) EntityPersonne.match('pid').equals(pid).grabOne(this)
-        else context.restKo('personne sans oid ni pid, login impossible')
-      }).seq(function (personne) {
-        if (!personne) return context.restKo(`La personne ${oid || pid} n’existe pas`)
-        $session.login(context, personne)
-        context.rest({message: 'Utilisateur login', personne})
-      }).catch(function (error) {
-        context.restKo(error)
-      })
-    })
+/**
+ * Ajoute la page react au contenu courant (pour beforeTransport)
+ * @param {Context} context
+ * @param {string} [contentToAdd] Sera ajouté tel quel dans la page, après le div root (juste avant </body>), à priori du js…
+ */
+function displayReactPage (context, data, contentToAdd) {
+  // sinon le content-type va imposer le transport html qui veut un template dust
+  context.contentType = 'text/html'
+  context.raw(html, {})
+  // on peut fixer nos headers directement sur la réponse
+  // context.response.append('Content-Length', reactPagelength)
+  // mais express ajoute Content-Length lui-même
+}
 
-    /**
-     * Déconnecte un utilisateur
-     * @route GET /api/test/logout
-     */
-    this.get('logout', function (context) {
-      $session.logout(context)
-      context.rest({message: 'Utilisateur logout'})
-    })
-  })
+module.exports = {
+  displayReactPage,
+  getHtml
 }

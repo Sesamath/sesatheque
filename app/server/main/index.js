@@ -73,7 +73,7 @@ module.exports = function mainComponentFactory (lassi) {
   if (staging === 'dev') {
     require('./controllerDebug')(mainComponent)
   } else if (staging === 'test') {
-    require('./controllerApiTest')(mainComponent)
+    require('./controllerTest')(mainComponent)
   }
 
   // le listener beforeTransport est dans le composant ressource (il a besoin des services de ressource)
