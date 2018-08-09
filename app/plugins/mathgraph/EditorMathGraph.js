@@ -28,36 +28,15 @@ class EditorMathGraph extends Component {
   }
 
   /**
-   * Synchronise le contenu de l'éditeur graphique avec redux-form
-   */
-  updateStoreFromEditor () {
-    // getParametres correspond au mtgApp.getResult()
-    let parametres = this.props.getParametres()
-    // console.log('retour de mtgApp.getResult()', parametres)
-    if (!parametres) throw new Error('mathgraph ne remonte aucune info')
-    let {fig, level, isExercice} = parametres
-    if (!fig || typeof fig !== 'string') throw new Error('mathgraph ne renvoie pas la figure')
-    if (!level || typeof level !== 'number' || !Number.isInteger(level) || level < 0) {
-      console.error(new Error('level n’est pas un entier positif ou nul (on le fixe à 3)'))
-      // en attendant que ce soit réglé on le fixe arbitrairement à 3
-      level = 3
-    }
-    // on teste pas la propriété score inutilisée ici
-
-    this.props.change('parametres[fig]', fig)
-    this.props.change('parametres[level]', level)
-    this.props.change('parametres[isExercice]', isExercice)
-  }
-
-  /**
   /**
    * Appelée par le onLoad de l'iframe
-   * @param {HTMLElement} iframe Iframe présente dans le DOM
+   * @param {HTshowReloadMessageMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframe) {
+  onIframeLoaded (iframe, fields) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
     const {parametres} = this.props
-    iframe.current.contentWindow.load({parametres}, this.props.getLoadCb(this.updateStoreFromEditor.bind(this)))
+    const win = iframe.current.contentWindow
+    win.load({parametres}, fields)
   }
 
   render () {
@@ -96,8 +75,14 @@ class EditorMathGraph extends Component {
           ) : null}
           <span className="alert--info">Vous pouvez changer les outils disponibles via le bouton &laquo;options&raquo;</span>
           <IframeHandler
+            names={[
+              'parametres[fig]',
+              'parametres[level]',
+              'parametres[isExercise]'
+            ]}
             onLoad={this.onIframeLoaded.bind(this)}
             src={iframeSrc}
+            root="parametres"
           />
         </fieldset>
       </Fragment>
@@ -106,11 +91,9 @@ class EditorMathGraph extends Component {
 }
 
 EditorMathGraph.propTypes = {
-  change: PropTypes.func,
   parametres: PropTypes.object,
   getLoadCb: PropTypes.func,
-  getParametres: PropTypes.func,
-  setUpdateStoreFromEditor: PropTypes.func
+  getInfosParametres: PropTypes.func
 }
 
 export default iframeHelper(formValues({parametres: 'parametres'})(EditorMathGraph))

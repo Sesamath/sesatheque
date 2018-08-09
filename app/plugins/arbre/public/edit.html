@@ -13,7 +13,12 @@
   </div>
   <script src="/editArbre.js"></script>
   <script type="application/javascript">
-    function load (ressource, options, saveCallback) {
+    function load (ressource, options, fields) {
+      const saveCallback = (error, getParametres) => {
+        window.addEventListener('blur', () => {
+          fields.input.onBlur(getParametres())
+        })
+      }
       steditArbre.default(ressource, options, saveCallback)
     }
   </script>

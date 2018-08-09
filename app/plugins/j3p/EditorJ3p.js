@@ -8,26 +8,13 @@ import iframeSrc from './public/editgraphe.html'
 
 class EditorJ3p extends Component {
   /**
-   * Synchronise le contenu de l'éditeur graphique avec redux-form
-   */
-  updateStoreFromEditor () {
-    let parametres = this.props.getParametres()
-    if (!parametres) {
-      // @todo Ajouter un gestionnaire d'erreur avec feedback
-      console.error(new Error('sesaeditgraphe ne remonte aucune info'))
-      return
-    }
-
-    this.props.change('parametres', parametres)
-  }
-
-  /**
    * Appelée par le onLoad de l'iframe
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframe) {
+  onIframeLoaded (iframe, fields) {
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
-    iframe.current.contentWindow.load({parametres}, this.props.getLoadCb(this.updateStoreFromEditor.bind(this)))
+
+    iframe.current.contentWindow.load({parametres}, fields)
   }
 
   render () {
@@ -37,8 +24,11 @@ class EditorJ3p extends Component {
           allowManualEdition
           onLoad={this.onIframeLoaded.bind(this)}
           src={iframeSrc}
-          updateStoreFromEditor={this.updateStoreFromEditor.bind(this)}
-          setUpdateStoreFromEditor={this.props.setUpdateStoreFromEditor}
+          name="parametres"
+          names={[
+            'parametres'
+          ]}
+          root="parametres"
         />
       </fieldset>
     )
@@ -46,14 +36,10 @@ class EditorJ3p extends Component {
 }
 
 EditorJ3p.propTypes = {
-  change: PropTypes.func,
   parametres: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.string
-  ]),
-  getLoadCb: PropTypes.func,
-  getParametres: PropTypes.func,
-  setUpdateStoreFromEditor: PropTypes.func
+  ])
 }
 
 export default iframeHelper(formValues({parametres: 'parametres'})(EditorJ3p))

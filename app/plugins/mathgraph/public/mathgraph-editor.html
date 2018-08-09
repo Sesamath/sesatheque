@@ -36,7 +36,7 @@
 <div id="main"></div>
 <script type="application/javascript">
   // ATTENTION, le code ci-dessous doit être de l'es5 car il ne passe pas par babel
-  function load (ressource, loadCb) {
+  function load (ressource, fields) {
     var parametres = ressource.parametres
     /* glob mtgLoader */
     // pour le fonctionnement, cf le dépôt
@@ -92,22 +92,38 @@
       // ici on laisse le comportement par défaut sur l'enregistrement (en local et pas dans la sesatheque)
       // car on récupère la figure au clic sur enregistrer de la ressource
       callBackAfterReady: function () {
-        function getParametres () {
+        function onBlur () {
           // faut transformer le result en parametres, on override seulement ces 2 props
           // ça mute l'objet parametres reçu au départ mais c'est pas très grave,
           // l'appelant devrait le remplacer par ce qu'on renvoie ici
           var result = mtgApp.getResult()
-          parametres.fig = result.fig
-          parametres.level = result.level
+
+          if (!result) throw new Error('mathgraph ne remonte aucune info')
+          var fig = result.fig
+          var level = result.level
           // on ajoute ça pour savoir si c'est un exo qui renvoie un score calculé par mtg
-          parametres.isExercise = mtgApp.isExercise()
-          return parametres
+          var isExercise = mtgApp.isExercise()
+
+          if (!fig || typeof fig !== 'string') throw new Error('mathgraph ne renvoie pas la figure')
+          if (!level || typeof level !== 'number' || !Number.isInteger(level) || level < 0) {
+            console.error(new Error('level n’est pas un entier positif ou nul (on le fixe à 3)'))
+            // en attendant que ce soit réglé on le fixe arbitrairement à 3
+            level = 3
+          }
+
+          fields.fig.input.onBlur(fig)
+          fields.level.input.onBlur(level)
+          fields.isExercise.input.onBlur(isExercise)
         }
         // on vire le spinner
         const spinner = document.getElementById('spinner')
         while (spinner.firstChild) spinner.removeChild(spinner.firstChild)
-        // et on passe getParametres au parent
-        loadCb(null, getParametres)
+        window.addEventListener('blur', onBlur)
+        // ligne mystérieuse mais indispensable: lorqu'on efface des éléments, un clic à l'extérieur de l'iframe ne déclenche pas de blur
+        // on peut écouter mouseup ou click mais pas mousedown
+        window.addEventListener('click', () => {
+          window.focus()
+        })
       }
     }
     mtgApp = mtgLoader('main', figure, svgOptions, mtgOptions)

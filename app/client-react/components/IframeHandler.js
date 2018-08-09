@@ -1,29 +1,65 @@
 import PropTypes from 'prop-types'
-import React, {Component} from 'react'
+import React, {Component, Fragment} from 'react'
+import {Fields} from 'redux-form'
 import {TextField} from './fields'
+import Warning from './Warning'
+
+const Iframe = ({
+  root,
+  onLoad,
+  src,
+  names,
+  ...otherProps
+}) => {
+  /**
+   * Référence React vers l'iframe
+   * @type {React.Ref}
+   * @see https://reactjs.org/docs/refs-and-the-dom.html
+   */
+  const iframeRef = React.createRef()
+  const fieldsArray = (names.length === 1) ? [otherProps[root]] : Object.entries(otherProps[root]).map(([_, val]) => val)
+
+  return (
+    <Fragment>
+      <iframe
+        onLoad={() => onLoad(iframeRef, otherProps[root])}
+        ref={iframeRef}
+        src={src}
+      />
+      {
+        fieldsArray.map(({
+          meta: {touched, error, warning},
+          input: {name}
+        }) => {
+          if (touched && (error || warning)) {
+            return (<Warning
+              message={error || warning}
+              key={name}
+            />)
+          }
+
+          return null
+        })
+      }
+    </Fragment>
+  )
+}
+
+Iframe.propTypes = {
+  root: PropTypes.string,
+  onLoad: PropTypes.func,
+  src: PropTypes.string,
+  names: PropTypes.arrayOf(PropTypes.string)
+}
 
 class IframeHandler extends Component {
   constructor (props) {
     super(props)
 
-    /**
-     * Référence React vers l'iframe
-     * @type {React.Ref}
-     * @see https://reactjs.org/docs/refs-and-the-dom.html
-     */
-    this.iframe = React.createRef()
-
     this.state = {
       manualEdition: false,
       disableEditor: false
     }
-  }
-
-  /**
-   * Callback appelé au chargement de l'iframe, on passe alors l'iframe à props.onLoad
-   */
-  onLoad () {
-    this.props.onLoad(this.iframe)
   }
 
   onManualEditorChange (annotations) {
@@ -43,13 +79,6 @@ class IframeHandler extends Component {
     this.setState({
       manualEdition: toManual
     })
-
-    if (toManual) {
-      // on met à jour le store d'après l'éditeur graphique
-      this.props.updateStoreFromEditor()
-      // updateStoreFromEditor ne doit plus rien faire (au cas où qqun la rapellerait)
-      this.props.setUpdateStoreFromEditor(() => {})
-    }
   }
 
   render () {
@@ -76,10 +105,12 @@ class IframeHandler extends Component {
             onValidate={this.onManualEditorChange.bind(this)}
           />
         ) : (
-          <iframe
-            onLoad={this.onLoad.bind(this)}
-            ref={this.iframe}
+          <Fields
+            names={this.props.names}
+            root={this.props.root}
+            onLoad={this.props.onLoad}
             src={this.props.src}
+            component={Iframe}
           />
         )}
       </fieldset>
@@ -93,7 +124,9 @@ IframeHandler.propTypes = {
   onLoad: PropTypes.func,
   setUpdateStoreFromEditor: PropTypes.func,
   updateStoreFromEditor: PropTypes.func,
-  name: PropTypes.string
+  name: PropTypes.string,
+  root: PropTypes.string,
+  names: PropTypes.arrayOf(PropTypes.string)
 }
 
 export default IframeHandler
