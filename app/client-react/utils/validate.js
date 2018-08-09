@@ -1,7 +1,7 @@
 import {isEmpty} from 'lodash'
 
 const requiredText = 'Ce champ est obligatoire'
-const requiredFields = ['titre', 'type', 'categories', 'niveaux']
+const requiredFields = ['titre', 'type', 'categories', 'niveaux', 'nom']
 
 const validate = values => {
   const errors = {}
