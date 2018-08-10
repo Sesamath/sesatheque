@@ -119,10 +119,13 @@
         const spinner = document.getElementById('spinner')
         while (spinner.firstChild) spinner.removeChild(spinner.firstChild)
         window.addEventListener('blur', onBlur)
-        // ligne mystérieuse mais indispensable: lorqu'on efface des éléments, un clic à l'extérieur de l'iframe ne déclenche pas de blur
-        // on peut écouter mouseup ou click mais pas mousedown
         window.addEventListener('click', () => {
           window.focus()
+        })
+        window.addEventListener('focus', () => {
+          fields.fig.input.onFocus()
+          fields.level.input.onFocus()
+          fields.isExercise.input.onFocus()
         })
       }
     }

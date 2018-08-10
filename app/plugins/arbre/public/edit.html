@@ -15,8 +15,15 @@
   <script type="application/javascript">
     function load (ressource, options, fields) {
       const saveCallback = (error, getParametres) => {
+        if (error) return console.error(error)
+        window.addEventListener('focus', () => {
+          fields.input.onFocus()
+        })
         window.addEventListener('blur', () => {
           fields.input.onBlur(getParametres())
+        })
+        window.addEventListener('click', () => {
+          window.focus()
         })
       }
       steditArbre.default(ressource, options, saveCallback)

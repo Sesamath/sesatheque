@@ -15,7 +15,13 @@
   function load (ressource, fields) {
     // quand le js sera chargé
     const saveCallback = (error, getParametres) => {
-      if (error) console.log(error)
+      if (error) return console.error(error)
+      window.addEventListener('click', () => {
+        window.focus()
+      })
+      window.addEventListener('focus', () => {
+        fields.input.onFocus()
+      })
       window.addEventListener('blur', () => {
         fields.input.onBlur(getParametres())
       })
