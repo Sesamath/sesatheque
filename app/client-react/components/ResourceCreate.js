@@ -15,7 +15,7 @@ import {
   InputField,
   TextareaField
 } from './fields'
-import validate from '../utils/validate'
+import validate from '../utils/ressourceValidate'
 
 const ResourceCreate = ({
   handleSubmit,

@@ -11,7 +11,7 @@ import resourceLoader from '../hoc/resourceLoader'
 import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
-import commonValidate from '../utils/validate'
+import commonValidate from '../utils/ressourceValidate'
 import editors from 'plugins/editors'
 
 const validate = (values) => {
