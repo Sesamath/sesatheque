@@ -12,6 +12,7 @@ export const ResourceList = ({
   handlePageClick,
   queryOptions,
   resources,
+  showSearchLink,
   total
 }) => {
   // query et queryOptions vont toujours ensemble
@@ -19,12 +20,12 @@ export const ResourceList = ({
     // pas très normal…
     console.error(Error('ResourceList appelé sans query'))
     return (
-      <p className="alert--info">Aucun critère de recherche (<a href="#form">rechercher</a>).</p>
+      <p className="alert--info">Aucun critère de recherche. {showSearchLink ? (<a href="#form">(rechercher)</a>) : ''}.</p>
     )
   }
   if (!total) {
     return (
-      <p className="alert--info">Aucune ressource ne correspond à vos critères de recherche (<a href="#form">modifier</a>).</p>
+      <p className="alert--info">Aucune ressource ne correspond à vos critères de recherche. {showSearchLink ? (<a href="#form">(modifier)</a>) : ''}</p>
     )
   }
   const {skip, limit} = queryOptions
@@ -123,6 +124,7 @@ ResourceList.propTypes = {
     description: PropTypes.string,
     commentaires: PropTypes.string
   })).isRequired,
+  showSearchLink: PropTypes.bool,
   total: PropTypes.number.isRequired,
   handlePageClick: PropTypes.func.isRequired,
   // fourni par resourceListProvider
