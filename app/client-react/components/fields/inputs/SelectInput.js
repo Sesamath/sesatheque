@@ -34,7 +34,7 @@ const SelectInput = ({
       value={isAsync ? value : getValue(value, options, isMulti)}
       name={name}
       onFocus={onFocus}
-      onBlur={() => onBlur(value)}
+      onBlur={() => onBlur()}
       closeMenuOnSelect={!isMulti}
       onChange={(selection, {action, removedValue}) => {
         if (['pop-value', 'remove-value'].includes(action) && removedValue.isUndeletable) {
@@ -59,6 +59,7 @@ const SelectInput = ({
       noOptionsMessage={() => 'Aucun résultat trouvé'}
       loadingMessage={() => 'Recherche en cours'}
       isMulti={isMulti}
+      isSearchable={false}
     />
   )
 }
