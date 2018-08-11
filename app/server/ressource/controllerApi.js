@@ -540,9 +540,8 @@ module.exports = function (component) {
         if (configRessource.editable[ressource.type]) {
           // editable on duplique
           delete ressource.oid
-          delete ressource.rid
-          delete ressource.idOrigine
           ressource.origine = config.application.baseId
+          delete ressource.idOrigine
           // faut mettre le user en auteur sinon il aura pas le droit de supprimer
           if (ressource.auteurs.indexOf(pid) < 0) ressource.auteurs.push(pid)
           // on laisse publie et restriction à l'identique
@@ -551,6 +550,7 @@ module.exports = function (component) {
           // ajout de la relation avec la ressource originale
           if (!ressource.relations) ressource.relations = []
           ressource.relations.push([configRessource.constantes.relations.estVersionDe, ressource.rid])
+          delete ressource.rid
           $ressourceRepository.save(ressource, function (error, ressource) {
             if (error) return $json.sendKo(context, error)
             if (!ressource || !ressource.oid) return $json.send(context, new Error('L’enregistrement de la ressource a échoué'))
