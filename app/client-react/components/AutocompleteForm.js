@@ -59,8 +59,8 @@ class AutocompleteForm extends Component {
   searchResources () {
     const queryFilters = {}
     this.state.selection.forEach(element => {
-      if (queryFilters[element.label] === undefined) queryFilters[element.label] = []
-      queryFilters[element.label].push(element.value.value)
+      if (queryFilters[element.value.filter] === undefined) queryFilters[element.value.filter] = []
+      queryFilters[element.value.filter].push(element.value.filterValue)
     })
 
     search(config.baseId, queryFilters, (error, resources) => {

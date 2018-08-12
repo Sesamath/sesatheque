@@ -35,7 +35,7 @@ const ResourceSearch = (props) => {
         initialValues={initialValues}
         allowAnyOption={allowAnyOption}
       />
-      {!isFormOpen && (<ResourceList {...props} />)}
+      {!isFormOpen && (<ResourceList {...props} showSearchLink={true} />)}
     </Fragment>
   )
 }
