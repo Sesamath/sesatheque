@@ -12,10 +12,22 @@
 <script src="/editGraphe.js"></script>
 <script type="application/javascript">
   // une fct en global que notre parent appellera
-  function load (ressource, loadCb) {
+  function load (ressource, fields) {
     // quand le js sera chargé
+    const saveCallback = (error, getParametres) => {
+      if (error) return console.error(error)
+      window.addEventListener('click', () => {
+        window.focus()
+      })
+      window.addEventListener('focus', () => {
+        fields.parametres.input.onFocus()
+      })
+      window.addEventListener('blur', () => {
+        fields.parametres.input.onBlur(getParametres())
+      })
+    }
     var root = document.getElementById('root')
-    if (typeof j3p_editGraphe !== 'undefined') j3p_editGraphe.default(root, ressource, loadCb)
+    if (typeof j3p_editGraphe !== 'undefined') j3p_editGraphe.default(root, ressource, saveCallback)
     else root.innerText = 'Problème de chargement d’editgraphe ' + typeof j3p_editGraphe
   }
 </script>

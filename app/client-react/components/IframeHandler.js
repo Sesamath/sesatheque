@@ -1,29 +1,17 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
+import {Fields} from 'redux-form'
+import Iframe from './fields/inputs/Iframe'
 import {TextField} from './fields'
 
 class IframeHandler extends Component {
   constructor (props) {
     super(props)
 
-    /**
-     * Référence React vers l'iframe
-     * @type {React.Ref}
-     * @see https://reactjs.org/docs/refs-and-the-dom.html
-     */
-    this.iframe = React.createRef()
-
     this.state = {
       manualEdition: false,
       disableEditor: false
     }
-  }
-
-  /**
-   * Callback appelé au chargement de l'iframe, on passe alors l'iframe à props.onLoad
-   */
-  onLoad () {
-    this.props.onLoad(this.iframe)
   }
 
   onManualEditorChange (annotations) {
@@ -43,13 +31,6 @@ class IframeHandler extends Component {
     this.setState({
       manualEdition: toManual
     })
-
-    if (toManual) {
-      // on met à jour le store d'après l'éditeur graphique
-      this.props.updateStoreFromEditor()
-      // updateStoreFromEditor ne doit plus rien faire (au cas où qqun la rapellerait)
-      this.props.setUpdateStoreFromEditor(() => {})
-    }
   }
 
   render () {
@@ -72,14 +53,15 @@ class IframeHandler extends Component {
           <TextField
             mode="json"
             label="Paramètres"
-            name={this.props.name || 'parametres'}
+            name={this.props.textEditorName}
             onValidate={this.onManualEditorChange.bind(this)}
           />
         ) : (
-          <iframe
-            onLoad={this.onLoad.bind(this)}
-            ref={this.iframe}
+          <Fields
+            names={this.props.iframeNames}
+            onLoad={this.props.onLoad}
             src={this.props.src}
+            component={Iframe}
           />
         )}
       </fieldset>
@@ -91,9 +73,9 @@ IframeHandler.propTypes = {
   allowManualEdition: PropTypes.bool,
   src: PropTypes.string,
   onLoad: PropTypes.func,
-  setUpdateStoreFromEditor: PropTypes.func,
-  updateStoreFromEditor: PropTypes.func,
-  name: PropTypes.string
+  textEditorName: PropTypes.string,
+  root: PropTypes.string,
+  iframeNames: PropTypes.arrayOf(PropTypes.string)
 }
 
 export default IframeHandler

@@ -20,6 +20,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
+const pluginsConfig = require('./app/plugins/webpack.plugins')
 
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
@@ -139,7 +140,8 @@ const conf = {
       {from: './node_modules/sesaeditgraphe/dist'},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
-    ])
+    ]),
+    ...pluginsConfig
   ],
 
   // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
