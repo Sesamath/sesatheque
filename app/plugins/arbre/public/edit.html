@@ -17,10 +17,10 @@
       const saveCallback = (error, getParametres) => {
         if (error) return console.error(error)
         window.addEventListener('focus', () => {
-          fields.input.onFocus()
+          fields.enfants.input.onFocus()
         })
         window.addEventListener('blur', () => {
-          fields.input.onBlur(getParametres())
+          fields.enfants.input.onBlur(getParametres())
         })
         window.addEventListener('click', () => {
           window.focus()

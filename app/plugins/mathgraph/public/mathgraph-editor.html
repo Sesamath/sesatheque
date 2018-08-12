@@ -111,9 +111,9 @@
             level = 3
           }
 
-          fields.fig.input.onBlur(fig)
-          fields.level.input.onBlur(level)
-          fields.isExercise.input.onBlur(isExercise)
+          fields.parametres.fig.input.onBlur(fig)
+          fields.parametres.level.input.onBlur(level)
+          fields.parametres.isExercise.input.onBlur(isExercise)
         }
         // on vire le spinner
         const spinner = document.getElementById('spinner')
@@ -123,9 +123,9 @@
           window.focus()
         })
         window.addEventListener('focus', () => {
-          fields.fig.input.onFocus()
-          fields.level.input.onFocus()
-          fields.isExercise.input.onFocus()
+          fields.parametres.fig.input.onFocus()
+          fields.parametres.level.input.onFocus()
+          fields.parametres.isExercise.input.onFocus()
         })
       }
     }

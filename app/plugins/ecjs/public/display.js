@@ -98,6 +98,17 @@ module.exports = function display (ressource, options, next) {
         const $divExoClc = $(divExoClc)
 
         const isOptionsEditorMode = typeof options.onLoadEditorCb === 'function'
+
+        if (isOptionsEditorMode) {
+          const {exoBase: pristineExoBase} = CLC
+          const exoBase = (arg) => {
+            const exo = pristineExoBase(arg)
+            window.currentExo = exo
+            return exo
+          }
+          CLC.exoBase = exoBase
+        }
+
         // les options clc
         const optionsClc = ressource.parametres.options || {}
         if (options.hasOwnProperty('parametrable')) optionsClc.parametrable = options.parametrable

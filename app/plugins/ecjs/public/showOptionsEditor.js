@@ -30,36 +30,17 @@
  */
 'use strict'
 
-const page = require('../../../client/page/index')
 const log = require('sesajstools/utils/log')
 
 // helper de display pour afficher l'éditeur des options calculatice
 module.exports = function showOptionsEditor ($, {exoClc, ressource, options}) {
   // on a pas de méthode pour afficher les options (le paramétrage),
   // faut utiliser jQuery pour cliquer sur la roue crantée à la place de l'utilisateur,
-  // (puis sur valider quand on voudra les valeurs, et il faudra alors chercher de nouveau
-  // le bouton pour repasser en mode édition du paramétrage
-
-  // clc a un event pour la validation des options, mais
-  // on veut pas ajouter un nouveau listener à chaque fois qu'on nous demande
-  // les paramètres, donc on en met un seul avec une liste d'attente de cb
-  const listeners = []
-  exoClc.on('validationOption', null, function (event, options) {
-    if (options) {
-      ressource.parametres.options = options
-      // si y'a des listener on les appelle (et les vire)
-      while (listeners.length) listeners.pop()(ressource.parametres)
-    } else {
-      page.addError(Error('La validation des options calcul@tice ne renvoie rien'))
-    }
-  })
 
   // itérations pour rechercher nos éléments
   const maxIterations = 300
   const delayMs = 10
   const maxWait = maxIterations * delayMs / 1000
-  // le bouton valider qui sera initialisé à chaque affichage des options
-  let $buttonValidate
 
   const goToEditorMode = () => new Promise((resolve, reject) => {
     // clique sur le bouton paramétrage (la roue crantée)
@@ -97,7 +78,6 @@ module.exports = function showOptionsEditor ($, {exoClc, ressource, options}) {
           }
           log(`on a trouvé le bouton valider après ${i * delayMs}ms d’attente`)
           $button.hide()
-          $buttonValidate = $button
           resolve()
         } else {
           i++
@@ -111,28 +91,8 @@ module.exports = function showOptionsEditor ($, {exoClc, ressource, options}) {
     getAndHideValidate()
   }))
 
-  // on crée une fct pour récupérer ces paramètres
-  const getParametres = () => new Promise((resolve, reject) => {
-    if (!$buttonValidate) return goToEditorMode().then(getParametres)
-    const timerId = setTimeout(
-      () => reject(Error('Impossible de récupérer les options de cet exercice calcul@tice')),
-      1000
-    )
-    // on ajoute un listener sur les options
-    listeners.push((parametres) => {
-      clearTimeout(timerId)
-      resolve(parametres)
-      // le clic fait repasser en affichage standard, faut revenir aux options
-      // mais faut laisser jQuery faire le reste d'abord
-      setTimeout(() => goToEditorMode().catch(page.addError), 0)
-    })
-    // et on réclame
-    $buttonValidate.click()
-  })
-
   // on lance la bascule du mode d'affichage
   goToEditorMode().then(() => {
-    // et on file cette fct getParametres à celui qui la voulait
-    options.onLoadEditorCb(null, getParametres)
+    options.onLoadEditorCb(null)
   }).catch(options.onLoadEditorCb)
 }

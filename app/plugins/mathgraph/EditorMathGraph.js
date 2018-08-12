@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, {Fragment, Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from 'client-react/components/IframeHandler'
-import iframeHelper from 'client-react/hoc/iframeHelper'
 import {IntegerField, SwitchField} from 'client-react/components/fields'
 // page de l'éditeur mathgraph à insérer en iframe
 import iframeSrc from './public/mathgraph-editor.html'
@@ -75,14 +74,13 @@ class EditorMathGraph extends Component {
           ) : null}
           <span className="alert--info">Vous pouvez changer les outils disponibles via le bouton &laquo;options&raquo;</span>
           <IframeHandler
-            names={[
+            iframeNames={[
               'parametres[fig]',
               'parametres[level]',
               'parametres[isExercise]'
             ]}
             onLoad={this.onIframeLoaded.bind(this)}
             src={iframeSrc}
-            root="parametres"
           />
         </fieldset>
       </Fragment>
@@ -96,4 +94,4 @@ EditorMathGraph.propTypes = {
   getInfosParametres: PropTypes.func
 }
 
-export default iframeHelper(formValues({parametres: 'parametres'})(EditorMathGraph))
+export default formValues({parametres: 'parametres'})(EditorMathGraph)

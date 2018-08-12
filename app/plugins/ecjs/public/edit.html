@@ -11,15 +11,47 @@
   // ATTENTION, le code ci-dessous doit être de l'es5 car il ne passe pas par babel
 
   // une fct en global que notre parent appellera quand il aura eu l'evt load sur l'iframe
-  window.load = function loadEcjsEditor (ressource, loadCb) {
-    const container = document.getElementById('root')
-    const options = {
+  window.load = function loadEcjsEditor (parametres, fields) {
+    var optionsField = fields.parametres.options
+    var container = document.getElementById('root')
+    var options = {
       container,
-      onLoadEditorCb: loadCb
+      onLoadEditorCb: (error) => {
+        if (error) return console.error(error)
+        var initialOptions = window.currentExo.options
+        var $form = $('.bloc-parametre')
+
+        $form.on('change', function() {
+          var options = $.extend({}, initialOptions)
+          // bout de code extrait du fichier minifié scripts.js...
+          // on lit les valeurs du formulaire et on met à jour options
+          var a = $form.serializeArray();
+          $.each(a, function(a, b) {
+              var c = b.name;
+              $.isArray(options[c]) && (options[c] = [])
+          }),
+          $.each(a, function(a, b) {
+            var c = b.name;
+            $.isArray(options[c]) ? isNaN(Number(b.value)) ? "true" === b.value ? options[c].push(!0) : "false" === b.value ? options[c].push(!1) : options[c].push(b.value) : options[c].push(Number(b.value)) : isNaN(Number(b.value)) ? "true" === b.value ? options[c] = !0 : "false" === b.value ? options[c] = !1 : options[c] = b.value : options[c] = Number(b.value)
+          }),
+          void 0 !== options.temps_question && (options.tempsQuestion = options.temps_question),
+          void 0 !== options.temps_max && (options.tempsExo = options.temps_max),
+          void 0 !== options.temps_exo && (options.tempsExo = options.temps_exo),
+          void 0 !== options.nbre_questions && (options.totalQuestion = options.nbre_questions),
+          // fin de l'extrait
+          optionsField.input.onChange(options)
+        })
+        window.addEventListener('blur', function () {
+          optionsField.input.onBlur()
+        })
+        window.addEventListener('focus', function () {
+          optionsField.input.onFocus()
+        })
+      }
     }
     // le parent nous file que les paramètres, faut au moins ajouter le type
-    ressource.type = 'ecjs'
-    if (typeof stdisplay === 'function') stdisplay(ressource, options)
+    parametres.type = 'ecjs'
+    if (typeof stdisplay === 'function') stdisplay(parametres, options)
     else root.innerText = 'Problème de chargement de l’éditeur calcul@tice'
   }
 </script>

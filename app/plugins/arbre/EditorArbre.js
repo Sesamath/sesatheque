@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from 'client-react/components/IframeHandler'
-import iframeHelper from 'client-react/hoc/iframeHelper'
 // page contenant l'éditeur d'arbre à insérer en iframe
 import iframeSrc from './public/edit.html'
 // cf webpackConfigLoader.js pour les valeurs exportées à un browser
@@ -42,11 +41,10 @@ class EditorArbre extends Component {
           allowManualEdition
           onLoad={this.onIframeLoaded.bind(this)}
           src={iframeSrc}
-          name="enfants"
-          names={[
+          textEditorName="enfants"
+          iframeNames={[
             'enfants'
           ]}
-          root="enfants"
         />
       </fieldset>
     )
@@ -67,11 +65,9 @@ EditorArbre.propTypes = {
   titre: PropTypes.string
 }
 
-export default iframeHelper(
-  formValues({
-    aliasOf: 'aliasOf',
-    enfants: 'enfants',
-    rid: 'rid',
-    titre: 'titre'
-  })(EditorArbre)
-)
+export default formValues({
+  aliasOf: 'aliasOf',
+  enfants: 'enfants',
+  rid: 'rid',
+  titre: 'titre'
+})(EditorArbre)
