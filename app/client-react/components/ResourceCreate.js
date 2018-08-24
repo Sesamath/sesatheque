@@ -4,9 +4,9 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {reduxForm} from 'redux-form'
 import Classification from './Classification'
-import {saveRessource} from '../actions/ressource'
 import {labels} from '../../server/ressource/config'
 import listes from '../utils/listesFromConfig'
+import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
 
 import {
@@ -15,7 +15,7 @@ import {
   InputField,
   TextareaField
 } from './fields'
-import validate from '../utils/validate'
+import validate from '../utils/ressourceValidate'
 
 const ResourceCreate = ({
   handleSubmit,
@@ -117,15 +117,19 @@ const form = {
     niveaux: [],
     langue: 'fra',
     publie: true,
-    restriction: '0'
+    restriction: 0
   },
-  onSubmit: (values, dispatch) => {
+  onSubmit: (values, dispatch, {
+    saveRessource
+  }) => {
     const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}`))
-    dispatch(saveRessource(values, onSave))
+    saveRessource(values, onSave)
   },
   validate
 }
 
 export default ensureLogged(
-  reduxForm(form)(ResourceCreate)
+  resourceSaver(
+    reduxForm(form)(ResourceCreate)
+  )
 )

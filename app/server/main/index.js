@@ -63,9 +63,6 @@ module.exports = function mainComponentFactory (lassi) {
   require('./controllerMain')(mainComponent)
   // pour /api/checkSesalab et /api/checkSesatheque
   require('./controllerApi')(mainComponent)
-  require('./servicePage')(mainComponent)
-  require('./serviceFlashMessages')(mainComponent)
-  require('./serviceForm')(mainComponent)
   require('./serviceJson')(mainComponent)
 
   // pour la doc
@@ -76,7 +73,7 @@ module.exports = function mainComponentFactory (lassi) {
   if (staging === 'dev') {
     require('./controllerDebug')(mainComponent)
   } else if (staging === 'test') {
-    require('./controllerApiTest')(mainComponent)
+    require('./controllerTest')(mainComponent)
   }
 
   // le listener beforeTransport est dans le composant ressource (il a besoin des services de ressource)

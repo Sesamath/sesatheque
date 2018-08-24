@@ -52,7 +52,8 @@ TextEditor.propTypes = {
   input: PropTypes.shape({
     value: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.object
+      PropTypes.object,
+      PropTypes.array
     ]),
     onBlur: PropTypes.func,
     onChange: PropTypes.func,

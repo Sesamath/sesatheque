@@ -5,7 +5,17 @@ import config from '../../server/config'
 import {labels, listes} from '../../server/ressource/config'
 import {Async as Select} from 'react-select'
 import {ResourceList} from './ResourceList'
-import 'react-select/dist/react-select.css'
+
+class OptionValue {
+  constructor (filter, filterValue) {
+    this.filter = filter
+    this.filterValue = filterValue
+  }
+
+  toString () {
+    return `${this.filter}-${this.filterValue}`
+  }
+}
 
 const optionValueToText = (label, value) => listes[label] ? listes[label][value] : value
 const optionLabelToText = label => labels[label]
@@ -13,26 +23,22 @@ const optionLabelToText = label => labels[label]
 const debouncedGET = debounce((input, callback) => {
   autocomplete(config.baseId, input, (error, filters) => {
     if (error) return console.error(error)
-
     const options = []
     for (const filter in filters) {
-      for (const value in filters[filter]) {
-        // Note : l'attribut "value" possède l'ensemble d'une option pour éviter
-        // un bug lié à l'unicité d'une clé qui provoque des comportements étranges avec react-select
+      filters[filter].forEach(filterValue => {
         options.push({
-          value: {filter, value: filters[filter][value]},
-          label: filter
+          value: new OptionValue(filter, filterValue),
+          label: `${optionLabelToText(filter)}: ${optionValueToText(filter, filterValue)}`
         })
-      }
+      })
     }
-
-    return callback(null, { options })
+    return callback(options)
   })
 }, 500)
 
-const getOptions = (input, callback) => {
-  if (!input || input.length <= 2) return callback(null, ({ options: [] }))
-  debouncedGET(input, callback)
+const getOptions = (input, setOptions) => {
+  if (!input || input.length <= 2) return setOptions([])
+  debouncedGET(input, setOptions)
 }
 
 class AutocompleteForm extends Component {
@@ -45,11 +51,16 @@ class AutocompleteForm extends Component {
     }
   }
 
+  filterOption ({value}) {
+    const key = value.toString()
+    return this.state.selection.every(option => option.value.toString() !== key)
+  }
+
   searchResources () {
     const queryFilters = {}
     this.state.selection.forEach(element => {
-      if (queryFilters[element.label] === undefined) queryFilters[element.label] = []
-      queryFilters[element.label].push(element.value.value)
+      if (queryFilters[element.value.filter] === undefined) queryFilters[element.value.filter] = []
+      queryFilters[element.value.filter].push(element.value.filterValue)
     })
 
     search(config.baseId, queryFilters, (error, resources) => {
@@ -58,36 +69,25 @@ class AutocompleteForm extends Component {
     })
   }
 
-  optionRenderer (option) {
-    return `${optionValueToText(option.label, option.value.value)} (${optionLabelToText(option.label)})`
-  }
-
-  valueRenderer (option) {
-    return `${optionLabelToText(option.label)} : ${optionValueToText(option.label, option.value.value)}`
-  }
-
   render () {
     return (
       <Fragment>
         <h1>Recherche assistée (beta)</h1>
         <div className="grid-5">
           <Select
+            classNamePrefix="react-select"
             className="col-4"
             value={this.state.selection}
-            clearable={true}
+            clearable
             closeOnSelect={false}
-            onBlurResetsInput={false}
-            onCloseResetsInput={false}
-            filterOption={() => (true)}
-            removeSelected={false}
+            filterOption={this.filterOption.bind(this)}
+            hideSelectedOptions
             onChange={selection => this.setState({selection})}
-            optionRenderer={this.optionRenderer}
-            valueRenderer={this.valueRenderer}
             placeholder="Votre recherche"
-            noResultsText="Aucun résultat trouvé"
-            loadingPlaceholder="Recherche en cours"
+            noOptionsMessage={() => 'Aucun résultat trouvé'}
+            loadingMessage={() => 'Recherche en cours'}
             loadOptions={getOptions}
-            multi={true}
+            isMulti
           />
           <button
             className="btn btn--rounded"

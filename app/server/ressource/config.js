@@ -56,6 +56,7 @@ const configRessource = {
       url: 'page externe'
     },
     niveaux: common.niveaux,
+    // Attention, il ne faut pas modifier les données suivantes, elles sont utilisées à de nombreux endroits dans le code
     categories: {
       1: 'Activité fixe',
       2: 'Activité animée',
@@ -138,7 +139,9 @@ const configRessource = {
   },
   // lors de l'itération sur les listes, ça prend l'ordre numérique des noms de propriétés, on peut fixer notre ordre ici
   listesOrdonnees: {
+    restriction: [0, 1, 2, 3],
     niveaux: common.ordre.niveaux,
+    categories: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     typeDocumentaires: [9, 5, 6, 12, 11, 1, 2],
     typePedagogiques: [3, 9, 91, 92, 191, 7, 2, 81, 82, 13, 141, 151, 21, 22]
   }, // fin des listes

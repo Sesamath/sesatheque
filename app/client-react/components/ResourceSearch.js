@@ -6,7 +6,7 @@ import ResourceList from './ResourceList'
 import resourceListProvider from '../hoc/resourceListProvider'
 
 const ResourceSearch = (props) => {
-  const {hash, query} = props
+  const {hash, query, allowAnyOption} = props
   const defaultFormValues = {
     categories: [],
     niveaux: [],
@@ -33,13 +33,16 @@ const ResourceSearch = (props) => {
         isOpen={isFormOpen}
         query={query}
         initialValues={initialValues}
+        allowAnyOption={allowAnyOption}
       />
-      {!isFormOpen && (<ResourceList {...props} />)}
+      {!isFormOpen && (<ResourceList {...props} showSearchLink={true} />)}
     </Fragment>
   )
 }
 
 ResourceSearch.propTypes = {
+  /** fourni par hoc resourceListProvider (construit à partir de query) */
+  allowAnyOption: PropTypes.bool,
   /** fourni par le router (hoc resourceListProvider) */
   hash: PropTypes.string,
   /** fourni par hoc resourceListProvider (construit à partir de search) */

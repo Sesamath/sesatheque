@@ -2,6 +2,7 @@ import {push} from 'connected-react-router'
 import {debounce} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
+import {components} from 'react-select'
 import {withProps} from 'recompose'
 import {formValues, reduxForm} from 'redux-form'
 import {GET} from '../../utils/httpMethods'
@@ -9,33 +10,54 @@ import {
   SwitchField,
   InputField,
   TextareaField,
-  AsyncSelectField
+  SelectField
 } from '../fields'
 import {saveGroupe} from '../../actions/groupes'
 import groupesLoader from './hoc/groupesLoader'
 import {getPersonneByOidUrl} from '../../apiRoutes'
+import validate from '../../utils/groupeValidate'
 
-const debouncedGET = debounce((input, callback) => {
+const {MultiValueRemove: DefaultMultiValueRemove} = components
+
+const MultiValueRemove = ({
+  data,
+  ...props
+}) => (data.isUndeletable ? null : (
+  <DefaultMultiValueRemove
+    data={data}
+    {...props}
+  />
+))
+
+MultiValueRemove.propTypes = {
+  data: PropTypes.shape({})
+}
+
+const debouncedGET = debounce((input, setOptions) => {
   GET(getPersonneByOidUrl({oid: input}))
     .then(({user}) => {
-      if (user === null) { return callback(null, ({ options: [] })) }
+      if (user === null) {
+        return setOptions([])
+      }
       const {oid, prenom, nom} = user
 
-      return callback(null, {
-        options: [
-          {
-            value: oid,
-            label: `${prenom} ${nom} (${oid})`
-          }
-        ]
-      })
+      return setOptions([
+        {
+          value: oid,
+          label: `${prenom} ${nom} (${oid})`
+        }
+      ])
     })
-    .catch(error => callback(error, null))
+    .catch(error => {
+      console.error(error)
+      setOptions([])
+    })
 }, 500)
 
-const getOptions = (input, callback) => {
-  if (!input) return callback(null, ({ options: [] }))
-  debouncedGET(input, callback)
+const emptyInputRe = /^\s*$/
+const getOptions = (input, setOptions) => {
+  if (emptyInputRe.test(input)) return setOptions([])
+  debouncedGET(input, setOptions)
 }
 
 /**
@@ -89,11 +111,13 @@ const GroupeEdition = ({
           Ajouter des gestionnaires
           <span className="remarque"> (saisir l’identifiant d’un utilisateur, ATTENTION l’ajout est irrévocable)</span>
 
-          <AsyncSelectField
+          <SelectField
+            components={{ MultiValueRemove }}
             placeholder="Saisir un oid"
             name="gestionnaires"
             loadOptions={getOptions}
-            multi
+            isMulti
+            isClearable={false}
           />
         </label>
       </fieldset>
@@ -149,7 +173,7 @@ const getInitialValues = ({
   const gestionnairesItems = gestionnaires.map((oid, index) => ({
     value: oid,
     label: `${gestionnairesNames[index]} (${oid})`,
-    clearableValue: false
+    isUndeletable: true
   }))
   const initialValues = {
     ...others,
@@ -170,7 +194,8 @@ const onSubmit = ({gestionnaires, ...others}, dispatch) => {
 
 const formDefinition = {
   form: 'groupe-edition',
-  onSubmit
+  onSubmit,
+  validate
 }
 
 const propsFromForm = {

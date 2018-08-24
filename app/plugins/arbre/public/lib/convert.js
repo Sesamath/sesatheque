@@ -30,8 +30,9 @@
  */
 'use strict'
 
-import {icons} from 'plugins'
+import icons from 'plugins/icons'
 import getUrls from 'sesatheque-client/src/getUrls'
+import arbreNodeRef from '../images/arbreRef.gif'
 // import log from 'sesajstools/utils/log'
 
 /**
@@ -142,7 +143,7 @@ export function toJstree (ressource) {
   if (ressource.type === 'arbre') {
     node.children = getJstreeChildren(ressource)
     // c'est une ref dont on a pas encore les enfants, on met l'icone ref
-    if (node.children === true && ressource.aliasOf) node.icon = 'arbreJstNodeRef'
+    if (node.children === true && ressource.aliasOf) node.icon = arbreNodeRef
   }
 
   return node

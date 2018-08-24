@@ -65,9 +65,9 @@ module.exports = function (component) {
     controller.post('', function (context) {
       const data = context.post
       const myOid = $accessControl.getCurrentUserOid(context)
-      const sendInternalError = (error) => $json.sendError(context, error)
+      const sendInternalError = (error) => $json.sendKo(context, error)
       if (!myOid) return $json.denied(context, 'Vous devez être authentifié pour créer des groupes')
-      if (!data.nom) return $json.sendError(context, 'Impossible de créer un groupe sans nom')
+      if (!data.nom) return $json.sendKo(context, 'Impossible de créer un groupe sans nom')
       // on init les éventuelles valeurs manquantes par nos valeurs par défaut
 
       // cas modif
@@ -135,7 +135,7 @@ module.exports = function (component) {
         }
         // il manque une clé unique sur le nom?
         EntityGroupe.create(groupe).store((error, groupe) => {
-          if (error) return $json.sendError(context, error)
+          if (error) return $json.sendKo(context, error)
 
           flow().seq(function () {
             joinAndFollowGroup(context, groupe.nom, this)
@@ -165,7 +165,7 @@ module.exports = function (component) {
       }).seq(function (groupe) {
         $json.sendOk(context, groupe)
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
@@ -185,7 +185,7 @@ module.exports = function (component) {
       }).seq(function (groupe) {
         $json.sendOk(context, groupe)
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
@@ -205,7 +205,7 @@ module.exports = function (component) {
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (groupeBdd) {
-        if (groupeBdd) return $json.sendError(context, `Le groupe ${nom} existe déjà`)
+        if (groupeBdd) return $json.sendKo(context, `Le groupe ${nom} existe déjà`)
 
         // on crée un nouveau groupe, par défaut fermé et public
         var groupe = EntityGroupe.create({
@@ -220,7 +220,7 @@ module.exports = function (component) {
       }).seq(function () {
         $json.sendOk(context)
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
@@ -231,7 +231,7 @@ module.exports = function (component) {
     controller.get('ignorer/:nom', function (context) {
       if (!$accessControl.isAuthenticated(context)) return $json.denied(context, 'Il faut être authentifié pour ignorer un groupe')
       ignoreGroup(context, context.arguments.nom, (error) => {
-        if (error) return $json.sendError(context, error)
+        if (error) return $json.sendKo(context, error)
         return $json.sendOk(context)
       })
     })
@@ -243,7 +243,7 @@ module.exports = function (component) {
     controller.get('quitter/:nom', function (context) {
       if (!$accessControl.isAuthenticated(context)) return $json.denied(context, 'Il faut être authentifié pour quitter un groupe')
       quitGroup(context, context.arguments.nom, (error) => {
-        if (error) return $json.sendError(context, error)
+        if (error) return $json.sendKo(context, error)
         return $json.sendOk(context)
       })
     })
@@ -259,8 +259,8 @@ module.exports = function (component) {
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
-        if (!grp) return $json.sendError(context, `Le groupe ${nom} n’existe pas`)
-        if (!grp.ouvert && !isManaged(context, grp)) return $json.sendError(context, `Vous n’avez pas les droits suffisant pour suivre le groupe ${nom}`)
+        if (!grp) return $json.sendKo(context, `Le groupe ${nom} n’existe pas`)
+        if (!grp.public && !isManaged(context, grp)) return $json.sendKo(context, `Vous n’avez pas les droits suffisant pour suivre le groupe ${nom}`)
         groupe = grp
         followGroup(context, nom, this)
       }).seq(function () {
@@ -268,7 +268,7 @@ module.exports = function (component) {
       }).seq(function () {
         $json.sendOk(context, groupe)
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
@@ -283,8 +283,8 @@ module.exports = function (component) {
       flow().seq(function () {
         $groupeRepository.loadByNom(nom, this)
       }).seq(function (grp) {
-        if (!grp) return $json.sendError(context, `Le groupe ${nom} n’existe pas`)
-        if (!grp.public && !isMemberOf(context, grp) && !isManaged(context, grp)) return $json.sendError(context, `Vous n’avez pas les droits suffisant pour rejoindre le groupe ${nom}`)
+        if (!grp) return $json.sendKo(context, `Le groupe ${nom} n’existe pas`)
+        if (!grp.ouvert && !isMemberOf(context, grp) && !isManaged(context, grp)) return $json.sendKo(context, `Vous n’avez pas les droits suffisant pour rejoindre le groupe ${nom}`)
         groupe = grp
         joinGroup(context, nom, this)
       }).seq(function () {
@@ -292,12 +292,12 @@ module.exports = function (component) {
       }).seq(function () {
         $json.sendOk(context, groupe)
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
     /**
-     * Efface un groupe d'après son nom, appellera denied ou sendJson avec error ou deleted:nom
+     * Efface un groupe d'après son nom, appellera denied ou $json avec error ou deleted:nom
      * @private
      * @param {Context} context
      * @param nom
@@ -307,7 +307,7 @@ module.exports = function (component) {
       const myOid = $accessControl.getCurrentUserOid(context)
       // faut charger le groupe pour vérifier si l'utilisateur est admin (elle est probablement en cache)
       $groupeRepository.loadByNom(nom, function (error, groupe) {
-        if (error) return $json.sendError(context, error)
+        if (error) return $json.sendKo(context, error)
         if (!groupe) return $json.notFound(context, `Le groupe ${nom} n’existe pas`)
         if (!groupe.gestionnaires.includes(myOid)) return $json.denied(context, `Vous n’avez pas le droit de supprimer ce groupe`)
         flow().seq(function () {
@@ -317,7 +317,7 @@ module.exports = function (component) {
         }).seq(function () {
           $json.sendOk(context, {deleted: nom})
         }).catch(function (error) {
-          $json.sendError(context, error)
+          $json.sendKo(context, error)
         })
       })
     }

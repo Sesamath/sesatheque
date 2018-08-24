@@ -34,6 +34,7 @@ const fs = require('fs')
 const path = require('path')
 
 const {application: {staticMaxAge}} = require('../config')
+const {displayReactPage} = require('./reactPage')
 
 const envSesathequeConf = process.env.SESATHEQUE_CONF
 
@@ -72,21 +73,10 @@ module.exports = function (mainComponent) {
     this.serve('/', expressOptions)
 
     // le source react pour toutes ses routes
-    // sauf en dev (c'est webpack-dev-server qui gère)
-    // sauf en test (docker n'a pas de dossier build)
-    // => pour prod et preprod
-    // pour la page html react, c'est la même sur toutes les routes
-    const reactPage = require('../reactPage')
-    const options = {
-      headers: {
-        'Content-Type': 'text/html'
-      }
-    }
-    const sendReactPage = (context) => context.raw(reactPage, options)
-
-    // cf app/client-react/App.js pour ne pas en oublier
+    // (en dev on sera pas appelé car c'est webpack-dev-server qui gère)
+    // cf app/client-react/App.js pour ne pas oublier de routes
     const reactRoutes = [
-      // '/', inutile car /build/index.html passe avant
+      '/',
       '/autocomplete',
       '/mentionsLegales',
       '/ressource/ajouter',
@@ -96,8 +86,7 @@ module.exports = function (mainComponent) {
       '/ressource/rechercher',
       '/ressources'
     ]
-
-    reactRoutes.forEach(route => this.get(route, sendReactPage))
+    reactRoutes.forEach(route => this.get(route, displayReactPage))
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
     // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)

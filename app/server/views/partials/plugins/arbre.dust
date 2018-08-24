@@ -1,8 +1,0 @@
-<div class="form-group" id="groupEnfants">
-  {>wrapper widget="textarea" o=enfants cols=80 rows=20 /}
-</div>
-
-<div class="form-group">
-  <div id="display"></div>
-  {>editParametres /}
-</div>

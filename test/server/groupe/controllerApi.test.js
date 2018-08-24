@@ -44,7 +44,8 @@ import {expect} from 'chai'
 import {
   createGroupe,
   createPersonne,
-  itBlocksUser,
+  // itBlocksUser,
+  itNeedsAuth,
   itIsSuccessfull,
   login,
   logout
@@ -97,13 +98,13 @@ describe('API groupe', () => {
   context('sans avoir de session', () => {
     it('/api/groupes/perso denied', async () => {
       const response = await agent.get(`/api/groupes/perso`)
-      itBlocksUser(response, 'Il faut être authentifié pour récupérer ses groupes')
+      itNeedsAuth(response, 'Il faut être authentifié pour récupérer ses groupes')
       return Promise.resolve()
     })
 
     it('/api/groupe/ajouter/unNom denied', async () => {
       const response = await agent.get(`/api/groupe/ajouter/unNom`)
-      itBlocksUser(response, 'Accès refusé')
+      itNeedsAuth(response, 'Authentification requise')
       return Promise.resolve()
     })
 
@@ -112,7 +113,7 @@ describe('API groupe', () => {
         .post(`/api/groupe`)
         .set('Content-Type', 'application/json')
         .send(testGroup)
-      itBlocksUser(response, 'Vous devez être authentifié pour créer des groupes')
+      itNeedsAuth(response, 'Vous devez être authentifié pour créer des groupes')
       return Promise.resolve()
     })
 
@@ -149,9 +150,11 @@ describe('API groupe', () => {
       groupeToCreate.gestionnaires = [testUser.oid]
       itIsSuccessfull(response, groupeToCreate)
       // et on teste aussi oid & dateCreation
-      expect(response.body.oid).to.exist
-      expect(response.body.dateCreation).to.exist
-      const creationTimestamp = (new Date(response.body.dateCreation)).getTime()
+      const {message, data: {oid, dateCreation}} = response.body
+      expect(message).to.equals('OK')
+      expect(oid).to.exist
+      expect(dateCreation).to.exist
+      const creationTimestamp = (new Date(dateCreation)).getTime()
       expect(creationTimestamp > start).to.be.true
       expect(creationTimestamp < start + 2000).to.be.true
 

@@ -11,8 +11,8 @@ import resourceLoader from '../hoc/resourceLoader'
 import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
-import commonValidate from '../utils/validate'
-import {editors} from 'plugins'
+import commonValidate from '../utils/ressourceValidate'
+import editors from 'plugins/editors'
 
 const validate = (values) => {
   const errors = commonValidate(values)
@@ -32,13 +32,8 @@ const ResourceForm = ({
     _droits: droits
   },
   handleSubmit,
-  change,
   submitting,
-  updateStoreFromEditor,
-  setUpdateStoreFromEditor,
-  saveRessource,
-  pristine,
-  initialize
+  pristine
 }) => {
   const Editor = (editors[type] && editors[type].editor) || EditorSimple
 
@@ -49,26 +44,17 @@ const ResourceForm = ({
         ressourceOid={ressourceOid}
         droits={droits}
       />
-      <form>
+      <form onSubmit={handleSubmit}>
         <MetaForm />
         <hr />
         <GroupContainer />
         <hr />
-        <Editor
-          change={change}
-          setUpdateStoreFromEditor={setUpdateStoreFromEditor}
-        />
+        <Editor />
         <div className="buttons-area">
           <button
-            type="button"
+            type="submit"
             className="btn--primary"
             disabled={submitting}
-            onClick={(e) => {
-              e.persist()
-              return Promise.resolve(updateStoreFromEditor())
-                .then(() => handleSubmit(
-                  values => saveRessource(values, initialize))(e))
-            }}
           >
             Enregistrer
           </button>
@@ -85,10 +71,7 @@ const ResourceForm = ({
 ResourceForm.propTypes = {
   initialValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  change: PropTypes.func,
   submitting: PropTypes.bool,
-  updateStoreFromEditor: PropTypes.func,
-  setUpdateStoreFromEditor: PropTypes.func,
   saveRessource: PropTypes.func,
   pristine: PropTypes.bool,
   initialize: PropTypes.func
@@ -99,7 +82,14 @@ export default ensureLogged(
     aliasForker(
       resourceSaver(
         renameProp('ressource', 'initialValues')(
-          reduxForm({form: 'ressource', validate})(ResourceForm)
+          reduxForm({
+            form: 'ressource',
+            validate,
+            onSubmit: (values, _, {
+              saveRessource,
+              initialize
+            }) => saveRessource(values, initialize)
+          })(ResourceForm)
         )
       )
     )

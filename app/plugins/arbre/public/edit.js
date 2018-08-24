@@ -41,14 +41,19 @@ import 'jstree/dist/themes/default/style.css'
 import { addSesatheques, exists, fetchPublicRef } from 'sesatheque-client/src/fetch'
 import { addNode, build, getEnfants } from './lib'
 import {sesatheques} from '../../../server/config'
+import icons from 'plugins/icons'
 
 addSesatheques(sesatheques)
 
 // @todo Reste à ajouter un options.eachEnfant pour modifier à la volée les enfants sur l'arbre de destination et empêcher le chargement des arbres en aliasOf (sinon ça les intègre d'office), en ajoutant sur ces éléments un menu de clic droit "incorporer tout le contenu ici"
 
-// @todo ajouter l'aperçu
-
 // @todo régler le pb des css (actuellement avec un dom.addCss de la css construite par webpack, faut fusionner avec les autres)
+
+// @todo réparer les css qui manquent, $treeError ne se voit plus du tout (classe css error) et les polices sont crades
+
+// @todo remettre les icones sur les actions du clic droit
+
+// @todo voir si on peut ouvrir l'édition dans un nouvel onglet
 
 /**
  * Édite un arbre (avec jstree, src et dst), appelé depuis la vue editArbre depuis l'url /ressource/modifier/xxx
@@ -65,13 +70,31 @@ function edit (arbre, options, saveCallback) {
    * @param node
    */
   function addLinkApercu (links, node) {
-    const url = node.a_attr && node.a_attr[ 'data-displayurl' ]
+    const url = node.a_attr && node.a_attr.href
     // Apercu sur tous les éléments dont on a une ref
     if (!url) return
     links.apercu = {
       label: 'Aperçu',
       action: function () {
         iframeApercu.src = url
+      }
+    }
+  }
+
+  /**
+   * Ajoute le lien d'aperçu externe aux links
+   * @param {object} links l'objet contextmenu.items de jstree
+   * @param node
+   */
+  function addLinkApercuBlank (links, node) {
+    const url = node.a_attr && node.a_attr.href
+    if (!url) return
+
+    links.apercuBlank = {
+      label: 'Voir dans un nouvel onglet',
+      action: function () {
+        const tab = window.open(url, '_blank')
+        tab.focus()
       }
     }
   }
@@ -101,8 +124,8 @@ function edit (arbre, options, saveCallback) {
    * @private
    */
   function addLoadSrc () {
-    dom.addElement(container, 'span', null, 'arbre source à charger ')
-    inputRef = dom.addElement(container, 'input', {id: 'loadRef', type: 'text', style: {margin: '0 1em'}})
+    const labelArbreSource = dom.addElement(container, 'label', null, 'Arbre source à charger ')
+    inputRef = dom.addElement(labelArbreSource, 'input', {id: 'loadRef', type: 'text', style: {margin: '0 1em'}})
     $inputRef = $(inputRef)
     // enter doit pas valider le form mais charger la ref
     $inputRef.keypress(function (event) {
@@ -164,11 +187,11 @@ function edit (arbre, options, saveCallback) {
     addLoadSrc()
     // la recherche
     const searchContainer = dom.addElement(container, 'div', { class: 'search' })
-    dom.addElement(searchContainer, 'span', null, 'Mettre en valeur les titres contenant ')
-    searchInput = dom.addElement(searchContainer, 'input', { type: 'text' })
+    const searchInputLabel = dom.addElement(searchContainer, 'label', null, 'Mettre en valeur les titres contenant ')
+    searchInput = dom.addElement(searchInputLabel, 'input', { type: 'text' })
 
     srcGroup = dom.addElement(container, 'div', { id: 'srcGroup' })
-    dom.addElement(srcGroup, 'span', null, 'arbre source')
+    dom.addElement(srcGroup, 'span', {class: 'bold'}, 'arbre source')
     divSrcTree = dom.addElement(srcGroup, 'div')
 
     const dstGroup = dom.addElement(container, 'div', { id: 'dstGroup' })
@@ -225,7 +248,7 @@ function edit (arbre, options, saveCallback) {
       const parentNode = inst.get_node(data.reference)
       log('node parent', parentNode)
       const newNode = {
-        icon: 'arbreJstNode',
+        icon: icons['arbre'],
         a_attr: { 'data-type': 'arbre' }
       }
       inst.create_node(parentNode, newNode, 'last', createCb)
@@ -241,7 +264,7 @@ function edit (arbre, options, saveCallback) {
     }
 
     // Aller éditer la ressource
-    function actionEdit (data) {
+    function actionEdit (blank, data) {
       // on a un bind sur le node
       const inst = $dstTree.jstree(true)
       const node = inst.get_node(data.reference)
@@ -254,7 +277,12 @@ function edit (arbre, options, saveCallback) {
           if (slashPos) {
             const id = aliasOf.substr(slashPos + 1)
             if (id) {
-              window.location = '/ressource/modifier/' + id
+              if (blank) {
+                const tab = window.open(`/ressource/modifier/${id}`, '_blank')
+                tab.focus()
+              } else {
+                window.location = '/ressource/modifier/' + id
+              }
               return
             }
           }
@@ -313,8 +341,9 @@ function edit (arbre, options, saveCallback) {
       // on met une fct car le résultat dépend de l'item sur lequel on fait un clic droit
       const items = {}
       const isRacine = (node.parent === '#')
-      const isArbreSansRef = node.a_attr[ 'data-type' ] === 'arbre' && !node.a_attr[ 'data-aliasof' ]
-      const isArbreRef = node.a_attr[ 'data-type' ] === 'arbre' && node.a_attr[ 'data-aliasof' ]
+      const isArbre = node.a_attr[ 'data-type' ] === 'arbre'
+      const isArbreSansRef = isArbre && !node.a_attr[ 'data-aliasof' ]
+      const isArbreRef = isArbre && node.a_attr[ 'data-aliasof' ]
       // on peut supprimer n'importe quel item sauf la racine
       if (!isRacine) {
         items.remove = {
@@ -342,15 +371,25 @@ function edit (arbre, options, saveCallback) {
           label: 'Renommer',
           action: actionRename
         }
-      }
-      // un raccourci pour aller éditer une ref
-      if (isArbreRef && !isRacine) {
-        items.editRef = {
-          label: 'Éditer',
-          action: actionEdit
+      } else if (isArbreRef && !isRacine) {
+        // un raccourci pour aller éditer une ref
+        const editUrl = node.a_attr['data-editurl']
+        if (editUrl) {
+          log('lien éditer vers', editUrl)
+          items.editRef = {
+            label: 'Éditer',
+            action: actionEdit.bind(this, false)
+          }
+
+          items.editRefBlank = {
+            label: 'Éditer dans un nouvel onglet',
+            action: actionEdit.bind(this, true)
+          }
         }
+      } else if (!isArbre) {
+        addLinkApercu(items, node)
+        addLinkApercuBlank(items, node)
       }
-      addLinkApercu(items, node)
       log('clic droit sur', node)
       cb(items)
     }
@@ -400,6 +439,8 @@ function edit (arbre, options, saveCallback) {
           // cf http://www.jstree.com/api/#/?q=$jstree.defaults&f=$jstree.defaults.contextmenu.items
           const links = {}
           addLinkApercu(links, node)
+          addLinkApercuBlank(links, node)
+
           // ajout du 'charger ici'
           const aliasOf = node.a_attr && node.a_attr[ 'data-aliasof' ]
           if (aliasOf && node.a_attr[ 'data-type' ] === 'arbre') {

@@ -44,7 +44,9 @@ const anLog = require('an-log')
 const sjt = require('sesajstools')
 const {merge} = require('sesajstools/utils/object')
 const log = require('sesajstools/utils/log')
+
 const addMiddlewares = require('./addMiddlewares')
+const beforeTransport = require('./beforeTransport')
 const boot = require('./boot')
 const config = require('./config')
 const {checkLocalOnRemote} = require('./checkConfig')
@@ -61,7 +63,7 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
   anLog.config(config.lassiLogger)
 
   // une fois les composants chargés on ajoutera nos listeners lassi
-  mainComponent.config(function ($accessControl, $flashMessages, $routes, $settings) {
+  mainComponent.config(function ($accessControl, $routes, $settings) {
     // on désactive toujours la compression dust (pas seulement en dev), car ça crée trop de
     // pbs dans le code js des templates dust
     lassi.transports.html.engine.disableWhiteSpaceCompression()
@@ -92,7 +94,7 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
     })
 
     // le listener beforeTransport
-    lassi.on('beforeTransport', require('./beforeTransport')($accessControl, $routes, $flashMessages))
+    lassi.on('beforeTransport', beforeTransport)
 
     // si $sesalabSsoClient existe, faut l'ajouter en client d'authentification
     // on lui passe les infos dont il a besoin

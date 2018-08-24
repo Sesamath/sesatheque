@@ -167,11 +167,13 @@ const resourceListProvider = (WrappedComponent) => {
     const parsedSearch = queryString.parse(search)
     const query = buildQuery(parsedSearch)
     const queryOptions = buildQueryOptions(parsedSearch)
+    const allowAnyOption = query && ((query.auteurs || query.groupes) !== undefined)
+
     // màj search pour (c'est la sérialisation de query utilisée pour savoir
     // s'il faut mettre à jour les résultats)
     search = queryString.stringify({...query, ...queryOptions})
 
-    return {hash, query, queryOptions, search}
+    return {hash, query, queryOptions, search, allowAnyOption}
   }
 
   return connect(mapStateToProps, {})(ResourceListProvider)

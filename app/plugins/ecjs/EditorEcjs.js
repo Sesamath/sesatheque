@@ -3,50 +3,30 @@ import React, {Component, Fragment} from 'react'
 import {formValues} from 'redux-form'
 import {SelectField} from 'client-react/components/fields'
 import IframeHandler from 'client-react/components/IframeHandler'
-import iframeHelper from 'client-react/hoc/iframeHelper'
 // page de l'éditeur ecjs à insérer en iframe
 import iframeSrc from './public/edit.html'
 import typesEcjs from './subtypes'
 
 class EditorEcjs extends Component {
   /**
-   * Synchronise le contenu de l'éditeur graphique avec redux-form
-   * (appel du getParametres de l'éditeur puis props.change)
-   */
-  updateStoreFromEditor () {
-    let parametresPending = this.props.getParametres()
-    if (!parametresPending) {
-      // @todo Ajouter un gestionnaire d'erreur avec feedback
-      console.error(new Error('l’éditeur graphique ne remonte aucune info'))
-      return
-    }
-    // avec ecjs c'est une Promise
-    parametresPending.then((parametres) => {
-      console.log('l’éditeur graphique ecjs renvoie les paramètres', parametres)
-      this.props.change('parametres', parametres)
-    }).catch((error) => {
-      console.error(error)
-    })
-  }
-
-  /**
    * Appelée par le onLoad de l'iframe
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframe) {
+  onIframeLoaded (iframeRef, fields) {
     // on stocke une ref sur l'iframe
-    this.iframe = iframe
+    this.iframeRef = iframeRef
+    this.fields = fields
     this.loadResourceInEditor()
   }
 
-  loadResourceInEditor () {
-    if (!this.iframe) {
+  loadResourceInEditor (fields) {
+    if (!this.iframeRef.current) {
       console.error(Error(`Impossible de charger une ressource avant d'avoir chargé l'iframe`))
       return
     }
-    const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
+    const parametres = this.props.parametres
     // on appelle (en global dans l'iframe) load(ressource, cb) qui rappellera cb(getParametres)
-    this.iframe.current.contentWindow.load({parametres}, this.props.getLoadCb(this.updateStoreFromEditor.bind(this)))
+    this.iframeRef.current.contentWindow.load({parametres}, this.fields)
   }
 
   /**
@@ -74,6 +54,7 @@ class EditorEcjs extends Component {
    * @param prevProps
    */
   componentDidUpdate (prevProps) {
+    console.log(this.props.parametres.fichierjs)
     if (prevProps.parametres.fichierjs !== this.props.parametres.fichierjs) {
       this.loadResourceInEditor()
     }
@@ -95,11 +76,9 @@ class EditorEcjs extends Component {
         {this.props.parametres.fichierjs ? (
           <fieldset>
             <IframeHandler
-              allowManualEdition={false}
               onLoad={this.onIframeLoaded.bind(this)}
               src={iframeSrc}
-              updateStoreFromEditor={this.updateStoreFromEditor.bind(this)}
-              setUpdateStoreFromEditor={this.props.setUpdateStoreFromEditor}
+              iframeNames={['parametres[options]']}
             />
           </fieldset>
         ) : null}
@@ -109,19 +88,13 @@ class EditorEcjs extends Component {
 }
 
 EditorEcjs.propTypes = {
-  // ces deux props sont fournies par resourceSaver
-  change: PropTypes.func,
-  setUpdateStoreFromEditor: PropTypes.func,
-  // ça c'est redux-form
+  // prop fournie par formValue:
   parametres: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.string
-  ]),
-  // iframeHelper ajoute ces deux props (la 2e est dans son state, affectée par loadCb)
-  getLoadCb: PropTypes.func,
-  getParametres: PropTypes.func
+  ])
 }
 
-export default iframeHelper(
-  formValues({parametres: 'parametres'})(EditorEcjs)
-)
+export default formValues({
+  parametres: 'parametres'
+})(EditorEcjs)

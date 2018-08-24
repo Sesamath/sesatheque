@@ -39,36 +39,6 @@ module.exports = function (component) {
    * @Controller controllerApiPersonne
    */
   component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session) {
-    /**
-     * Équivalent de context.denied en json
-     * @todo utiliser $json.denied, qui devra utiliser context.restKo (prop message et plus error)
-     * @private
-     * @param {Context} context
-     * @param msg
-     */
-    function denied (context, msg) {
-      if (!msg) msg = 'Accès refusé'
-      context.status = 403
-      context.json({error: msg})
-    }
-
-    /**
-     * Callback générique de sortie
-     * @todo utiliser $json.send, qui devra utiliser context.restKo (prop message et plus error)
-     * @private
-     * @param {Context} context
-     * @param error
-     * @param data
-     */
-    function sendJson (context, error, data) {
-      if (error) {
-        log.error(error)
-        context.json({error: error.toString()})
-      } else {
-        context.rest(data)
-      }
-    }
-
     // service $auth qu'on ne peut pas mettre en dépendance car le component auth
     // est chargé après ce component personne (il utilise ses services)
     let $auth
@@ -86,21 +56,19 @@ module.exports = function (component) {
       }
       // log.debug('post /api/personne a reçu', context.post, 'api', {max: 1000})
       log.debug('post /api/personne a reçu', context.post, 'api')
-      if ($accessControl.hasAllRights(context)) {
-        // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
-        // pour garantir l'intégrité des données
-        if (context.post.origine && context.post.idOrigine) {
-          var personne = EntityPersonne.create(context.post)
-          personne.store(function (error, personneBdd) {
-            if (error) sendJson(context, error)
-            else if (personneBdd && personneBdd.oid) sendJson(context, null, {oid: personneBdd.oid})
-            else sendJson(context, new Error("Erreur interne (personne.store ne renvoie pas d'objet avec oid)"))
-          })
-        } else {
-          sendJson(context, new Error('origine ou idOrigine manquant'))
-        }
+      if (!$accessControl.hasAllRights(context)) return $json.denied(context)
+
+      // l'appelant est censé être de confiance, on vérifie rien sinon passer par le constructeur
+      // pour garantir l'intégrité des données
+      if (context.post.origine && context.post.idOrigine) {
+        var personne = EntityPersonne.create(context.post)
+        personne.store(function (error, personneBdd) {
+          if (error) $json.sendKo(context, error)
+          else if (personneBdd && personneBdd.oid) $json.sendOk(context, {oid: personneBdd.oid})
+          else $json.sendKo(context, new Error("Erreur interne (personne.store ne renvoie pas d'objet avec oid)"))
+        })
       } else {
-        denied(context)
+        $json.sendKo(context, new Error('origine ou idOrigine manquant'))
       }
     })
 
@@ -109,7 +77,7 @@ module.exports = function (component) {
      * @route GET /api/personne/me
      */
     this.get('me', function (context) {
-      sendJson(context, null, $session.getCurrentPersonne(context))
+      $json.sendOk(context, $session.getCurrentPersonne(context))
     })
 
     /**
@@ -168,9 +136,9 @@ module.exports = function (component) {
           send()
         }
       }).seq(function () {
-        sendJson(context, null, response)
+        $json.sendOk(context, response)
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
 
@@ -193,7 +161,7 @@ module.exports = function (component) {
           $json.sendOk(context, {user: {nom, oid, prenom}})
         }
       }).catch(function (error) {
-        $json.sendError(context, error)
+        $json.sendKo(context, error)
       })
     })
   })

@@ -31,113 +31,92 @@
 
 'use strict'
 
-const request = require('request')
-const defaultTimeout = 5000
+let $accessControl
 
 /**
+ * @typedef sesathequeJsonResponse
+ * @type Object
+ * @property {string} message Jamais vide (OK si rien de spécial)
+ * @property {Object|undefined} [data] Le contenu de la réponse s'il y en a
+ */
+/**
  * Service contenant les méthodes communes aux contrôleurs qui répondent en json
+ * Il garanti de toujours avoir la propriété message et éventuellement une propriété data
  * @service $json
  */
 module.exports = function (component) {
   component.service('$json', function () {
     /**
-     * Équivalent de context.denied en json
+     * Équivalent json de context.denied (qui renvoie du text/plain en 403), mais renvoie toujours du json,
+     * avec une 401 si on est pas authentifié (403 sinon)
      * @param {Context} context
-     * @param msg
+     * @param {string|Error} [message=Authentification requise|Droits insuffisants] (mis dans le log d'erreur si c'est une Error)
      */
-    function denied (context, msg) {
-      if (!msg) msg = 'Accès refusé'
-      context.status = 403
-      sendError(context, msg)
+    function denied (context, message) {
+      if (!$accessControl) $accessControl = lassi.service('$accessControl')
+      if ($accessControl.isAuthenticated(context)) {
+        context.status = 403
+        if (!message) message = 'Droits insuffisants'
+      } else {
+        context.status = 401
+        if (!message) message = 'Authentification requise'
+      }
+      context.json({message})
     }
 
     /**
      * Équivalent de context.notFound en json
      * @param {Context} context
-     * @param {string}  msg
+     * @param {string}  [message=Ce contenu n’existe pas]
      */
-    function notFound (context, msg) {
-      if (!msg) msg = 'Contenu inexistant'
+    function notFound (context, message = 'Ce contenu n’existe pas') {
       context.status = 404
-      sendError(context, msg)
-    }
-
-    /**
-     * Wrapper de request.post, pour envoyer des data en json et récupérer du json
-     * @param url
-     * @param data
-     * @param next
-     */
-    function post (url, data, next) {
-      const postOptions = {
-        url: url,
-        json: true,
-        content_type: 'charset=UTF-8',
-        timeout: defaultTimeout,
-        form: data
-      }
-      request.post(postOptions, function (error, response, body) {
-        if (error) return next(error)
-        if (body && body.error) return next(new Error(body.error))
-        next(null, body)
-      })
+      context.json({message})
     }
 
     /**
      * Callback générique de sortie json
      * @param {Context} context
      * @param {string|string[]|Error} error
-     * @param data
+     * @param {object} data
      */
     function send (context, error, data) {
-      if (error) {
-        // on logge l'erreur si s'en est vraiment une (pas les strings simples)
-        if (error.stack) {
-          log.error(error)
-          error = error.toString()
-        } else if (Array.isArray(error)) {
-          error = error.join(', ')
-        }
-        sendError(context, error)
-      } else {
-        if (!data) data = {success: true}
-        log.debug('$json.send va renvoyer', data, 'api')
-        context.json(data)
-      }
+      if (error) sendKo(context, error)
+      else context.json({message: 'OK', data})
     }
 
     /**
-     * Envoie un message d'erreur {success:false, error: errorMessage}
-     * @param {Context}      context
-     * @param {Error|string} error
-     */
-    function sendError (context, error) {
-      if (error && error instanceof Error) {
-        log.error(error)
-        error = error.toString()
-      }
-      log.debug("$json va renvoyer l'erreur", error, 'api')
-      context.json({success: false, error: error})
-    }
-
-    /**
-     * Callback générique de sortie json avec {success:true}, et d'éventuelles autres data
+     * Envoie une réponse 400 en json (log error si c'est une Error)
      * @param {Context} context
-     * @param {object} [data] des données à ajouter au {success:true}
+     * @param {string|Error} error
+     */
+    function sendKo (context, error) {
+      let message = error
+      if (error instanceof Error) {
+        log.error(error)
+        message = error.toString()
+      } else if (typeof error !== 'string') {
+        if (error) log.error('erreur invalide', error)
+        message = 'Requête invalide'
+      }
+      context.status = 400
+      context.json({message})
+    }
+
+    /**
+     * Callback générique de sortie json avec {message: 'OK'}, et éventuelles data
+     * @param {Context} context
+     * @param {object} [data] données à envoyer
      */
     function sendOk (context, data) {
-      if (!data) data = {}
-      data.success = true
-      log.debug('sendOk va renvoyer', data, 'api')
-      context.json(data)
+      context.json({message: 'OK', data})
     }
 
     return {
       denied,
       notFound,
-      post,
       send,
-      sendError,
+      sendKo,
       sendOk
     }
   })

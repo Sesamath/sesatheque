@@ -85,8 +85,7 @@ const clone = ({oid}) => `clone/${oid}`
  */
 export const getRessourceCloneUrl = wrapper(clone, ['oid'])
 
-const ressource = ({oid, format}) => 'ressource' + (oid ? `/${oid}` : '') + (format ? `?format=${format}` : '')
-
+const ressourceUrl = ({oid, format}) => 'ressource' + (oid ? `/${oid}` : '') + (format ? `?format=${format}` : '')
 /**
  * Récupérer ou modifier une ressource, avec oid pour GET & DELETE, sans pour POST
  * (toujours sur la route /ressource/ donc avec credentials)
@@ -96,7 +95,7 @@ const ressource = ({oid, format}) => 'ressource' + (oid ? `/${oid}` : '') + (for
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getRessourceUrl = wrapper(ressource)
+export const getRessourceUrl = wrapper(ressourceUrl)
 
 const createAlias = ({baseId, oid}) => `createAlias/${baseId}/${oid}`
 /**

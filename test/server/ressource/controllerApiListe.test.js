@@ -87,22 +87,20 @@ describe('GET /api/liste', () => {
   after(purge)
 
   const checkDefault = (result) => {
-    expect(result).not.to.have.property('error')
-    expect(result).to.have.property('success')
-    expect(result.success).to.be.true
-    expect(result).not.to.have.property('warnings')
-    expect(result).to.have.property('query')
-    expect(result.query).to.have.property('publie')
-    expect(result.query.publie).to.have.length(1)
-    expect(result.query.publie[0]).to.equals(true)
-    expect(result.query).to.have.property('restriction')
-    expect(result.query.restriction).to.have.length(1)
-    expect(result.query.restriction[0]).to.equals(0)
-    expect(result).to.have.property('queryOptions')
-    expect(result.queryOptions).to.have.property('limit')
-    expect(result.queryOptions).to.have.property('skip')
-    expect(result).to.have.property('total')
-    expect(result).to.have.property('liste')
+    expect(result).to.have.property('message')
+    expect(result).to.have.property('data')
+    expect(Object.keys(result)).to.have.length(2, 'il ne devrait y avoir que {message, data} dans la réponse')
+    const {query, queryOptions, total, liste} = result.data
+    expect(query).to.have.property('publie')
+    expect(query.publie).to.have.length(1)
+    expect(query.publie[0]).to.equals(true)
+    expect(query).to.have.property('restriction')
+    expect(query.restriction).to.have.length(1)
+    expect(query.restriction[0]).to.equals(0)
+    expect(queryOptions).to.have.property('limit')
+    expect(queryOptions).to.have.property('skip')
+    expect(total).to.be.a('Number')
+    expect(liste).to.be.a('Array')
   }
 
   const checkAsRef = (item, ressource) => {
@@ -110,7 +108,7 @@ describe('GET /api/liste', () => {
     Object.keys(ref).forEach(p => expect(item[p]).to.deep.equals(ref[p], `Pb sur prop ${p}`))
   }
 
-  it('sans argument retourne tout', function () {
+  it('sans argument retourne toutes les ressources (publiques)', function () {
     return _superTestClient
       .get('/api/liste')
       .set('Content-Type', 'application/json')
@@ -118,10 +116,11 @@ describe('GET /api/liste', () => {
       .then(res => {
         const result = res.body
         checkDefault(result)
-        expect(result.queryOptions.limit).to.equals(listeNbDefault)
-        expect(result.queryOptions.skip).to.equals(0)
-        expect(result.total).to.equals(50)
-        expect(result.liste).to.have.length(listeNbDefault)
+        const d = result.data
+        expect(d.queryOptions.limit).to.equals(listeNbDefault)
+        expect(d.queryOptions.skip).to.equals(0)
+        expect(d.total).to.equals(50)
+        expect(d.liste).to.have.length(listeNbDefault)
         return Promise.resolve()
       })
   })
@@ -134,11 +133,12 @@ describe('GET /api/liste', () => {
       .then(res => {
         const result = res.body
         checkDefault(result)
-        expect(result.queryOptions.limit).to.equals(listeNbDefault)
-        expect(result.queryOptions.skip).to.equals(0)
-        expect(result.total).to.equals(50)
-        expect(result.liste).to.have.length(listeNbDefault)
-        result.liste.forEach((item, i) => {
+        const d = result.data
+        expect(d.queryOptions.limit).to.equals(listeNbDefault)
+        expect(d.queryOptions.skip).to.equals(0)
+        expect(d.total).to.equals(50)
+        expect(d.liste).to.have.length(listeNbDefault)
+        d.liste.forEach((item, i) => {
           lightProps.forEach((prop) => expect(item[prop]).to.equals(ressources[i][prop], `Pb avec ${prop} pour ${i}`))
         })
         return Promise.resolve()
@@ -155,11 +155,12 @@ describe('GET /api/liste', () => {
       .then(res => {
         const result = res.body
         checkDefault(result)
-        expect(result.queryOptions.limit).to.equals(listeNbDefault)
-        expect(result.queryOptions.skip).to.equals(0)
-        expect(result.total).to.equals(50)
-        expect(result.liste).to.have.length(listeNbDefault)
-        result.liste.forEach((item, i) => {
+        const d = result.data
+        expect(d.queryOptions.limit).to.equals(listeNbDefault)
+        expect(d.queryOptions.skip).to.equals(0)
+        expect(d.total).to.equals(50)
+        expect(d.liste).to.have.length(listeNbDefault)
+        d.liste.forEach((item, i) => {
           checkAsRef(item, ressources[i])
         })
         return Promise.resolve()
@@ -176,11 +177,12 @@ describe('GET /api/liste', () => {
       .then(res => {
         const result = res.body
         checkDefault(result)
-        expect(result.queryOptions.limit).to.equals(listeNbDefault)
-        expect(result.queryOptions.skip).to.equals(0)
-        expect(result.total).to.equals(50)
-        expect(result.liste).to.have.length(listeNbDefault)
-        result.liste.forEach((item, i) => checkAsRef(item, ressources[49 - i]))
+        const d = result.data
+        expect(d.queryOptions.limit).to.equals(listeNbDefault)
+        expect(d.queryOptions.skip).to.equals(0)
+        expect(d.total).to.equals(50)
+        expect(d.liste).to.have.length(listeNbDefault)
+        d.liste.forEach((item, i) => checkAsRef(item, ressources[49 - i]))
         return Promise.resolve()
       })
   })

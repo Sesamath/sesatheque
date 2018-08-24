@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Éditeur d'arbre</title>
+  <script type="application/javascript" src="/bugsnag.js"></script>
 </head>
 <body>
   <div id="formRessource">
@@ -12,7 +13,19 @@
   </div>
   <script src="/editArbre.js"></script>
   <script type="application/javascript">
-    function load (ressource, options, saveCallback) {
+    function load (ressource, options, fields) {
+      const saveCallback = (error, getParametres) => {
+        if (error) return console.error(error)
+        window.addEventListener('focus', () => {
+          fields.enfants.input.onFocus()
+        })
+        window.addEventListener('blur', () => {
+          fields.enfants.input.onBlur(getParametres())
+        })
+        window.addEventListener('click', () => {
+          window.focus()
+        })
+      }
       steditArbre.default(ressource, options, saveCallback)
     }
   </script>
