@@ -164,7 +164,7 @@ module.exports = function (component) {
         this()
       }).seq(function () {
         const missing = pids.filter(pid => !personnes.some(p => p.pid === pid))
-        next(null, {personnes, missing})
+        next(null, personnes, missing)
       }).catch(function (error) {
         next(error)
       })

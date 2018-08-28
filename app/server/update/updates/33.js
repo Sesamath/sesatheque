@@ -64,7 +64,7 @@ module.exports = {
       })
 
       if (pidsUnknown.length) {
-        $personneRepository.loadByPids(pidsUnknown, (error, {personnes, missing}) => {
+        $personneRepository.loadByPids(pidsUnknown, (error, personnes, missing) => {
           if (error) return nextGroupe(error)
           // récup des oids
           personnes.forEach(({oid, pid}) => {
