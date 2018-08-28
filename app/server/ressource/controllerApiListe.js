@@ -162,8 +162,6 @@ module.exports = function (component) {
       flow().seq(function () {
         // grab auteurs
         $personneRepository.loadByPids(pids, this)
-      }).seq(function ({personnes}) {
-        this(null, personnes)
       }).seqEach(function (personne, index) {
         if (personne) {
           retour[personne.pid] = {
