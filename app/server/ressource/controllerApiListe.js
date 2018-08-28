@@ -162,6 +162,8 @@ module.exports = function (component) {
       flow().seq(function () {
         // grab auteurs
         $personneRepository.loadByPids(pids, this)
+        // le 2e argument (missing) passé à la cb sera ignoré par seqEach, qui ne traite que l'array
+        // qu'on lui passe en 1er argument
       }).seqEach(function (personne, index) {
         if (personne) {
           retour[personne.pid] = {
