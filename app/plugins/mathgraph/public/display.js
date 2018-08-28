@@ -86,6 +86,8 @@ module.exports = function display (ressource, options, next) {
       dom.addCss('https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.css')
 
       // hauteur et largeur (si ça change, attention à modifier aussi dans mathgraph-editor.html)
+      // la taille doit être fixée à l'avance (à cause de la gestion du svg),
+      // on peut le faire en fonction de la taille d'affichage disponible (avec un minimum)
       let width = ressource.parametres.width || container.clientWidth || 1024
       if (!Number.isInteger(width) || width < 300) width = 300
       let height = ressource.parametres.height || container.clientHeight
@@ -138,10 +140,6 @@ module.exports = function display (ressource, options, next) {
         // fichier src/mtgLoader.js
         // ou documentation/index.html
         const svgOptions = {
-          // faut imposer ça à cause de notre css #svg plus haut
-          svgId: 'svg',
-          // la taille doit être fixée à l'avance (à cause de la gestion du svg),
-          // on peut le faire en fonction de la taille d'affichage disponible (avec un minimum)
           width,
           height
         }
