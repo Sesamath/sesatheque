@@ -94,6 +94,12 @@ module.exports = function display (ressource, options, next) {
       // la consigne éventuelle
       if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
 
+      // dys et level qu'il faut aussi mettre dans les résultats
+      const dys = ressource.parametres.hasOwnProperty('dys') ? ressource.parametres.dys : false
+      // à la création on démarre avec une interface collège (le prof pourra changer ensuite dans l'éditeur
+      // et getParametres nous renverra la bonne valeur)
+      const level = ressource.parametres.hasOwnProperty('level') ? ressource.parametres.level : 1
+
       // init Mathjax
       MathJax.Hub.Config({
         tex2jax: {
@@ -113,7 +119,9 @@ module.exports = function display (ressource, options, next) {
               fig,
               // un booléen pour signaler que le score vient de mtg, ça servira pour analyser le score
               // (si c'est false un score de 1 signifie "vu", sinon ça signifie "construction réussie")
-              isScored: score !== undefined
+              isScored: score !== undefined,
+              dys,
+              level
             },
             score
           }
@@ -129,9 +137,6 @@ module.exports = function display (ressource, options, next) {
         // git@src.sesamath.net:mathgraph_js
         // fichier src/mtgLoader.js
         // ou documentation/index.html
-        // à la création on démarre avec une interface collège (le prof pourra changer ensuite dans l'éditeur
-        // et getParametres nous renverra la bonne valeur)
-        const level = parametres.hasOwnProperty('level') ? parametres.level : 1
         const svgOptions = {
           // faut imposer ça à cause de notre css #svg plus haut
           svgId: 'svg',
@@ -145,7 +150,7 @@ module.exports = function display (ressource, options, next) {
           // ce paramètre à true sert à afficher la figure avec des traits plus gros,
           // des lettres plus espacées, etc.
           // Il n'est pas contenu dans la figure
-          dys: parametres.hasOwnProperty('dys') ? parametres.dys : false,
+          dys,
           newFig: false, // en consultation on ne peut pas ouvrir une nouvelle figure
           open: false,
           // options: pour autoriser à changer les options de la figure, true par défaut
