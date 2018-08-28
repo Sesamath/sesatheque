@@ -82,26 +82,27 @@ module.exports = function ($accessControl) {
   const sanitizeSearchGroupes = (context, query, warnings) => {
     const myGroups = getCurrentUserGroupesMembre(context)
     const canReadAll = hasGenericPermission('read', context)
+    const trimAll = (nom) => nom.trim()
 
     const addGroups = (prop) => {
-      const wantedGroupes = context.get[prop]
-      if (!wantedGroupes) return
-      const groupes = (Array.isArray(wantedGroupes)
-        ? wantedGroupes
-        : wantedGroupes.split(',')).map(groupe => groupe.trim())
-      if (groupes.length) {
+      const groupesAsked = context.get[prop]
+      if (!groupesAsked) return
+      const groupesWanted = (Array.isArray(groupesAsked)
+        ? groupesAsked
+        : groupesAsked.split(','))
+      if (groupesWanted.length) {
         if (canReadAll) {
-          query[prop] = wantedGroupes
+          query[prop] = groupesWanted.map(trimAll)
         } else {
-          const groupes = wantedGroupes.filter(groupe => myGroups.includes(groupe))
-          if (groupes.length < wantedGroupes.length) {
-            const excluded = wantedGroupes.filter(g => !myGroups.includes(g))
+          const groupesOk = groupesWanted.filter(groupe => myGroups.includes(groupe))
+          if (groupesOk.length < groupesWanted.length) {
+            const excluded = groupesWanted.filter(g => !myGroups.includes(g))
             const message = (excluded.length > 1)
               ? `Vous n’êtes pas membre du groupe ${excluded[0]}, il a été exclu de la recherche`
               : `Vous n’êtes pas membre des groupes ${excluded.join(', ')}, ils ont été exclus de la recherche`
             warnings.push(message)
           }
-          if (groupes.length) query[prop] = groupes
+          if (groupesOk.length) query[prop] = groupesOk.map(trimAll)
         }
       } else {
         warnings.push('Groupe(s) invalide(s), ignoré(s)')
