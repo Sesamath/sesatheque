@@ -191,6 +191,10 @@ module.exports = function (component) {
             if (error) {
               log.error(error)
             } else if (ressourceLiee) {
+              if (!ressourceLiee.rid) {
+                log.dataError(`la ressource ${relationTarget} n’a pas de rid !`, ressourceLiee)
+                return nextRelation()
+              }
               const [baseId, oid] = getRidComponents(ressourceLiee.rid)
               ressource._relations.push({
                 predicat: config.listes.relations[relationId],
