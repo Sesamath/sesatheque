@@ -47,6 +47,7 @@ const page = require('../../../client/page/index')
  * @param {errorCallback}  next       La fct à appeler quand l'mathgraph sera chargé (sans argument ou avec une erreur)
  */
 module.exports = function display (ressource, options, next) {
+  // on ne vérifie que la figure et le score
   function isSameResultat (resultat) {
     if (!resultat) throw new Error('Erreur interne')
     if (!lastResultatSent) return false
@@ -115,17 +116,11 @@ module.exports = function display (ressource, options, next) {
       MathJax.Hub.Queue(function () {
         // sauvegarde la figure courante
         function save (needDefer) {
-          const {fig, score} = mtgApp.getResult()
+          // on veut dys et level pour le display du bilan, mais on laisse getResult l'écraser s'il le souhaite
+          const contenu = Object.assign({}, {dys, level}, mtgApp.getResult())
           const resultat = {
-            contenu: {
-              fig,
-              // un booléen pour signaler que le score vient de mtg, ça servira pour analyser le score
-              // (si c'est false un score de 1 signifie "vu", sinon ça signifie "construction réussie")
-              isScored: score !== undefined,
-              dys,
-              level
-            },
-            score
+            contenu,
+            score: contenu.score
           }
           if (!isSameResultat(resultat)) {
             if (needDefer) resultat.deferSync = true
