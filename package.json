@@ -105,7 +105,7 @@
     "express": "^4.16.2",
     "ip": "^1.1.5",
     "knacss": "^7.0.5",
-    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.5",
+    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.6",
     "lodash": "4.17.5",
     "moment": "2.19.3",
     "morgan": "1.9.0",
