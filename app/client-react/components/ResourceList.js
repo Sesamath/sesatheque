@@ -69,7 +69,7 @@ export const ResourceList = ({
             $droits
           }) => (
             <tr key={oid}>
-              <td><img src={icons[type]} alt="thumbnail" /></td>
+              <td><img src={icons[type]} alt="" /></td>
               <td>{type}</td>
               <td>{oid}</td>
               <td>{titre}</td>
