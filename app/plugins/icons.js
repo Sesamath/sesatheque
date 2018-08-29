@@ -7,6 +7,9 @@ import * as em from './em/icon'
 import * as iep from './iep/icon'
 import * as j3p from './j3p/icon'
 import * as mathgraph from './mathgraph/icon'
+import * as mental from './mental/icon'
+import * as sequenceModele from './sequenceModele/icon'
+import * as serie from './serie/icon'
 import * as url from './url/icon'
 
 const icons = {}
@@ -21,6 +24,9 @@ const plugins = [
   iep,
   j3p,
   mathgraph,
+  mental,
+  sequenceModele,
+  serie,
   url
 ]
 
