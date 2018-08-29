@@ -70,7 +70,7 @@ module.exports = function (component) {
         if (!exists(baseId)) return next(new Error(`rid ${rid} invalide ou correspondant à une sesathèque inconnue`))
         // on peut aller chercher ça
         const baseUrl = getBaseUrl(baseId)
-        var options = {
+        const options = {
           uri: baseUrl + 'api/public/' + id,
           gzip: true,
           json: true,
@@ -80,13 +80,16 @@ module.exports = function (component) {
           options.uri = baseUrl + 'api/ressource/' + id
           options.headers = {'X-ApiToken': encodeURIComponent(tokens[baseId])}
         }
-        request(options, function (error, response, ressource) {
+        request(options, function (error, response, body) {
           if (error) return next(error)
-          if (response.statusCode === 200 && ressource) {
-            if (ressource.error) return next(new Error(ressource.error))
-            return next(null, ressource)
+          if (response.statusCode === 200) {
+            if (body.data && body.data.rid) return next(null, body.data)
+          } else if (body.message) {
+            next(Error(body.message))
+          } else {
+            log.error(`Réponse incohérente sur ${options.uri}`, body)
+            next(Error('Réponse incohérente, impossible de récupérer la ressource'))
           }
-          next(new Error(`Aucune ressource ${rid}`))
         })
       } catch (error) {
         next(error)
@@ -110,18 +113,18 @@ module.exports = function (component) {
       if (!exists(baseId)) return $ressourceRepository.load(mixedId, send)
       // c'est un rid externe, faut appeler son /api/getRid?id=xxx
       const baseUrl = getBaseUrl(baseId)
-      var options = {
+      const options = {
         uri: baseUrl + 'api/public/getRid?id=' + id,
         json: true,
         timeout: 3000
       }
-      request(options, function (error, response, data) {
+      request(options, function (error, response, body) {
         if (error) return next(error)
-        if (response.statusCode === 200 && data && data.rid) return next(null, data.rid)
-        if (data && data.error) return next(new Error(data.error))
-        error = new Error(`${options.uri} ne retourne rien de compréhensible`)
-        log.error(error, data)
-        next(error)
+        if (response.statusCode === 200 && body.data && body.data.rid) return next(null, body.data.rid)
+        if (body && body.message) return next(Error(body.message))
+        // bizarre…
+        log.error(`Réponse incohérente sur ${options.uri}`, body)
+        next(Error('Réponse incohérente, impossible de récupérer la ressource'))
       })
     }
 
@@ -142,11 +145,12 @@ module.exports = function (component) {
           fetch(ressource.aliasOf, function (error, ress2) {
             if (error) return next(error)
             // on a toujours une erreur ou une ressource
-            if (ress2.aliasOf) return next(new Error(`Trop d’alias imbriqués (${aliasOf} => ${ressource.aliasOf} => ${ress2.aliasOf})`))
+            if (ress2.aliasOf) return next(Error(`Trop d’alias imbriqués (${aliasOf} => ${ressource.aliasOf} => ${ress2.aliasOf})`))
             next(null, ress2)
           })
+        } else {
+          next(null, ressource)
         }
-        next(null, ressource)
       })
     }
 
