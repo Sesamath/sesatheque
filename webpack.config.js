@@ -70,7 +70,8 @@ const conf = {
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
   },
-  // devtool: 'source-map', // même en prod
+  // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx
+  devtool: isProd ? 'source-map' : 'eval',
   /* externals: {
     stePage: 'page',
     steDisplay: 'display'
