@@ -118,6 +118,11 @@ module.exports = function display (ressource, options, next) {
         function save (needDefer) {
           // on veut dys et level pour le display du bilan, mais on laisse getResult l'écraser s'il le souhaite
           const contenu = Object.assign({}, {dys, level}, mtgApp.getResult())
+          // on ajoute ça car la bibli va remplacer les scores undefined par 0 avant de les envoyer
+          // (pour garantir un nombre entre 0 et 1)
+          // et on veut distinguer les exos de construction ratés (score 0)
+          // des figures sans score (score undefined)
+          contenu.isScored = typeof contenu.score === 'number'
           const resultat = {
             contenu,
             score: contenu.score
