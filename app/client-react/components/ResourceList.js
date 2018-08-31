@@ -93,12 +93,6 @@ export const ResourceList = ({
                     title="Modifier"
                   >Modifier</NavLink>
                 ) : null}
-                {$droits.includes('D') ? (
-                  <NavLink
-                    to={`/ressource/supprimer/${oid}`}
-                    title="Supprimer"
-                  >Supprimer</NavLink>
-                ) : null}
               </td>
             </tr>
           ))}

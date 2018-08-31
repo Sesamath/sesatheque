@@ -118,7 +118,7 @@ export const leaveGroupe = (
     })
   )
 
-  return GET(getGroupeLeaveUrl())
+  return GET(getGroupeLeaveUrl({nom}))
     .then(requestSuccess, requestError)
 }
 
