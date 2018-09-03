@@ -74,11 +74,7 @@ class EditorMathGraph extends Component {
           ) : null}
           <span className="alert--info">Vous pouvez changer les outils disponibles via le bouton &laquo;options&raquo;</span>
           <IframeHandler
-            iframeNames={[
-              'parametres[fig]',
-              'parametres[level]',
-              'parametres[isExercise]'
-            ]}
+            iframeNames={['parametres']}
             onLoad={this.onIframeLoaded.bind(this)}
             src={iframeSrc}
           />

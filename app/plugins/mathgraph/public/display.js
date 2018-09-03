@@ -94,14 +94,8 @@ module.exports = function display (ressource, options, next) {
       let height = ressource.parametres.height || container.clientHeight
       if (!Number.isInteger(height) || height < 200) height = Math.round(width * 0.66)
 
-      // la consigne éventuelle
+      // la consigne éventuelle (disparue dans les nouvelles versions de mathgraph, à mettre dans la figure)
       if (ressource.parametres.consigne) dom.addElement(container, 'p', null, ressource.parametres.consigne)
-
-      // dys et level qu'il faut aussi mettre dans les résultats
-      const dys = ressource.parametres.hasOwnProperty('dys') ? ressource.parametres.dys : false
-      // à la création on démarre avec une interface collège (le prof pourra changer ensuite dans l'éditeur
-      // et getParametres nous renverra la bonne valeur)
-      const level = ressource.parametres.hasOwnProperty('level') ? ressource.parametres.level : 1
 
       // init Mathjax
       MathJax.Hub.Config({
@@ -117,11 +111,11 @@ module.exports = function display (ressource, options, next) {
         // sauvegarde la figure courante
         function save (needDefer) {
           // on veut dys et level pour le display du bilan, mais on laisse getResult l'écraser s'il le souhaite
-          const contenu = Object.assign({}, {dys, level}, mtgApp.getResult())
+          const contenu = mtgApp.getResult()
           // on ajoute ça car la bibli va remplacer les scores undefined par 0 avant de les envoyer
-          // (pour garantir un nombre entre 0 et 1)
-          // et on veut distinguer les exos de construction ratés (score 0)
-          // des figures sans score (score undefined)
+          // (pour garantir un nombre entre 0 et 1) et on veut distinguer
+          // les score 0 (exos de construction ratés)
+          // des score undefined (figures sans score)
           contenu.isScored = typeof contenu.score === 'number'
           const resultat = {
             contenu,
@@ -132,8 +126,8 @@ module.exports = function display (ressource, options, next) {
             resultatCallback(resultat)
             lastResultatSent = resultat
           }
-        }
-        const parametres = ressource.parametres
+        } // save
+
         /* glob mtgLoader */
         // pour le fonctionnement, cf le dépôt
         // git@src.sesamath.net:mathgraph_js
@@ -143,21 +137,20 @@ module.exports = function display (ressource, options, next) {
           width,
           height
         }
-        const mtgOptions = {
-          level,
-          // ce paramètre à true sert à afficher la figure avec des traits plus gros,
-          // des lettres plus espacées, etc.
-          // Il n'est pas contenu dans la figure
-          dys,
-          newFig: false, // en consultation on ne peut pas ouvrir une nouvelle figure
-          open: false,
-          // options: pour autoriser à changer les options de la figure, true par défaut
-          options: false, // true si édition par le prof, false en consultation de ressource
-          save: true, // pour que l'outil permettant d'enregistrer une figure soit présent
-          callBackAfterReady: function () {
-            isLoaded = true
-            if (next) next()
-          }
+        const mtgOptions = ressource.parametres
+        if (!mtgOptions.fig) return next(Error('Ressource mathgraph sans figure à afficher'))
+        if (!mtgOptions.hasOwnProperty('level')) mtgOptions.level = 1
+        // en consultation on ne peut pas ouvrir une nouvelle figure
+        mtgOptions.newFig = false
+        mtgOptions.open = false
+        // options: pour autoriser à changer les options de la figure, true par défaut
+        mtgOptions.options = false
+        // en consultation on affiche toujours le bouton save, si y'a du resultatCallback ça lui filera
+        // la figure, sinon on peut toujours sauvegarder localement la figure
+        mtgOptions.save = true
+        mtgOptions.callBackAfterReady = function () {
+          isLoaded = true
+          if (next) next()
         }
 
         // on ajoute une cb si qq veut le résultat
@@ -166,12 +159,14 @@ module.exports = function display (ressource, options, next) {
           mtgOptions.functionOnSave = save.bind(null, false)
           // + listener unload
           if (container.addEventListener) {
-            container.addEventListener('unload', () => { if (isLoaded) save(true) })
+            container.addEventListener('unload', () => {
+              if (isLoaded) save(true)
+            })
           }
         }
 
         // go
-        const mtgApp = mtgLoader(container, parametres.fig, svgOptions, mtgOptions)
+        const mtgApp = mtgLoader(container, mtgOptions.fig, svgOptions, mtgOptions)
       })
     })
   } catch (error) {

@@ -36,103 +36,91 @@
 <div id="main"></div>
 <script type="application/javascript">
   // ATTENTION, le code ci-dessous doit être de l'es5 car il ne passe pas par babel
+  // @todo mettre ça dans un js séparé qui passerait par webpack
+  // (chargé ici avec du <script src="/plugins/mathgraph/editor.js" …)
   function load (ressource, fields) {
-    var parametres = ressource.parametres
     /* glob mtgLoader */
-    // pour le fonctionnement, cf le dépôt
-    // git@src.sesamath.net:mathgraph_js
-    // fichier src/mtgLoader.js
-    // ou documentation/index.html
-
     if (typeof mtgLoader !== 'function') return alert('mathgraph n’est pas chargé correctement')
 
     var mtgApp
+    var parametres = ressource.parametres
 
     // hauteur et largeur (copié de display.js, à maintenir sync)
-    let width = ressource.parametres.width || document.body.clientWidth || 1024
+    var width = parametres.width || document.body.clientWidth || 1024
     if (!Number.isInteger(width) || width < 300) width = 300
-    let height = ressource.parametres.height || document.body.clientHeight
+    var height = parametres.height || document.body.clientHeight
     if (!Number.isInteger(height) || height < 200) height = Math.round(width * 0.66)
     // qu'on met dans svgOptions
     var svgOptions = {
-      // faullait imposer ça à cause de notre css #svg plus haut, mais il n'y est plus...
-      svgId: 'svg',
       width,
       height
     }
 
+    var mtgOptions = parametres
     // à la création on démarre avec une interface collège
     // (le prof pourra changer ensuite dans l'éditeur
     // et getParametres nous renverra la valeur modifiée)
-    var level = parametres.hasOwnProperty('level') ? parametres.level : 1
+    // le level sert pour ouvrir mathgraph avec une figure vierge, ou pour limiter les outils disponibles
+    // il peut être mdifié dans l'interface mtg si mtgOptions.options === true
+    // 0 : école
+    // 1 : collège
+    // 2 : lycée sans les nombres complexes
+    // 3 : lycée avec les nombres complexes
+    // Si la figure est fournie, en édition il faut fournir le level le plus élevé
+    // pour que le prof puisse activer tous les outils qu'il voudrait ajouter
+    if (!parametres.hasOwnProperty('level')) mtgOptions.level = 1
     // à la création on démarre avec ça par défaut (sans repère, juste vecteur unité)
-    var figure = parametres.fig || {type: 'unity', grad: 'simple', unity: 'deg'}
-    var mtgOptions = {
-      // le level sert pour ouvrir mathgraph avec une figure vierge, ou pour limiter les outils disponibles
-      // il peut être mdifié dans l'interface mtg si mtgOptions.options === true
-      // 0 : école
-      // 1 : collège
-      // 2 : lycée sans les nombres complexes
-      // 3 : lycée avec les nombres complexes
-      // Si la figure est fournie, en édition il faut fournir le level le plus élevé
-      // pour que le prof puisse activer tous les outils qu'il voudrait ajouter
-      level,
-      // ce paramètre à true sert à afficher la figure avec des traits plus gros,
-      // des lettres plus espacées, etc.
-      // Il n'est pas contenu dans la figure
-      dys: parametres.hasOwnProperty('dys') ? parametres.dys : false,
-      // pour les exercices de construction c'est indispensable
-      edition: true,
-      open: true, // bouton pour ouvrir une figure, l'info est dans la figure
-      // options: pour autoriser à changer les options de la figure, true par défaut
-      options: true, // true si édition par le prof, false en consultation de ressource
-      // on veut que l'outil permettant d'enregistrer une figure soit présent,
-      // pour qu'il puisse enregistrer en local
-      // si ça perturbe on mettra false...
-      save: true,
-      // onSaveCallback n'a de sens que si `figureOptions.save === true`,
-      // ici on laisse le comportement par défaut sur l'enregistrement (en local et pas dans la sesatheque)
-      // car on récupère la figure au clic sur enregistrer de la ressource
-      callBackAfterReady: function () {
-        function onBlur () {
-          // faut transformer le result en parametres, on override seulement ces 2 props
-          // ça mute l'objet parametres reçu au départ mais c'est pas très grave,
-          // l'appelant devrait le remplacer par ce qu'on renvoie ici
-          var result = mtgApp.getResult()
+    if (!mtgOptions.fig) mtgOptions.fig = {type: 'unity', grad: 'simple', unity: 'deg'}
+    // ce paramètre dys à true sert à afficher la figure avec des traits plus gros,
+    // des lettres plus espacées, etc.
+    // Il n'est pas contenu dans la figure
+    if (!mtgOptions.hasOwnProperty('dys')) mtgOptions.dys = false
+    // pour les exercices de construction c'est indispensable
+    mtgOptions.edition = true
+    // bouton pour ouvrir une figure, l'info est dans la figure mais on le force ici (édition)
+    mtgOptions.open = true
+    // options: pour autoriser à changer les options de la figure, true par défaut, toujours true en édition
+    mtgOptions.options = true
+    // on veut que l'outil permettant d'enregistrer une figure soit présent,
+    // pour qu'il puisse enregistrer en local
+    // si ça perturbe on mettra false...
+    mtgOptions.save = true
+    // onSaveCallback n'a de sens que si `figureOptions.save === true`,
+    // ici on laisse le comportement par défaut sur le bouton enregistrement de mathgraph
+    // (en fichier local et pas dans la sesatheque) car on récupère la figure au clic sur
+    // enregistrer (dans la page html hors mathgraph)
 
-          if (!result) throw new Error('mathgraph ne remonte aucune info')
-          var fig = result.fig
-          var level = result.level
-          // on ajoute ça pour savoir si c'est un exo qui renvoie un score calculé par mtg
-          var isExercise = mtgApp.isExercise()
-
-          if (!fig || typeof fig !== 'string') throw new Error('mathgraph ne renvoie pas la figure')
-          if (!level || typeof level !== 'number' || !Number.isInteger(level) || level < 0) {
-            console.error(new Error('level n’est pas un entier positif ou nul (on le fixe à 3)'))
-            // en attendant que ce soit réglé on le fixe arbitrairement à 3
-            level = 3
-          }
-
-          fields.parametres.fig.input.onBlur(fig)
-          fields.parametres.level.input.onBlur(level)
-          fields.parametres.isExercise.input.onBlur(isExercise)
+    // quand mtg sera chargé on mettra nos listeners
+    mtgOptions.callBackAfterReady = function () {
+      // on vire le spinner
+      var spinner = document.getElementById('spinner')
+      while (spinner.firstChild) spinner.removeChild(spinner.firstChild)
+      // et on ajoute nos listeners
+      window.addEventListener('blur', function () {
+        var result = mtgApp.getResult()
+        if (!result) throw new Error('mathgraph ne remonte aucune info')
+        if (!result.fig || typeof result.fig !== 'string') throw new Error('mathgraph ne renvoie pas la figure')
+        var level = result.level
+        if (!level || typeof level !== 'number' || !Number.isInteger(level) || level < 0) {
+          console.error(new Error('level n’est pas un entier positif ou nul (on le fixe à 3)'))
+          result.level = 3
         }
-        // on vire le spinner
-        const spinner = document.getElementById('spinner')
-        while (spinner.firstChild) spinner.removeChild(spinner.firstChild)
-        window.addEventListener('blur', onBlur)
-        window.addEventListener('click', () => {
-          window.focus()
-        })
-        window.addEventListener('focus', () => {
-          fields.parametres.fig.input.onFocus()
-          fields.parametres.level.input.onFocus()
-          fields.parametres.isExercise.input.onFocus()
-        })
-      }
-    }
-    mtgApp = mtgLoader('main', figure, svgOptions, mtgOptions)
-  }
+        // faut ajouter hauteur et largeur s'ils y étaient
+        if (parametres.height) result.height = parametres.height
+        if (parametres.width) result.width = parametres.width
+
+        fields.parametres.input.onBlur(result)
+      })
+      window.addEventListener('click', function () {
+        window.focus()
+      })
+      window.addEventListener('focus', function () {
+        fields.parametres.input.onFocus()
+      })
+    } // callBackAfterReady
+
+    mtgApp = mtgLoader('main', mtgOptions.fig, svgOptions, mtgOptions)
+  } // load
 </script>
 </body>
 </html>
