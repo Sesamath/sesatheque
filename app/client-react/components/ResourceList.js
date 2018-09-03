@@ -40,6 +40,7 @@ export const ResourceList = ({
       previousLabel={'<'}
       nextLabel={'>'}
       breakLabel={<a href="">...</a>}
+      forcePage={Math.ceil(skip / limit)}
       pageCount={Math.ceil(total / limit)}
       onPageChange={handlePageClick}
       containerClassName={'pagination'}
