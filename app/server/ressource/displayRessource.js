@@ -78,7 +78,7 @@ try {
     verbose: ${isDev}
   };
   if (window.location.hash === '#formateur') options.isFormateur = true
-  stdisplay(${JSON.stringify(ressource)});
+  stdisplay(${JSON.stringify(ressource)}, options);
 } catch(error) {
   document.getElementById('errors').innerHTML = error.toString();
   if (console && console.error) console.error(error);
