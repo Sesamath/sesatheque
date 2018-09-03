@@ -128,13 +128,15 @@ export const saveRessource = (
     dispatch(setRessource(responseRessource))
 
     // On notifie le parent concernant la mise à jour de la ressource
-    const parsedQuery = parse(window.location.search)
-    if (parent.postMessage && parsedQuery.closerId) {
-      parent.postMessage({
-        action: 'iframeCloser',
-        id: parsedQuery.closerId,
-        ressource: responseRessource
-      }, '*')
+    if (parent !== window && parent.postMessage) {
+      const parsedQuery = parse(window.location.search)
+      if (parsedQuery.closerId) {
+        parent.postMessage({
+          action: 'iframeCloser',
+          id: parsedQuery.closerId,
+          ressource: responseRessource
+        }, '*')
+      }
     }
 
     return success(responseRessource)
