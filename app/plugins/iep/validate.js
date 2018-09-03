@@ -1,4 +1,4 @@
-const xmlRe = /^\s*<INSTRUMENTPOCHE>[^]*<\/INSTRUMENTPOCHE>\s*$/
+const xmlParser = new DOMParser()
 
 const validate = ({parametres: {url, xml}}, errors) => {
   if (!url && !xml) {
@@ -7,9 +7,17 @@ const validate = ({parametres: {url, xml}}, errors) => {
     return
   }
 
-  if (xml && !xmlRe.test(xml)) {
-    errors.parametres = errors.parametres || {}
-    errors.parametres.xml = 'Ce champs doit contenir du xml valide de la forme: <INSTRUMENTPOCHE>...</INSTRUMENTPOCHE>'
+  if (xml) {
+    const xmlDOM = xmlParser.parseFromString(xml, 'text/xml')
+    const error = xmlDOM.querySelector('parsererror')
+    const {nodeName: rootName} = xmlDOM.documentElement
+    if (error) {
+      errors.parametres = errors.parametres || {}
+      errors.parametres.xml = 'Ce champ doit contenir du xml valide'
+    } else if (rootName !== 'INSTRUMENPOCHE') {
+      errors.parametres = errors.parametres || {}
+      errors.parametres.xml = 'Ce champ doit contenir du xml dont la racine est <INSTRUMENPOCHE>'
+    }
   }
 }
 
