@@ -7,6 +7,7 @@ import {
   getRessourceUrl,
   getForkAliasUrl
 } from '../apiRoutes'
+import {parse} from 'query-string'
 
 /**
  * Retourne l'action de type SET_RESSOURCE pour affecter une ressource dans le store
@@ -125,6 +126,17 @@ export const saveRessource = (
       message: 'La ressource a été sauvegardée'
     }))
     dispatch(setRessource(responseRessource))
+
+    // On notifie le parent concernant la mise à jour de la ressource
+    const parsedQuery = parse(window.location.search)
+    if (parent.postMessage && parsedQuery.closerId) {
+      parent.postMessage({
+        action: 'iframeCloser',
+        id: parsedQuery.closerId,
+        ressource: responseRessource
+      }, '*')
+    }
+
     return success(responseRessource)
   }
   const requestError = (error) => dispatch(addNotification({
