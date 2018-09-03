@@ -5,11 +5,15 @@ import {connect} from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
 import queryString from 'query-string'
-import './ResourceList.scss'
 import icons from 'plugins/icons'
+import {deleteRessource} from '../actions/ressource'
+
+import './ResourceList.scss'
 
 export const ResourceList = ({
   handlePageClick,
+  askDelete,
+  refreshList,
   queryOptions,
   resources,
   showSearchLink,
@@ -93,6 +97,17 @@ export const ResourceList = ({
                     title="Modifier"
                   >Modifier</NavLink>
                 ) : null}
+                {$droits.includes('D') ? (
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault()
+                      askDelete(oid, refreshList)
+                    }}
+                    href="#"
+                    title="Supprimer"
+                  >Supprimer</a>
+                ) : null}
+
               </td>
             </tr>
           ))}
@@ -121,12 +136,14 @@ ResourceList.propTypes = {
   showSearchLink: PropTypes.bool,
   total: PropTypes.number.isRequired,
   handlePageClick: PropTypes.func.isRequired,
+  askDelete: PropTypes.func.isRequired,
   // fourni par resourceListProvider
   query: PropTypes.object,
   queryOptions: PropTypes.shape({
     skip: PropTypes.number.isRequired,
     limit: PropTypes.number.isRequired
-  })
+  }),
+  refreshList: PropTypes.func.isRequired
 }
 
 // pour ajouter le comportement du changement de page
@@ -143,6 +160,11 @@ const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
       pathname: '/ressource/rechercher',
       search: queryString.stringify(params)
     }))
+  },
+  askDelete: (oid, refreshList) => {
+    if (confirm('Êtes vous sûr de vouloir supprimer cette ressource ?')) {
+      dispatch(deleteRessource(oid, refreshList))
+    }
   }
 })
 
