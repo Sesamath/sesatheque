@@ -37,6 +37,19 @@ const {merge} = require('sesajstools/utils/object')
 
 const {application: {name: appName, staging}} = config
 
+// plusieurs modules permettent de récupérer les traces async, tous font de grosses surcharges,
+// pénalisantes pour les perfs mais surtout non exempte de bug, faut surtout pas utiliser ça en prod
+// après avoir regardé
+// https://github.com/mattinsler/longjohn/
+// https://github.com/tlrobinson/long-stack-traces
+// https://github.com/groundwater/node-stackup
+// on opte pour https://github.com/AndreasMadsen/trace
+if (!/prod/.test(staging)) {
+  log(`Environnement ${staging}, on ajoute les traces longues`)
+  require('trace')
+  Error.stackTraceLimit = 100
+}
+
 let lassiInstance
 
 /**
