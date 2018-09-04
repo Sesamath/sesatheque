@@ -3,6 +3,8 @@ import React, {Fragment} from 'react'
 import {renameProp} from 'recompose'
 import {reduxForm} from 'redux-form'
 import {Prompt} from 'react-router'
+import {parse} from 'query-string'
+
 import MetaForm from './MetaForm'
 import EditorSimple from './EditorSimple'
 import GroupContainer from './GroupContainer'
@@ -22,6 +24,31 @@ const validate = (values) => {
     typeValidate(values, errors)
   }
   return errors
+}
+
+const onSubmit = (values, dispatch, {saveRessource, initialize}) => saveRessource(values, (savedRessource) => {
+  // On notifie le parent concernant la mise à jour de la ressource
+  if (parent !== window && parent.postMessage) {
+    const parsedQuery = parse(window.location.search)
+    if (parsedQuery.closerId) {
+      // @todo harmoniser ces préfixes _ retournés par l'api pour mettre du $ partout (maintenant qu'on passe plus par context.rest qui les virait)
+      const ressource = {...savedRessource}
+      delete ressource._droits
+      ressource.$droits = savedRessource._droits
+      parent.postMessage({
+        action: 'iframeCloser',
+        id: parsedQuery.closerId,
+        ressource
+      }, '*')
+    }
+  }
+  initialize(savedRessource)
+})
+
+const formDef = {
+  form: 'ressource',
+  validate,
+  onSubmit
 }
 
 const ResourceForm = ({
@@ -79,17 +106,10 @@ ResourceForm.propTypes = {
 
 export default ensureLogged(
   resourceLoader(
-    aliasForker(
-      resourceSaver(
+    aliasForker( // fork si on édite un alias
+      resourceSaver( // fournit saveRessource
         renameProp('ressource', 'initialValues')(
-          reduxForm({
-            form: 'ressource',
-            validate,
-            onSubmit: (values, _, {
-              saveRessource,
-              initialize
-            }) => saveRessource(values, initialize)
-          })(ResourceForm)
+          reduxForm(formDef)(ResourceForm)
         )
       )
     )

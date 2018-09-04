@@ -3,6 +3,8 @@ import {Prompt} from 'react-router'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {reduxForm} from 'redux-form'
+import {parse} from 'query-string'
+
 import Classification from './Classification'
 import {labels} from '../../server/ressource/config'
 import listes from '../utils/listesFromConfig'
@@ -122,7 +124,10 @@ const form = {
   onSubmit: (values, dispatch, {
     saveRessource
   }) => {
-    const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}`))
+    // si on nous passe un closerId, faut le refiler à la page modifier, c'est elle qui fera le postMessage
+    const {closerId} = parse(window.location.search)
+    const search = closerId ? `?closerId=${closerId}` : ''
+    const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}${search}`))
     saveRessource(values, onSave)
   },
   validate
