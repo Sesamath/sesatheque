@@ -6,7 +6,7 @@ import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
 import queryString from 'query-string'
 import icons from 'plugins/icons'
-import {deleteRessource} from '../actions/ressource'
+import {askDelete} from '../utils/ressourceOperations'
 
 import './ResourceList.scss'
 
@@ -148,7 +148,7 @@ ResourceList.propTypes = {
 }
 
 // pour ajouter le comportement du changement de page
-const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
+const mapDispatchToProps = (dispatch, {query, queryOptions, refreshList}) => ({
   // au clic sur un changement de pagination faut mettre à jour l'url
   // (et resourceListProvider mettra à jour la liste resources)
   handlePageClick: (data) => {
@@ -162,11 +162,7 @@ const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
       search: queryString.stringify(params)
     }))
   },
-  askDelete: (oid, refreshList) => {
-    if (confirm('Êtes vous sûr de vouloir supprimer cette ressource ?')) {
-      dispatch(deleteRessource(oid, refreshList))
-    }
-  }
+  askDelete: askDelete(dispatch, refreshList)
 })
 
 export default connect(null, mapDispatchToProps)(ResourceList)
