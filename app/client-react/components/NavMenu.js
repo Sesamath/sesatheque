@@ -3,7 +3,7 @@ import React, {Fragment} from 'react'
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 import {getContext} from 'recompose'
-import {deleteRessource, cloneRessource} from '../actions/ressource'
+import {askDelete, askClone} from '../utils/ressourceOperations'
 import NavMenuItem from './NavMenuItem'
 import NavButton from './NavButton'
 import './NavMenu.scss'
@@ -81,22 +81,11 @@ NavMenu.propTypes = {
 
 // les props sont passées en 2e argument
 const mapDispatchToProps = (dispatch) => ({
-  askDelete: (oid) => {
-    if (confirm('Êtes vous sûr de vouloir supprimer cette ressource ?')) {
-      const success = () => dispatch(push('/'))
-
-      return dispatch(deleteRessource(oid, success))
-    }
-  },
-  askClone: (oid) => {
-    if (confirm('Êtes vous sûr de vouloir dupliquer cette ressource ?')) {
-      const success = (clonedOid) => dispatch(
-        push(`/ressource/modifier/${clonedOid}`)
-      )
-
-      return dispatch(cloneRessource(oid, success))
-    }
-  }
+  askDelete: askDelete(dispatch, () => dispatch(push('/'))),
+  askClone: askClone(dispatch, clonedOid =>
+    dispatch(
+      push(`/ressource/modifier/${clonedOid}`)
+    ))
 })
 
 export default getContext({isIframeLayout: PropTypes.bool})(connect(null, mapDispatchToProps)(NavMenu))

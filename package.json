@@ -232,7 +232,7 @@
   ],
   "eslintIgnore": [
     "**/node_modules",
-    "app/assets/vendor",
+    "app/assets",
     "_private",
     "build",
     "doc_src",

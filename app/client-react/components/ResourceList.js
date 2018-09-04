@@ -5,11 +5,15 @@ import {connect} from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
 import queryString from 'query-string'
-import './ResourceList.scss'
 import icons from 'plugins/icons'
+import {askDelete} from '../utils/ressourceOperations'
+
+import './ResourceList.scss'
 
 export const ResourceList = ({
   handlePageClick,
+  askDelete,
+  refreshList,
   queryOptions,
   resources,
   showSearchLink,
@@ -36,6 +40,7 @@ export const ResourceList = ({
       previousLabel={'<'}
       nextLabel={'>'}
       breakLabel={<a href="">...</a>}
+      forcePage={Math.ceil(skip / limit)}
       pageCount={Math.ceil(total / limit)}
       onPageChange={handlePageClick}
       containerClassName={'pagination'}
@@ -93,6 +98,17 @@ export const ResourceList = ({
                     title="Modifier"
                   >Modifier</NavLink>
                 ) : null}
+                {$droits.includes('D') ? (
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault()
+                      askDelete(oid, refreshList)
+                    }}
+                    href="#"
+                    title="Supprimer"
+                  >Supprimer</a>
+                ) : null}
+
               </td>
             </tr>
           ))}
@@ -121,16 +137,18 @@ ResourceList.propTypes = {
   showSearchLink: PropTypes.bool,
   total: PropTypes.number.isRequired,
   handlePageClick: PropTypes.func.isRequired,
+  askDelete: PropTypes.func.isRequired,
   // fourni par resourceListProvider
   query: PropTypes.object,
   queryOptions: PropTypes.shape({
     skip: PropTypes.number.isRequired,
     limit: PropTypes.number.isRequired
-  })
+  }),
+  refreshList: PropTypes.func.isRequired
 }
 
 // pour ajouter le comportement du changement de page
-const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
+const mapDispatchToProps = (dispatch, {query, queryOptions, refreshList}) => ({
   // au clic sur un changement de pagination faut mettre à jour l'url
   // (et resourceListProvider mettra à jour la liste resources)
   handlePageClick: (data) => {
@@ -143,7 +161,8 @@ const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
       pathname: '/ressource/rechercher',
       search: queryString.stringify(params)
     }))
-  }
+  },
+  askDelete: askDelete(dispatch, refreshList)
 })
 
 export default connect(null, mapDispatchToProps)(ResourceList)

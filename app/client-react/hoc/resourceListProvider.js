@@ -64,7 +64,12 @@ const resourceListProvider = (WrappedComponent) => {
 
     render () {
       return (
-        <WrappedComponent {...this.props} resources={this.state.resources} total={this.state.total} />
+        <WrappedComponent
+          {...this.props}
+          resources={this.state.resources}
+          total={this.state.total}
+          refreshList={this.fetchList.bind(this)}
+        />
       )
     }
   }
