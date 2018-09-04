@@ -44,11 +44,7 @@ const {application: {name: appName, staging}} = config
 // https://github.com/tlrobinson/long-stack-traces
 // https://github.com/groundwater/node-stackup
 // on opte pour https://github.com/AndreasMadsen/trace
-if (!/prod/.test(staging)) {
-  log(`Environnement ${staging}, on ajoute les traces longues`)
-  require('trace')
-  Error.stackTraceLimit = 100
-}
+// mais on ne le lance que via yarn run start:devBack car ça fait parfois planter node (out of memory)
 
 let lassiInstance
 

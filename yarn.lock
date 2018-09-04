@@ -7693,6 +7693,10 @@ ssri@^5.2.4:
   dependencies:
     safe-buffer "^5.1.1"
 
+stack-chain@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/stack-chain/-/stack-chain-2.0.0.tgz#d73d1172af89565f07438b5bcc086831b6689b2d"
+
 stack-generator@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/stack-generator/-/stack-generator-2.0.3.tgz#bb74385c67ffc4ccf3c4dee5831832d4e509c8a0"
@@ -8084,6 +8088,12 @@ tough-cookie@~2.3.0, tough-cookie@~2.3.2, tough-cookie@~2.3.3:
   resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
   dependencies:
     punycode "^1.4.1"
+
+trace@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/trace/-/trace-3.1.0.tgz#32709b7f2324be68e99547b12dacd17ab900b1e2"
+  dependencies:
+    stack-chain "^2.0.0"
 
 trim-newlines@^1.0.0:
   version "1.0.0"
