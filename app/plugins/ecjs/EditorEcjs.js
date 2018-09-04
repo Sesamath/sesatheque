@@ -20,8 +20,8 @@ class EditorEcjs extends Component {
   }
 
   loadResourceInEditor (fields) {
-    if (!this.iframeRef.current) {
-      console.error(Error(`Impossible de charger une ressource avant d'avoir chargé l'iframe`))
+    if (!this.iframeRef || !this.iframeRef.current) {
+      // l'iframe de l'éditeur n'est pas prête
       return
     }
     const parametres = this.props.parametres
@@ -54,7 +54,6 @@ class EditorEcjs extends Component {
    * @param prevProps
    */
   componentDidUpdate (prevProps) {
-    console.log(this.props.parametres.fichierjs)
     if (prevProps.parametres.fichierjs !== this.props.parametres.fichierjs) {
       this.loadResourceInEditor()
     }
