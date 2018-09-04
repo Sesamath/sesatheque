@@ -54,7 +54,6 @@ class EditorEcjs extends Component {
    * @param prevProps
    */
   componentDidUpdate (prevProps) {
-    console.log(this.props.parametres.fichierjs)
     if (prevProps.parametres.fichierjs !== this.props.parametres.fichierjs) {
       this.loadResourceInEditor()
     }
