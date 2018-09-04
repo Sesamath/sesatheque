@@ -31,10 +31,14 @@ const onSubmit = (values, dispatch, {saveRessource, initialize}) => saveRessourc
   if (parent !== window && parent.postMessage) {
     const parsedQuery = parse(window.location.search)
     if (parsedQuery.closerId) {
+      // @todo harmoniser ces préfixes _ retournés par l'api pour mettre du $ partout (maintenant qu'on passe plus par context.rest qui les virait)
+      const ressource = {...savedRessource}
+      delete ressource._droits
+      ressource.$droits = savedRessource._droits
       parent.postMessage({
         action: 'iframeCloser',
         id: parsedQuery.closerId,
-        ressource: savedRessource
+        ressource
       }, '*')
     }
   }
