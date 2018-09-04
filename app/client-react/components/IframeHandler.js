@@ -15,9 +15,7 @@ class IframeHandler extends Component {
   }
 
   onManualEditorChange (annotations) {
-    if (annotations.length === 0) return this.setState({disableEditor: false})
-
-    let hasErrors = annotations.find(a => a.type === 'error') !== undefined
+    const hasErrors = annotations.some(({type}) => type === 'error')
     this.setState({disableEditor: hasErrors})
   }
 
