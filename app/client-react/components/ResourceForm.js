@@ -13,6 +13,7 @@ import resourceLoader from '../hoc/resourceLoader'
 import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
+import onSubmitFail from '../utils/onSubmitFail'
 import commonValidate from '../utils/ressourceValidate'
 import editors from 'plugins/editors'
 
@@ -48,7 +49,8 @@ const onSubmit = (values, dispatch, {saveRessource, initialize}) => saveRessourc
 const formDef = {
   form: 'ressource',
   validate,
-  onSubmit
+  onSubmit,
+  onSubmitFail
 }
 
 const ResourceForm = ({
