@@ -59,6 +59,14 @@ class EditorMathGraph extends Component {
               label="Affichage adapté &laquo;dys&raquo;"
               name="parametres[dys]"
             />
+            <SwitchField
+              label="Afficher à l'élève le bouton &laquo;nouvelle figure&raquo;"
+              name="parametres[newFig]"
+            />
+            <SwitchField
+              label="Afficher à l'élève le bouton &laquo;ouvrir&raquo;"
+              name="parametres[open]"
+            />
           </div>
           {this.state.showReloadMessage ? (
             <span className="alert--warning">
@@ -74,7 +82,7 @@ class EditorMathGraph extends Component {
           ) : null}
           <span className="alert--info">Vous pouvez changer les outils disponibles via le bouton &laquo;options&raquo;</span>
           <IframeHandler
-            iframeNames={['parametres']}
+            iframeNames={['parametres[content]']}
             onLoad={this.onIframeLoaded.bind(this)}
             src={iframeSrc}
           />
