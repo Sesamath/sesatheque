@@ -21,6 +21,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const appConfig = require('./app/server/config')
 const pluginsConfig = require('./app/plugins/webpack.plugins')
+const pluginsEntry = require('./app/plugins/webpack.entry')
 
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
@@ -36,6 +37,7 @@ const conf = {
   mode: isProd ? 'production' : 'development',
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
+    ...pluginsEntry,
     // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
     // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
@@ -63,9 +65,9 @@ const conf = {
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
-    library: 'st[name]',
+    library: 'st[name]', // ne plus changer cela car des scripts externes l'utilisent (j3p, nos plugins…)
     // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library,
-    // ici var => globale
+    // ici var => on aura l'export de l'entry dispo en global (obj ou fonction suivant le module)
     libraryTarget: 'var',
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
@@ -80,7 +82,8 @@ const conf = {
     extensions: ['.js', '.json', '.jsx'],
     alias: {
       'client-react': path.resolve(__dirname, 'app/client-react'),
-      plugins: path.resolve(__dirname, 'app/plugins')
+      plugins: path.resolve(__dirname, 'app/plugins'),
+      server: path.resolve(__dirname, 'app/server')
     }
   },
   // pour nos loaders perso

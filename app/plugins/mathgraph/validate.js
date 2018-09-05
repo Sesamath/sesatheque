@@ -1,18 +1,18 @@
-const validate = ({parametres: {fig, width, height}}, errors) => {
-  if (typeof fig !== 'string' || fig.length === 0) {
+
+const validate = ({parametres: {content, width, height}}, errors) => {
+  const addError = (field, errorMessage) => {
     errors.parametres = errors.parametres || {}
-    errors.parametres.fig = 'La figure est vide'
+    errors.parametres[field] = errorMessage
+  }
+  if (typeof content !== 'object') {
+    addError('content', 'pas de contenu')
+  } else {
+    if (typeof content.fig !== 'string' || !content.fig.length) addError('content', 'pas de figure')
+    if (!Number.isInteger(content.level) || content.level < 0) addError('propriété level invalide')
   }
 
-  if (typeof width === 'number' && width < 300) {
-    errors.parametres = errors.parametres || {}
-    errors.parametres.width = 'La largeur doit être vide ou supérieure à 300'
-  }
-
-  if (typeof height === 'number' && height < 200) {
-    errors.parametres = errors.parametres || {}
-    errors.parametres.height = 'La hauteur doit être vide ou supérieure à 200'
-  }
+  if (typeof width === 'number' && width < 300) addError('width', 'La largeur doit être vide ou supérieure à 300')
+  if (typeof height === 'number' && height < 200) addError('height', 'La hauteur doit être vide ou supérieure à 200')
 }
 
 export default validate
