@@ -26,9 +26,9 @@
 <div id="main"></div>
 <script type="application/javascript">
   // attention, ES5 obligatoire
-  if (typeof stpluginMathgraphEditor === 'function') {
+  if (typeof window.stpluginMathgraphEditor === 'function') {
     // le dom parent appelle load en lui passant (ressource, fields)
-    var load = stpluginMathgraphEditor
+    window.load = window.stpluginMathgraphEditor
   } else {
     document.getElementById('errors').innerText = 'Erreur de chargement'
   }

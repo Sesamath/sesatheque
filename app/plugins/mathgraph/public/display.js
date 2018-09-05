@@ -73,14 +73,9 @@ module.exports = function display (ressource, options, next) {
     log('start mathgraph display avec la ressource', ressource)
     // les params minimaux
     if (!ressource.oid || !ressource.titre || !ressource.parametres) throw new Error('Ressource incomplète')
-    // du temps de l'applet java, ou du chargement js qui géait le svg, on avait parametres.figure
-    // mais maintenant mathgraph renvoie fig
     const {parametres} = ressource
-    if (!parametres.fig && parametres.figure) {
-      parametres.fig = parametres.figure
-      delete parametres.figure
-    }
-    if (!parametres.fig) throw new Error('Pas de figure mathgraph en paramètre')
+    const {content} = parametres
+    if (!content || !content.fig) throw new Error('Pas de figure mathgraph en paramètre')
 
     const dependencies = [
       'https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js',
@@ -144,14 +139,13 @@ module.exports = function display (ressource, options, next) {
             width,
             height
           }
-          const mtgOptions = parametres.content || parametres
-          if (!mtgOptions.fig) return next(Error('Ressource mathgraph sans figure à afficher'))
+          const mtgOptions = {...content}
           if (!mtgOptions.hasOwnProperty('level')) mtgOptions.level = 1
           // en consultation on ne peut pas remplacer la figure par une nouvelle, sauf si c'est explicitement autorisé
           mtgOptions.newFig = Boolean(parametres.newFig)
           // idem pour en ouvrir une
           mtgOptions.open = Boolean(parametres.open)
-          // options: pour autoriser à changer les options de la figure, true par défaut
+          // options: pour autoriser à changer les options de la figure, true par défaut, jamais autorisé en consultation
           mtgOptions.options = false
           // en consultation on affiche toujours le bouton save, si y'a du resultatCallback ça lui filera
           // la figure, sinon on peut toujours sauvegarder localement la figure
