@@ -1,7 +1,6 @@
-import {get} from 'lodash'
 import PropTypes from 'prop-types'
-import React, {Component, Fragment} from 'react'
-import Warning from '../../Warning'
+import React, {Component} from 'react'
+import showInvalidField from '../hoc/showInvalidField'
 
 class Iframe extends Component {
   constructor (props) {
@@ -18,43 +17,24 @@ class Iframe extends Component {
     const {
       onLoad,
       src,
-      names,
-      ...otherProps
+      input
     } = this.props
 
-    const fieldsArray = names.map(name => get(otherProps, name))
-
     return (
-      <Fragment>
-        <iframe
-          onLoad={() => onLoad(this.iframeRef, otherProps)}
-          ref={this.iframeRef}
-          src={src}
-        />
-        {
-          fieldsArray.map(({
-            meta: {touched, error, warning},
-            input: {name}
-          }) => {
-            if (touched && (error || warning)) {
-              return (<Warning
-                message={error || warning}
-                key={name}
-              />)
-            }
-
-            return null
-          })
-        }
-      </Fragment>
+      <iframe
+        onLoad={() => onLoad(this.iframeRef, input)}
+        ref={this.iframeRef}
+        src={src}
+      />
     )
   }
 }
 
 Iframe.propTypes = {
+  input: PropTypes.shape({}),
   onLoad: PropTypes.func,
   src: PropTypes.string,
   names: PropTypes.arrayOf(PropTypes.string)
 }
 
-export default Iframe
+export default showInvalidField(Iframe)

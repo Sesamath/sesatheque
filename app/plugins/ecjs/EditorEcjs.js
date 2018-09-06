@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
 import {formValues} from 'redux-form'
-import {SelectField} from 'client-react/components/fields'
-import IframeHandler from 'client-react/components/IframeHandler'
+import {IframeField, SelectField} from 'client-react/components/fields'
 // page de l'éditeur ecjs à insérer en iframe
 import iframeSrc from './public/edit.html'
 import typesEcjs from './subtypes'
@@ -73,13 +72,12 @@ class EditorEcjs extends Component {
           placeholder="Choisir un type d’exercice"
         />
         {this.props.parametres.fichierjs ? (
-          <fieldset>
-            <IframeHandler
-              onLoad={this.onIframeLoaded.bind(this)}
-              src={iframeSrc}
-              iframeNames={['parametres[options]']}
-            />
-          </fieldset>
+          <IframeField
+            label="Édition des options"
+            onLoad={this.onIframeLoaded.bind(this)}
+            src={iframeSrc}
+            name="parametres[options]"
+          />
         ) : null}
       </Fragment>
     )

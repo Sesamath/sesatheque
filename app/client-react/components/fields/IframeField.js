@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
-import {Fields} from 'redux-form'
-import Iframe from './fields/inputs/Iframe'
-import {TextField} from './fields'
+import {Field} from 'redux-form'
+import Iframe from './inputs/Iframe'
+import TextEditor from './inputs/TextEditor'
+import addLabel from './hoc/addLabel'
 
-class IframeHandler extends Component {
+class IframeField extends Component {
   constructor (props) {
     super(props)
 
@@ -32,8 +33,11 @@ class IframeHandler extends Component {
   }
 
   render () {
+    const isManual = this.props.allowManualEdition && this.state.manualEdition
+
     return (
       <fieldset>
+        {this.props.children}
         {this.props.allowManualEdition ? (
           <nav className="tabs-menu">
             <button
@@ -47,33 +51,25 @@ class IframeHandler extends Component {
               disabled={this.state.disableEditor}>Éditeur graphique</button>
           </nav>
         ) : null}
-        {this.props.allowManualEdition && this.state.manualEdition ? (
-          <TextField
-            mode="json"
-            label="Paramètres"
-            name={this.props.textEditorName}
-            onValidate={this.onManualEditorChange.bind(this)}
-          />
-        ) : (
-          <Fields
-            names={this.props.iframeNames}
-            onLoad={this.props.onLoad}
-            src={this.props.src}
-            component={Iframe}
-          />
-        )}
+        <Field
+          mode="json"
+          name={this.props.name}
+          onValidate={this.onManualEditorChange.bind(this)}
+          onLoad={this.props.onLoad}
+          src={this.props.src}
+          component={isManual ? TextEditor : Iframe}
+        />
       </fieldset>
     )
   }
 }
 
-IframeHandler.propTypes = {
+IframeField.propTypes = {
   allowManualEdition: PropTypes.bool,
   src: PropTypes.string,
   onLoad: PropTypes.func,
-  textEditorName: PropTypes.string,
-  root: PropTypes.string,
-  iframeNames: PropTypes.arrayOf(PropTypes.string)
+  name: PropTypes.string,
+  children: PropTypes.node
 }
 
-export default IframeHandler
+export default addLabel(IframeField)

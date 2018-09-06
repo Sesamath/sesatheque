@@ -13,7 +13,7 @@ const mtgLoaderUrl = isProd
   ? 'https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js'
   : 'https://www.mathgraph32.org/ftp/js/mtgloader/max/mtgLoader.js'
 
-module.exports = function addMtgLoader (ressource, fields) {
+module.exports = function addMtgLoader (ressource, input) {
   function displayEditor () {
     /* global mtgLoader */
     const parametres = ressource.parametres
@@ -77,13 +77,13 @@ module.exports = function addMtgLoader (ressource, fields) {
       window.addEventListener('blur', function () {
         const content = mtgApp.getResult()
         if (!content || typeof content !== 'object') throw new Error('mathgraph ne remonte aucune info')
-        fields.parametres.content.input.onBlur(content)
+        input.onBlur(content)
       })
       window.addEventListener('click', function () {
         window.focus()
       })
       window.addEventListener('focus', function () {
-        fields.parametres.content.input.onFocus()
+        input.onFocus()
       })
     } // callBackAfterReady
 
