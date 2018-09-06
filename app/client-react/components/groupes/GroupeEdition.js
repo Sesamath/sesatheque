@@ -15,6 +15,7 @@ import {
 import {saveGroupe} from '../../actions/groupes'
 import groupesLoader from './hoc/groupesLoader'
 import {getPersonneByOidUrl} from '../../apiRoutes'
+import onSubmitFail from '../../utils/onSubmitFail'
 import validate from '../../utils/groupeValidate'
 
 const {MultiValueRemove: DefaultMultiValueRemove} = components
@@ -195,7 +196,8 @@ const onSubmit = ({gestionnaires, ...others}, dispatch) => {
 const formDefinition = {
   form: 'groupe-edition',
   onSubmit,
-  validate
+  validate,
+  onSubmitFail
 }
 
 const propsFromForm = {

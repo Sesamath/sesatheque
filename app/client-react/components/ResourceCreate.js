@@ -7,6 +7,7 @@ import {parse} from 'query-string'
 
 import Classification from './Classification'
 import {labels} from '../../server/ressource/config'
+import onSubmitFail from '../utils/onSubmitFail'
 import listes from '../utils/listesFromConfig'
 import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
@@ -130,6 +131,7 @@ const form = {
     const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}${search}`))
     saveRessource(values, onSave)
   },
+  onSubmitFail,
   validate
 }
 

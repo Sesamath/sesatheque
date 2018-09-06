@@ -6,7 +6,6 @@ const Input = ({
   className,
   input,
   placeholder,
-  name,
   type,
   disabled = false
 }) => (
@@ -14,7 +13,6 @@ const Input = ({
     {...input}
     placeholder={placeholder}
     type={type}
-    name={name}
     className={className}
     disabled={disabled}
   />
@@ -24,7 +22,6 @@ Input.propTypes = {
   className: PropTypes.string,
   disabled: PropTypes.bool,
   input: PropTypes.object,
-  name: PropTypes.string,
   placeholder: PropTypes.string,
   type: PropTypes.string
 }

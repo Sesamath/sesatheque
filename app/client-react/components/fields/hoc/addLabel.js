@@ -9,10 +9,13 @@ import React, {Component} from 'react'
 const addLabel = (WrappedComponent) => {
   class AddLabel extends Component {
     render () {
-      const {className, label, info} = this.props
+      const {className, label, info, name} = this.props
 
       return (
-        <label className={className}>
+        <label
+          className={className}
+          fieldname={name}
+        >
           {label} {info && (<i>{info}</i>)}
           <WrappedComponent {...this.props} />
         </label>
@@ -22,8 +25,9 @@ const addLabel = (WrappedComponent) => {
 
   AddLabel.propTypes = {
     className: PropTypes.string,
+    info: PropTypes.string,
     label: PropTypes.string,
-    info: PropTypes.string
+    name: PropTypes.string
   }
 
   return AddLabel
