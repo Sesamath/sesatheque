@@ -16,7 +16,7 @@ const categories = listes.categories.filter(({value}) => value !== 9)
  */
 const Classification = ({detailed}) => (
   <fieldset>
-    <div className="grid-4">
+    <div className="grid-2">
       <SelectField
         name="categories"
         label={labels.categories}
