@@ -139,6 +139,8 @@ function display (ressource, options, next) {
                 if (isLoaded) save(true)
               })
             }
+            // + notif
+            page.showNotification('<p style="max-width: 300px">Clique sur le bouton de sauvegarde <img src="/plugins/mathgraph/outilSave.png" /> pour enregistrer ton résultat</p>')
           }
 
           // go
