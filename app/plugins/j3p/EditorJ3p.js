@@ -10,10 +10,10 @@ class EditorJ3p extends Component {
    * Appelée par le onLoad de l'iframe
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframeRef, fields) {
+  onIframeLoaded (iframeRef, input) {
     const parametres = typeof this.props.parametres === 'string' ? JSON.parse(this.props.parametres) : this.props.parametres
 
-    iframeRef.current.contentWindow.load({parametres}, fields)
+    iframeRef.current.contentWindow.load({parametres}, input)
   }
 
   render () {

@@ -32,11 +32,11 @@ class EditorMathGraph extends Component {
    * Appelée par le onLoad de l'iframe
    * @param {HTshowReloadMessageMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframe, fields) {
+  onIframeLoaded (iframe, input) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
     const {parametres} = this.props
     const win = iframe.current.contentWindow
-    win.load({parametres}, fields)
+    win.load({parametres}, input)
   }
 
   render () {

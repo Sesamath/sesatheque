@@ -11,21 +11,21 @@ class EditorEcjs extends Component {
    * Appelée par le onLoad de l'iframe
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframeRef, fields) {
+  onIframeLoaded (iframeRef, input) {
     // on stocke une ref sur l'iframe
     this.iframeRef = iframeRef
-    this.fields = fields
+    this.input = input
     this.loadResourceInEditor()
   }
 
-  loadResourceInEditor (fields) {
+  loadResourceInEditor () {
     if (!this.iframeRef || !this.iframeRef.current) {
       // l'iframe de l'éditeur n'est pas prête
       return
     }
     const parametres = this.props.parametres
     // on appelle (en global dans l'iframe) load(ressource, cb) qui rappellera cb(getParametres)
-    this.iframeRef.current.contentWindow.load({parametres}, this.fields)
+    this.iframeRef.current.contentWindow.load({parametres}, this.input)
   }
 
   /**

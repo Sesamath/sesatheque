@@ -16,7 +16,7 @@ class EditorArbre extends Component {
    *
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframe, fields) {
+  onIframeLoaded (iframe, input) {
     const enfants = typeof this.props.enfants === 'string' ? JSON.parse(this.props.enfants) : this.props.enfants
 
     const ressource = {
@@ -31,7 +31,7 @@ class EditorArbre extends Component {
     }
 
     // on peut appeler la méthode load de l'éditeur (pour charger la ressource dedans)
-    iframe.current.contentWindow.load(ressource, options, fields)
+    iframe.current.contentWindow.load(ressource, options, input)
   }
 
   render () {
