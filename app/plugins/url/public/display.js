@@ -31,6 +31,7 @@
 'use strict'
 
 import 'client-react/styles/display.scss'
+import './url.css'
 
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
@@ -188,8 +189,6 @@ module.exports = function urlDisplay (ressource, options, next) {
       if (!/^https?:\/\//.test(url)) throw new Error('Url invalide : ' + url)
 
       // init
-      dom.addCss(options.pluginBase + 'url.css')
-
       const hasConsigne = params.question_option !== 'off'
       const hasReponse = params.answer_option !== 'off'
       const isBasic = !hasConsigne && !hasReponse
