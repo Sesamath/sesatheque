@@ -1,10 +1,14 @@
+// Ce js est compilé par webpack (cf ../webpack.entry.js) et mis dans /pluginMathgraphEditor.js
+// qui exporte ce module dans une var globale stpluginMathgraphEditor
+
 // au moment de l'externalisation en module séparé il faudra voir comment passer cette config
 // probablement via une factory à qui on donnera la conf locale
 // c'est la config filée par webpack, donc version client (chargée par notre config-loader)
 const {application: {staging}} = require('server/config')
 const {addElement, addJs} = require('sesajstools/dom')
 
-const isProd = /prod/.test(staging)
+const isProd = /prod/.test(staging) && !/\.(devsesamath.net|local)$/.test(window.location.hostname) && window.location.hostname !== 'localhost'
+
 const mtgLoaderUrl = isProd
   ? 'https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.min.js'
   : 'https://www.mathgraph32.org/ftp/js/mtgloader/max/mtgLoader.js'

@@ -253,10 +253,39 @@ function setBase (newBase) {
 }
 
 /**
+ * Affiche une notification
+ * @param {string} htmlString
+ * @param {number} [delay=5] délai en s avant fermeture auto
+ */
+function showNotification (htmlString, delay = 5) {
+  const parent = document.body
+  const style = {
+    position: 'absolute',
+    top: '80px',
+    left: '80px',
+    padding: '1em',
+    'max-width': '50%',
+    'max-height': '50%',
+    overflow: 'auto',
+    'background-color': '#fff',
+    'border': 'solid #333'
+  }
+  const notif = dom.addElement(parent, 'div', {style})
+  notif.innerHTML = htmlString
+  const closerElt = dom.addElement(notif, 'img', {src: '/medias/cocheVerte.png', alt: '', style: {position: 'absolute', top: '5px', right: '5px'}})
+  const closeNotif = () => {
+    closerElt.removeEventListener('click', closeNotif)
+    parent.removeChild(notif)
+  }
+  closerElt.addEventListener('click', closeNotif)
+  setTimeout(closeNotif, delay * 1000)
+}
+
+/**
  * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
  * @service page
  */
-module.exports = {addError, addBoutonVu, autosize, hideTitle, init, loadAsync, refreshAuth, setBase}
+module.exports = {addError, addBoutonVu, autosize, hideTitle, init, loadAsync, refreshAuth, setBase, showNotification}
 
 /* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
 if (typeof window !== 'undefined') {
