@@ -119,7 +119,7 @@ function app (options, afterBootCallback) {
   // after boot est facultatif, et on veut un message dans le log
   function afterBootCallbackWrapper () {
     if (afterBootCallback) afterBootCallback()
-    log(`${config.application.name} started`)
+    log(`${config.application.name} started with staging ${config.application.staging}`)
   }
 
   if (lassiInstance) return Promise.resolve(lassiInstance)

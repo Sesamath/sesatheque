@@ -3,8 +3,10 @@ import React, {Fragment, Component} from 'react'
 import {formValues} from 'redux-form'
 import IframeHandler from 'client-react/components/IframeHandler'
 import {IntegerField, SwitchField} from 'client-react/components/fields'
-// page de l'éditeur mathgraph à insérer en iframe
-import iframeSrc from './public/mathgraph-editor.html'
+import {version} from '../../../../package'
+
+// page de l'éditeur mathgraph à insérer en iframe (copiée par webpack)
+const iframeSrc = `/plugins/mathgraph/mathgraph-editor.html?${version}`
 
 class EditorMathGraph extends Component {
   constructor (props) {

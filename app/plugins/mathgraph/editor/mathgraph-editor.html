@@ -4,7 +4,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=9">
   <title>${title}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <script type="application/javascript" src="/bugsnag.js"></script>
+  <script type="application/javascript" src="/bugsnag.js?{version}"></script>
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       tex2jax: {
@@ -16,12 +16,12 @@
       messageStyle:'none'
     });
   </script>
-  <script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full"></script>
-  <script type="application/javascript" src="/pluginMathgraphEditor.js"></script>
-  <link rel="stylesheet" href="https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.css"/>
+  <script type="text/javascript" src="https://www.mathgraph32.org/ftp/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full&stversion={version}"></script>
+  <script type="application/javascript" src="/pluginMathgraphEditor.js?{version}"></script>
+  <link rel="stylesheet" href="https://www.mathgraph32.org/ftp/js/mtgloader/mtgLoader.css?{version}"/>
 </head>
 <body>
-<div id="spinner">Chargement en cours… <img src="/plugins/mathgraph/spinner.gif" alt="" /></div>
+<div id="spinner">Chargement en cours… <img src="/plugins/mathgraph/spinner.gif?{version}" alt="" /></div>
 <div id="errors" style="color: red"></div>
 <div id="main"></div>
 <script type="application/javascript">
