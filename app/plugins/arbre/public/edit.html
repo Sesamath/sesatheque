@@ -13,14 +13,14 @@
   </div>
   <script src="/editArbre.js"></script>
   <script type="application/javascript">
-    function load (ressource, options, fields) {
+    function load (ressource, options, input) {
       const saveCallback = (error, getParametres) => {
         if (error) return console.error(error)
         window.addEventListener('focus', () => {
-          fields.enfants.input.onFocus()
+          input.onFocus()
         })
         window.addEventListener('blur', () => {
-          fields.enfants.input.onBlur(getParametres())
+          input.onBlur(getParametres())
         })
         window.addEventListener('click', () => {
           window.focus()

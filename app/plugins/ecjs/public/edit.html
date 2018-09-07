@@ -11,8 +11,7 @@
   // ATTENTION, le code ci-dessous doit être de l'es5 car il ne passe pas par babel
 
   // une fct en global que notre parent appellera quand il aura eu l'evt load sur l'iframe
-  window.load = function loadEcjsEditor (parametres, fields) {
-    var optionsField = fields.parametres.options
+  window.load = function loadEcjsEditor (parametres, input) {
     var container = document.getElementById('root')
     var options = {
       container,
@@ -39,13 +38,13 @@
           void 0 !== options.temps_exo && (options.tempsExo = options.temps_exo),
           void 0 !== options.nbre_questions && (options.totalQuestion = options.nbre_questions),
           // fin de l'extrait
-          optionsField.input.onChange(options)
+          input.onChange(options)
         })
         window.addEventListener('blur', function () {
-          optionsField.input.onBlur()
+          input.onBlur()
         })
         window.addEventListener('focus', function () {
-          optionsField.input.onFocus()
+          input.onFocus()
         })
       }
     }

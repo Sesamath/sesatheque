@@ -61,6 +61,13 @@ const getOptions = (input, setOptions) => {
   debouncedGET(input, setOptions)
 }
 
+const LabelGestionnaires = () => (
+  <Fragment>
+    Ajouter des gestionnaires
+    <span className="remarque"> (saisir l’identifiant d’un utilisateur, ATTENTION l’ajout est irrévocable)</span>
+  </Fragment>
+)
+
 /**
  * Formulaire d'édition de groupe
  * Doit être dans un redux-form
@@ -108,19 +115,15 @@ const GroupeEdition = ({
             : 'il faut être membre pour suivre les publications du groupe'
           })</span>
         </div>
-        <label>
-          Ajouter des gestionnaires
-          <span className="remarque"> (saisir l’identifiant d’un utilisateur, ATTENTION l’ajout est irrévocable)</span>
-
-          <SelectField
-            components={{ MultiValueRemove }}
-            placeholder="Saisir un oid"
-            name="gestionnaires"
-            loadOptions={getOptions}
-            isMulti
-            isClearable={false}
-          />
-        </label>
+        <SelectField
+          label={<LabelGestionnaires />}
+          components={{ MultiValueRemove }}
+          placeholder="Saisir un oid"
+          name="gestionnaires"
+          loadOptions={getOptions}
+          isMulti
+          isClearable={false}
+        />
       </fieldset>
       <hr />
       <div className="buttons-area">

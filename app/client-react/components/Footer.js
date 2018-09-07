@@ -10,7 +10,7 @@ export const Footer = ({isIframeLayout}) => {
 
   return (
     <footer>
-      <ul role="navigation" className="clearfix unstyled">
+      <ul className="clearfix unstyled">
         <li className="fl">
           <Link to="/mentionsLegales">Infos légales</Link>
         </li>

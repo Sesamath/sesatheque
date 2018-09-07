@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {formValues} from 'redux-form'
-import IframeHandler from 'client-react/components/IframeHandler'
+import {IframeField} from 'client-react/components/fields'
 // page contenant l'éditeur d'arbre à insérer en iframe
 import iframeSrc from './public/edit.html'
 // cf webpackConfigLoader.js pour les valeurs exportées à un browser
@@ -16,7 +16,7 @@ class EditorArbre extends Component {
    *
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframe, fields) {
+  onIframeLoaded (iframe, input) {
     const enfants = typeof this.props.enfants === 'string' ? JSON.parse(this.props.enfants) : this.props.enfants
 
     const ressource = {
@@ -31,22 +31,18 @@ class EditorArbre extends Component {
     }
 
     // on peut appeler la méthode load de l'éditeur (pour charger la ressource dedans)
-    iframe.current.contentWindow.load(ressource, options, fields)
+    iframe.current.contentWindow.load(ressource, options, input)
   }
 
   render () {
     return (
-      <fieldset>
-        <IframeHandler
-          allowManualEdition
-          onLoad={this.onIframeLoaded.bind(this)}
-          src={iframeSrc}
-          textEditorName="enfants"
-          iframeNames={[
-            'enfants'
-          ]}
-        />
-      </fieldset>
+      <IframeField
+        label="Édition de l'arbre"
+        allowManualEdition
+        onLoad={this.onIframeLoaded.bind(this)}
+        src={iframeSrc}
+        name="enfants"
+      />
     )
   }
 }

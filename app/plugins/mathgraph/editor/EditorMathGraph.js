@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Fragment, Component} from 'react'
 import {formValues} from 'redux-form'
-import IframeHandler from 'client-react/components/IframeHandler'
-import {IntegerField, SwitchField} from 'client-react/components/fields'
+import {IframeField, IntegerField, SwitchField} from 'client-react/components/fields'
 import {version} from '../../../../package'
 
 // page de l'éditeur mathgraph à insérer en iframe (copiée par webpack)
@@ -33,14 +32,16 @@ class EditorMathGraph extends Component {
    * Appelée par le onLoad de l'iframe
    * @param {HTshowReloadMessageMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframe, fields) {
+  onIframeLoaded (iframe, input) {
     // @todo vérifier que this.iframe.current existe et gérer l'erreur éventuelle
     const {parametres} = this.props
     const win = iframe.current.contentWindow
-    win.load({parametres}, fields)
+    win.load({parametres}, input)
   }
 
   render () {
+    const isFigEmpty = !this.props.parametres.content || this.props.parametres.content.fig === undefined
+
     return (
       <Fragment>
         <fieldset>
@@ -71,33 +72,31 @@ class EditorMathGraph extends Component {
             />
           </div>
           {this.state.showReloadMessage ? (
-            <span className="alert--warning">
+            <div className="alert--warning">
               Cette modification sera visible lors du prochain affichage de cette ressource.
-            </span>
+            </div>
           ) : null}
         </fieldset>
         <hr />
-        <fieldset>
-          {this.props.parametres.fig === undefined ? (
-            <span className="alert--info">Pour ajouter un repère, utiliser le bouton
-            &laquo;Nouvelle figure&raquo;</span>
+        <IframeField
+          label="Édition du contenu MathGraph"
+          name="parametres[content]"
+          onLoad={this.onIframeLoaded.bind(this)}
+          src={iframeSrc}
+        >
+          {isFigEmpty ? (
+            <div className="alert--info">Pour ajouter un repère, utiliser le bouton
+            &laquo;Nouvelle figure&raquo;</div>
           ) : null}
-          <span className="alert--info">Vous pouvez changer les outils disponibles via le bouton &laquo;options&raquo;</span>
-          <IframeHandler
-            iframeNames={['parametres[content]']}
-            onLoad={this.onIframeLoaded.bind(this)}
-            src={iframeSrc}
-          />
-        </fieldset>
+          <div className="alert--info">Vous pouvez changer les outils disponibles via le bouton &laquo;options&raquo;</div>
+        </IframeField>
       </Fragment>
     )
   }
 }
 
 EditorMathGraph.propTypes = {
-  parametres: PropTypes.object,
-  getLoadCb: PropTypes.func,
-  getInfosParametres: PropTypes.func
+  parametres: PropTypes.object
 }
 
 export default formValues({parametres: 'parametres'})(EditorMathGraph)

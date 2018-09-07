@@ -5,6 +5,7 @@ import addLabel from './hoc/addLabel'
 
 const TextareaField = ({name, label, ...otherProps}) => (
   <Field
+    id={`${name}-field`}
     name={name}
     component="textarea"
     placeholder={label}

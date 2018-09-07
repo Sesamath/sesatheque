@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
 import {formValues} from 'redux-form'
-import {SelectField} from 'client-react/components/fields'
-import IframeHandler from 'client-react/components/IframeHandler'
+import {IframeField, SelectField} from 'client-react/components/fields'
 // page de l'éditeur ecjs à insérer en iframe
 import iframeSrc from './public/edit.html'
 import typesEcjs from './subtypes'
@@ -12,21 +11,21 @@ class EditorEcjs extends Component {
    * Appelée par le onLoad de l'iframe
    * @param {HTMLElement} iframe Iframe présente dans le DOM
    */
-  onIframeLoaded (iframeRef, fields) {
+  onIframeLoaded (iframeRef, input) {
     // on stocke une ref sur l'iframe
     this.iframeRef = iframeRef
-    this.fields = fields
+    this.input = input
     this.loadResourceInEditor()
   }
 
-  loadResourceInEditor (fields) {
+  loadResourceInEditor () {
     if (!this.iframeRef || !this.iframeRef.current) {
       // l'iframe de l'éditeur n'est pas prête
       return
     }
     const parametres = this.props.parametres
     // on appelle (en global dans l'iframe) load(ressource, cb) qui rappellera cb(getParametres)
-    this.iframeRef.current.contentWindow.load({parametres}, this.fields)
+    this.iframeRef.current.contentWindow.load({parametres}, this.input)
   }
 
   /**
@@ -73,13 +72,12 @@ class EditorEcjs extends Component {
           placeholder="Choisir un type d’exercice"
         />
         {this.props.parametres.fichierjs ? (
-          <fieldset>
-            <IframeHandler
-              onLoad={this.onIframeLoaded.bind(this)}
-              src={iframeSrc}
-              iframeNames={['parametres[options]']}
-            />
-          </fieldset>
+          <IframeField
+            label="Édition des options"
+            onLoad={this.onIframeLoaded.bind(this)}
+            src={iframeSrc}
+            name="parametres[options]"
+          />
         ) : null}
       </Fragment>
     )

@@ -8,7 +8,7 @@ const onSubmitFail = (errors, dispatch) => {
   const names = Object.keys(errors)
   if (names.length) {
     const name = names[0]
-    const element = document.querySelector(`[fieldname="${name}"]`)
+    const element = document.querySelector(`[data-fieldname="${name}"]`)
     if (element && element.scrollIntoView) element.scrollIntoView(false)
     dispatch(addNotification({
       level: 'warning',

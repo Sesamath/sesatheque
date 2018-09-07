@@ -15,7 +15,6 @@ const DateField = ({
 }) => (
   <Field
     format={format}
-    placeholder={label}
     name={name}
     component={Input}
     type="date"
