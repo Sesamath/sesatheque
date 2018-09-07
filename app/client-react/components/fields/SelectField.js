@@ -21,4 +21,4 @@ SelectField.propTypes = {
   placeholder: PropTypes.string
 }
 
-export default addLabel(SelectField)
+export default addLabel(SelectField, 'div')

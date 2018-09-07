@@ -19,4 +19,4 @@ TextField.propTypes = {
   onValidate: PropTypes.func
 }
 
-export default addLabel(TextField)
+export default addLabel(TextField, 'div')

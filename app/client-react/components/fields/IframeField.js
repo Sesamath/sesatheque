@@ -72,4 +72,4 @@ IframeField.propTypes = {
   children: PropTypes.node
 }
 
-export default addLabel(IframeField)
+export default addLabel(IframeField, 'div')

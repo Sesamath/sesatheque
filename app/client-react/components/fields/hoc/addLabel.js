@@ -6,19 +6,22 @@ import React, {Component} from 'react'
  * @param {Component} WrappedComponent
  * @return {Component} Le composant enrichi
  */
-const addLabel = (WrappedComponent) => {
+const addLabel = (WrappedComponent, Tag = 'label') => {
   class AddLabel extends Component {
     render () {
       const {className, label, info, name} = this.props
+      const classList = []
+      if (className) classList.push(className)
+      if (Tag !== 'label') classList.push('label')
 
       return (
-        <label
-          className={className}
-          fieldname={name}
+        <Tag
+          className={classList.join(' ')}
+          data-fieldname={name}
         >
           {label} {info && (<i>{info}</i>)}
           <WrappedComponent {...this.props} />
-        </label>
+        </Tag>
       )
     }
   }
