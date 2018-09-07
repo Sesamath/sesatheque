@@ -1,23 +1,15 @@
 import React, {Component, Fragment} from 'react'
-import {connect} from 'react-redux'
 import {autocomplete, search} from 'sesatheque-client/src/client'
 import {debounce} from 'lodash'
 import config from '../../server/config'
 import {labels, listes} from '../../server/ressource/config'
 import {Async as Select} from 'react-select'
-import {ResourceList} from './ResourceList'
-import {askDelete} from '../utils/ressourceOperations'
+import ResourceList from './ResourceList'
 
 const defaultQuery = {
   skip: 0,
   limit: 100
 }
-
-const mapDispatchToProps = (dispatch, {query, queryOptions, refreshList}) => ({
-  askDelete: askDelete(dispatch, refreshList)
-})
-
-const WrappedResourceList = connect(null, mapDispatchToProps)(ResourceList)
 
 class OptionValue {
   constructor (filter, filterValue) {
@@ -108,7 +100,7 @@ class AutocompleteForm extends Component {
             className="btn btn--rounded"
             onClick={this.searchResources.bind(this)}>Rechercher</button>
         </div>
-        <WrappedResourceList
+        <ResourceList
           handlePageClick={() => {}}
           refreshList={this.searchResources.bind(this)}
           queryOptions={defaultQuery}

@@ -88,59 +88,59 @@ export const Description = ({
         <span className="btn fr tag">{publie ? 'Publié' : 'NON PUBLIÉ'}</span>
         <span className="btn fr tag">{labels.restriction}&nbsp;:&nbsp;{getRestrictionString({restriction, groupes})}</span>
 
-        <section className="grid-5 has-gutter">
-          <div className="txtright">{labels.oid}&nbsp;:</div>
+        <section className="grid-5 has-gutter clear-right">
+          <div className="txtbold">{labels.oid}&nbsp;:</div>
           <div className="col-4">
             {oid}{externalId} {getLink('dataUrl', 'json')}
           </div>
 
-          <div className="txtright">{labels.type}&nbsp;:</div>
+          <div className="txtbold">{labels.type}&nbsp;:</div>
           <div className="col-4">{type}</div>
-          <div className="txtright">{labels.version}&nbsp;:</div>
+          <div className="txtbold">{labels.version}&nbsp;:</div>
           <div className="col-4">{version}</div>
 
           {aliasOf ? (
             <Fragment>
-              <div className="txtright"><strong>Alias de</strong></div>
+              <div className="txtbold"><strong>Alias de</strong></div>
               <div className="col-4">{getLink('describeUrl', titre)}</div>
             </Fragment>
           ) : (
             <Fragment>
-              <div className="txtright">{labels.dateCreation}&nbsp;:</div>
+              <div className="txtbold">{labels.dateCreation}&nbsp;:</div>
               <div className="col-4">{moment(dateCreation).format(dateFormat)}</div>
 
-              <div className="txtright">{labels.dateMiseAJour}&nbsp;:</div>
+              <div className="txtbold">{labels.dateMiseAJour}&nbsp;:</div>
               <div className="col-4">{moment(dateMiseAJour).format(dateFormat)}</div>
 
-              <div className="txtright">{labels.langue}&nbsp;:</div>
+              <div className="txtbold">{labels.langue}&nbsp;:</div>
               <div className="col-4">{listes.langue[langue]}</div>
 
-              <div className="txtright">{labels.niveaux}&nbsp;:</div>
+              <div className="txtbold">{labels.niveaux}&nbsp;:</div>
               <div className="col-4">{niveaux.map((niveau) => listes.niveaux[niveau]).join(', ')}</div>
 
-              <div className="txtright">{labels.typePedagogiques}&nbsp;:</div>
+              <div className="txtbold">{labels.typePedagogiques}&nbsp;:</div>
               <div className="col-4">{typePedagogiques.map((typePedagogique) => listes.typePedagogiques[typePedagogique]).join(', ')}</div>
 
-              <div className="txtright">{labels.typeDocumentaires}&nbsp;:</div>
+              <div className="txtbold">{labels.typeDocumentaires}&nbsp;:</div>
               <div className="col-4">{typeDocumentaires.map((typeDocumentaire) => listes.typeDocumentaires[typeDocumentaire]).join(', ')}</div>
             </Fragment>
           )}
 
-          <div className="txtright">{labels.categories}&nbsp;:</div>
+          <div className="txtbold">{labels.categories}&nbsp;:</div>
           <div className="col-4">{categories.map((categorie) => listes.categories[categorie]).join(', ')}</div>
 
-          <div className="txtright">{labels.resume}&nbsp;:</div>
+          <div className="txtbold">{labels.resume}&nbsp;:</div>
           <div className="col-4">{nl2br(resume)}</div>
 
-          <div className="txtright">{labels.description}&nbsp;:</div>
+          <div className="txtbold">{labels.description}&nbsp;:</div>
           <div className="col-4">{nl2br(description)}</div>
 
-          <div className="txtright">{labels.commentaires}&nbsp;:</div>
+          <div className="txtbold">{labels.commentaires}&nbsp;:</div>
           <div className="col-4">{nl2br(commentaires)}</div>
 
           {_enfants.length ? (
             <Fragment>
-              <div className="txtright">Liens vers les enfants&nbsp;:</div>
+              <div className="txtbold">Liens vers les enfants&nbsp;:</div>
               <div className="col-4">
                 <ul>
                   {_enfants.map(({url, titre}, index) => (
@@ -165,7 +165,7 @@ export const Description = ({
 
           {!aliasOf && _auteurs.length ? (
             <Fragment>
-              <div className="txtright">{labels.auteurs}&nbsp;:</div>
+              <div className="txtbold">{labels.auteurs}&nbsp;:</div>
               <div className="col-4">
                 {_auteurs.length > 1 ? (
                   <ul>
@@ -180,7 +180,7 @@ export const Description = ({
 
           {!aliasOf && _contributeurs.length ? (
             <Fragment>
-              <div className="txtright">{labels.contributeurs}&nbsp;:</div>
+              <div className="txtbold">{labels.contributeurs}&nbsp;:</div>
               <div className="col-4">
                 <ul>
                   {_contributeurs.map(contributeur => (
@@ -193,7 +193,7 @@ export const Description = ({
 
           {!aliasOf && _relations.length ? (
             <Fragment>
-              <div className="txtright">{labels.relations}&nbsp;:</div>
+              <div className="txtbold">{labels.relations}&nbsp;:</div>
               <div className="col-4">
                 <ul className="relations">
                   {_relations.map(({predicat, rid, titre, type, url}) => (
@@ -216,7 +216,7 @@ export const Description = ({
 
           {!aliasOf && groupes.length ? (
             <Fragment>
-              <div className="txtright">{labels.groupes}&nbsp;:</div>
+              <div className="txtbold">{labels.groupes}&nbsp;:</div>
               <div className="col-4">
                 <ul className="groupes">
                   {groupes.map(groupe => (
