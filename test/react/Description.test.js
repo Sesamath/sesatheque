@@ -46,7 +46,7 @@ describe('<Description />', () => {
     expect(h1.children[0]).to.equals(expectedTitre)
 
     // Le bloc de description doit contenir le bon nb de div
-    const bloc = testComponent.root.findByProps({className: 'grid-5 has-gutter'})
+    const bloc = testComponent.root.findByProps({className: 'grid-5 has-gutter clear-right'})
     let expectedLength = 14 // la base pour tous
     if (isAlias) {
       expectedLength += 2
