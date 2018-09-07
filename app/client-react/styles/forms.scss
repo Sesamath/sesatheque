@@ -28,22 +28,22 @@
     font-size: 11pt;
   }
 
-  textarea {
+  > textarea {
     min-height: 100px;
   }
 
-  input[type='checkbox'] {
+  > input[type='checkbox'] {
     display: block;
     margin-right: 5px;
     margin-top: 15px;
   }
 
-  input[type='radio'] {
+  > input[type='radio'] {
     -webkit-appearance: none;
     -moz-appearance: none;
   }
 
-  input.switch {
+  > input.switch {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;

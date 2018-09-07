@@ -66,15 +66,17 @@ class EditorUrl extends Component {
         </div>
         <div>Consigne
           {questionOptions.map(({key, label}) => (
-            <label key={key}>
-              <Field
-                name="parametres[question_options]"
-                className="radio"
-                component="input"
-                type="radio"
-                value={key}
-              /> {label} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
-            </label>
+            <div className="field" key={key}>
+              <label>
+                <Field
+                  name="parametres[question_options]"
+                  className="radio"
+                  component="input"
+                  type="radio"
+                  value={key}
+                /> {label} {key !== 'off' && (<i>(l’affichage de la page)</i>)}
+              </label>
+            </div>
           ))}
           {this.hasConsigne() ? (
             <TextareaField
@@ -87,15 +89,17 @@ class EditorUrl extends Component {
         </div>
         <div>Réponse
           {answerOptions.map(({key, label}) => (
-            <label key={key}>
-              <Field
-                name="parametres[answer_option]"
-                className="radio"
-                component="input"
-                type="radio"
-                value={key}
-              /> {label}
-            </label>
+            <div className="field" key={key}>
+              <label>
+                <Field
+                  name="parametres[answer_option]"
+                  className="radio"
+                  component="input"
+                  type="radio"
+                  value={key}
+                /> {label}
+              </label>
+            </div>
           ))}
         </div>
       </fieldset>
