@@ -1,16 +1,14 @@
-import {push} from 'connected-react-router'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {connect} from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
-import queryString from 'query-string'
 import icons from 'plugins/icons'
 import {askDelete} from '../utils/ressourceOperations'
 
 import './ResourceList.scss'
 
-export const ResourceList = ({
+const ResourceList = ({
   handlePageClick,
   askDelete,
   refreshList,
@@ -147,21 +145,7 @@ ResourceList.propTypes = {
   refreshList: PropTypes.func.isRequired
 }
 
-// pour ajouter le comportement du changement de page
-const mapDispatchToProps = (dispatch, {query, queryOptions, refreshList}) => ({
-  // au clic sur un changement de pagination faut mettre à jour l'url
-  // (et resourceListProvider mettra à jour la liste resources)
-  handlePageClick: (data) => {
-    const params = {
-      ...query,
-      skip: (Math.round(data.selected) || 0) * queryOptions.limit
-    }
-
-    dispatch(push({
-      pathname: '/ressource/rechercher',
-      search: queryString.stringify(params)
-    }))
-  },
+const mapDispatchToProps = (dispatch, {refreshList}) => ({
   askDelete: askDelete(dispatch, refreshList)
 })
 

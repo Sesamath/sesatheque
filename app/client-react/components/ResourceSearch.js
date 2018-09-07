@@ -1,5 +1,8 @@
-import {NavLink} from 'react-router-dom'
+import {push} from 'connected-react-router'
 import PropTypes from 'prop-types'
+import queryString from 'query-string'
+import {connect} from 'react-redux'
+import {NavLink} from 'react-router-dom'
 import React, {Fragment} from 'react'
 import SearchForm from './SearchForm'
 import ResourceList from './ResourceList'
@@ -60,4 +63,24 @@ ResourceSearch.propTypes = {
   total: PropTypes.number
 }
 
-export default resourceListProvider(ResourceSearch)
+// pour ajouter le comportement du changement de page
+const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
+  // au clic sur un changement de pagination faut mettre à jour l'url
+  // (et resourceListProvider mettra à jour la liste resources)
+  handlePageClick: (data) => {
+    const params = {
+      ...query,
+      skip: (Math.round(data.selected) || 0) * queryOptions.limit
+    }
+
+    dispatch(push({
+      pathname: '/ressource/rechercher',
+      search: queryString.stringify(params)
+    }))
+  }
+})
+
+export default resourceListProvider(
+  connect(null, mapDispatchToProps)(ResourceSearch
+  )
+)
