@@ -6,22 +6,23 @@ import React, {Component} from 'react'
  * @param {Component} WrappedComponent
  * @return {Component} Le composant enrichi
  */
-const addLabel = (WrappedComponent, Tag = 'label') => {
+const addLabel = (WrappedComponent, hasForAttr = true) => {
   class AddLabel extends Component {
     render () {
       const {className, label, info, name} = this.props
-      const classList = []
+      const classList = ['field']
       if (className) classList.push(className)
-      if (Tag !== 'label') classList.push('label')
 
       return (
-        <Tag
-          className={classList.join(' ')}
+        <div
+          className={classList.join(' ') || null}
           data-fieldname={name}
         >
-          {label} {info && (<i>{info}</i>)}
+          <label htmlFor={hasForAttr ? `${name}-field` : null}>
+            {label} {info && (<i>{info}</i>)}
+          </label>
           <WrappedComponent {...this.props} />
-        </Tag>
+        </div>
       )
     }
   }
@@ -29,7 +30,7 @@ const addLabel = (WrappedComponent, Tag = 'label') => {
   AddLabel.propTypes = {
     className: PropTypes.string,
     info: PropTypes.string,
-    label: PropTypes.string,
+    label: PropTypes.node,
     name: PropTypes.string
   }
 

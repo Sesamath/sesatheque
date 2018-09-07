@@ -10,6 +10,7 @@ const Input = ({
   disabled = false
 }) => (
   <input
+    id={`${input.name}-field`}
     {...input}
     placeholder={placeholder}
     type={type}

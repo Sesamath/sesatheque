@@ -4,21 +4,26 @@ import {Field} from 'redux-form'
 import SelectInput from './inputs/SelectInput'
 import addLabel from './hoc/addLabel'
 
+const getPlaceholder = (label) => {
+  if (typeof label === 'string') return label
+  return null
+}
+
 const SelectField = ({
   label,
   placeholder,
   ...otherProps
 }) => (
   <Field
-    placeholder={placeholder || label}
+    placeholder={placeholder || getPlaceholder(label)}
     component={SelectInput}
     {...otherProps}
   />
 )
 
 SelectField.propTypes = {
-  label: PropTypes.string,
+  label: PropTypes.node,
   placeholder: PropTypes.string
 }
 
-export default addLabel(SelectField, 'div')
+export default addLabel(SelectField, false)
