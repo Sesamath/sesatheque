@@ -78,11 +78,11 @@ class EditorIep extends Component {
             name="parametres[url]"
             type="url"
           />
-          <label>
+          <div className="field">
             <br />
             <button type="button" onClick={this.importScript.bind(this)}>Importer le script</button>
             <span className="note">(Si la source change ou disparait cette ressource restera identique)</span>
-          </label>
+          </div>
         </div>
         <ShowError error={httpsError} />
         <TextField
