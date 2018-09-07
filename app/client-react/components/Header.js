@@ -73,13 +73,12 @@ export const Header = ({
   ) : null
 
   return (
-    <header role="banner">
+    <header>
       <NavLink to="/">
         <img src={logoUrl} width="250" height="48" alt="logo" />
       </NavLink>
       <nav
         className="navigation fr"
-        role="navigation"
       >
         {getButtons(personne).map(({
           id,
