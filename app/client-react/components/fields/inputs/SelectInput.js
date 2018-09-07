@@ -59,7 +59,7 @@ const SelectInput = ({
       noOptionsMessage={() => 'Aucun résultat trouvé'}
       loadingMessage={() => 'Recherche en cours'}
       isMulti={isMulti}
-      isSearchable={false}
+      isSearchable={isAsync}
     />
   )
 }
