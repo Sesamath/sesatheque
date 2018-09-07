@@ -95,7 +95,8 @@ function display (ressource, options, next) {
             contenu.isScored = typeof contenu.score === 'number'
             const resultat = {
               contenu,
-              score: contenu.score
+              score: contenu.score,
+              fin: true
             }
             if (!isSameResultat(resultat)) {
               if (needDefer) resultat.deferSync = true
@@ -140,7 +141,7 @@ function display (ressource, options, next) {
               })
             }
             // + notif
-            page.showNotification('<p style="max-width: 300px">Clique sur le bouton de sauvegarde <img src="/plugins/mathgraph/outilSave.png" /> pour enregistrer ton résultat</p>')
+            page.showNotification('<p style="max-width: 300px">Clique sur le bouton de sauvegarde <img src="/plugins/mathgraph/outilSave.png" /> pour enregistrer ton résultat (cela terminera l’exercice)</p>')
           }
 
           // go

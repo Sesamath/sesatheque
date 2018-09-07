@@ -59,10 +59,9 @@ module.exports = function addMtgLoader (ressource, input) {
     mtgOptions.newFig = true
     // options: pour autoriser à changer les options de la figure, true par défaut, toujours true en édition
     mtgOptions.options = true
-    // on veut que l'outil permettant d'enregistrer une figure soit présent,
-    // pour qu'il puisse enregistrer en local
-    // si ça perturbe on mettra false...
-    mtgOptions.save = true
+    // on vire le bouton pour éviter la confusion avec le bouton sauvegarde de la ressource sous la figure
+    // si le prof veut récupérer sa figure il peut toujours l'exporter en base64
+    mtgOptions.save = false
     // onSaveCallback n'a de sens que si `figureOptions.save === true`,
     // ici on laisse le comportement par défaut sur le bouton enregistrement de mathgraph
     // (en fichier local et pas dans la sesatheque) car on récupère la figure au clic sur

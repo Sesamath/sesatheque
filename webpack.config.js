@@ -47,7 +47,6 @@ const conf = {
     bugsnag: './app/client/page/bugsnag.js',
     registerSesatheques: './app/client/page/registerSesatheques.js',
     display: './app/client/display/index.js',
-    // edit: './app/client/edit/index.js', // tous les éditeurs sont en react
     import: './app/client/edit/import.js',
     react: './app/client-react/index.js',
     // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
