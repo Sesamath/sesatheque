@@ -1,4 +1,8 @@
 .ressource {
+  .clear-right {
+    clear: right;
+  }
+
   margin-top: 20px;
 
   & > span {
@@ -13,7 +17,7 @@
       margin: 0;
     }
 
-    .txtright {
+    .txtbold {
       font-weight: bold;
     }
   }
