@@ -30,7 +30,7 @@
  */
 'use strict'
 // ce module est réservé à un usage dans un navigateur (build utilise jQuery)
-import {fetchRef, fetchUrl} from 'sesatheque-client/src/fetch'
+import {fetchRef, callApiUrl} from 'sesatheque-client/src/fetch'
 import {addSesatheque, getBaseIdFromRessource} from 'sesatheque-client/src/sesatheques'
 import log from 'sesajstools/utils/log'
 import {getJstreeChildren, toJstree} from './convert'
@@ -80,7 +80,7 @@ export function getDataCallback (ressource, options) {
       // @see http://git.net/jstree/msg12107.html
       const url = node.url || (node.data && node.data.url) || (node.a_attr && node.a_attr['data-dataurl'])
       if (url) {
-        fetchUrl(url, {}, function (error, ressource) {
+        callApiUrl(url, {}, function (error, ressource) {
           // on a toujours error ou ressource non vide sans propriété error
           if (error) return errorCallback(error, next)
           if (ressource.type === 'arbre') {
