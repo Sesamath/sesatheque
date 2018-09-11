@@ -34,7 +34,7 @@ const {exists, getRidComponents} = require('sesatheque-client/src/sesatheques')
 const {stringify} = require('sesajstools')
 
 const tools = require('../lib/tools')
-const {getNormalizedName} = require('../lib/normalize')
+const {basicArrayIndexer, getNormalizedName} = require('../lib/normalize')
 const {getRidEnfants} = require('../lib/ressource')
 
 const Ressource = require('../../constructors/Ressource')
@@ -102,9 +102,9 @@ module.exports = function (component) {
       .defineIndex('type')
       .defineIndex('titre')
       .defineIndex('niveaux')
-      .defineIndex('categories', 'integer')
-      .defineIndex('typePedagogiques', 'integer')
-      .defineIndex('typeDocumentaires', 'integer')
+      .defineIndex('categories', 'integer', basicArrayIndexer)
+      .defineIndex('typePedagogiques', 'integer', basicArrayIndexer)
+      .defineIndex('typeDocumentaires', 'integer', basicArrayIndexer)
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir une callback qui la remplace
       // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
       // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
@@ -120,16 +120,16 @@ module.exports = function (component) {
         if (!this.enfants || !this.enfants.length) return
         return getRidEnfants(this)
       })
-      .defineIndex('auteurs')
-      .defineIndex('auteursParents')
-      .defineIndex('contributeurs')
+      .defineIndex('auteurs', basicArrayIndexer)
+      .defineIndex('auteursParents', basicArrayIndexer)
+      .defineIndex('contributeurs', basicArrayIndexer)
       .defineIndex('iPids', function () {
-        return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
+        return basicArrayIndexer([].concat(this.auteurs, this.auteursParents, this.contributeurs))
       })
       // les groupes chez qui la ressource est publiée
-      .defineIndex('groupes', {normalizer: getNormalizedName})
+      .defineIndex('groupes', {normalizer: getNormalizedName}, basicArrayIndexer)
       // les groupes qui ont un droit d'écriture sur la ressource
-      .defineIndex('groupesAuteurs', {normalizer: getNormalizedName})
+      .defineIndex('groupesAuteurs', {normalizer: getNormalizedName}, basicArrayIndexer)
       .defineIndex('langue')
       .defineIndex('publie', 'boolean')
       .defineIndex('indexable', 'boolean')
