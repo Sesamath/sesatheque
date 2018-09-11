@@ -153,7 +153,9 @@ export const Header = ({
 
 Header.propTypes = {
   isIframeLayout: PropTypes.bool,
-  personne: PropTypes.object,
+  personne: PropTypes.shape({
+    permissions: PropTypes.object.isRequired
+  }),
   logoutUrl: PropTypes.string,
   loginLink: PropTypes.object,
   sso: PropTypes.shape({

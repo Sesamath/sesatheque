@@ -22,6 +22,7 @@ import validate from '../utils/ressourceValidate'
 
 const ResourceCreate = ({
   handleSubmit,
+  personne: {permissions: createAll},
   pristine,
   submitting,
   submitSucceeded
@@ -46,7 +47,7 @@ const ResourceCreate = ({
               label={labels.type}
               name="type"
               placeholder="Choisir le type"
-              options={listes.editableTypes}
+              options={listes[createAll ? 'type' : 'editableTypes']}
             />
             <SelectField
               label={labels.restriction}
@@ -110,6 +111,9 @@ ResourceCreate.propTypes = {
   handleSubmit: PropTypes.func,
   submitting: PropTypes.bool,
   submitSucceeded: PropTypes.bool,
+  personne: PropTypes.shape({
+    permissions: PropTypes.object.isRequired
+  }).isRequired,
   pristine: PropTypes.bool
 }
 
