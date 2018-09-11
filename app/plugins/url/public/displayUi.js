@@ -34,7 +34,7 @@
  * D'après l'ancien url.js de l'outil labomep
  */
 
- import forwardImage from './images/forward.png'
+import forwardImage from './images/forward.png'
 
 /* eslint-disable camelcase */
 const dom = require('sesajstools/dom')
