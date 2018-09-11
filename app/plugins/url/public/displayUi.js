@@ -112,7 +112,7 @@ module.exports = function (ressource, options, next) {
           // on ajoute l'envoi de la réponse sur le bouton et à la fermeture
           $(boutonReponse).click(sendReponse)
           $('body').on('unload', function () {
-            sendReponse(null, true)
+            sendResultat(null, true)
           })
           $textarea.change(function () {
             isResultatSent = false
@@ -437,7 +437,7 @@ module.exports = function (ressource, options, next) {
           addReponseDialog()
         } else if (sendResultat) {
           // pas de réponse demandée mais qqun attend un résultat, on ajoute le bouton vu
-          page.addBoutonVu(() => sendReponse(null, true))
+          page.addBoutonVu(() => sendResultat(null, true))
         }
 
         etapes = {
