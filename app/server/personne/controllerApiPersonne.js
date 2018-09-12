@@ -109,7 +109,8 @@ module.exports = function (component) {
               nom,
               prenom,
               groupesMembre,
-              groupesSuivis
+              groupesSuivis,
+              permissions
             } = personne
             response.personne = {
               oid,
@@ -117,7 +118,8 @@ module.exports = function (component) {
               nom,
               prenom,
               groupesMembre,
-              groupesSuivis
+              groupesSuivis,
+              permissions
             }
             response.logoutUrl = $auth.getLogoutUrl(context)
             response.sso = {
