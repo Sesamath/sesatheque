@@ -69,7 +69,7 @@ class EditorUrl extends Component {
             <div className="field" key={key}>
               <label>
                 <Field
-                  name="parametres[question_options]"
+                  name="parametres[question_option]"
                   className="radio"
                   component="input"
                   type="radio"
@@ -113,7 +113,7 @@ EditorUrl.propTypes = {
 }
 
 const propsFromFormValues = {
-  questionOption: 'parametres[question_options]',
+  questionOption: 'parametres[question_option]',
   url: 'parametres[adresse]'
 }
 
