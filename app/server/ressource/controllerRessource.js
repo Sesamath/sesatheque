@@ -84,7 +84,7 @@ module.exports = function (component) {
             context.status = 401
             displayError(context, 'Vous devez être authentifié pour visionner cette ressource')
           } else if ($accessControl.hasReadPermission(context, ressource)) {
-            displayRessource(ressource)
+            displayRessource(context, ressource)
           } else {
             context.status = 403
             displayError(context, 'Vous n’avez pas de droits suffisants pour visionner cette ressource')
