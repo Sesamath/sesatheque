@@ -38,7 +38,7 @@ const updateLog = require('an-log')('update' + updateNum)
 module.exports = {
   name: 'reindex toutes les ressources (pour avoir null sur les tableaux vides) avec groupes sans lowerCase',
   description: '',
-  run: function run (next) {
+  run: function run (done) {
     const EntityRessource = lassi.service('EntityRessource')
     const EntityGroupe = lassi.service('EntityGroupe')
     let nbRess = 0
@@ -57,6 +57,7 @@ module.exports = {
         EntityGroupe.match('nom').equals(nom).grabOne(this)
       }).seqEach(function (groupe, i) {
         if (typeof groupe === 'string') {
+          // il vient de knownGroupesByLowerCase
           newGroupes.push(groupe)
         } else if (groupe && groupe.nom) {
           newGroupes.push(groupe.nom)
@@ -64,54 +65,70 @@ module.exports = {
         } else {
           warnings.push(`Le groupe ${groupes[i]} n’existe plus`)
         }
+        this()
       }).seq(function () {
         next(null, {newGroupes, warnings})
-      }).catch(next)
+      }).catch(done)
     }
 
     flow().seq(function () {
       const onEach = (ressource, next) => {
         nbRess++
         if ((ressource.groupes && ressource.groupes.length) || (ressource.groupesAuteurs && ressource.groupesAuteurs.length)) nbRessGroup++
-        let isMod = false
+
         flow().seq(function () {
           getRealNames(ressource.groupes, this)
         }).seq(function ({newGroupes, warnings}) {
           if (warnings.length) {
-            updateLog.error(`WARNING sur la ressource ${ressource.oid} : ${warnings.join('\n  ')}`)
-            isMod = true
+            // on en a perdu en route
+            updateLog.error(`WARNING groupes sur la ressource ${ressource.oid} : ${warnings.join('\n  ')}`)
           } else if (newGroupes.some((grp, i) => grp !== ressource.groupes[i])) {
             // pour contrôle de l'update
             updateLog(`Modifs groupes pour ${ressource.oid} :\n${ressource.groupes.join(' ')} =>\n${newGroupes.join(' ')}`)
-            isMod = true
           }
-          if (isMod) ressource.groupes = newGroupes
+          ressource.groupes = newGroupes
+
           // et on recommence avec les groupesAuteurs si y'en a
-          if (!ressource.groupesAuteurs.length) return this(null, {newGroupes: [], warnings: []})
-          getRealNames(ressource.groupesAuteurs, this)
-        }).seq(function ({newGroupes: newGroupesAuteurs, warnings}) {
-          let isGAmod = false
+          if (!ressource.groupesAuteurs.length) this(null, {newGroupes: [], warnings: []})
+          else getRealNames(ressource.groupesAuteurs, this)
+        }).seq(function ({newGroupes, warnings}) {
           if (warnings.length) {
-            updateLog.error(`WARNING sur la ressource ${ressource.oid} : ${warnings.join('\n  ')}`)
-            isGAmod = true
-          } else if (newGroupesAuteurs.some((grp, i) => grp !== ressource.groupesAuteurs[i])) {
-            isGAmod = true
+            updateLog.error(`WARNING groupesAuteurs sur la ressource ${ressource.oid} : ${warnings.join('\n  ')}`)
+          } else if (newGroupes.some((grp, i) => grp !== ressource.groupesAuteurs[i])) {
+            updateLog(`Modifs groupesAuteurs pour ${ressource.oid} :\n${ressource.groupesAuteurs.join(' ')} =>\n${newGroupes.join(' ')}`)
           }
-          if (isGAmod) {
-            updateLog(`Modifs groupesAuteurs pour ${ressource.oid} :\n${ressource.groupesAuteurs.join(' ')} =>\n${newGroupesAuteurs.join(' ')}`)
-            ressource.groupesAuteurs = newGroupesAuteurs
-            isMod = true
-          }
-          if (ressource.groupes.length || ressource.groupesAuteurs.length) updateLog(`fin traitement ${ressource.oid} ${ressource.groupes.length} ${ressource.groupesAuteurs.length}`)
-          if (isMod) ressource.store(next)
-          else next()
-        }).catch(next)
+          ressource.groupesAuteurs = newGroupes
+
+          if (nbRess % 1000 === 0) updateLog(`${nbRess} ressources traitées`)
+          // on store quoi qu'il arrive, car on veut tous les réindexer
+          ressource.store(this)
+        }).empty().done(next)
       } // onEach
 
-      EntityRessource.match().forEachEntity(onEach, this)
+      const limit = 100
+      let skip = 0
+      const afterAll = this
+      const grab = () => {
+        flow().seq(function () {
+          EntityRessource.match().grab({skip, limit}, this)
+        }).seqEach(function (ressource) {
+          onEach(ressource, this)
+        }).seq(function (ressources) {
+          // ressources est un array dont tous les elts sont undefined, mais il a quand même la longueur
+          // du nb de ressources traitées dans ce batch
+          if (ressources.length < limit) {
+            afterAll()
+          } else {
+            skip += limit
+            process.nextTick(grab)
+          }
+        }).catch(done)
+      } // grab
+
+      grab()
     }).seq(function () {
       updateLog(`${nbRess} réindexées, ${nbRessMod} ressource modifiées (sur ${nbRessGroup} ressources avec groupes)`)
-      next()
-    }).catch(next)
+      done()
+    }).catch(done)
   } // run
 }
