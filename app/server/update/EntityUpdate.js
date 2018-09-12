@@ -48,6 +48,7 @@ module.exports = function (component) {
       } else {
         initObj = {}
       }
+      if (initObj.oid) this.oid = initObj.oid
       this.name = initObj.name || 'sans nom'
       this.num = initObj.num || 0
       this.date = initObj.date || new Date()
