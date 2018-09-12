@@ -85,6 +85,9 @@ const SearchForm = ({handleSubmit, isOpen, query, allowAnyOption}) => {
               className="col-2"
               label={labels.auteurs}
               name="auteurs"/>
+            <InputField
+              label={labels.groupes}
+              name="groupes"/>
           </div>
         </fieldset>
         <hr/>

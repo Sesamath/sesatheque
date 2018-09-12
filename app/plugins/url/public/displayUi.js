@@ -33,6 +33,9 @@
  * @file Module js pour gérer l'affichage / masquage de question / réponse / page
  * D'après l'ancien url.js de l'outil labomep
  */
+
+import forwardImage from './images/forward.png'
+
 /* eslint-disable camelcase */
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
@@ -109,7 +112,7 @@ module.exports = function (ressource, options, next) {
           // on ajoute l'envoi de la réponse sur le bouton et à la fermeture
           $(boutonReponse).click(sendReponse)
           $('body').on('unload', function () {
-            sendReponse(null, true)
+            sendResultat(null, true)
           })
           $textarea.change(function () {
             isResultatSent = false
@@ -142,7 +145,7 @@ module.exports = function (ressource, options, next) {
       function getLienSuivant () {
         const lien = dom.getElement('img', {
           'class': 'lienSuivant',
-          src: options.pluginBase + 'images/forward.png',
+          src: forwardImage,
           align: 'absmiddle',
           alt: 'suivant'
         })
@@ -434,7 +437,7 @@ module.exports = function (ressource, options, next) {
           addReponseDialog()
         } else if (sendResultat) {
           // pas de réponse demandée mais qqun attend un résultat, on ajoute le bouton vu
-          page.addBoutonVu(() => sendReponse(null, true))
+          page.addBoutonVu(() => sendResultat(null, true))
         }
 
         etapes = {
