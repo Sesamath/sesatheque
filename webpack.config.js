@@ -5,11 +5,19 @@ Pour le chargement dynamique et les contextes
   https://github.com/webpack/webpack/issues/118
 
 Pour le découpage des chunks
- https://webpack.github.io/docs/code-splitting.html
- https://webpack.github.io/docs/list-of-plugins.html#commonschunkplugin
+  https://webpack.js.org/guides/code-splitting
 
- https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
- https://github.com/webpack/webpack/tree/master/examples/named-chunks
+  https://webpack.js.org/plugins/split-chunks-plugin/
+
+  Le découpage automatique des entries se fait avec:
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
+  }
+  La difficulté est qu'il faut ensuite charger dans les fichiers html tous les morceaux (à moins d'utiliser HtmlWebpackPlugin qui a été retiré du projet sesatheque).
+
+  Pour l'instant, on ne découpe pas. Le chargement des pages sesatheque dans labomep utilisant convenablement le cache du navigateur.
 
 Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
