@@ -129,7 +129,8 @@ const conf = {
       // pour pouvoir faire des require('client-react/xxx') sans la collection de ../../..
       'client-react': path.resolve(__dirname, 'app/client-react'),
       plugins: path.resolve(__dirname, 'app/plugins'),
-      server: path.resolve(__dirname, 'app/server')
+      server: path.resolve(__dirname, 'app/server'),
+      client: path.resolve(__dirname, 'app/client')
     }
   },
   // pour nos loaders perso
@@ -148,8 +149,7 @@ const conf = {
         exclude: /node_modules/,
         use: defaultBabelLoader
       }, {
-        test: /app\/(client-react|plugins)\/.*\.jsx?/,
-        exclude: /node_modules/,
+        test: /app\/(client-react|plugins)\/.*\.jsx?$/,
         use: reactBabelLoader
       }, {
         test: /test\/react\/.*\.jsx?/,

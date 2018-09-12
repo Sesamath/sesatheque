@@ -57,7 +57,8 @@
     "dev": "./scripts/run -sd",
     "prod": "./scripts/run -sp",
     "stop": "./scripts/run -s",
-    "watch": "./scripts/run -swl"
+    "watch": "./scripts/run -swl",
+    "postinstall": "cd app/plugins && node buildPackageJson && yarn install"
   },
   "babel": {
     "presets": [

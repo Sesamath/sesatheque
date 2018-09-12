@@ -23,3 +23,6 @@ package.local-extras.json
 
 # trucs qui peuvent traîner à la racine (pm2 qui tourne…)
 /*.pid
+
+# package.json des plugins
+/app/plugins/package.json

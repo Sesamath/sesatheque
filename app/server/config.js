@@ -95,6 +95,7 @@ const toBeConfigured = 'toBeConfigured'
  * Config par défaut
  */
 const config = {
+  version,
   // dans localConf, sinon conf par défaut i.e. port 3000
   application: {
     name: 'bibliotheque',

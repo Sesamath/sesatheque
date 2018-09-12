@@ -1,10 +1,10 @@
 const config = require('./app/server/config')
-const version = require('./package').version
 /**
  * ici on n'exporte que des variables non-sensibles et qui peuvent être
  * exposées dans le browser
  */
 const safeConfig = {
+  version: config.version,
   application: {
     staging: config.application.staging,
     baseId: config.application.baseId,
@@ -13,8 +13,7 @@ const safeConfig = {
   baseId: config.application.baseId,
   baseUrl: config.application.baseUrl,
   bugsnag: config.bugsnag,
-  sesatheques: config.sesatheques.map(({baseId, baseUrl}) => ({baseId, baseUrl})),
-  version
+  sesatheques: config.sesatheques.map(({baseId, baseUrl}) => ({baseId, baseUrl}))
 }
 
 // Exports un "loader" webpack
