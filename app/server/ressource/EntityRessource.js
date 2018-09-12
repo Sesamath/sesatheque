@@ -110,6 +110,7 @@ module.exports = function (component) {
       // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
       // (pour gérer les relations avec des oid externes)
       .defineIndex('relations', function () {
+        if (!this.relations || !this.relations.length) return null
         // on retourne pour chaque relation l'item lié, tant pis pour la nature de la relation
         return this.relations.map(relation => relation[1])
       })
@@ -117,7 +118,7 @@ module.exports = function (component) {
       // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
       // (pour mettre à jour titre & résumé par ex).
       .defineIndex('enfants', 'string', function () {
-        if (!this.enfants || !this.enfants.length) return
+        if (!this.enfants || !this.enfants.length) return null
         return getRidEnfants(this)
       })
       .defineIndex('auteurs', basicArrayIndexer)

@@ -43,9 +43,11 @@ module.exports = {
     const $ressourceRepository = lassi.service('$ressourceRepository')
     let nbRess = 0
     let nbRessMod = 0
+    let lastOid
 
     flow().seq(function () {
       const onEach = (ressource, next) => {
+        lastOid = ressource.oid
         nbRess++
         if (ressource.parametres.content) return next()
         nbRessMod++
@@ -59,10 +61,13 @@ module.exports = {
         })
         $ressourceRepository.save(ressource, next)
       }
-      EntityRessource.match('type').equals('mathgraph').forEachEntity(onEach, this)
+      EntityRessource.match('type').equals('mathgraph').sort('oid').forEachEntity(onEach, this)
     }).seq(function () {
       updateLog(`${nbRessMod} ressource Mathgraph modifiées (sur ${nbRess})`)
       next()
-    }).catch(next)
+    }).catch(function (error) {
+      console.error(`plantage dans l’update ${updateNum} avec la ressource ${lastOid}, ${nbRess} traitées, `)
+      next(error)
+    })
   } // run
 }

@@ -75,6 +75,8 @@ function getNormalizedGrabOptions (options) {
  * @throws {Error} si strict et nom invalide (pas une string ou retournerait une chaîne vide après normalisation)
  */
 function getNormalizedName (nom, strict = true) {
+  // on peut être appelé avec null (sortie de basicArrayIndexer)
+  if (nom === null) return null
   if (!nom || typeof nom !== 'string' || nom === 'undefined') {
     if (strict) throw Error('nom invalide')
     else return ''
