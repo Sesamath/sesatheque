@@ -67,13 +67,78 @@ module.exports = function (component) {
     })
 
     /**
+     * Page display d'une ressource publique d'après son origine
+     * (redirige vers /ressource si elle n'est pas publique)
+     * @route GET /public/voir/:origine/:idOrigine
+     */
+    controller.get('public/voir/:origine/:idOrigine', function (context) {
+      const {origine, idOrigine} = context.arguments
+      // loadByOrigine gère le cas origine = 'cle' ou bien origine = myBaseId
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
+        if (error) {
+          context.status = 500
+          displayError(context, error)
+        } else if (ressource && isPublic(ressource)) {
+          displayRessource(context, ressource)
+        } else if (ressource) {
+          // elle n'était pas publique
+          context.redirect(context.request.originalUrl.replace('public/', 'ressource/'), 302)
+        } else {
+          context.status = 404
+          displayError(context, `La ressource ${origine}/${idOrigine} n’existe pas`)
+        }
+      })
+    })
+
+    /**
      * Page display (voir en pleine page, à priori pour mettre en iframe)
      * (redirige vers /public si elle est publique)
      * @route GET /ressource/voir/:oid
      */
     controller.get('ressource/voir/:oid', function (context) {
-      if (!$accessControl.isAuthenticated(context)) return context.redirect(context.request.originalUrl.replace('ressource/', 'public/'), 302)
+      if (!$accessControl.isAuthenticated(context)) {
+        context.status = 401
+        displayError(context, 'Vous devez être authentifié pour afficher cette page')
+        return
+      }
+
       $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
+        if (error) {
+          context.status = 500
+          displayError(context, error)
+        } else if (ressource) {
+          if (isPublic(ressource)) {
+            context.redirect(context.request.originalUrl.replace('ressource/', 'public/'), 302)
+          } else if (!$accessControl.isAuthenticated(context)) {
+            context.status = 401
+            displayError(context, 'Vous devez être authentifié pour visionner cette ressource')
+          } else if ($accessControl.hasReadPermission(context, ressource)) {
+            displayRessource(context, ressource)
+          } else {
+            context.status = 403
+            displayError(context, 'Vous n’avez pas de droits suffisants pour visionner cette ressource')
+          }
+        } else {
+          context.status = 404
+          displayError(context, `La ressource ${context.arguments.oid} n’existe pas`)
+        }
+      })
+    })
+
+    /**
+     * Page display d'une ressource privée d'après son origine
+     * (redirige vers /public si elle est publique)
+     * @route GET /ressource/voir/:origine/:idOrigine
+     */
+    controller.get('ressource/voir/:origine/:idOrigine', function (context) {
+      if (!$accessControl.isAuthenticated(context)) {
+        context.status = 401
+        displayError(context, 'Vous devez être authentifié pour afficher cette page')
+        return
+      }
+
+      const {origine, idOrigine} = context.arguments
+      $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) {
           context.status = 500
           displayError(context, error)
