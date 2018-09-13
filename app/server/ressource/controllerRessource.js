@@ -31,6 +31,8 @@
  */
 
 'use strict'
+const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
+
 const displayRessource = require('./displayRessource')
 const displayError = require('./displayError')
 
@@ -74,6 +76,10 @@ module.exports = function (component) {
     controller.get('public/voir/:origine/:idOrigine', function (context) {
       const {origine, idOrigine} = context.arguments
       // loadByOrigine gère le cas origine = 'cle' ou bien origine = myBaseId
+      // mais on veut un redirect si origine est une baseId connue
+      const baseUrl = getBaseUrl(origine, false)
+      if (baseUrl) return context.redirect(`${baseUrl}/public/voir/${idOrigine}`, 302)
+
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) {
           context.status = 500
@@ -98,8 +104,7 @@ module.exports = function (component) {
     controller.get('ressource/voir/:oid', function (context) {
       if (!$accessControl.isAuthenticated(context)) {
         context.status = 401
-        displayError(context, 'Vous devez être authentifié pour afficher cette page')
-        return
+        return displayError(context, 'Vous devez être authentifié pour afficher cette page')
       }
 
       $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
@@ -133,11 +138,19 @@ module.exports = function (component) {
     controller.get('ressource/voir/:origine/:idOrigine', function (context) {
       if (!$accessControl.isAuthenticated(context)) {
         context.status = 401
-        displayError(context, 'Vous devez être authentifié pour afficher cette page')
-        return
+        return displayError(context, 'Vous devez être authentifié pour afficher cette page')
       }
 
       const {origine, idOrigine} = context.arguments
+      // on redirige si c'est un rid
+      const baseUrl = getBaseUrl(origine, false)
+      if (baseUrl) return context.redirect(`${baseUrl}/public/voir/${idOrigine}`, 302)
+      // et on ne veut pas de cle/xxx sur /ressource (public only), c'est probablement une erreur en amont
+      if (origine === 'cle') {
+        context.status = 404
+        return displayError(context, `Chemin /ressource/cle inconnu`)
+      }
+      // on peut charger
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) {
           context.status = 500
