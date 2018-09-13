@@ -136,20 +136,24 @@ module.exports = function (component) {
      * @route GET /ressource/voir/:origine/:idOrigine
      */
     controller.get('ressource/voir/:origine/:idOrigine', function (context) {
+      const {origine, idOrigine} = context.arguments
+
+      // on redirige si c'est un rid
+      const baseUrl = getBaseUrl(origine, false)
+      if (baseUrl) return context.redirect(`${baseUrl}/ressource/voir/${idOrigine}`, 302)
+
+      // on ne veut pas de cle/xxx sur /ressource (public only), c'est probablement une erreur en amont
+      if (origine === 'cle') {
+        context.status = 404
+        return displayError(context, `Chemin /ressource/cle inconnu`)
+      }
+
+      // check auth
       if (!$accessControl.isAuthenticated(context)) {
         context.status = 401
         return displayError(context, 'Vous devez être authentifié pour afficher cette page')
       }
 
-      const {origine, idOrigine} = context.arguments
-      // on redirige si c'est un rid
-      const baseUrl = getBaseUrl(origine, false)
-      if (baseUrl) return context.redirect(`${baseUrl}/public/voir/${idOrigine}`, 302)
-      // et on ne veut pas de cle/xxx sur /ressource (public only), c'est probablement une erreur en amont
-      if (origine === 'cle') {
-        context.status = 404
-        return displayError(context, `Chemin /ressource/cle inconnu`)
-      }
       // on peut charger
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) {
