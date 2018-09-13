@@ -113,6 +113,19 @@ function isApi (url) {
 }
 
 /**
+ * Retourne true si ar1 et ar2 ont autant d'élément tous égaux (comparaison ===)
+ * @todo déplacer ça dans sesajstools
+ * @param {Array} ar1
+ * @param {Array} ar2
+ * @return {boolean}
+ */
+function isSameSimpleArray (ar1, ar2) {
+  if (!Array.isArray(ar1) || !Array.isArray(ar2)) throw Error(`Array expected`)
+  if (ar1.length !== ar2.length) return false
+  return ar1.every((elt, i) => elt === ar2[i])
+}
+
+/**
  * Retourne true si l'url concerne un fichier statique
  * (statique i.e. les extensions susceptibles d'exister dans sesatheque, c'est pas exaustif)
  * @memberOf tools
@@ -266,6 +279,7 @@ module.exports = {
   ensure,
   idListToArray,
   isApi,
+  isSameSimpleArray,
   isStatic,
   isPublic,
   link,
