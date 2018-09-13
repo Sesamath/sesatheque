@@ -42,13 +42,15 @@ function addError (ressource, error) {
 }
 
 /**
- * Ajoute un warning à la ressource (en créant le tableau $warnings s'il n'existait pas)
+ * Ajoute un warning à la ressource
+ * - crée le tableau $warnings s'il n'existait pas
+ * - n'ajoute rien si le warning y était déjà
  * @param {Ressource} ressource
  * @param {string} warning
  */
 function addWarning (ressource, warning) {
   if (!ressource.$warnings) ressource.$warnings = []
-  ressource.$warnings.push(warning)
+  if (!ressource.$warnings.includes(warning)) ressource.$warnings.push(warning)
 }
 
 /**
