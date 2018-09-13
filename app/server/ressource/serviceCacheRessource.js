@@ -151,15 +151,23 @@ module.exports = function (component) {
      */
     $cacheRessource.set = function (ressource, next = dummy) {
       if (!ressource.oid) return next(new Error('cacheSet sur une ressource sans oid'))
+      // on utilise Entity.values(), pour stocker la même chose que ce qui aurait été mis en bdd
+      if (typeof ressource.values !== 'function') return next(Error('$cache.set veut une Entity'))
+      const values = ressource.values()
+      const {oid, aliasOf, origine, idOrigine, cle} = values
       // next appelé seulement sur le set principal (le dernier)
-      if (ressource.origine && ressource.idOrigine) $cache.set(getKey(ressource.idOrigine, ressource.origine), ressource.oid, ttl, log.ifError)
-      if (ressource.cle) $cache.set(getKey(ressource.cle, 'cle'), ressource.oid, ttl, log.ifError)
-      if (ressource.aliasOf) $cache.set(getKey(ressource.aliasOf, 'aliasOf'), ressource.oid, ttl, log.ifError)
-      $cache.set(getKey(ressource.oid), ressource, ttl, function (error, ress) {
+      if (origine && idOrigine) $cache.set(getKey(idOrigine, origine), oid, ttl, log.ifError)
+      if (cle) $cache.set(getKey(cle, 'cle'), oid, ttl, log.ifError)
+      if (aliasOf) $cache.set(getKey(aliasOf, 'aliasOf'), oid, ttl, log.ifError)
+      $cache.set(getKey(oid), values, ttl, function (error, ress) {
         if (error) {
-          if (error.message && /^The length of the value is greater/.test(error.message)) log.dataError(`ressource ${ressource.oid} trop grosse pour le cache (${error.message})`)
-          else log.error(error)
-          return next(null, ressource)
+          // on log mais on plante pas
+          if (error.message && /^The length of the value is greater/.test(error.message)) {
+            log.dataError(`ressource ${oid} trop grosse pour le cache (${error.message})`)
+          } else {
+            log.error(error)
+          }
+          return next(null, values)
         }
         next(null, ress)
       })

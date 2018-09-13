@@ -114,23 +114,24 @@ module.exports = function (component) {
      * @memberOf $cacheGroupe
      */
     function set (groupe, next = log.ifError) {
+      if (typeof groupe.values !== 'function') return next(Error('$cacheGroupe.set veut une Entity'))
       const key = getKey(groupe)
       if (key) {
+        const values = groupe.values()
+        const {oid} = groupe
         flow().seq(function () {
-          $cache.set(key, groupe, ttl, this)
-          if (groupe.oid) $cache.set(prefix + groupe.oid, groupe, ttl, log.ifError)
+          $cache.set(key, values, ttl, this)
+          if (oid) $cache.set(prefix + oid, values, ttl, log.ifError)
         }).seq(function () {
-          if (next) next()
+          next()
         }).catch(function (error) {
           log.error(`le $cache.set a planté avec la clé ${key}`, error)
           // pb de clé, tant pis, ça sera pas en cache via le nom
           // (pas de risque d'avoir une ancienne version foireuse au get)
-          if (next) next()
+          next()
         })
       } else {
-        const error = Error('Groupe invalide')
-        if (next) next(error)
-        else log.error(error, groupe)
+        next(Error('Groupe invalide'))
       }
     }
 
