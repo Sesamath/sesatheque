@@ -38,6 +38,7 @@ const {update} = require('sesajstools/utils/object')
 
 const config = require('../config')
 const configRessource = require('./config')
+const {isEntity} = require('../lib/tools')
 const Ref = require('../../constructors/Ref')
 
 const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
@@ -195,8 +196,7 @@ module.exports = function (component) {
       }).seq(function (cleanData) {
         log.debug(`après valide ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
-        const groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
-        $personneControl.checkGroupes(context, ressourceBdd, cleanData, groupesSup, this)
+        $personneControl.checkGroupes(context, ressourceBdd, cleanData, this)
       }).seq(function (cleanData) {
         log.debug(`après checkGroupes ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // on ajoute le user courant pour serie et sequenceModele,

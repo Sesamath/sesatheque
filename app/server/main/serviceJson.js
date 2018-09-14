@@ -99,6 +99,10 @@ module.exports = function (component) {
         if (error) log.error('erreur invalide', error)
         message = 'Requête invalide'
       }
+      // on reformule certains messages
+      if (/duplicate key error collection/.test(message)) {
+        message =
+      }
       context.status = 400
       context.json({message})
     }

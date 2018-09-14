@@ -49,8 +49,11 @@ function addError (ressource, error) {
  * @param {string} warning
  */
 function addWarning (ressource, warning) {
+  console.trace('addWarning')
   if (!ressource.$warnings) ressource.$warnings = []
+  console.log(`aj de ${warning} dans`, ressource.$warnings)
   if (!ressource.$warnings.includes(warning)) ressource.$warnings.push(warning)
+  else console.log('il y était déjà')
 }
 
 /**

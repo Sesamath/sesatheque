@@ -64,6 +64,7 @@ module.exports = function (component) {
      * @param {callbackPersonne} next
      */
     function saveCurrentUser (context, me, next) {
+      $session.updateCurrentUser(context, me)
       $personneRepository.save(me, next)
     }
 

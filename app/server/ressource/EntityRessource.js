@@ -77,11 +77,6 @@ module.exports = function (component) {
         if (values.dateMiseAJour && !(values.dateMiseAJour instanceof Date)) values.dateMiseAJour = tools.toDate(values.dateMiseAJour)
       }
 
-      // ajoute les éventuelles propriétés supplémentaire de notre objet initial
-      // _.each(values, function (value, key) {
-      //  if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug('la propriété ' +key +' a été ignorée dans le constructeur de Ressource')
-      // })
-
       // la langue par défaut
       if (this.langue) {
         // on rectifie fre en fra
@@ -94,8 +89,10 @@ module.exports = function (component) {
     EntityRessource.validateJsonSchema(schema)
 
     EntityRessource
-      .defineIndex('rid', {unique: true, sparse: true}) // rid est obligatoire, mais on l'a pas encore à la création… => sparse
-      .defineIndex('cle', {unique: true, sparse: true}) // pour loadByCle
+      // rid est obligatoire, mais on l'a pas encore à la création… => sparse
+      .defineIndex('rid', {unique: true, sparse: true})
+      // pour loadByCle
+      .defineIndex('cle', {unique: true, sparse: true})
       .defineIndex('aliasOf')
       .defineIndex('origine')
       .defineIndex('idOrigine')
@@ -109,6 +106,7 @@ module.exports = function (component) {
       // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
       // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
       // (pour gérer les relations avec des oid externes)
+      // @todo renommer l'index en relationRid
       .defineIndex('relations', function () {
         if (!this.relations || !this.relations.length) return null
         // on retourne pour chaque relation l'item lié, tant pis pour la nature de la relation
@@ -235,7 +233,7 @@ module.exports = function (component) {
           }
         }
 
-        // on génère la clé si elle manque, on la vire si elle n'est plus nécessaire
+        // on génère la clé de lecture si elle manque, on la vire si elle n'est plus nécessaire
         if (this.publie && !this.restriction) {
           // public
           if (this.hasOwnProperty('cle')) delete this.cle
@@ -244,11 +242,9 @@ module.exports = function (component) {
           if (!this.cle) this.cle = uuid()
         }
 
-        // pas de parametres sur les arbres mais une propriété enfants obligatoire
+        // les arbres ont une propriété enfants obligatoire
         if (this.type === 'arbre') {
-          // @todo remettre ça après passage de l'update 35
-          // if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
-          if (!Array.isArray(this.enfants)) this.enfants = []
+          if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
         }
 
         // date de création
@@ -263,8 +259,9 @@ module.exports = function (component) {
           log.dataError(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
           this.restriction = configRessource.constantes.restriction.prive
         }
-        // check des relations dans beforeSave mais pas ici (pour permettre des batch qui sauvent
-        // des paires liées par ex, la 1re a pas encore sa relation en base)
+        // check des relations dans $ressourceRepository.beforeSave() mais pas ici
+        // (pour permettre des batch qui sauvent des paires liées par ex,
+        // quand la 1re a pas encore sa relation en base)
 
         next(null, this)
       } catch (error) {

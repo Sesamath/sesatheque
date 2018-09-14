@@ -55,11 +55,8 @@ module.exports = function (component) {
      */
     function login (context, personne) {
       if (context.session.user) log.error(Error('Il y avait déjà un utilisateur en session'))
-      // on vérifie qu'il a au moins ces propriétés
-      ;['groupesMembre', 'groupesSuivis', 'nom', 'oid', 'pid', 'prenom', 'roles', 'permissions'].forEach(prop => {
-        if (!personne.hasOwnProperty(prop)) throw new Error(`Paramètres invalides (${prop} manquant)`)
-      })
-      context.session.user = personne
+      if (typeof personne.values !== 'function') throw Error(`$session.login veut une entity`)
+      context.session.user = personne.values()
     }
 
     /**
@@ -68,6 +65,22 @@ module.exports = function (component) {
      */
     function logout (context) {
       context.session.user = null
+    }
+
+    /**
+     * Renomme un groupe dans le user en session
+     * (ne vérifie pas que newName existait déjà car ça devrait pas être possible de renommer un groupe
+     * vers un nom existant, la sauvegarde en base a planté avant d'arriver là)
+     * @param {Context} context
+     * @param {string} oldName
+     * @param {string} newName
+     */
+    function renameGroup (context, oldName, newName) {
+      if (!context.session.user) return
+      if (!context.session.user.groupesMembre) context.session.user.groupesMembre = []
+      if (!context.session.user.groupesSuivis) context.session.user.groupesSuivis = []
+      context.session.user.groupesMembre = context.session.user.groupesMembre.map(nom => nom === oldName ? newName : nom)
+      context.session.user.groupesSuivis = context.session.user.groupesSuivis.map(nom => nom === oldName ? newName : nom)
     }
 
     /**
@@ -80,6 +93,22 @@ module.exports = function (component) {
     }
 
     /**
+     * Met à jour
+     * @param context
+     * @param user
+     */
+    function updateCurrentUser (context, user) {
+      if (!context.session.user) throw Error('Aucun utilisateur en session, impossible de mettre à jour')
+      // @todo ajouter un helper qui vérifie que c'est la bonne Entity (instanceof marche pas pour ça, faut aller voir la définition)
+      if (typeof user.values !== 'function') throw Error(`$session.updateCurrentUser veut une entity Personne`)
+      const values = user.values()
+      if (context.session.user.oid !== values.oid) throw Error('L’utilisateur en session ne correspond pas, impossible de mettre à jour')
+      Object.entries(values).forEach(([k, v]) => {
+        context.session.user[k] = v
+      })
+    }
+
+    /**
      * Service de gestion de la session (ça devrait être le seul endroit qui modifie context.session)
      * @service $session
      */
@@ -88,6 +117,7 @@ module.exports = function (component) {
       getCurrentPersonne,
       login,
       logout,
+      renameGroup,
       setAuthBaseId
     }
   })

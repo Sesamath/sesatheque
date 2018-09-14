@@ -596,11 +596,11 @@ module.exports = function (component) {
      * @returns {boolean}
      */
     function isGroupeMembre (context, groupeNom) {
-      const nom = groupeNom.toLowerCase()
+      console.log(`isGroupeMembre ${groupeNom}`, context.session.user.groupesMembre)
       return context.session.user &&
         context.session.user.groupesMembre &&
         context.session.user.groupesMembre.length &&
-        context.session.user.groupesMembre.some(n => n === nom)
+        context.session.user.groupesMembre.some(n => n === groupeNom)
     }
 
     /**
@@ -611,11 +611,10 @@ module.exports = function (component) {
      * @returns {boolean}
      */
     function isGroupeSuivi (context, groupeNom) {
-      const nom = groupeNom.toLowerCase()
       return context.session.user &&
         context.session.user.groupesSuivis &&
         context.session.user.groupesSuivis.length &&
-        context.session.user.groupesSuivis.some(n => n === nom)
+        context.session.user.groupesSuivis.some(n => n === groupeNom)
     }
 
     /**

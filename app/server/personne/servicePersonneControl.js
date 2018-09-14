@@ -30,10 +30,10 @@
  */
 'use strict'
 
-var flow = require('an-flow')
-var _ = require('lodash')
-var sjt = require('sesajstools')
-var rTools = require('../lib/ressource')
+const flow = require('an-flow')
+const {isInArray} = require('sesajstools')
+const {addError, addWarning} = require('../lib/ressource')
+const {isSameSimpleArray} = require('../lib/tools')
 
 module.exports = function (component) {
   component.service('$personneControl', function (EntityPersonne, EntityGroupe, $personneRepository, $groupeRepository, $accessControl) {
@@ -45,53 +45,57 @@ module.exports = function (component) {
      * @param {Ressource} ressource
      * @param {string} groupeNom
      * @param {object} [options]
-     * @param {boolean} [options.shouldBeNew] Si le groupe n'existait pas, le créer avec le user courant en gestionnaire
      * @param {boolean} [options.isGroupeAuteur] Ajouter le groupe à groupesAuteurs et pas groupes
      * @param {string[]} [options.whiteList] Une liste de noms de groupes que l'on peut ajouter sans vérifier si on est membre ou pas
      * @param {errorCallback} next
      */
-    function checkGroupe (context, ressource, groupeNom, options, next) {
+    function addGroupe (context, ressource, groupeNom, options, next) {
+      console.log(`addGroupe ${groupeNom}`, ressource.groupes, ressource.groupesAuteurs)
       if (!ressource) throw new Error('pas de ressource')
       if (!groupeNom) throw new Error('pas de nom de groupe')
       if (arguments.length === 4) {
         next = options
         options = {}
       }
-      var shouldBeNew = options.shouldBeNew || false
-      var isGroupeAuteur = options.isGroupeAuteur || false
-      var whiteList = options.whiteList || []
+      const isGroupeAuteur = options.isGroupeAuteur === true
+      const whiteList = options.whiteList || []
       if (!Array.isArray(ressource.groupes)) ressource.groupes = []
+      if (!Array.isArray(ressource.groupesAuteurs)) ressource.groupesAuteurs = []
       $groupeRepository.loadByNom(groupeNom, function (error, groupe) {
+        console.log(`récup ${groupeNom} en base`, !error && groupe ? 'ok' : 'KO')
         if (error) return next(error)
-        if (groupe) {
-          if (_.includes(whiteList, groupe.nom)) {
-            if (isGroupeAuteur) ressource.groupesAuteurs.push(groupe.nom)
-            else ressource.groupes.push(groupe.nom)
-          } else if ($accessControl.isGroupeMembre(context, groupe.nom)) {
-            if (isGroupeAuteur) {
-              // il faut en plus les droits updateAuteurs
-              if ($accessControl.hasPermission('updateAuteurs', context, ressource)) ressource.groupesAuteurs.push(groupe.nom)
-              else rTools.addWarning(ressource, 'Vous n’avez pas les droits suffirants pour modifier les groupes pouvant modifier cette ressource')
-            } else {
-              ressource.groupes.push(groupe.nom)
-            }
-          } else {
-            rTools.addWarning(ressource, 'Vous devez faire partie du groupe ' + groupe.nom + ' pour y partager cette ressource')
-          }
-          next()
-        } else if (shouldBeNew) {
-          // il est nouveau et on voulait justement l'ajouter
-          var currentUser = $accessControl.getCurrentUser(context)
-          $personneRepository.addGroupe(currentUser, groupeNom, function (error) {
-            if (error) return next(error)
-            ressource.groupes.push(groupe.nom)
-            next()
-          })
-        } else {
-          // il est nouveau et c'est pas normal
-          rTools.addWarning(ressource, `Le groupe ${groupeNom} n’existe pas (ou plus)`)
-          next()
+        if (!groupe) {
+          addWarning(ressource, `Le groupe ${groupeNom} n’existe pas (ou plus)`)
+          return next()
         }
+        const {nom} = groupe
+
+        if (whiteList.includes(nom)) {
+          console.log(`aj whitelist ${nom}`)
+          if (isGroupeAuteur) ressource.groupesAuteurs.push(nom)
+          else ressource.groupes.push(nom)
+          return next()
+        }
+
+        // faut les droits
+        if (!$accessControl.isGroupeMembre(context, nom)) {
+          addWarning(ressource, `Vous devez faire partie du groupe « ${nom} » pour y partager cette ressource`)
+          return next()
+        }
+
+        if (isGroupeAuteur) {
+          // il faut en plus les droits updateAuteurs
+          if ($accessControl.hasPermission('updateAuteurs', context, ressource)) {
+            console.log(`aj groupesAuteurs ${nom}`)
+            ressource.groupesAuteurs.push(nom)
+          } else {
+            addWarning(ressource, 'Vous n’avez pas les droits suffirants pour modifier les groupes pouvant modifier cette ressource')
+          }
+        } else {
+          console.log(`aj groupes ${nom}`)
+          ressource.groupes.push(nom)
+        }
+        return next()
       })
     }
 
@@ -100,7 +104,7 @@ module.exports = function (component) {
      * à la jonction entre personne et ressource.
      * @service $personneControl
      */
-    var $personneControl = {}
+    const $personneControl = {}
 
     /**
      * Normalise la propriété groupes d'une ressource (en vérifiant les droits et que les groupes existent)
@@ -108,11 +112,10 @@ module.exports = function (component) {
      * @param {Context}           context
      * @param {Ressource}         ressourceOriginale
      * @param {Ressource}         ressourceNew
-     * @param {string}            groupesSup La liste des groupes à ajouter (délimiteur , ou ; ou espace)
      * @param {ressourceCallback} next
      * @memberOf $personneControl
      */
-    $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, groupesSup, next) {
+    $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, next) {
       /**
        * ajoute l'erreur à la ressource et la passe à next
        * @private
@@ -121,84 +124,79 @@ module.exports = function (component) {
        */
       function addErrorAndNext (error) {
         log.error(error)
-        rTools.addError(ressourceNew, error.toString())
+        addError(ressourceNew, error.toString())
         next(null, ressourceNew)
       }
+
+      console.log('checkGroupes avec dans l’original', ressourceOriginale.groupes, ressourceOriginale.groupesAuteurs)
+      console.log('et dans la nouvelle', ressourceNew.groupes, ressourceNew.groupesAuteurs)
 
       if (!ressourceNew.groupes) ressourceNew.groupes = []
       if (!ressourceNew.groupesAuteurs) ressourceNew.groupesAuteurs = []
       if (!Array.isArray(ressourceNew.groupes)) {
         // on vide et on signale l'erreur sans aller plus loin
         log.error(new Error("groupes n'était pas un array"), ressourceNew.groupes)
-        rTools.addError(ressourceNew, 'Groupes invalides')
+        addError(ressourceNew, 'Groupes invalides')
         ressourceNew.groupes = []
         return next(null, ressourceNew)
       }
       if (!Array.isArray(ressourceNew.groupesAuteurs)) {
         log.error(new Error("groupesAuteurs n'était pas un array"), ressourceNew.groupesAuteurs)
-        rTools.addError(ressourceNew, 'Groupes auteurs invalides')
+        addError(ressourceNew, 'Groupes auteurs invalides')
         ressourceNew.groupesAuteurs = []
         return next(null, ressourceNew)
       }
-      log.debug('checkGroupes avec les groupes (' + ressourceNew.groupes.join(',') + ') groupesAuteurs (' + ressourceNew.groupesAuteurs.join(',') + ') et les nouveaux (' + groupesSup + ')')
+      log.debug(`checkGroupes avec les groupes (${ressourceNew.groupes.join(',')}) groupesAuteurs (${ressourceNew.groupesAuteurs.join(',')})`)
       // les 2 cas où y'a rien à faire
       if (
         ressourceOriginale &&
-        _.isEqual(ressourceNew.groupes, ressourceOriginale.groupes) &&
-        _.isEqual(ressourceNew.groupesAuteurs, ressourceOriginale.groupesAuteurs) &&
-        !groupesSup
+        isSameSimpleArray(ressourceNew.groupes, ressourceOriginale.groupes) &&
+        isSameSimpleArray(ressourceNew.groupesAuteurs, ressourceOriginale.groupesAuteurs)
       ) {
         // update sans modif de groupe
         return next(null, ressourceNew)
-      } else if (
+      }
+      if (
         !ressourceOriginale &&
         !ressourceNew.groupes.length &&
-        !ressourceNew.groupesAuteurs.length &&
-        !groupesSup
+        !ressourceNew.groupesAuteurs.length
       ) {
         // création de ressource sans groupes
         return next(null, ressourceNew)
       }
 
-      // vérif des droits sur les groupes, seulement si la ressource existait
+      // y'a des trucs à vérifier, les droits sur les groupes, seulement si la ressource existait
       // (sinon on suppose que si on est appelé c'est que le user a les droits de création de ressource donc d'updateGroupes dessus)
       if (ressourceOriginale && !$accessControl.hasPermission('updateGroupes', context, ressourceOriginale)) {
+        // on remet comme c'était et on s'arrête là
         ressourceNew.groupes = ressourceOriginale.groupes
         ressourceNew.groupesAuteurs = ressourceOriginale.groupesAuteurs
-        rTools.addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
+        addError(ressourceNew, "Vous n'avez pas les droits suffisants pour modifier les groupes de cette ressource")
         return next(null, ressourceNew)
       }
 
       // on a les droits, on mémorise ce qui est demandé et ajoute les groupes sup s'il y en a
-      var groupesVoulus = ressourceNew.groupes
-      var groupesAuteurVoulus = ressourceNew.groupesAuteurs
+      const groupesVoulus = ressourceNew.groupes
+      const groupesAuteursVoulus = ressourceNew.groupesAuteurs
+      console.log('checkGroupes 2', groupesVoulus, groupesAuteursVoulus)
       ressourceNew.groupes = []
       ressourceNew.groupesAuteurs = []
-      flow().seq(function () {
-        // on boucle sur les groupes à ajouter
-        flow(sjt.splitAndTrim(groupesSup, /[,;]+/)).seqEach(function (groupeNom) {
-          log.debug('ajout du nouveau groupe ' + groupeNom)
-          checkGroupe(context, ressourceNew, groupeNom, {shoulBeNew: true}, this)
-        }).done(this)
-      }).seq(function () {
-        // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie qu'ils existent
-        // et que l'utilisateur peut ajouter ou qu'il y était déjà
-        flow(groupesVoulus).seqEach(function (groupeNom) {
-          // log.debug('affectation du groupe ' + groupeNom)
-          const options = {}
-          if (ressourceOriginale && ressourceOriginale.groupes) options.whiteList = ressourceOriginale.groupes
-          checkGroupe(context, ressourceNew, groupeNom, options, this)
-        }).done(this)
+      // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie s'ils y étaient déjà
+      // et sinon qu'ils existent et que l'utilisateur peut les ajouter
+      flow(groupesVoulus).seqEach(function (groupeNom) {
+        const options = {
+          whiteList: ressourceOriginale.groupes
+        }
+        addGroupe(context, ressourceNew, groupeNom, options, this)
         // @todo faudrait vérifier que l'on a pas viré de groupe auxquel on appartient pas, et si c'était le cas cloner ?
+      }).set(groupesAuteursVoulus).seqEach(function (groupeNom) {
+        const options = {
+          whiteList: ressourceOriginale.groupesAuteurs,
+          isGroupeAuteur: true
+        }
+        addGroupe(context, ressourceNew, groupeNom, options, this)
       }).seq(function () {
-        flow(groupesAuteurVoulus).seqEach(function (groupeNom) {
-          // log.debug('affectation du groupeAuteur ' + groupeNom)
-          checkGroupe(context, ressourceNew, groupeNom, {
-            whiteList: ressourceOriginale.groupesAuteurs,
-            isGroupeAuteur: true
-          }, this)
-        }).done(this)
-      }).seq(function () {
+        console.log('checkGroupes fin', ressourceNew.groupes, ressourceNew.groupesAuteurs)
         next(null, ressourceNew)
       }).catch(addErrorAndNext)
     }
@@ -219,8 +217,8 @@ module.exports = function (component) {
       // les cas où on a rien à faire
       if (
         ressourceOriginale &&
-        _.isEqual(ressourceNew.auteurs, ressourceOriginale.auteurs) &&
-        _.isEqual(ressourceNew.contributeurs, ressourceOriginale.contributeurs) &&
+        isSameSimpleArray(ressourceNew.auteurs, ressourceOriginale.auteurs) &&
+        isSameSimpleArray(ressourceNew.contributeurs, ressourceOriginale.contributeurs) &&
         !ressourceNew._auteursAdd &&
         !ressourceNew._contributeursAdd
       ) {
@@ -232,7 +230,7 @@ module.exports = function (component) {
         // les pids que l'on veut mettre (case à cocher, parmi les précédents)
         const auteurs = []
         ressourceNew.auteurs.forEach((pid) => {
-          if (!sjt.isInArray(auteurs, pid)) auteurs.push(pid)
+          if (!isInArray(auteurs, pid)) auteurs.push(pid)
         })
         // aj auteurs sup
         if (ressourceNew._auteursAdd) {
@@ -240,7 +238,7 @@ module.exports = function (component) {
           delete ressourceNew._auteursAdd
           tmp.forEach(function (pid) {
             pid = pid.trim() // vire d'éventuels espaces
-            if (pid && !sjt.isInArray(auteurs, pid)) {
+            if (pid && !isInArray(auteurs, pid)) {
               auteurs.push(pid)
             }
           })
@@ -248,14 +246,14 @@ module.exports = function (component) {
         // idem contributeurs
         const contributeurs = []
         ressourceNew.contributeurs.forEach((pid) => {
-          if (!sjt.isInArray(auteurs, pid) && !sjt.isInArray(contributeurs, pid)) contributeurs.push(pid)
+          if (!isInArray(auteurs, pid) && !isInArray(contributeurs, pid)) contributeurs.push(pid)
         })
         // aj contributeurs sup
         if (ressourceNew._contributeursAdd) {
           const tmp = ressourceNew._contributeursAdd.split(',')
           delete ressourceNew._contributeursAdd
           tmp.forEach(function (pid) {
-            if (pid && !sjt.isInArray(contributeurs, pid) && !sjt.isInArray(auteurs, pid)) contributeurs.push(pid)
+            if (pid && !isInArray(contributeurs, pid) && !isInArray(auteurs, pid)) contributeurs.push(pid)
           })
         }
 
@@ -265,40 +263,40 @@ module.exports = function (component) {
 
         flow().seq(function () {
           // auteurs voulus
-          var nextStep = this
+          const nextStep = this
           flow(auteurs).seqEach(function (pid) {
-            var nextAuteur = this
+            const nextAuteur = this
             $personneRepository.load(pid, function (error, personne) {
               if (error) {
-                rTools.addError(ressourceNew, error.toString())
+                addError(ressourceNew, error.toString())
               } else if (personne) {
                 ressourceNew.auteurs.push(personne.pid)
               } else {
-                rTools.addWarning(ressourceNew, 'L’auteur d’identifiant ' + pid + ' n’existe pas')
+                addWarning(ressourceNew, 'L’auteur d’identifiant ' + pid + ' n’existe pas')
               }
               nextAuteur()
             })
           }).done(nextStep)
         }).seq(function () {
           // contributeurs voulus
-          var nextStep = this
+          const nextStep = this
           // flow contributeurs demandés
           flow(contributeurs).seqEach(function (pid) {
-            var nextContributeur = this
+            const nextContributeur = this
             $personneRepository.load(pid, function (error, personne) {
               if (error) {
-                rTools.addError(ressourceNew, error.toString())
+                addError(ressourceNew, error.toString())
               } else if (personne) {
                 ressourceNew.contributeurs.push(personne.pid)
               } else {
-                rTools.addWarning(ressourceNew, 'Le contributeur d’identifiant ' + pid + ' n’existe pas')
+                addWarning(ressourceNew, 'Le contributeur d’identifiant ' + pid + ' n’existe pas')
               }
               nextContributeur()
             })
           }).done(nextStep)
         }).seq(function () {
           // terminé, mais si y'a pas d'auteurs on met au moins le user courant, si y'en a un
-          if (pid && _.isEmpty(ressourceNew.auteurs)) ressourceNew.auteurs.push(pid)
+          if (pid && !ressourceNew.auteurs.length) ressourceNew.auteurs.push(pid)
           next(null, ressourceNew)
         }).catch(next)
       } else {

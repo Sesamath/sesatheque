@@ -43,7 +43,7 @@ function optionsOk (context) {
 }
 
 module.exports = function (component) {
-  component.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository, $groupe) {
+  component.controller('api/groupe', function (EntityGroupe, $groupeRepository, $accessControl, $json, $personneRepository, $groupe, $session) {
     // les méthodes de $groupe qui nous intéressent
     const {addGestionnairesNames, followGroup, ignoreGroup, isManaged, isMemberOf, joinGroup, joinAndFollowGroup, quitGroup} = $groupe
 
@@ -80,18 +80,21 @@ module.exports = function (component) {
           if (!isManaged(context, groupeBdd)) return $json.denied(context, 'Vous n’êtes pas gestionnaire de ce groupe et ne pouvez pas le modifier')
 
           // si le nom change pas on passe à la suite
-          if (!data.nom || data.nom === groupeBdd.nom) return this(null, groupeBdd)
+          const oldName = groupeBdd.nom
+          const newName = data.nom
+          if (!newName || newName === oldName) return this(null, groupeBdd)
 
           // mais sinon faut répercuter partout
           const nextStep = this
           flow().seq(function () {
-            $personneRepository.renameGroup(groupeBdd.nom, data.nom, this)
+            $personneRepository.renameGroup(oldName, newName, this)
           }).seq(function () {
+            $session.renameGroup(context, oldName, newName)
             initRessourceRepository()
-            $ressourceRepository.renameGroup(groupeBdd.nom, data.nom, this)
+            $ressourceRepository.renameGroup(oldName, newName, this)
           }).seq(function () {
             // maj personne & ressource ok, on peut changer le nom du groupe
-            groupeBdd.nom = data.nom
+            groupeBdd.nom = newName
             nextStep(null, groupeBdd)
           }).catch(sendInternalError)
 
