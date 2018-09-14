@@ -53,7 +53,7 @@ module.exports = function display (ressource, options, next) {
     // pb, les exercices avec canvas ne fonctionnent pas (pb de CORS sur les getImageData
     // => security restrictions on reading canvas pixel data with local or cross-domain images)
     // on contourne avec le domaine local, et on redirige /replication_calculatice via le frontal web (varnish)
-    const ecjsBase = sjtUrl.getParameter('ecjsBase') || options.ecjsBase || window.location.protocol + '//' + window.location.host + '/addons/replication_calculatice/javascript'
+    const ecjsBase = sjtUrl.getParameter('ecjsBase') || options.ecjsBase || window.location.protocol + '//' + window.location.host + '/replication_calculatice/javascript'
 
     // d'après {ecjsBase}/api/clc-api.main.js
     // celui-là détruit notre style et semble ne rien apporter dans les exos
