@@ -3,7 +3,7 @@ const xmlParser = new DOMParser()
 const validate = ({parametres: {url, xml}}, errors) => {
   if (!url && !xml) {
     errors.parametres = errors.parametres || {}
-    errors.parametres.xml = errors.parametres.url = 'Il faut renseigner l\'un de ces deux champs'
+    errors.parametres.xml = errors.parametres.url = 'Il faut renseigner l’un de ces deux champs'
     return
   }
 
