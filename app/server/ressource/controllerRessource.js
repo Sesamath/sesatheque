@@ -78,7 +78,7 @@ module.exports = function (component) {
       // loadByOrigine gère le cas origine = 'cle' ou bien origine = myBaseId
       // mais on veut un redirect si origine est une baseId connue
       const baseUrl = getBaseUrl(origine, false)
-      if (baseUrl) return context.redirect(`${baseUrl}/public/voir/${idOrigine}`, 302)
+      if (baseUrl) return context.redirect(`${baseUrl}public/voir/${idOrigine}`, 302)
 
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) {
@@ -140,7 +140,7 @@ module.exports = function (component) {
 
       // on redirige si c'est un rid
       const baseUrl = getBaseUrl(origine, false)
-      if (baseUrl) return context.redirect(`${baseUrl}/ressource/voir/${idOrigine}`, 302)
+      if (baseUrl) return context.redirect(`${baseUrl}ressource/voir/${idOrigine}`, 302)
 
       // on ne veut pas de cle/xxx sur /ressource (public only), c'est probablement une erreur en amont
       if (origine === 'cle') {
@@ -162,9 +162,6 @@ module.exports = function (component) {
         } else if (ressource) {
           if (isPublic(ressource)) {
             context.redirect(context.request.originalUrl.replace('ressource/', 'public/'), 302)
-          } else if (!$accessControl.isAuthenticated(context)) {
-            context.status = 401
-            displayError(context, 'Vous devez être authentifié pour visionner cette ressource')
           } else if ($accessControl.hasReadPermission(context, ressource)) {
             displayRessource(context, ressource)
           } else {
