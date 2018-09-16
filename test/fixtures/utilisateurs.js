@@ -11,7 +11,7 @@ module.exports = [
       formateur: true,
       acces_correction: true
     },
-    permissions: [],
+    permissions: {create: true},
     groupesMembre: [],
     groupesSuivis: []
   }
