@@ -35,6 +35,7 @@ const path = require('path')
 
 const {application: {staticMaxAge}} = require('../config')
 const {displayReactPage} = require('./reactPage')
+const {displayObsoletePage} = require('./obsoletePage')
 
 const envSesathequeConf = process.env.SESATHEQUE_CONF
 
@@ -87,6 +88,9 @@ module.exports = function (mainComponent) {
       '/ressources'
     ]
     reactRoutes.forEach(route => this.get(route, displayReactPage))
+
+    // page destinée aux navigateurs non pris en charge
+    this.get('/navigateurObsolete', displayObsoletePage)
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
     // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)
