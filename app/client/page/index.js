@@ -205,8 +205,10 @@ function loadAsync (moduleNames, parallelLoad, callback) {
   const paths = []
   const errors = []
   moduleNames.forEach(function (moduleName) {
-    let path = externalModules[ moduleName ]
+    let path = externalModules[moduleName]
+    // si moduleName est un externalModule connu on le prend
     if (path) path = base + path
+    // sinon moduleName doit être une url absolue (http… ou //domain/path)
     else if (/^(https?:)?\/\//.test(moduleName)) path = moduleName
     if (path) paths.push(path)
     else errors.push(moduleName)
