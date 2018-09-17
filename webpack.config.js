@@ -51,6 +51,8 @@ const conf = {
     // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
     // apiClient: './app/client/apiClient.js',
     client: 'sesatheque-client',
+    // un client light qui ne fait que récupérer des ressources sur l'api
+    fetch: 'sesatheque-client/src/fetch.js',
     page: './app/client/page/index.js',
     bugsnag: './app/client/page/bugsnag.js',
     registerSesatheques: './app/client/page/registerSesatheques.js',

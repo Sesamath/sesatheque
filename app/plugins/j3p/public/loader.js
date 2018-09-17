@@ -217,6 +217,7 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
       }
     }
 
+    var isDev = /\.devsesamath.net$/.test(window.location.hostname)
     // les css qu'il faut toujours charger
     // dom.addCss(pathOutils +'stylesactivite.css')
     // Et on passe aux js
@@ -240,18 +241,26 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
 
     if (estDans('mtg32', that.listedesoutils)) {
       J3PInclude2("MathJax.Hub.Config({  tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]},        jax: ['input/TeX','output/SVG'],TeX: {extensions: ['color.js']},messageStyle:'none' });", 'text/x-mathjax-config')
-      piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
-      piledappels.push(pathOutils + 'mtg32/mtg32jsmax.js')
+      piledappels.push('https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
+      if (isDev) {
+        piledappels.push('https://www.mathgraph32.org/js/mtg32jsmax.js')
+      } else {
+        piledappels.push('https://www.mathgraph32.org/js/mtg32jsmin.js')
+      }
     }
+
     // Modification par Yves le 21/07/2017 pour pouvoir utiliser la version appli js de MathGraph32
     // modifié le 16/10/2017 pour aller chercher css & js mathgraph sur mathgraph32.org
+    // le 17/09/2018 on va aussi chercher là-bas mathjax, et on distingue dev / prod
     if (estDans('mtg32App', that.listedesoutils)) {
-      // mathjax @j3p
-      J3PInclude2("MathJax.Hub.Config({tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]}, jax: ['input/TeX','output/SVG'], TeX: {extensions: ['color.js']}, messageStyle: 'none'});", 'text/x-mathjax-config')
-      piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
+      // mathjax si on l'a pas déjà
+      if (!estDans('mtg32', that.listedesoutils)) {
+        J3PInclude2("MathJax.Hub.Config({tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]}, jax: ['input/TeX','output/SVG'], TeX: {extensions: ['color.js']}, messageStyle: 'none'});", 'text/x-mathjax-config')
+        piledappels.push('https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
+      }
       // css & js mathgraph sur www.mathgraph32.org
       dom.addCss('https://www.mathgraph32.org/js/mtgloader/mtgLoader.css')
-      if (/\.devsesamath.net$/.test(window.location.hostname)) {
+      if (isDev) {
         piledappels.push('https://www.mathgraph32.org/js/mtgloader/max/mtgLoader.js')
       } else {
         piledappels.push('https://www.mathgraph32.org/js/mtgloader/mtgLoader.min.js')
@@ -398,16 +407,21 @@ module.exports = {
     if (!urlBaseJ3p || (urlBaseJ3p.substr(0, 2) !== '//' && urlBaseJ3p.substr(0, 4) !== 'http')) {
       throw new Error('Il faut donner une url absolue pour le domaine j3p')
     }
+    if (/\.devsesamath\.net$/.test(window.location.hostname) && /j3p\.sesamath\.net$/.test(urlBaseJ3p)) {
+      urlBaseJ3p = '//j3p.devsesamath.net/'
+    }
+    // toujours avec slash de fin
+    if (urlBaseJ3p.substr(-1) !== '/') urlBaseJ3p += '/'
     log = options.log
     if (!log) log = function () {}
     // init de l'objet j3p utililisé pendant le chargement
     w.j3p = {
       'config': { // l'objet config est l'objet décrit dans j3pconfig/configj3p.txt
         'arborescence': {
-          'sections': urlBaseJ3p + '/sections/',
-          'outils': urlBaseJ3p + '/outils/',
-          'outilsexternes': urlBaseJ3p + '/outilsexternes/',
-          'adresses': urlBaseJ3p + '/j3pbdd/'
+          'sections': urlBaseJ3p + 'sections/',
+          'outils': urlBaseJ3p + 'outils/',
+          'outilsexternes': urlBaseJ3p + 'outilsexternes/',
+          'adresses': urlBaseJ3p + 'j3pbdd/'
         }
       }
     }
@@ -436,11 +450,8 @@ module.exports = {
       w.J3Pinclude = dom.addJs
     }
 
-    // des scripts qu'on charge s'en servent peut-être encore
-    w.J3PEstDansLabomep = urlBaseJ3p
-
-    // pour virer le dernier / car sinon on a des chemins du genre http://j3p.devsesamath.net//sections...
-    if (urlBaseJ3p.substr(urlBaseJ3p.length) === '/') urlBaseJ3p = urlBaseJ3p.substring(0, urlBaseJ3p.length - 1)
+    // des scripts qu'on charge s'en servent peut-être encore (sans slash de fin)
+    w.J3PEstDansLabomep = urlBaseJ3p.substr(0, urlBaseJ3p.length - 1)
 
     var chargementJ3p = new ChargementJ3p()
     // faut mettre chargementJ3p à la racine du dom car les autres scripts le cherchent là
