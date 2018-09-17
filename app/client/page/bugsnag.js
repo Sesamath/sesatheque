@@ -35,6 +35,7 @@ const bugsnagJs = require('bugsnag-js')
 const {application, bugsnag, version} = require('../../server/config')
 
 // ce fichier met un objet busgnagClient en global
+// ATTENTION il y a une deuxième conf bugsnag dans app/client-react/App.js pour le client react
 
 /**
  * Appelé avant d'envoyer le rapport, pour filtrer
