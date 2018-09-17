@@ -190,12 +190,13 @@ function init (options, next) {
 /**
  * Pour charger des modules référencé ici en async, avec loadjs
  * @param {Array} moduleNames
- * @param {object} options
+ * @param {boolean} [parallelLoad=true]
+ * @param callback
  */
-function loadAsync (moduleNames, isAsync, callback) {
+function loadAsync (moduleNames, parallelLoad, callback) {
   if (callback === undefined) {
-    callback = isAsync
-    isAsync = true
+    callback = parallelLoad
+    parallelLoad = true
   }
   // on accepte les string
   if (typeof moduleNames === 'string') moduleNames = [moduleNames]
@@ -213,13 +214,13 @@ function loadAsync (moduleNames, isAsync, callback) {
   if (errors.length) {
     addError('Impossible de charger le ou les modules inconnus suivants ' + errors.join(', '))
   } else if (paths.length) {
-    const body = wd.getElementsByTagName('body')[0]
+    const {body} = wd
     const waitingElt = dom.addElement(body, 'div', {className: 'waiting'}, 'chargement en cours…')
     loadjs(paths, {
-      async: isAsync,
+      async: parallelLoad,
       success: () => {
         body.removeChild(waitingElt)
-        if (callback) callback()
+        callback()
       },
       error: (modules) => {
         body.removeChild(waitingElt)
@@ -227,7 +228,7 @@ function loadAsync (moduleNames, isAsync, callback) {
       }
     })
   } else {
-    if (callback) callback()
+    callback()
   }
 }
 
