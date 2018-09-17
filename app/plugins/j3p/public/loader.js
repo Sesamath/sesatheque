@@ -21,6 +21,9 @@
  * - en simplifiant car on ne charge ici que des graphes, pas des listes
  * - en faisant des appels jsonP (car on est pas sur le même nom de domaine donc
  *   les XMLHttpRequest sont plus compliqués)
+ *
+ *   @todo ne laisser ici que le strict minimum spécifique à la sesatheque et déléguer à un loader
+ *   sur j3p.sesamath.net le reste du chargement
  */
 'use strict'
 
@@ -128,12 +131,7 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
   function oncontinue3 () {
     // on charge adresses.js qui ajoute un gros objet chargementJ3p.adresses avec les correspondances
     // nomSection : chemin du js de la section
-    page.loadAsync(w.j3p.config.arborescence.adresses + 'adresses.js', // intialisation de j3p.config
-      function () {
-        log('on a chargé adresses.js')
-        oncontinue4bis()
-      }
-    )
+    page.loadAsync(w.j3p.config.arborescence.adresses + 'adresses.js', oncontinue4bis) // intialisation de j3p.config
   }
 
   // chargement de jquery, jquery-ui et asmselect
@@ -175,7 +173,7 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
     page.loadAsync(piledappels, false, oncontinue6)
   }
 
-  // Définition de la liste des outils nécessaires
+  // Définition de la liste des outils nécessaires (fct sync)
   function oncontinue6 () {
     if (!window.Parcours) throw new Error('Le chargement de j3p a échoué')
     var name, outils
@@ -253,7 +251,11 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
       piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
       // css & js mathgraph sur www.mathgraph32.org
       dom.addCss('https://www.mathgraph32.org/js/mtgloader/mtgLoader.css')
-      piledappels.push('https://www.mathgraph32.org/js/mtgloader/mtgLoader.min.js')
+      if (/\.devsesamath.net$/.test(window.location.hostname)) {
+        piledappels.push('https://www.mathgraph32.org/js/mtgloader/max/mtgLoader.js')
+      } else {
+        piledappels.push('https://www.mathgraph32.org/js/mtgloader/mtgLoader.min.js')
+      }
     }
     // Fin Modif Yves
 
