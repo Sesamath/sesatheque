@@ -30,7 +30,9 @@ import store from './store'
 
 import './App.scss'
 
+// ATTENTION il y a une deuxième conf bugsnag dans app/client/page/bugsnag.js pour le display et les editeurs iframes
 const beforeSend = (report) => {
+  if (/^file:\/\//.test(report.request.url)) return false
   report.metaData.state = store.getState()
 }
 

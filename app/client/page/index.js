@@ -33,6 +33,8 @@
 // On ajoute les babel-polyfill via ce fichier et non directement dans les entries de webpack.
 // C'est le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
 // qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
+// Pas besoin de polyfill pour fetch en principe
+
 require('babel-polyfill')
 
 const dom = require('sesajstools/dom')
@@ -45,6 +47,7 @@ const refreshAuth = require('./refreshAuth')
 const inBrowser = (typeof window) !== 'undefined'
 // lui s'ajoute tout seul à window, suffit de le charger
 if (inBrowser) {
+  require('../../client-react/utils/checkBrowser').default()
   require('./bugsnag')
 }
 
