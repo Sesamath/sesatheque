@@ -44,6 +44,7 @@ const {application, bugsnag, version} = require('../../server/config')
 function beforeSend (report) {
   // cf https://docs.bugsnag.com/platforms/browsers/js/customizing-error-reports/
   if (/local/.test(window.location.hostname)) return false
+  if (/^file:\/\//.test(report.request.url)) return false
   if (report && report.metaData) {
     const md = report.metaData
     const type = md && md.exo && md.exo.type

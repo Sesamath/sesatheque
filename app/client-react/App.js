@@ -31,6 +31,7 @@ import store from './store'
 import './App.scss'
 
 const beforeSend = (report) => {
+  if (/^file:\/\//.test(report.request.url)) return false
   report.metaData.state = store.getState()
 }
 
