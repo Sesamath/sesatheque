@@ -47,7 +47,7 @@ const showOptionsEditor = require('./showOptionsEditor')
  * @param {displayOptions} options    Possibilité de passer ecjsBase pour modifier http://ressources.sesamath.net/replication_calculatice/javascript
  * @param {errorCallback}  [next]     La fct à appeler quand le swf sera chargé
  */
-const display  = (ressource, options, next) => {
+const display = (ressource, options, next) => {
   function displayEcjs () {
     // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
     // pb, les exercices avec canvas ne fonctionnent pas (pb de CORS sur les getImageData

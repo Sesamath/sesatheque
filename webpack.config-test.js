@@ -102,13 +102,16 @@ const conf = {
       // editgraphe doit passer par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-      {test: /sesatheque-client\/src\/.*\.js/, use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env'],
-          plugins: [require('@babel/plugin-proposal-object-rest-spread')]
+      {
+        test: /sesatheque-client\/src\/.*\.js/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: [require('@babel/plugin-proposal-object-rest-spread')]
+          }
         }
-      }},
+      },
       // le statique
       /* process CSS files */
       {
