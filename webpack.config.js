@@ -105,7 +105,7 @@ const conf = {
   module: {
     rules: [
       {test: /app\/(client|server)\/.*\.js/, loader: 'babel-loader'},
-      {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
+      {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['@babel/preset-react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
@@ -116,7 +116,13 @@ const conf = {
       // editgraphe doit passer par babel
       {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel-loader'},
+      {test: /sesatheque-client\/src\/.*\.js/, use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+          plugins: [require('@babel/plugin-proposal-object-rest-spread')]
+        }
+      }},
       // le statique
       /* process CSS files */
       {

@@ -1,5 +1,5 @@
 // inclusion des polyfills:
-import 'babel-polyfill'
+import '@babel/polyfill'
 import 'whatwg-fetch'
 
 import {createElement} from 'react'

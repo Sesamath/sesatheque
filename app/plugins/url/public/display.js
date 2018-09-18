@@ -49,8 +49,8 @@ const divIframeSelector = '#page'
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
-  require.ensure(['jquery'], function (require) {
 const urlDisplay = (ressource, options, next) => {
+  require.ensure(['jquery'], function (require) {
     /**
      * Ajoute le bouton vu et le listener sur unload quand il n'y a pas de réponse demandée
      */
@@ -208,7 +208,7 @@ const urlDisplay = (ressource, options, next) => {
       }
       // sinon, faut charger la gestion des dialog jQueryUi
       require.ensure(['./displayUi'], function (require) {
-        const displayUi = require('./displayUi')
+        const {displayUi} = require('./displayUi')
         // on ajoute l'entete avant la page
         const entete = dom.addElement(options.container, 'div', {id: 'entete'})
         addPage(url, params, () => {

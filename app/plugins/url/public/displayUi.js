@@ -53,7 +53,7 @@ const divIframeId = 'page'
  * @param {displayOptions} options
  * @param {errorCallback}  next
  */
-module.exports = function (ressource, options, next) {
+const displayUi = (ressource, options, next) => {
   require.ensure(['jquery', 'jquery-ui'], function (require) {
     const $ = require('jquery')
     // on utilise que dialog
@@ -556,3 +556,5 @@ module.exports = function (ressource, options, next) {
     }) // $(code)
   }) // require.ensure
 }
+
+export {displayUi}
