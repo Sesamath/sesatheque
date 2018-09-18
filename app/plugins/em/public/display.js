@@ -145,6 +145,11 @@ function getResultatCallback (ressource, options, next) {
  */
 module.exports = function display (ressource, options, next) {
   try {
+    // y'a des swf qui appellent cette fct en global, c'est du modèle 1 qu'on corrigera pas,
+    // on ajoute juste ça pour que ça plante plus
+    window.fermer_cons = function () {
+      if (window.console && typeof console.trace === 'function') console.trace('appel de la fct globale fermer_cons')
+    }
     let {container} = options
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
     const errorsContainer = options.errorsContainer
