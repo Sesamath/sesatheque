@@ -184,6 +184,8 @@ module.exports = function urlDisplay (ressource, options, next) {
       })
       // raccourcis
       const params = ressource.parametres || {}
+      params.question_option = params.question_option || 'off'
+      params.answer_option = params.answer_option || 'off'
       const url = params.adresse
       if (!url) throw new Error('Url manquante')
       if (!/^https?:\/\//.test(url)) throw new Error('Url invalide : ' + url)
