@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {reduxForm} from 'redux-form'
 import {parse} from 'query-string'
+import defaultValues from 'plugins/defaultValues'
 
 import Classification from './Classification'
 import {labels} from '../../server/ressource/config'
@@ -133,7 +134,13 @@ const form = {
     const {closerId} = parse(window.location.search)
     const search = closerId ? `?closerId=${closerId}` : ''
     const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}${search}`))
-    saveRessource(values, onSave)
+    const {type} = values
+    const defaultValue = defaultValues[type]
+    const ressourceData = defaultValue ? {
+      ...defaultValue,
+      ...values
+    } : values
+    saveRessource(ressourceData, onSave)
   },
   onSubmitFail,
   validate
