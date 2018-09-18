@@ -49,8 +49,8 @@ const divIframeSelector = '#page'
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
-module.exports = function urlDisplay (ressource, options, next) {
   require.ensure(['jquery'], function (require) {
+const urlDisplay = (ressource, options, next) => {
     /**
      * Ajoute le bouton vu et le listener sur unload quand il n'y a pas de réponse demandée
      */
@@ -223,3 +223,5 @@ module.exports = function urlDisplay (ressource, options, next) {
     }
   })
 }
+
+export default urlDisplay

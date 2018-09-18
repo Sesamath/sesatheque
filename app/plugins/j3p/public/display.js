@@ -47,7 +47,7 @@ var urlBaseJ3p = '//j3p.sesamath.net'
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   /**
    * Chargera la ressource quand on aura éventuellement récupéré lastResultat
    */
@@ -141,3 +141,5 @@ module.exports = function display (ressource, options, next) {
     page.addError(error)
   }
 }
+
+export default display

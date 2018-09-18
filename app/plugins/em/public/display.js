@@ -143,7 +143,7 @@ function getResultatCallback (ressource, options, next) {
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   try {
     let {container} = options
     if (!container) throw new Error('Il faut passer dans les options un conteneur html pour afficher cette ressource')
@@ -252,3 +252,5 @@ module.exports = function display (ressource, options, next) {
     next(error)
   }
 }
+
+export default display

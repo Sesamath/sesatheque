@@ -48,7 +48,7 @@ let isLoaded
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   try {
     let baseSwf, swfUrl, swfOpt
     const container = options.container
@@ -109,3 +109,5 @@ module.exports = function display (ressource, options, next) {
     else page.addError(error)
   }
 }
+
+export default display

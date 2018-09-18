@@ -52,7 +52,7 @@ addSesatheques(sesatheques)
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   require.ensure(['jquery', 'jstree'], function (require) {
     const $ = require('jquery')
     // const stJstree = require('sesatheque-client/src/jstree')
@@ -254,3 +254,5 @@ module.exports = function display (ressource, options, next) {
     else if (error) page.addError(error)
   })
 } // display
+
+export default display
