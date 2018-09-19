@@ -50,7 +50,7 @@
     "start:testCommun": "env SESATHEQUE_CONF=testCommun node app/server/start.js",
     "test": "./scripts/run -t",
     "test:all": "yarn run test:react && yarn run test:server && yarn run test:others",
-    "test:react": "BABEL_ENV=test mocha-webpack --webpack-config webpack.config-test.js 'test/react/**/*.test.js'",
+    "test:react": "BABEL_ENV=test mocha-webpack 'test/react/**/*.test.js'",
     "test:server": "mocha 'test/server/**/*.test.js'",
     "test:others": "mocha 'test/others/**/*.test.js'",
     "test:watch": "npm test -- --watch",
