@@ -56,6 +56,7 @@ const conf = {
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
+    chunkFilename: '[id]-[chunkhash].js',
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     library: 'st[name]',

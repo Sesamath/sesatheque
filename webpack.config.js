@@ -70,7 +70,7 @@ const conf = {
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
-    // chunkFilename: '[id].js', // ça n'évite pas le ~ dans les noms de fichier variables exportées…
+    chunkFilename: '[id]-[chunkhash].js', // ça n'évite pas le ~ dans les noms de fichier variables exportées…
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
