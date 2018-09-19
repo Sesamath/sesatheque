@@ -49,7 +49,6 @@ const showOptionsEditor = require('./showOptionsEditor')
  */
 module.exports = function display (ressource, options, next) {
   function displayEcjs () {
-    /* global head */
     // pour utiliser le serveur de calculatice mettre http://calculatice.ac-lille.fr/calculatice/bibliotheque/javascript
     // pb, les exercices avec canvas ne fonctionnent pas (pb de CORS sur les getImageData
     // => security restrictions on reading canvas pixel data with local or cross-domain images)
@@ -63,138 +62,137 @@ module.exports = function display (ressource, options, next) {
     dom.addCss(ecjsBase + '/clc/css/clc.css')
     // si on prend pas le css original qui reset html et body, ça casse tout (le rectangle clc s'affiche pas),
     // mais en le laissant ça casse nos styles, faudrait le mettre toujours en iframe :-/
-    head.ready(function () {
-      // on attend que tout soit fini pour virer require que Raphael et Big ne supportent pas
-      // on espère que plus personne n'en aura besoin
-      if (typeof window.define !== 'undefined') {
-        console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec requireJs, on désactive define et require')
-        window.define = undefined // eslint-disable-line no-native-reassign
-        window.require = undefined
-      }
-      if (typeof window.require !== 'undefined') {
-        console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec commonJs, on désactive require')
-        window.require = undefined
-      }
-      // Cf /home/sesamath/bin/fetchCalculatice.sh qui tourne sur le serveur web ressources.sesamath.net
-      // pour la liste des js concaténés dans scripts.js
-      head.load(ecjsBase + '/scripts.js', function () {
-        // on vérifie que l'on a tous les objets globaux souhaités
-        ;[ 'Modernizr', '$', 'SVG', 'Raphael', 'Big', 'createjs', 'CLC' ].forEach((prop, i) => {
-          if (typeof window[prop] === 'undefined') throw new Error(`Problème de chargement d’une dépendance calcul@tice, ${prop} n’existe pas`)
-        })
 
-        // On réinitialise le conteneur
-        const container = options.container
-        dom.empty(container)
-        const divExoClc = dom.addElement(container, 'div', { id: 'exoclc', style: { margin: '0 auto', width: '735px' } })
-        const footer = dom.addElement(container, 'p', {
-          style: {
-            'text-align': 'right',
-            margin: '0 auto',
-            width: '735px'
-          }
-        }, 'Exercice original provenant du site ')
-        dom.addElement(footer, 'a', { href: 'http://calculatice.ac-lille.fr/', target: '_blank' }, 'Calcul@tice')
-        const $divExoClc = $(divExoClc)
-
-        const isOptionsEditorMode = typeof options.onLoadEditorCb === 'function'
-
-        if (isOptionsEditorMode) {
-          const {exoBase: pristineExoBase} = CLC
-          const exoBase = (arg) => {
-            const exo = pristineExoBase(arg)
-            window.currentExo = exo
-            return exo
-          }
-          CLC.exoBase = exoBase
-        }
-
-        // les options clc
-        const optionsClc = ressource.parametres.options || {}
-        if (options.hasOwnProperty('parametrable')) optionsClc.parametrable = options.parametrable
-        else if (isOptionsEditorMode) optionsClc.parametrable = true
-        else optionsClc.parametrable = !!options.isFormateur
-        // le nom de l'exo
-        const nomExo = ressource.parametres.fichierjs
-        const cheminExo = ecjsBase + '/exercices/'
-        // des flags
-        let exoLoaded = false
-
-        // si ça intéresse l'appelant et que le chargement est KO on finira par le dire après 10s
-        if (next && typeof next === 'function') {
-          setTimeout(function () {
-            if (!exoLoaded) next(new Error('Exercice calculatice toujours pas chargé après 10s'))
-          }, 10000) // on laisse 10s avant d'envoyer une erreur de chargement
-        }
-
-        // cree un exo de maniere asynchrone
-        log('on va charger l’exo ' + nomExo + ' avec les options', optionsClc)
-        const reqExo = CLC.loadExo(cheminExo + nomExo, optionsClc)
-
-        // quand l'exo est pret on le met dans son div
-        reqExo.done(function (exoClc) {
-          $divExoClc.html(exoClc)
-          // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
-          $divExoClc.ready(function () {
-            exoLoaded = true
-
-            // ////////     MODE ÉDITION DES OPTIONS    //////////
-            // si l'utilisateur veut récupérer les paramètres, on les affiche directement
-            // (en cliquant sur le bouton de paramétrage à sa place)
-            // et on lui file une fonction pour récupérer une promesse de récupération de ces options
-            if (isOptionsEditorMode) {
-              showOptionsEditor($, {exoClc, ressource, options})
-
-              // ////////     MODE STANDARD avec envoi de résultats    //////////
-            } else if (options.resultatCallback) {
-              let resultatSent = false
-              /* global CLC, $ */
-              // le 2e arg se retrouve dans event.data (event 1er arg passé à la callback)
-              // pour la liste des événements, chercher 'publier' dans les sources calculatice
-              // on a validationQuestion, validationOption, finExercice
-              // pour finExercice on récupère {idExo, numExo, score {int, nb de bonnes réponses}, total {int, nb total de questions}, duree {int, en secondes}}
-              const envoyerScoreExoJs = (event, data) => {
-                log('résultats reçus du js calculatice', data)
-                if (!options || typeof options.resultatCallback !== 'function') return
-                resultatSent = true // même si ça plante, pas la peine de recommencer au unload
-                const dataToSend = {
-                  fin: true,
-                  // on veut pas laisser affiché le bouton recommencer
-                  $resetDelay: 0
-                }
-                if (data.total > 0) {
-                  const score = parseInt(data.score, 10) || 0
-                  dataToSend.score = score / data.total
-                  dataToSend.reponse = score + ' sur ' + data.total
-                } else {
-                  dataToSend.reponse = 'score indéterminé'
-                }
-                if (options.resultatCallback) {
-                  options.resultatCallback(dataToSend)
-                }
-              }
-
-              // on le met en listener de la fin d'exo
-              exoClc.on('finExercice', null, envoyerScoreExoJs)
-              // et au unload
-              window.addEventListener('unload', function () {
-                log('unload ecjs')
-                if (exoLoaded && !resultatSent) {
-                  envoyerScoreExoJs(null, {
-                    score: 0,
-                    reponse: 'Aucune réponse',
-                    fin: true
-                  })
-                }
-              })
-            } // fin du else envoyer résultat
-
-            if (next && typeof next === 'function') {
-              next()
-            }
-          }) // $divExoClc.ready
-        }) // reqExo.done
+    // on vire require que Raphael et Big ne supportent pas
+    // on espère que plus personne n'en aura besoin
+    if (typeof window.define !== 'undefined') {
+      console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec requireJs, on désactive define et require')
+      window.define = undefined // eslint-disable-line no-native-reassign
+      window.require = undefined
+    }
+    if (typeof window.require !== 'undefined') {
+      console.error('Les bibliotheques Raphael et Big utilisées par calculatice ne sont pas compatibles avec commonJs, on désactive require')
+      window.require = undefined
+    }
+    // Cf /home/sesamath/bin/fetchCalculatice.sh qui tourne sur le serveur web ressources.sesamath.net
+    // pour la liste des js concaténés dans scripts.js
+    page.loadAsync(ecjsBase + '/scripts.js', function () {
+      // on vérifie que l'on a tous les objets globaux souhaités
+      ;[ 'Modernizr', '$', 'SVG', 'Raphael', 'Big', 'createjs', 'CLC' ].forEach((prop, i) => {
+        if (typeof window[prop] === 'undefined') throw new Error(`Problème de chargement d’une dépendance calcul@tice, ${prop} n’existe pas`)
       })
+
+      // On réinitialise le conteneur
+      const container = options.container
+      dom.empty(container)
+      const divExoClc = dom.addElement(container, 'div', { id: 'exoclc', style: { margin: '0 auto', width: '735px' } })
+      const footer = dom.addElement(container, 'p', {
+        style: {
+          'text-align': 'right',
+          margin: '0 auto',
+          width: '735px'
+        }
+      }, 'Exercice original provenant du site ')
+      dom.addElement(footer, 'a', { href: 'http://calculatice.ac-lille.fr/', target: '_blank' }, 'Calcul@tice')
+      const $divExoClc = $(divExoClc)
+
+      const isOptionsEditorMode = typeof options.onLoadEditorCb === 'function'
+
+      if (isOptionsEditorMode) {
+        const {exoBase: pristineExoBase} = CLC
+        const exoBase = (arg) => {
+          const exo = pristineExoBase(arg)
+          window.currentExo = exo
+          return exo
+        }
+        CLC.exoBase = exoBase
+      }
+
+      // les options clc
+      const optionsClc = ressource.parametres.options || {}
+      if (options.hasOwnProperty('parametrable')) optionsClc.parametrable = options.parametrable
+      else if (isOptionsEditorMode) optionsClc.parametrable = true
+      else optionsClc.parametrable = !!options.isFormateur
+      // le nom de l'exo
+      const nomExo = ressource.parametres.fichierjs
+      const cheminExo = ecjsBase + '/exercices/'
+      // des flags
+      let exoLoaded = false
+
+      // si ça intéresse l'appelant et que le chargement est KO on finira par le dire après 10s
+      if (next && typeof next === 'function') {
+        setTimeout(function () {
+          if (!exoLoaded) next(new Error('Exercice calculatice toujours pas chargé après 10s'))
+        }, 10000) // on laisse 10s avant d'envoyer une erreur de chargement
+      }
+
+      // cree un exo de maniere asynchrone
+      log('on va charger l’exo ' + nomExo + ' avec les options', optionsClc)
+      const reqExo = CLC.loadExo(cheminExo + nomExo, optionsClc)
+
+      // quand l'exo est pret on le met dans son div
+      reqExo.done(function (exoClc) {
+        $divExoClc.html(exoClc)
+        // on a pas d'événement sur l'exo chargé, faut attendre que le js de calculatice ait complété le dom
+        $divExoClc.ready(function () {
+          exoLoaded = true
+
+          // ////////     MODE ÉDITION DES OPTIONS    //////////
+          // si l'utilisateur veut récupérer les paramètres, on les affiche directement
+          // (en cliquant sur le bouton de paramétrage à sa place)
+          // et on lui file une fonction pour récupérer une promesse de récupération de ces options
+          if (isOptionsEditorMode) {
+            showOptionsEditor($, {exoClc, ressource, options})
+
+            // ////////     MODE STANDARD avec envoi de résultats    //////////
+          } else if (options.resultatCallback) {
+            let resultatSent = false
+            /* global CLC, $ */
+            // le 2e arg se retrouve dans event.data (event 1er arg passé à la callback)
+            // pour la liste des événements, chercher 'publier' dans les sources calculatice
+            // on a validationQuestion, validationOption, finExercice
+            // pour finExercice on récupère {idExo, numExo, score {int, nb de bonnes réponses}, total {int, nb total de questions}, duree {int, en secondes}}
+            const envoyerScoreExoJs = (event, data) => {
+              log('résultats reçus du js calculatice', data)
+              if (!options || typeof options.resultatCallback !== 'function') return
+              resultatSent = true // même si ça plante, pas la peine de recommencer au unload
+              const dataToSend = {
+                fin: true,
+                // on veut pas laisser affiché le bouton recommencer
+                $resetDelay: 0
+              }
+              if (data.total > 0) {
+                const score = parseInt(data.score, 10) || 0
+                dataToSend.score = score / data.total
+                dataToSend.reponse = score + ' sur ' + data.total
+              } else {
+                dataToSend.reponse = 'score indéterminé'
+              }
+              if (options.resultatCallback) {
+                options.resultatCallback(dataToSend)
+              }
+            }
+
+            // on le met en listener de la fin d'exo
+            exoClc.on('finExercice', null, envoyerScoreExoJs)
+            // et au unload
+            window.addEventListener('unload', function () {
+              log('unload ecjs')
+              if (exoLoaded && !resultatSent) {
+                envoyerScoreExoJs(null, {
+                  score: 0,
+                  reponse: 'Aucune réponse',
+                  fin: true
+                })
+              }
+            })
+          } // fin du else envoyer résultat
+
+          if (next && typeof next === 'function') {
+            next()
+          }
+        }) // $divExoClc.ready
+      }) // reqExo.done
     })
   } // displayEcjs
 
@@ -202,8 +200,7 @@ module.exports = function display (ressource, options, next) {
     // vérifs de base
     if (!options.container) throw new Error('Paramétrage manquant (conteneur)')
     if (!ressource.parametres.fichierjs) throw new Error('Paramétrage manquant (type d’exercice à lancer)')
-    if (typeof head !== 'undefined' && head.js) displayEcjs()
-    else page.loadAsync('head', displayEcjs)
+    displayEcjs()
   } catch (error) {
     if (next) next(error)
     else page.addError(error)

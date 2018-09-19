@@ -18,25 +18,17 @@ const getButtons = (personne) => {
     },
     icon: 'search'
   }
-  if (personne === null) {
+  if (personne === null || !personne.permissions.create) {
     return [buttonSearch]
   }
 
-  const {permissions: create} = personne
-
-  const buttons = []
-
-  if (create) {
-    buttons.push({
+  return [
+    {
       id: 'buttonAdd',
       title: 'Ajouter une ressource',
       to: '/ressource/ajouter',
       icon: 'plus-circle'
-    })
-  }
-
-  // @todo vérifier les droits, les deux derniers boutons existent sur commun mais pas forcément sur bibli
-  buttons.push(
+    },
     buttonSearch,
     {
       id: 'buttonMyRessources',
@@ -54,9 +46,7 @@ const getButtons = (personne) => {
       to: '/groupes/perso',
       icon: 'users'
     }
-  )
-
-  return buttons
+  ]
 }
 
 export const Header = ({

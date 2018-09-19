@@ -33,17 +33,21 @@
 // On ajoute les babel-polyfill via ce fichier et non directement dans les entries de webpack.
 // C'est le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
 // qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
+// Pas besoin de polyfill pour fetch en principe
+
 require('babel-polyfill')
 
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjtUrl = require('sesajstools/http/url')
+const loadjs = require('loadjs')
 
 const autosize = require('./autosize')
 const refreshAuth = require('./refreshAuth')
 const inBrowser = (typeof window) !== 'undefined'
 // lui s'ajoute tout seul à window, suffit de le charger
 if (inBrowser) {
+  require('../../client-react/utils/checkBrowser').default()
   require('./bugsnag')
 }
 
@@ -51,13 +55,12 @@ const w = inBrowser ? window : {}
 const wd = w.document
 
 /**
- * En attendant la gestion du load async avec es6, on utilise le bon vieux head.js,
+ * En attendant la gestion du load async avec es6, on utilise loadjs,
  * on garde ici un mapping vers les modules tiers que l'on utilise
  */
 const externalModules = {
   ckeditor: 'vendor/ckeditor/ckeditor.js',
   ckeditorJquery: 'vendor/ckeditor/adapters/jquery.js',
-  head: 'vendor/headjs/dist/1.0.0/head.load.min.js',
   // installé avec `bower install jquery1=jquery#1.11`
   jquery: 'vendor/jquery1/dist/jquery.min.js',
   // installé avec `bower install jquery2=jquery#2`
@@ -188,59 +191,50 @@ function init (options, next) {
 }
 
 /**
- * Pour charger des modules référencé ici en async, avec headJs
+ * Pour charger des modules référencé ici en async, avec loadjs
  * @param {Array} moduleNames
+ * @param {boolean} [parallelLoad=true]
  * @param callback
  */
-function loadAsync (moduleNames, callback) {
-  function headLoad (paths, cb) {
-    const loader = w.head.load || w.head.js // les anciennes versions de head utilisaient head.js avec la même signature
-    if (loader) {
-      const body = wd.getElementsByTagName('body')[0]
-      const waitingElt = dom.addElement(body, 'div', {className: 'waiting'}, 'chargement en cours…')
-      loader(paths, function () {
-        body.removeChild(waitingElt)
-        cb()
-      })
-    } else {
-      console.error('Impossible de trouver head pour chargement asynchrone')
-    }
+function loadAsync (moduleNames, parallelLoad, callback) {
+  if (callback === undefined) {
+    callback = parallelLoad
+    parallelLoad = true
   }
-
-  function headReady (next) {
-    if (typeof window.head === 'undefined') {
-      dom.addJs(base + externalModules.head, function () {
-        next()
-      })
-    } else {
-      next()
-    }
-  }
-
   // on accepte les string
   if (typeof moduleNames === 'string') moduleNames = [moduleNames]
 
-  // on passe par head qui gèrera au passage l'unicité de l'appel
-  headReady(function () {
-    const paths = []
-    const errors = []
-    moduleNames.forEach(function (moduleName) {
-      if (moduleName !== 'head') {
-        let path = externalModules[ moduleName ]
-        if (path) path = base + path
-        else if (/^https?:\/\//.test(moduleName)) path = moduleName
-        if (path) paths.push(path)
-        else errors.push(moduleName)
+  // on passe par loadjs qui gèrera au passage l'unicité de l'appel
+  const paths = []
+  const errors = []
+  moduleNames.forEach(function (moduleName) {
+    let path = externalModules[moduleName]
+    // si moduleName est un externalModule connu on le prend
+    if (path) path = base + path
+    // sinon moduleName doit être une url absolue (http… ou //domain/path)
+    else if (/^(https?:)?\/\//.test(moduleName)) path = moduleName
+    if (path) paths.push(path)
+    else errors.push(moduleName)
+  })
+  if (errors.length) {
+    addError('Impossible de charger le ou les modules inconnus suivants ' + errors.join(', '))
+  } else if (paths.length) {
+    const {body} = wd
+    const waitingElt = dom.addElement(body, 'div', {className: 'waiting'}, 'chargement en cours…')
+    loadjs(paths, {
+      async: parallelLoad,
+      success: () => {
+        body.removeChild(waitingElt)
+        callback()
+      },
+      error: (modules) => {
+        body.removeChild(waitingElt)
+        addError('Impossible de charger le ou les modules suivants ' + modules.join(', '))
       }
     })
-    if (errors.length) {
-      addError('Impossible de charger le ou les modules inconnus suivants ' + errors.join(', '))
-    } else if (paths.length) {
-      headLoad(paths, callback)
-    } else {
-      callback()
-    }
-  })
+  } else {
+    callback()
+  }
 }
 
 /**

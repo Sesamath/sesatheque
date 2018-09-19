@@ -57,8 +57,6 @@ module.exports = function displayRessource (context, ressource) {
   <title>${titre}</title>
   <meta property="og:title" content="${titre}"/>
   <meta property="twitter:title" content="${titre}"/>
-  <script type="text/javascript" src="/page.js?${version}"></script>
-  <script type="text/javascript" src="/display.js?${version}"></script>
 </head>
 <body class="iframe">
   <div id="root" role="document">
@@ -70,6 +68,7 @@ module.exports = function displayRessource (context, ressource) {
     Vous devez avoir un navigateur avec javascript activé pour voir ce contenu.<br />
     Chargement en cours…
   </div>
+<script type="text/javascript" src="/display.js?${version}"></script>
 <script type="application/javascript">
 try {
   if (typeof stdisplay === 'undefined') throw new Error('Le chargement a échoué, impossible de charger le module display');

@@ -3,7 +3,7 @@
  * Il déclare des méthodes via un module commonjs (cf rev 6116 pour un module AMD avec http://requirejs.org/)
  *
  * Ce script permet donc de charger un graphe dans le dom courant, mais sur un domaine inconnu.
- * Il faut avoir chargé headjs séparément, si jQuery n'est pas chargé on prendra celui de j3p
+ * Si jQuery n'est pas chargé on prendra celui de j3p
  *
  * Il reprend j3p.html + outils/j3pchargementlabomep.js, mais
  * - chargementJ3p.graphe est un tableau de tableaux (pas une chaine), ou on a inséré un tableau vide en indice 0
@@ -21,6 +21,9 @@
  * - en simplifiant car on ne charge ici que des graphes, pas des listes
  * - en faisant des appels jsonP (car on est pas sur le même nom de domaine donc
  *   les XMLHttpRequest sont plus compliqués)
+ *
+ *   @todo ne laisser ici que le strict minimum spécifique à la sesatheque et déléguer à un loader
+ *   sur j3p.sesamath.net le reste du chargement
  */
 'use strict'
 
@@ -29,6 +32,9 @@ var log = require('sesajstools/utils/log')
 
 var page = require('../../../client/page/index')
 
+// des fichiers inclus dynamiquement en ont besoin semble-t-il:
+require('headjs/dist/1.0.0/head.js')
+
 /**
  * L'url de base de j3p
  * @private
@@ -36,7 +42,7 @@ var page = require('../../../client/page/index')
 var urlBaseJ3p
 /** raccourci vers window */
 var w = window
-// Des variables globales que j3p utilise, on les défini si elles ne le sont pas déjà
+// Des variables globales que j3p utilise, on les définit si elles ne le sont pas déjà
 /* La commande console n’existe pas sous IE */
 if (typeof w.console === 'undefined') w.console = {}
 if (!w.console.log) w.console.log = function () {}
@@ -100,7 +106,7 @@ function estDans (ch, tab) {
 * @returns {undefined}
 */
 ChargementJ3p.prototype.chargement = function (eltHtml) {
-  /* global head, jQuery */
+  /* global jQuery */
   function oncontinue1 () {
     // alert('pause')
     // On charge les CSS :
@@ -125,18 +131,13 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
   function oncontinue3 () {
     // on charge adresses.js qui ajoute un gros objet chargementJ3p.adresses avec les correspondances
     // nomSection : chemin du js de la section
-    head.js(w.j3p.config.arborescence.adresses + 'adresses.js', // intialisation de j3p.config
-      function () {
-        log('on a chargé adresses.js')
-        oncontinue4bis()
-      }
-    )
+    page.loadAsync(w.j3p.config.arborescence.adresses + 'adresses.js', oncontinue4bis) // intialisation de j3p.config
   }
 
   // chargement de jquery, jquery-ui et asmselect
   // pas besoin du DIV Mepact avec la bibli
   function oncontinue4bis () {
-    var piledappels = new Array(0)
+    var piledappels = []
     // ça existe probablement déjà, mais pas forcément
     if (typeof jQuery === 'undefined') {
       piledappels.push(pathOutilsExt + 'jquery-ui/js/jquery-1.6.2.min.js')
@@ -149,8 +150,8 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
     // pour jquery-ui, comme on va pas les tester un par un, j3p les écrasera s'ils y étaient
     piledappels.push(pathOutilsExt + 'jquery-ui/js/jquery-ui-1.8.16.custom.min.js')
     piledappels.push(pathOutilsExt + 'asmselect/jquery.asmselect.js')
-    piledappels.push(oncontinue5)
-    head.js.apply(head, piledappels)
+    page.loadAsync(piledappels, false, oncontinue5)
+
     // et les css se chargeront en parallèle
     dom.addCss(pathOutilsExt + 'asmselect/jquery.asmselect.css')
     dom.addCss(pathOutilsExt + 'jquery-ui/css/redmond/jquery-ui-1.8.16.custom.css')
@@ -158,7 +159,7 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
 
   // chargement de methodesmodeles (classe Parcours) et de toutes les sections du graphe
   function oncontinue5 () {
-    var piledappels = new Array(0)
+    var piledappels = []
     var k
     var nomSection
     var prefixechemin = ''
@@ -169,11 +170,10 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
       piledappels.push(pathSections + prefixechemin + 'section' + nomSection + '.js')
     }
     log('On a trouvé les sections', that.listedessections, piledappels[1])
-    piledappels.push(oncontinue6)
-    head.js.apply(head, piledappels)
+    page.loadAsync(piledappels, false, oncontinue6)
   }
 
-  // Définition de la liste des outils nécessaires
+  // Définition de la liste des outils nécessaires (fct sync)
   function oncontinue6 () {
     if (!window.Parcours) throw new Error('Le chargement de j3p a échoué')
     var name, outils
@@ -217,10 +217,11 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
       }
     }
 
+    var isDev = /\.devsesamath.net$/.test(window.location.hostname)
     // les css qu'il faut toujours charger
     // dom.addCss(pathOutils +'stylesactivite.css')
     // Et on passe aux js
-    var piledappels = new Array(0)
+    var piledappels = []
     // On charge toujours ceux-là
     piledappels.push(pathOutils + 'J3Poutils.js')
     piledappels.push(pathOutils + 'J3Poutils2.js')
@@ -240,18 +241,30 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
 
     if (estDans('mtg32', that.listedesoutils)) {
       J3PInclude2("MathJax.Hub.Config({  tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]},        jax: ['input/TeX','output/SVG'],TeX: {extensions: ['color.js']},messageStyle:'none' });", 'text/x-mathjax-config')
-      piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
-      piledappels.push(pathOutils + 'mtg32/mtg32jsmax.js')
+      piledappels.push('https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
+      if (isDev) {
+        piledappels.push('https://www.mathgraph32.org/js/mtg32jsmax.js')
+      } else {
+        piledappels.push('https://www.mathgraph32.org/js/mtg32jsmin.js')
+      }
     }
+
     // Modification par Yves le 21/07/2017 pour pouvoir utiliser la version appli js de MathGraph32
     // modifié le 16/10/2017 pour aller chercher css & js mathgraph sur mathgraph32.org
+    // le 17/09/2018 on va aussi chercher là-bas mathjax, et on distingue dev / prod
     if (estDans('mtg32App', that.listedesoutils)) {
-      // mathjax @j3p
-      J3PInclude2("MathJax.Hub.Config({tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]}, jax: ['input/TeX','output/SVG'], TeX: {extensions: ['color.js']}, messageStyle: 'none'});", 'text/x-mathjax-config')
-      piledappels.push(pathOutils + 'mtg32/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
+      // mathjax si on l'a pas déjà
+      if (!estDans('mtg32', that.listedesoutils)) {
+        J3PInclude2("MathJax.Hub.Config({tex2jax: { inlineMath: [['$','$'], ['\\\\(','\\\\)']]}, jax: ['input/TeX','output/SVG'], TeX: {extensions: ['color.js']}, messageStyle: 'none'});", 'text/x-mathjax-config')
+        piledappels.push('https://www.mathgraph32.org/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG-full.js')
+      }
       // css & js mathgraph sur www.mathgraph32.org
       dom.addCss('https://www.mathgraph32.org/js/mtgloader/mtgLoader.css')
-      piledappels.push('https://www.mathgraph32.org/js/mtgloader/mtgLoader.min.js')
+      if (isDev) {
+        piledappels.push('https://www.mathgraph32.org/js/mtgloader/max/mtgLoader.js')
+      } else {
+        piledappels.push('https://www.mathgraph32.org/js/mtgloader/mtgLoader.min.js')
+      }
     }
     // Fin Modif Yves
 
@@ -337,20 +350,17 @@ ChargementJ3p.prototype.chargement = function (eltHtml) {
       piledappels.push(pathOutils + 'algo/algo.js')
     }
 
-    piledappels.push(
-      function () {
-        // var t=setTimeout(oncontinue8(),9000)
-        if (estDans('mtg32', that.listedesoutils)) {
-          log('etape 0')
-          /* global mtg32 */
-          w.mtg32App = new mtg32.mtg32App() // eslint-disable-line new-cap
-        }
-        oncontinue8()
-      }
-    )
     log('piledappels' + piledappels)
-    // piledappels.push(oncontinue8)
-    head.js.apply(head, piledappels)
+
+    page.loadAsync(piledappels, false, function () {
+      // var t=setTimeout(oncontinue8(),9000)
+      if (estDans('mtg32', that.listedesoutils)) {
+        log('etape 0')
+        /* global mtg32 */
+        w.mtg32App = new mtg32.mtg32App() // eslint-disable-line new-cap
+      }
+      oncontinue8()
+    })
   } // oncontinue7
 
   // lancement de j3p
@@ -397,16 +407,21 @@ module.exports = {
     if (!urlBaseJ3p || (urlBaseJ3p.substr(0, 2) !== '//' && urlBaseJ3p.substr(0, 4) !== 'http')) {
       throw new Error('Il faut donner une url absolue pour le domaine j3p')
     }
+    if (/\.devsesamath\.net$/.test(window.location.hostname) && /j3p\.sesamath\.net$/.test(urlBaseJ3p)) {
+      urlBaseJ3p = '//j3p.devsesamath.net/'
+    }
+    // toujours avec slash de fin
+    if (urlBaseJ3p.substr(-1) !== '/') urlBaseJ3p += '/'
     log = options.log
     if (!log) log = function () {}
     // init de l'objet j3p utililisé pendant le chargement
     w.j3p = {
       'config': { // l'objet config est l'objet décrit dans j3pconfig/configj3p.txt
         'arborescence': {
-          'sections': urlBaseJ3p + '/sections/',
-          'outils': urlBaseJ3p + '/outils/',
-          'outilsexternes': urlBaseJ3p + '/outilsexternes/',
-          'adresses': urlBaseJ3p + '/j3pbdd/'
+          'sections': urlBaseJ3p + 'sections/',
+          'outils': urlBaseJ3p + 'outils/',
+          'outilsexternes': urlBaseJ3p + 'outilsexternes/',
+          'adresses': urlBaseJ3p + 'j3pbdd/'
         }
       }
     }
@@ -435,11 +450,8 @@ module.exports = {
       w.J3Pinclude = dom.addJs
     }
 
-    // des scripts qu'on charge s'en servent peut-être encore
-    w.J3PEstDansLabomep = urlBaseJ3p
-
-    // pour virer le dernier / car sinon on a des chemins du genre http://j3p.devsesamath.net//sections...
-    if (urlBaseJ3p.substr(urlBaseJ3p.length) === '/') urlBaseJ3p = urlBaseJ3p.substring(0, urlBaseJ3p.length - 1)
+    // des scripts qu'on charge s'en servent peut-être encore (sans slash de fin)
+    w.J3PEstDansLabomep = urlBaseJ3p.substr(0, urlBaseJ3p.length - 1)
 
     var chargementJ3p = new ChargementJ3p()
     // faut mettre chargementJ3p à la racine du dom car les autres scripts le cherchent là
@@ -468,16 +480,14 @@ module.exports = {
     // on lance analyse du graphe et chargement des outils puis lancement
     // mais faut forcer cet id qui est en dur un peu partout dans le code j3p, on créé un div pour ça
     var j3pConteneur = dom.addElement(eltHtml, 'div', {id: 'Mepact'})
-    page.loadAsync(['head'], function () {
-      try {
-        chargementJ3p.chargement(j3pConteneur)
-        // qqun veut être rappelé ?
-        if (typeof options !== 'undefined' && typeof options.loadCallback === 'function') {
-          options.loadCallback()
-        }
-      } catch (error) {
-        page.addError(error)
+    try {
+      chargementJ3p.chargement(j3pConteneur)
+      // qqun veut être rappelé ?
+      if (typeof options !== 'undefined' && typeof options.loadCallback === 'function') {
+        options.loadCallback()
       }
-    })
+    } catch (error) {
+      page.addError(error)
+    }
   } // charge
 } // objet exporté

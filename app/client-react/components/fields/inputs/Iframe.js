@@ -22,6 +22,7 @@ class Iframe extends Component {
 
     return (
       <iframe
+        allowFullScreen
         onLoad={() => onLoad(this.iframeRef, input)}
         ref={this.iframeRef}
         src={src}

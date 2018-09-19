@@ -1,6 +1,12 @@
-const validate = ({enfants}, errors) => {
-  let children = enfants
-  if (typeof enfants === 'string') {
+/**
+ * Valide un arbre (ajoutera éventuellement une string dans errors.enfants)
+ * @param {Ressource} arbre
+ * @param {Object} errors
+ * @param {string} errors.enfants L'erreur éventuelle qui sera ajoutée en cas de pb de validation
+ */
+const validate = (arbre, errors) => {
+  let children = arbre.enfants
+  if (typeof children === 'string') {
     try {
       children = JSON.parse(children)
     } catch (err) {
@@ -13,7 +19,7 @@ const validate = ({enfants}, errors) => {
   const treeIterate = (enfants) => {
     if (error) return
     if (!Array.isArray(enfants)) {
-      error = 'Une sous-propriété enfants n\'est pas un tableau'
+      error = 'Une propriété enfants n’est pas un tableau'
       return
     }
     enfants.forEach((enfant) => {
@@ -22,7 +28,7 @@ const validate = ({enfants}, errors) => {
         error = 'Les enfants doivent être des objets'
         return
       }
-      const {type, titre} = enfant
+      const {type, titre, aliasOf} = enfant
       if (typeof titre !== 'string' || !titre.length) {
         error = 'Un enfant doit avoir un titre'
         return
@@ -32,12 +38,18 @@ const validate = ({enfants}, errors) => {
         return
       }
       if (type === 'arbre') {
+        if (aliasOf) return // un enfant alias n'a pas d'enfants
         treeIterate(enfant.enfants)
       }
     })
   }
+
   treeIterate(children)
-  if (error) { errors.enfants = error }
+
+  if (error) {
+    console.error(Error(error), arbre.enfants)
+    errors.enfants = error
+  }
 }
 
 export default validate

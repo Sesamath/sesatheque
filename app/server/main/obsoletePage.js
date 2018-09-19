@@ -28,35 +28,46 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
-
 'use strict'
 
-var tools = require('../lib/tools')
+const {version} = require('../../../package')
 
-module.exports = function (component) {
-  component.entity('EntityUpdate', function () {
-    /**
-     * Notre entité update, cf [Entity](lassi/Entity.html)
-     * @entity EntityUpdate
-     * @param {Object} initObj Un objet ayant des propriétés d'un update
-     * @extends Entity
-     */
-    this.construct(function (initObj) {
-      // on cast les dates avec notre tools.toDate() qui gère mieux les fuseaux,
-      if (initObj) {
-        if (initObj.date && !(initObj.date instanceof Date)) initObj.date = tools.toDate(initObj.date)
-      } else {
-        initObj = {}
-      }
-      if (initObj.oid) this.oid = initObj.oid
-      this.name = initObj.name || 'sans nom'
-      this.num = initObj.num || 0
-      this.date = initObj.date || new Date()
-    })
+const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Médiathèque de ressources pour l'éducation">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" sizes="16x16" href="/favicon.png?${version}">
+  <title>Navigateur trop vieux</title>
+</head>
+<body>
+<p>Désolé, ce navigateur ne permet pas d'utiliser Sésathèque.<br />
+  <ul>Vous pouvez utiliser:
+    <li><a href="https://www.mozilla.org/fr/firefox/">Firefox</a></li>
+    <li><a href="https://www.google.com/chrome/browser/desktop/index.html">Chrome</a></li>
+    <li><a href="https://www.microsoft.com/fr-fr/windows/microsoft-edge">Microsoft Edge (Windows 10)</a></li>
+    <li><a href="https://www.apple.com/fr/safari/">Safari (MacOs ou iOS)</a></li>
+    <li>et beaucoup d'autres navigateurs de moins de quelques années</a></li>
+  </ul>
+</p>
+</body>
+</html>
+`
 
-    // on laisse tomber beforeStore et afterStore ici car ils dépendent de cette entity, c'est le repository qui gère
-    this
-      .defineIndex('num', 'integer')
-      .defineIndex('date', 'date')
-  })
+const getHtml = () => html
+
+/**
+ * Ajoute la page pourt les navigateurs obsolètes au contenu courant (pour beforeTransport)
+ * @param {Context} context
+ */
+function displayObsoletePage (context) {
+  // sinon le content-type va imposer le transport html qui veut un template dust
+  context.contentType = 'text/html'
+  context.raw(html, {})
+}
+
+module.exports = {
+  displayObsoletePage,
+  getHtml
 }
