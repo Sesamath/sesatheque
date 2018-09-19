@@ -50,7 +50,6 @@ module.exports = function (component) {
      * @param {errorCallback} next
      */
     function addGroupe (context, ressource, groupeNom, options, next) {
-      console.log(`addGroupe ${groupeNom}`, ressource.groupes, ressource.groupesAuteurs)
       if (!ressource) throw new Error('pas de ressource')
       if (!groupeNom) throw new Error('pas de nom de groupe')
       if (arguments.length === 4) {
@@ -62,7 +61,6 @@ module.exports = function (component) {
       if (!Array.isArray(ressource.groupes)) ressource.groupes = []
       if (!Array.isArray(ressource.groupesAuteurs)) ressource.groupesAuteurs = []
       $groupeRepository.loadByNom(groupeNom, function (error, groupe) {
-        console.log(`récup ${groupeNom} en base`, !error && groupe ? 'ok' : 'KO')
         if (error) return next(error)
         if (!groupe) {
           addWarning(ressource, `Le groupe ${groupeNom} n’existe pas (ou plus)`)
@@ -71,7 +69,6 @@ module.exports = function (component) {
         const {nom} = groupe
 
         if (whiteList.includes(nom)) {
-          console.log(`aj whitelist ${nom}`)
           if (isGroupeAuteur) ressource.groupesAuteurs.push(nom)
           else ressource.groupes.push(nom)
           return next()
@@ -86,25 +83,16 @@ module.exports = function (component) {
         if (isGroupeAuteur) {
           // il faut en plus les droits updateAuteurs
           if ($accessControl.hasPermission('updateAuteurs', context, ressource)) {
-            console.log(`aj groupesAuteurs ${nom}`)
             ressource.groupesAuteurs.push(nom)
           } else {
             addWarning(ressource, 'Vous n’avez pas les droits suffirants pour modifier les groupes pouvant modifier cette ressource')
           }
         } else {
-          console.log(`aj groupes ${nom}`)
           ressource.groupes.push(nom)
         }
         return next()
       })
     }
-
-    /**
-     * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
-     * à la jonction entre personne et ressource.
-     * @service $personneControl
-     */
-    const $personneControl = {}
 
     /**
      * Normalise la propriété groupes d'une ressource (en vérifiant les droits et que les groupes existent)
@@ -115,7 +103,7 @@ module.exports = function (component) {
      * @param {ressourceCallback} next
      * @memberOf $personneControl
      */
-    $personneControl.checkGroupes = function (context, ressourceOriginale, ressourceNew, next) {
+    function checkGroupes (context, ressourceOriginale, ressourceNew, next) {
       /**
        * ajoute l'erreur à la ressource et la passe à next
        * @private
@@ -127,9 +115,6 @@ module.exports = function (component) {
         addError(ressourceNew, error.toString())
         next(null, ressourceNew)
       }
-
-      console.log('checkGroupes avec dans l’original', ressourceOriginale.groupes, ressourceOriginale.groupesAuteurs)
-      console.log('et dans la nouvelle', ressourceNew.groupes, ressourceNew.groupesAuteurs)
 
       if (!ressourceNew.groupes) ressourceNew.groupes = []
       if (!ressourceNew.groupesAuteurs) ressourceNew.groupesAuteurs = []
@@ -178,7 +163,6 @@ module.exports = function (component) {
       // on a les droits, on mémorise ce qui est demandé et ajoute les groupes sup s'il y en a
       const groupesVoulus = ressourceNew.groupes
       const groupesAuteursVoulus = ressourceNew.groupesAuteurs
-      console.log('checkGroupes 2', groupesVoulus, groupesAuteursVoulus)
       ressourceNew.groupes = []
       ressourceNew.groupesAuteurs = []
       // groupesVoulus contient tous ceux que l'on veut mettre, on vérifie s'ils y étaient déjà
@@ -196,7 +180,6 @@ module.exports = function (component) {
         }
         addGroupe(context, ressourceNew, groupeNom, options, this)
       }).seq(function () {
-        console.log('checkGroupes fin', ressourceNew.groupes, ressourceNew.groupesAuteurs)
         next(null, ressourceNew)
       }).catch(addErrorAndNext)
     }
@@ -209,7 +192,7 @@ module.exports = function (component) {
      * @param {Ressource}     ressourceNew
      * @param {ressourceCallback} next
      */
-    $personneControl.checkPersonnes = function (context, ressourceOriginale, ressourceNew, next) {
+    function checkPersonnes (context, ressourceOriginale, ressourceNew, next) {
       // log.debug('checkPersonnes avec les auteurs initiaux', ressourceOriginale && ressourceOriginale.auteurs)
       // log.debug('les nouveaux auteurs', ressourceNew.auteurs)
       // log.debug('et les auteurs à ajouter', ressourceNew._auteursAdd)
@@ -324,6 +307,14 @@ module.exports = function (component) {
       }
     }
 
-    return $personneControl
+    /**
+     * Service de gestion des droits (donc demande le contexte en argument, parfois la ressource concernée)
+     * à la jonction entre personne et ressource.
+     * @service $personneControl
+     */
+    return {
+      checkGroupes,
+      checkPersonnes
+    }
   })
 }

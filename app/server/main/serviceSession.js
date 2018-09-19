@@ -31,6 +31,8 @@
 
 'use strict'
 
+const {isEntity} = require('../lib/tools')
+
 module.exports = function (component) {
   component.service('$session', function () {
     /**
@@ -55,6 +57,7 @@ module.exports = function (component) {
      */
     function login (context, personne) {
       if (context.session.user) log.error(Error('Il y avait déjà un utilisateur en session'))
+      if (!isEntity(personne, 'EntityPersonne')) throw Error('user n’est pas une entity Utilisateur')
       if (typeof personne.values !== 'function') throw Error(`$session.login veut une entity`)
       context.session.user = personne.values()
     }
@@ -95,14 +98,16 @@ module.exports = function (component) {
     /**
      * Met à jour
      * @param context
-     * @param user
+     * @param personne
      */
-    function updateCurrentUser (context, user) {
+    function updateCurrentUser (context, personne) {
       if (!context.session.user) throw Error('Aucun utilisateur en session, impossible de mettre à jour')
-      // @todo ajouter un helper qui vérifie que c'est la bonne Entity (instanceof marche pas pour ça, faut aller voir la définition)
-      if (typeof user.values !== 'function') throw Error(`$session.updateCurrentUser veut une entity Personne`)
-      const values = user.values()
-      if (context.session.user.oid !== values.oid) throw Error('L’utilisateur en session ne correspond pas, impossible de mettre à jour')
+      if (!isEntity(personne, 'EntityPersonne')) throw Error('personne n’est pas une EntityPersonne')
+      const values = personne.values()
+      if (context.session.user.oid !== values.oid) {
+        log.error(Error(`updateCurrentUser avec ${values.oid} alors qu’on a en session ${context.session.user.oid}`))
+        throw Error('L’utilisateur en session ne correspond pas, impossible de mettre à jour')
+      }
       Object.entries(values).forEach(([k, v]) => {
         context.session.user[k] = v
       })
@@ -118,7 +123,8 @@ module.exports = function (component) {
       login,
       logout,
       renameGroup,
-      setAuthBaseId
+      setAuthBaseId,
+      updateCurrentUser
     }
   })
 }

@@ -54,9 +54,6 @@ module.exports = function (component) {
     const controller = this
 
     let $ressourceRepository
-    const initRessourceRepository = () => {
-      if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
-    }
 
     /**
      * Crée ou update un groupe
@@ -90,7 +87,7 @@ module.exports = function (component) {
             $personneRepository.renameGroup(oldName, newName, this)
           }).seq(function () {
             $session.renameGroup(context, oldName, newName)
-            initRessourceRepository()
+            if (!$ressourceRepository) $ressourceRepository = lassi.service('$ressourceRepository')
             $ressourceRepository.renameGroup(oldName, newName, this)
           }).seq(function () {
             // maj personne & ressource ok, on peut changer le nom du groupe

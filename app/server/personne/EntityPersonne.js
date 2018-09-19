@@ -32,7 +32,8 @@
 'use strict'
 
 const Personne = require('../../constructors/Personne')
-const sjtObj = require('sesajstools/utils/object')
+const {isObjectPlain} = require('sesajstools')
+const {truePropertiesList} = require('sesajstools/utils/object')
 const {getNormalizedName} = require('../lib/normalize')
 
 /**
@@ -131,8 +132,8 @@ module.exports = function (component) {
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
       // une callback qui renvoie la valeur (ou un tableau de valeurs)
       .defineIndex('roles', 'string', function () {
-        if (!this.roles || typeof this.roles !== 'object') return null
-        return sjtObj.truePropertiesList(this.roles)
+        if (isObjectPlain(this.roles)) return truePropertiesList(this.roles)
+        return null
       })
       .defineIndex('groupesMembre', {normalizer: getNormalizedName})
       .defineIndex('groupesSuivis', {normalizer: getNormalizedName})
