@@ -1,24 +1,12 @@
-/*
-cf https://github.com/petehunt/webpack-howto
-
-Pour le chargement dynamique et les contextes
-  https://github.com/webpack/webpack/issues/118
-
-Pour le découpage des chunks
- https://webpack.github.io/docs/code-splitting.html
- https://webpack.github.io/docs/list-of-plugins.html#commonschunkplugin
-
- https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
- https://github.com/webpack/webpack/tree/master/examples/named-chunks
-
-Pour charger des librairies tierces, on utilise page.loadAsync
-sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
-*/
+// Utilisé par le script test:react
+// @todo mettre le build dans build/test pour ne pas écraser le build ordinaire
 const path = require('path')
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 const appConfig = require('./app/server/config')
+const pluginsConfig = require('./app/plugins/webpack.plugins')
+const pluginsEntry = require('./app/plugins/webpack.entry')
 
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
@@ -74,7 +62,8 @@ const conf = {
     extensions: ['.js', '.json', '.jsx'],
     alias: {
       'client-react': path.resolve(__dirname, 'app/client-react'),
-      plugins: path.resolve(__dirname, 'app/plugins')
+      plugins: path.resolve(__dirname, 'app/plugins'),
+      server: path.resolve(__dirname, 'app/server')
     }
   },
   // pour nos loaders perso
@@ -86,14 +75,11 @@ const conf = {
   },
   module: {
     rules: [
-      {
-        test: /app\/client\/.*\.js/,
-        loader: 'babel-loader'
-      },
+      {test: /app\/(client|server)\/.*\.js/, loader: 'babel-loader'},
       {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       {test: /test\/react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
-      // {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
+      {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       // {test: /\.json$/, loader: 'json-loader'},
@@ -120,16 +106,17 @@ const conf = {
     ]
   },
   plugins: [
-    // génération du html pour react
-    // cf https://github.com/jantimon/html-webpack-plugin#options
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
-      {from: 'app/client/plugins', to: 'plugins/', ignore: ['*.js']},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
-    ])
+    ]),
+    ...pluginsConfig
   ],
+  // cf https://webpack.js.org/configuration/stats/
   stats: {
+    // utile en mode watch
+    builtAt: true,
     // Nice colored output
     colors: true
   }

@@ -106,6 +106,7 @@ const conf = {
     rules: [
       {test: /app\/(client|server)\/.*\.js/, loader: 'babel-loader'},
       {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
+      {test: /test\/react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
