@@ -32,6 +32,7 @@
 'use strict'
 
 const flow = require('an-flow')
+const {getNormalizedName} = require('../lib/normalize')
 
 // nos 3 cas
 const suivis = ['groupesSuivis']
@@ -44,80 +45,7 @@ const both = ['groupesMembre', 'groupesSuivis']
  */
 module.exports = function (component) {
   component.service('$groupe', function ($session, $accessControl, $groupeRepository, $personneRepository) {
-    /**
-     * Récupère le user courant en bdd
-     * @private
-     * @param {Context} context
-     * @param {callbackPersonne} next
-     */
-    function loadCurrentUser (context, next) {
-      const myOid = $accessControl.getCurrentUserOid(context)
-      if (!myOid) throw Error('Pas d’utilisateur en session')
-      $personneRepository.load(myOid, next)
-    }
-
-    /**
-     * Met a jour le user courant en session et bdd
-     * @private
-     * @param {Context} context
-     * @param {Personne} me
-     * @param {callbackPersonne} next
-     */
-    function saveCurrentUser (context, me, next) {
-      $session.updateCurrentUser(context, me)
-      $personneRepository.save(me, next)
-    }
-
-    /**
-     * Retourne le nom du groupe (helper des fcts qui prennent un argument groupe|groupeNom)
-     * @private
-     * @param {string|Groupe} groupe Le groupe ou son nom
-     * @returns {string} undefined si groupe n'est ni une string ni un objet avec une propriété nom
-     */
-    function getNom (groupe) {
-      if (typeof groupe === 'string') return groupe
-      if (groupe && groupe.nom) return groupe.nom
-      log.error('getNom appelé avec un paramètre incorrect', groupe)
-    }
-
-    /**
-     * Retourne true si on est gestionnaire du groupe
-     * @param context
-     * @param {Groupe} groupe Le groupe (pas son nom)
-     * @returns {boolean}
-     */
-    function isManaged (context, groupe) {
-      if (!groupe || !groupe.gestionnaires) throw Error('groupe invalide')
-      const oid = $accessControl.getCurrentUserOid(context)
-      if (!oid) return false
-      return groupe.gestionnaires.includes(oid)
-    }
-
-    /**
-     * Retourne true si on est membre du groupe
-     * @param {Context} context
-     * @param {string|Groupe} groupe Le groupe ou son nom
-     * @returns {boolean}
-     */
-    function isMemberOf (context, groupe) {
-      const groupesMembre = $accessControl.getCurrentUserGroupesMembre(context)
-      const nom = getNom(groupe)
-      if (nom && groupesMembre.length) return groupesMembre.includes(nom)
-      return false
-    }
-
-    /**
-     * Retourne true si on suit ce groupe
-     * @param context
-     * @param {string|Groupe} groupe Le groupe ou son nom
-     * @returns {boolean}
-     */
-    function isFollowed (context, groupe) {
-      const groupesSuivis = $accessControl.getCurrentUserGroupesSuivis(context)
-      const nom = getNom(groupe)
-      if (nom && groupesSuivis.length) return groupesSuivis.includes(nom)
-      return false
-    }
+    // méthodes privées
 
     /**
      * Ajoute un groupe à l'utilisateur courant
@@ -147,6 +75,30 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne le nom du groupe (helper des fcts qui prennent un argument groupe|groupeNom)
+     * @private
+     * @param {string|Groupe} groupe Le groupe ou son nom
+     * @returns {string} undefined si groupe n'est ni une string ni un objet avec une propriété nom
+     */
+    function getNom (groupe) {
+      if (typeof groupe === 'string') return groupe
+      if (groupe && groupe.nom) return groupe.nom
+      log.error('getNom appelé avec un paramètre incorrect', groupe)
+    }
+
+    /**
+     * Récupère le user courant en bdd
+     * @private
+     * @param {Context} context
+     * @param {callbackPersonne} next
+     */
+    function loadCurrentUser (context, next) {
+      const myOid = $accessControl.getCurrentUserOid(context)
+      if (!myOid) throw Error('Pas d’utilisateur en session')
+      $personneRepository.load(myOid, next)
+    }
+
+    /**
      * Retire un groupe à l'utilisateur courant
      * @private
      * @param {Context} context
@@ -169,6 +121,113 @@ module.exports = function (component) {
         if (hasChanged) saveCurrentUser(context, me, next)
         else next(new Error(`Vous n’étiez pas dans le groupe ${nom}`))
       })
+    }
+
+    /**
+     * Met a jour le user courant en session et bdd
+     * @private
+     * @param {Context} context
+     * @param {Personne} me
+     * @param {callbackPersonne} next
+     */
+    function saveCurrentUser (context, me, next) {
+      $session.updateCurrentUser(context, me)
+      $personneRepository.save(me, next)
+    }
+
+    // méthodes exportées
+
+    /**
+     * Ajoute gestionnairesNames au groupe
+     * @param {Context} context
+     * @param {Groupe} groupe
+     * @param {groupeCallback} next
+     */
+    function addGestionnairesNames (context, groupe, next) {
+      flow().seq(function () {
+        // on veut les noms des gestionnaires
+        const gestionnaires = groupe.gestionnaires || []
+        $personneRepository.loadByOids(gestionnaires, this)
+      }).seq(function (personnes) {
+        groupe.gestionnairesNames = personnes.map((p, i) => {
+          if (p) return `${p.prenom} ${p.nom}`
+          // il est pas ou plus en base, faut quand même renvoyer une string
+          const oid = groupe.gestionnaires[i]
+          log.dataError(Error(`Le gestionnaire ${oid} du groupe ${groupe.oid} n’existe plus`))
+          return `${oid} inconnu`
+        })
+        next(null, groupe)
+      }).catch(next)
+    }
+
+    /**
+     * Renvoie true si c'est le même index de groupe (après passage du normalizer)
+     * @param {string} nom1
+     * @param {string} nom2
+     * @return {boolean}
+     */
+    function areEquals (nom1, nom2) {
+      if (typeof nom1 !== 'string' || typeof nom2 !== 'string') throw Error('paramètres invalides')
+      return getNormalizedName(nom1) === getNormalizedName(nom2)
+    }
+
+    /**
+     * Ajoute un groupe suivi pour l'utilisateur courant
+     * @param {Context} context
+     * @param {string} nom Nom du groupe
+     * @param {callbackPersonne} next
+     */
+    function followGroup (context, nom, next) {
+      addGroup(context, nom, suivis, next)
+    }
+
+    /**
+     * Retire un groupe suivi pour l'utilisateur courant
+     * @param {Context} context
+     * @param {string} nom Nom du groupe
+     * @param {callbackPersonne} next
+     */
+    function ignoreGroup (context, nom, next) {
+      removeGroup(context, nom, suivis, next)
+    }
+
+    /**
+     * Retourne true si on suit ce groupe
+     * @param context
+     * @param {string|Groupe} groupe Le groupe ou son nom
+     * @returns {boolean}
+     */
+    function isFollowed (context, groupe) {
+      const groupesSuivis = $accessControl.getCurrentUserGroupesSuivis(context)
+      const nom = getNom(groupe)
+      if (nom && groupesSuivis.length) return groupesSuivis.includes(nom)
+      return false
+    }
+
+    /**
+     * Retourne true si on est gestionnaire du groupe
+     * @param context
+     * @param {Groupe} groupe Le groupe (pas son nom)
+     * @returns {boolean}
+     */
+    function isManaged (context, groupe) {
+      if (!groupe || !groupe.gestionnaires) throw Error('groupe invalide')
+      const oid = $accessControl.getCurrentUserOid(context)
+      if (!oid) return false
+      return groupe.gestionnaires.includes(oid)
+    }
+
+    /**
+     * Retourne true si on est membre du groupe
+     * @param {Context} context
+     * @param {string|Groupe} groupe Le groupe ou son nom
+     * @returns {boolean}
+     */
+    function isMemberOf (context, groupe) {
+      const groupesMembre = $accessControl.getCurrentUserGroupesMembre(context)
+      const nom = getNom(groupe)
+      if (nom && groupesMembre.length) return groupesMembre.includes(nom)
+      return false
     }
 
     /**
@@ -201,51 +260,9 @@ module.exports = function (component) {
       removeGroup(context, nom, membre, next)
     }
 
-    /**
-     * Ajoute un groupe suivi pour l'utilisateur courant
-     * @param {Context} context
-     * @param {string} nom Nom du groupe
-     * @param {callbackPersonne} next
-     */
-    function followGroup (context, nom, next) {
-      addGroup(context, nom, suivis, next)
-    }
-
-    /**
-     * Retire un groupe suivi pour l'utilisateur courant
-     * @param {Context} context
-     * @param {string} nom Nom du groupe
-     * @param {callbackPersonne} next
-     */
-    function ignoreGroup (context, nom, next) {
-      removeGroup(context, nom, suivis, next)
-    }
-
-    /**
-     * Ajoute gestionnairesNames au groupe
-     * @param {Context} context
-     * @param {Groupe} groupe
-     * @param {groupeCallback} next
-     */
-    const addGestionnairesNames = (context, groupe, next) => {
-      flow().seq(function () {
-        // on veut les noms des gestionnaires
-        const gestionnaires = groupe.gestionnaires || []
-        $personneRepository.loadByOids(gestionnaires, this)
-      }).seq(function (personnes) {
-        groupe.gestionnairesNames = personnes.map((p, i) => {
-          if (p) return `${p.prenom} ${p.nom}`
-          // il est pas ou plus en base, faut quand même renvoyer une string
-          const oid = groupe.gestionnaires[i]
-          log.dataError(Error(`Le gestionnaire ${oid} du groupe ${groupe.oid} n’existe plus`))
-          return `${oid} inconnu`
-        })
-        next(null, groupe)
-      }).catch(next)
-    }
-
     return {
       addGestionnairesNames,
+      areEquals,
       followGroup,
       ignoreGroup,
       isFollowed,
