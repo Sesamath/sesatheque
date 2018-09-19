@@ -41,6 +41,11 @@ const sanitizeSearchFactory = require('./serviceAccessControl.search')
 
 module.exports = function (component) {
   component.service('$accessControl', function (EntityPersonne, EntityGroupe, $settings, $personneRepository) {
+    // le service groupe que l'on ne peut pas mettre en dépendances (il dépend de nous)
+    let $groupe
+
+    // fonctions privées
+
     /**
      * Helper de checkAccess pour la permission correction
      * @private
@@ -596,11 +601,11 @@ module.exports = function (component) {
      * @returns {boolean}
      */
     function isGroupeMembre (context, groupeNom) {
-      console.log(`isGroupeMembre ${groupeNom}`, context.session.user.groupesMembre)
+      if (!$groupe) $groupe = lassi.service('$groupe')
       return context.session.user &&
         context.session.user.groupesMembre &&
         context.session.user.groupesMembre.length &&
-        context.session.user.groupesMembre.some(n => n === groupeNom)
+        context.session.user.groupesMembre.some(n => $groupe.areEquals(n, groupeNom))
     }
 
     /**
@@ -611,10 +616,11 @@ module.exports = function (component) {
      * @returns {boolean}
      */
     function isGroupeSuivi (context, groupeNom) {
+      if (!$groupe) $groupe = lassi.service('$groupe')
       return context.session.user &&
         context.session.user.groupesSuivis &&
         context.session.user.groupesSuivis.length &&
-        context.session.user.groupesSuivis.some(n => n === groupeNom)
+        context.session.user.groupesSuivis.some(n => $groupe.areEquals(n, groupeNom))
     }
 
     /**
