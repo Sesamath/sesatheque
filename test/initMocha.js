@@ -52,11 +52,13 @@ require('@babel/register')({
   babelrc: false,
   // notre filtre sur les fichiers à traiter
   ignore: [babelIgnoreFilter],
-  presets: ['@babel/preset-react'],
-  // et les plugins qu'il doit utiliser pour que mocha soit content
-  plugins: [
-    '@babel/plugin-transform-modules-commonjs',
-    '@babel/plugin-proposal-object-rest-spread',
-    '@babel/plugin-transform-object-assign'
-  ]
+  presets: [
+    [
+      "@babel/preset-env",
+      {
+        "targets": "node 10"
+      }
+    ],
+    ['@babel/preset-react']
+  ],
 })
