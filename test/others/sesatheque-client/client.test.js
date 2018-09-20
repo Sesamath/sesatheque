@@ -42,15 +42,9 @@ import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
 import log from 'sesajstools/utils/log'
-// pour sesatheque-client on se sert dans src pour avoir les bonnes lignes dans les éventuelles erreurs
-// mais ça marche pas avec mocha, sauf si le module est linké (car y'a plus node_modules dans son path)
-// faudrait dire à babel-register de traiter les node_modules/sesatheque-client/src
-// mais pas réussi (cf test/initMocha.js)
-// import getClient from 'sesatheque-client/src'
-import getClient from 'sesatheque-client'
+import getClient from 'sesatheque-client/src'
 import Ref from 'sesatheque-client/src/constructors/Ref'
-// import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
-import ClientItem from 'sesatheque-client/dist/ClientItem'
+import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
 
 import {XMLHttpRequest} from 'xmlhttprequest'
 

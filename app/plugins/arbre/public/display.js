@@ -38,7 +38,7 @@ import 'jstree/dist/themes/default/style.min.css'
 import './arbre.css'
 import 'jstree/dist/themes/default/style.css'
 import {sesatheques} from '../../../server/config'
-import page from '../../../client/page/index'
+import {addError} from '../../../client/page'
 import * as stJstree from './lib'
 
 import 'client-react/styles/display.scss'
@@ -52,7 +52,7 @@ addSesatheques(sesatheques)
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'arbre sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   require.ensure(['jquery', 'jstree'], function (require) {
     const $ = require('jquery')
     // const stJstree = require('sesatheque-client/src/jstree')
@@ -188,7 +188,7 @@ module.exports = function display (ressource, options, next) {
       dom.addElement(caseTree, 'div', { id: treeId })
       const jstData = {
         'core': {
-          'data': stJstree.getDataCallback(ressource, undefined, { errorCallback: page.addError })
+          'data': stJstree.getDataCallback(ressource, undefined, { errorCallback: addError })
         },
         plugins: [ 'search' ]
       }
@@ -251,6 +251,8 @@ module.exports = function display (ressource, options, next) {
       error = e
     }
     if (next) next(error)
-    else if (error) page.addError(error)
+    else if (error) addError(error)
   })
 } // display
+
+export default display

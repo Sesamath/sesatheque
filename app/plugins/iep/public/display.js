@@ -46,7 +46,7 @@ var isLoaded
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand l'iep sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   /**
    * Affiche le xml dans le conteneur passé en options
    * @private
@@ -193,3 +193,5 @@ module.exports = function display (ressource, options, next) {
     else page.addError(error)
   }
 }
+
+export default display

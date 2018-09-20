@@ -27,6 +27,10 @@ const autoprefixer = require('autoprefixer')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
+// on va forcer l'utilisation notre conf babel pour
+// la compilation de certains node_modules
+// (seatheque-client, sesaeditgraphe et plugins d'édition)
+const babelConfig = require('./package.json').babel
 const appConfig = require('./app/server/config')
 const pluginsConfig = require('./app/plugins/webpack.plugins')
 const pluginsEntry = require('./app/plugins/webpack.entry')
@@ -105,7 +109,19 @@ const conf = {
   module: {
     rules: [
       {test: /app\/(client|server)\/.*\.js/, loader: 'babel-loader'},
-      {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
+      {
+        test: /app\/(client-react|plugins)\/.*\.jsx?/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-react',
+              ...babelConfig.presets
+            ],
+            plugins: babelConfig.plugins
+          }
+        }
+      },
       // On empêche de require un fichier du répertoire _private dans du code client
       {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
@@ -114,9 +130,21 @@ const conf = {
       {test: /app\/client\/.*\.html/, loader: 'file-loader'},
       {test: /app\/plugins\/.*\.html/, loader: 'file-loader'},
       // editgraphe doit passer par babel
-      {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
+      {
+        test: /sesaeditgraphe\/src\/.*\.js/,
+        use: {
+          loader: 'babel-loader',
+          options: babelConfig
+        }
+      },
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel-loader'},
+      {
+        test: /sesatheque-client\/src\/.*\.js/,
+        use: {
+          loader: 'babel-loader',
+          options: babelConfig
+        }
+      },
       // le statique
       /* process CSS files */
       {

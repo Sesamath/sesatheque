@@ -30,12 +30,12 @@
  */
 
 'use strict'
-// On ajoute les babel-polyfill via ce fichier et non directement dans les entries de webpack.
+// On ajoute les @babel/polyfill via ce fichier et non directement dans les entries de webpack.
 // C'est le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
 // qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
 // Pas besoin de polyfill pour fetch en principe
 
-require('babel-polyfill')
+import '@babel/polyfill'
 
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
@@ -279,7 +279,7 @@ function showNotification (htmlString, delay = 5) {
  * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
  * @service page
  */
-module.exports = {addError, addBoutonVu, autosize, hideTitle, init, loadAsync, refreshAuth, setBase, showNotification}
+export {addError, addBoutonVu, autosize, hideTitle, init, loadAsync, refreshAuth, setBase, showNotification}
 
 /* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
 if (typeof window !== 'undefined') {

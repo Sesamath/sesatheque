@@ -143,7 +143,7 @@ function getResultatCallback (ressource, options, next) {
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   try {
     // y'a des swf qui appellent cette fct en global, c'est du modèle 1 qu'on corrigera pas,
     // on ajoute juste ça pour que ça plante plus
@@ -257,3 +257,5 @@ module.exports = function display (ressource, options, next) {
     next(error)
   }
 }
+
+export default display
