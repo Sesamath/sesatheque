@@ -138,6 +138,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "autoprefixer": "^9.1.5",
+    "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.2",
     "bugsnag-js": "^4.7.3",
     "chai": "^4.1.2",
@@ -180,6 +181,11 @@
     "xmlhttprequest": "^1.8.0"
   },
   "eslintConfig": {
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "sourceType": "module",
+      "allowImportExportEverywhere": true
+    },
     "env": {
       "browser": true
     },
