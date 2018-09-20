@@ -97,18 +97,24 @@ describe('controller api ressource', () => {
         ressource.oid = oid
         ressource.rid = `${myBaseId}/${oid}`
         cleanVolatileProperties(ressource)
-        // la ressource n'existait pas donc le inc et version ont été incrémenté, la version aussi
-        // y'a un bug sur l'init de inc & version, on verra plus tard…
-        // ressource.inc = 0
-        // ressource.version = 1
+        // la ressource n'existait pas donc le inc et version ont été incrémenté
         delete ressource.inc
         delete ressource.version
         return checkDb(ressource)
       })
 
+    const ressources = getTestRessources().map(r => {
+      // si on crée une ressource avec oid ou version l'api va vouloir archiver
+      // et ça plantera car y'a pas de version antérieure
+      delete r.oid
+      delete r.version
+      delete r.inc
+      return r
+    })
+
     // purge puis poste et vérifie puis purge
     return purge()
-      .then(() => Promise.all(getTestRessources().map(getPostPromise)))
+      .then(() => Promise.all(ressources.map(getPostPromise)))
       .catch(purgeOnError)
       .then(purge)
   })

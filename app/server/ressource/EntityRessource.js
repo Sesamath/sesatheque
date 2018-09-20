@@ -149,7 +149,7 @@ module.exports = function (component) {
 
     // beforeStore était dans $ressourceRepository, pour des questions de cycle d'injection de dépendances
     // on le ramène ici pour vérifier l'intégrité "interne" de l'entity, en laissant là-bas un beforeSave
-    // pour vérifier l'intégrité des relations
+    // pour vérifier l'intégrité des relations et voir s'il faut archiver
 
     EntityRessource.beforeStore(function (next) {
       const logAndNext = (errorMessage) => {
@@ -259,6 +259,11 @@ module.exports = function (component) {
           log.dataError(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
           this.restriction = configRessource.constantes.restriction.prive
         }
+
+        // version & inc
+        if (!this.version) this.version = 0
+        if (!this.inc) this.inc = 0
+
         // check des relations dans $ressourceRepository.beforeSave() mais pas ici
         // (pour permettre des batch qui sauvent des paires liées par ex,
         // quand la 1re a pas encore sa relation en base)

@@ -459,7 +459,7 @@ module.exports = function (ressourceComponent) {
      * @param next appelé avec (error, archive)
      */
     function archive (ressource, next) {
-      if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n’existe pas encore")
+      if (!ressource.oid) throw Error('Impossible d’archiver une ressource qui n’existe pas encore')
       const data = Object.assign({}, ressource, {oid: undefined})
       EntityArchive.create(data).store(next)
     }
@@ -793,8 +793,8 @@ module.exports = function (ressourceComponent) {
         if (ressource.oid) load(ressource.oid, this)
         else this()
       }).seq(function (ressourceBdd) {
-        if (!ressourceBdd) ressource.$original = '{}'
-        checkAgainstPrevious(ressource, this)
+        if (ressourceBdd) checkAgainstPrevious(ressource, this)
+        else this(null, ressource)
       }).seq(function (ressource) {
         if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {
           convertXmlEc2(ressource)
