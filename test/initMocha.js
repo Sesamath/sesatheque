@@ -53,12 +53,7 @@ require('@babel/register')({
   // notre filtre sur les fichiers à traiter
   ignore: [babelIgnoreFilter],
   presets: [
-    [
-      '@babel/preset-env',
-      {
-        'targets': 'node 10'
-      }
-    ],
+    ['@babel/preset-env', {'targets': 'node 10'}],
     ['@babel/preset-react']
   ]
 })
