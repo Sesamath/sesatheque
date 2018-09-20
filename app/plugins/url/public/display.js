@@ -50,7 +50,7 @@ const divIframeSelector = '#page'
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
 const urlDisplay = (ressource, options, next) => {
-  require.ensure(['jquery'], function (require) {
+  import('jquery').then(({default: $}) => {
     /**
      * Ajoute le bouton vu et le listener sur unload quand il n'y a pas de réponse demandée
      */
@@ -160,7 +160,6 @@ const urlDisplay = (ressource, options, next) => {
       resultatCallback(resultat, next)
     }
 
-    const $ = require('jquery')
     const {resultatCallback} = options
     let isLoaded
     // pour éviter de reposter au unload si on a cliqué sur le bouton vu avant
@@ -207,8 +206,7 @@ const urlDisplay = (ressource, options, next) => {
         })
       }
       // sinon, faut charger la gestion des dialog jQueryUi
-      require.ensure(['./displayUi'], function (require) {
-        const {displayUi} = require('./displayUi')
+      import('./displayUi').then(({default: displayUi}) => {
         // on ajoute l'entete avant la page
         const entete = dom.addElement(options.container, 'div', {id: 'entete'})
         addPage(url, params, () => {

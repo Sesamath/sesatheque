@@ -35,7 +35,7 @@
 // qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
 // Pas besoin de polyfill pour fetch en principe
 
-require('@babel/polyfill')
+import '@babel/polyfill'
 
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')

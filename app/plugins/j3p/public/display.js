@@ -55,8 +55,7 @@ const display = (ressource, options, next) => {
     log('lancement du chargement j3p sur ' + urlBaseJ3p)
     // cf https://github.com/petehunt/webpack-howto et
     // https://webpack.github.io/docs/code-splitting.html
-    require.ensure(['./loader'], function (require) {
-      var loader = require('./loader')
+    import('./loader').then(({default: loader}) => {
       try {
         // on cache toujours le titre
         page.hideTitle()
