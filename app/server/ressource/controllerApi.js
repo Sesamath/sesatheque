@@ -38,7 +38,6 @@ const {update} = require('sesajstools/utils/object')
 
 const config = require('../config')
 const configRessource = require('./config')
-const {isEntity} = require('../lib/tools')
 const Ref = require('../../constructors/Ref')
 
 const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
