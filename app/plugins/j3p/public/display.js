@@ -47,7 +47,7 @@ var urlBaseJ3p = '//j3p.sesamath.net'
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le swf sera chargé
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   /**
    * Chargera la ressource quand on aura éventuellement récupéré lastResultat
    */
@@ -55,8 +55,7 @@ module.exports = function display (ressource, options, next) {
     log('lancement du chargement j3p sur ' + urlBaseJ3p)
     // cf https://github.com/petehunt/webpack-howto et
     // https://webpack.github.io/docs/code-splitting.html
-    require.ensure(['./loader'], function (require) {
-      var loader = require('./loader')
+    import('./loader').then(({default: loader}) => {
       try {
         // on cache toujours le titre
         page.hideTitle()
@@ -141,3 +140,5 @@ module.exports = function display (ressource, options, next) {
     page.addError(error)
   }
 }
+
+export default display
