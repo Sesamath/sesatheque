@@ -132,10 +132,18 @@ module.exports = function (component) {
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir
       // une callback qui renvoie la valeur (ou un tableau de valeurs)
       .defineIndex('roles', 'string', function () {
-        if (isObjectPlain(this.roles)) return truePropertiesList(this.roles)
-        return null
+        if (!isObjectPlain(this.roles)) return null
+        const roles = truePropertiesList(this.roles)
+        if (!roles.length) return null
+        return roles
       })
-      .defineIndex('groupesMembre', {normalizer: getNormalizedName})
-      .defineIndex('groupesSuivis', {normalizer: getNormalizedName})
+      .defineIndex('groupesMembre', {normalizer: getNormalizedName}, function () {
+        if (!this.groupesMembre || !this.groupesMembre.length) return null
+        return this.groupesMembre
+      })
+      .defineIndex('groupesSuivis', {normalizer: getNormalizedName}, function () {
+        if (!this.groupesSuivis || !this.groupesSuivis.length) return null
+        return this.groupesSuivis
+      })
   })
 }
