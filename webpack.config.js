@@ -41,6 +41,7 @@ const isTest = process.env.BABEL_ENV === 'test'
 const isDebug = process.argv.includes('--debug')
 // prod d'après la conf (sauf --debug ou test)
 const isProd = !isDebug && !isTest && /prod/.test(appConfig.application.staging)
+const isUsingDevServer = !!appConfig.devServer
 
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
@@ -61,7 +62,7 @@ const conf = {
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
-    chunkFilename: '[id]-[chunkhash].js',
+    chunkFilename: isUsingDevServer ? '[id].js' : '[id]-[chunkhash].js',
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
@@ -274,7 +275,7 @@ if (process.env.SESATHEQUE_CONF) {
   conf.output.path = path.resolve(__dirname, 'build', process.env.SESATHEQUE_CONF)
 }
 
-if (appConfig.devServer) {
+if (isUsingDevServer) {
   const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
   conf.devServer = {
     contentBase: conf.output.path,
