@@ -168,7 +168,6 @@ const resourceListProvider = (WrappedComponent) => {
 
   // pour récupérer search d'après le router et construire query et queryOptions
   const mapStateToProps = ({router: {location: {search, hash}}}) => {
-    if (!search) return {hash, search: '', query: null}
     const parsedSearch = queryString.parse(search)
     const query = buildQuery(parsedSearch)
     const queryOptions = buildQueryOptions(parsedSearch)
