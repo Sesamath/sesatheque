@@ -125,11 +125,13 @@ function display (ressource, options, next) {
           // en consultation on affiche toujours le bouton save, si y'a du resultatCallback ça lui filera
           // la figure, sinon on peut toujours sauvegarder localement la figure
           mtgOptions.save = true
+          // pour le message sur les figures de construction
+          mtgOptions.preview = true
+          // cb de fin de chargement
           mtgOptions.callBackAfterReady = function () {
             isLoaded = true
             if (next) next()
           }
-
           // on ajoute une cb si qq veut le résultat
           if (resultatCallback) {
             // cb sur le bouton save
