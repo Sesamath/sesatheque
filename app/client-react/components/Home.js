@@ -1,8 +1,8 @@
 import React from 'react'
 import homeContent from '..'
 
-// homeContent est le contenu mis dans le source initial, mais pas à sa place, 
-// il est récupéré et mis de coté avant suppression du dom au chargement de 
+// homeContent est le contenu mis dans le source initial, mais pas à sa place,
+// il est récupéré et mis de coté avant suppression du dom au chargement de
 // l'appli (cf app/client-react/index.js)
 
 const Home = () => (

@@ -81,7 +81,7 @@ const getAdditionPromise = (ressource) => new Promise((resolve, reject) => {
 
 describe('sesatheque-client', () => {
   let sesathequeClient
-  let consoleErrorSpy
+  let consoleErrorStub
   /**
    * Vérifie que item a les valeurs de expected pour toutes les propriétés par défaut d'une ref
    * @private
@@ -155,11 +155,12 @@ describe('sesatheque-client', () => {
   })
 
   beforeEach(() => {
-    consoleErrorSpy = sinon.spy(console, 'error')
+    consoleErrorStub = sinon.stub(console, 'error')
   })
   afterEach(() => {
-    expect(consoleErrorSpy).to.not.have.been.called
-    console.error.restore()
+    expect(consoleErrorStub).to.not.have.been.called
+    consoleErrorStub.reset()
+    consoleErrorStub.restore()
   })
 
   it('getRessource remonte une ressource', () => {
@@ -212,7 +213,7 @@ describe('sesatheque-client', () => {
     const expected = ressourceToItem(ressource)
     sesathequeClient.getItem(ressource.rid, false, (error, item) => {
       if (error) return done(error)
-      expect(consoleErrorSpy).to.have.been.calledOnce
+      expect(consoleErrorStub).to.have.been.calledOnce
       console.error.reset()
       item.$deletable = false // undefined au retour de getItem
       checkItem(item, expected)

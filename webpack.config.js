@@ -35,11 +35,12 @@ const appConfig = require('./app/server/config')
 const pluginsConfig = require('./app/plugins/webpack.plugins')
 const pluginsEntry = require('./app/plugins/webpack.entry')
 
+// ça c'est pour mocka-webpack
+const isTest = process.env.BABEL_ENV === 'test'
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
-
-// prod d'après la conf (sauf --debug)
-const isProd = isDebug ? false : (appConfig.application.staging === 'production' || appConfig.application.staging === 'prod')
+// prod d'après la conf (sauf --debug ou test)
+const isProd = !isDebug && !isTest && /prod/.test(appConfig.application.staging)
 
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
@@ -50,22 +51,8 @@ const conf = {
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     ...pluginsEntry,
-    // chaque entrée contiendra ses dépendances, mais on veut préciser le loader et certains modules dans common
-    // et les autres qui l'utilisent, cf https://webpack.github.io/docs/code-splitting.html
-    // qui mène à https://github.com/webpack/webpack/tree/master/examples/multiple-commons-chunks
-    // apiClient: './app/client/apiClient.js',
-    client: 'sesatheque-client',
-    // un client light qui ne fait que récupérer des ressources sur l'api
-    fetch: 'sesatheque-client/src/fetch.js',
-    page: './app/client/page/index.js',
-    bugsnag: './app/client/page/bugsnag.js',
-    registerSesatheques: './app/client/page/registerSesatheques.js',
-    display: './app/client/display/index.js',
-    import: './app/client/edit/import.js',
-    react: './app/client-react/index.js',
-    // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
-    editArbre: './app/plugins/arbre/public/edit.js'
-    // pour editGraphe et showParcours, c'est copié tel quel plus bas (il a sa conf webpack de son coté)
+    react: './app/client-react/index.js'
+    // le reste est mis plus bas si !isTest
   },
   // cf https://webpack.js.org/configuration/output/#output-filename
   // pour les variables utilisables
@@ -74,7 +61,7 @@ const conf = {
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
-    chunkFilename: '[id]-[chunkhash].js', // ça n'évite pas le ~ dans les noms de fichier variables exportées…
+    chunkFilename: '[id]-[chunkhash].js',
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
@@ -85,8 +72,6 @@ const conf = {
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
   },
-  // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx
-  devtool: isProd ? 'source-map' : 'eval',
   /* externals: {
     stePage: 'page',
     steDisplay: 'display'
@@ -122,8 +107,19 @@ const conf = {
           }
         }
       },
-      // On empêche de require un fichier du répertoire _private dans du code client
-      {test: /_private\//, loader: 'throw-loader', exclude: /node_modules/},
+      {
+        test: /test\/react\/.*\.jsx?/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-react',
+              ...babelConfig.presets
+            ],
+            plugins: babelConfig.plugins
+          }
+        }
+      },
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       // {test: /\.json$/, loader: 'json-loader'},
@@ -146,47 +142,91 @@ const conf = {
         }
       },
       // le statique
-      /* process CSS files */
-      {
-        test: /\.s?css$/,
-        rules: [
-          {loader: 'style-loader'},
-          {loader: 'css-loader'},
-          {
-            loader: 'postcss-loader',
-            options: {
-              plugins: () => [
-                autoprefixer({
-                  browsers: [
-                    'ie 11',
-                    'last 3 iOS versions',
-                    'last 3 Safari versions',
-                    'last 3 Android versions'
-                  ]
-                })
-              ]
-            }
-          },
-          {test: /\.scss$/, loader: 'sass-loader'}
-        ]
-      },
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
       {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'}
+      // css plus loin pour éviter la compil sass en test
     ]
-  },
-  plugins: [
+  }
+}
+
+if (isTest) {
+  // pour avoir un dossier séparé faut aussi préciser un SESATHEQUE_CONF=test
+  // (mocha-webpack ne met rien dans output)
+
+  // pas besoin de css en test
+  conf.module.rules.push({
+    test: /\.s?css$/,
+    rules: [{loader: 'null-loader'}]
+  })
+} else {
+  // faut ajouter toutes les entry utilisées par nos html en iframe
+  Object.assign(conf.entry, {
+    // pour les html en iframe
+    bugsnag: './app/client/page/bugsnag.js',
+    display: './app/client/display/index.js',
+    // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
+    editArbre: './app/plugins/arbre/public/edit.js',
+    import: './app/client/edit/import.js',
+    // (c'est déjà inclus par display, est-ce bien utile ?)
+    page: './app/client/page/index.js',
+    // utilisé par editgraphe.html (plugin j3p)
+    registerSesatheques: './app/client/page/registerSesatheques.js'
+    // pour editGraphe et showParcours, c'est copié tel quel plus bas (il a sa conf webpack de son coté)
+  })
+
+  if (isProd) {
+    // faut ajouter aussi les js appelés par des sites tiers
+    Object.assign(conf.entry, {
+      // le client classique
+      client: 'sesatheque-client',
+      // un autre client plus light qui ne fait que récupérer des ressources sur l'api (sites tiers)
+      fetch: 'sesatheque-client/src/fetch.js'
+    })
+  }
+
+  // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx
+  conf.devtool = isProd ? 'source-map' : 'eval'
+
+  // On empêche de require un fichier du répertoire _private dans du code client
+  // (mais ça plante en mode test)
+  conf.module.rules.unshift({test: /_private\//, loader: 'throw-loader', exclude: /node_modules/})
+  conf.module.rules.push({
+    test: /\.s?css$/,
+    rules: [
+      {loader: 'style-loader'},
+      {loader: 'css-loader'},
+      {
+        loader: 'postcss-loader',
+        options: {
+          plugins: () => [
+            autoprefixer({
+              browsers: [
+                'ie 11',
+                'last 3 iOS versions',
+                'last 3 Safari versions',
+                'last 3 Android versions'
+              ]
+            })
+          ]
+        }
+      },
+      {test: /\.scss$/, loader: 'sass-loader'}
+    ]
+  })
+
+  conf.plugins = [
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
     ...pluginsConfig
-  ],
+  ]
 
   // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
-  optimization: {
+  conf.optimization = {
     // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
     // noEmitOnErrors: false,
 
@@ -214,10 +254,11 @@ const conf = {
       automaticNameDelimiter: '_', // faut un caractère compatible avec un nom de variable js
       maxSize: 201000 // bytes, mais si on met ça on a plus de react.js, seulement des react_<chunckhasch>.js
     } */
-  },
+  }
+
   // cf https://webpack.js.org/configuration/stats/
-  stats: {
-    // utile en mode watch
+  conf.stats = {
+    // indique l'heure de build, très utile en mode watch
     builtAt: true,
     // Nice colored output
     colors: true
