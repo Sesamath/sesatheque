@@ -99,9 +99,6 @@ module.exports = function (component) {
       .defineIndex('type')
       .defineIndex('titre')
       .defineIndex('niveaux')
-      .defineIndex('categories', 'integer', basicArrayIndexer)
-      .defineIndex('typePedagogiques', 'integer', basicArrayIndexer)
-      .defineIndex('typeDocumentaires', 'integer', basicArrayIndexer)
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir une callback qui la remplace
       // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
       // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
@@ -115,26 +112,46 @@ module.exports = function (component) {
       // pour les arbres, on indexe tous les enfants, c'est lourd en écriture d'index
       // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
       // (pour mettre à jour titre & résumé par ex).
-      .defineIndex('enfants', 'string', function () {
+      .defineIndex('enfants', function () {
         if (!this.enfants || !this.enfants.length) return null
-        return getRidEnfants(this)
+        const rids = getRidEnfants(this)
+        if (rids.length) return null // arrive si l'arbre ne contient que des dossiers sans ressources dedans
+        return rids
       })
-      .defineIndex('auteurs', basicArrayIndexer)
-      .defineIndex('auteursParents', basicArrayIndexer)
-      .defineIndex('contributeurs', basicArrayIndexer)
-      .defineIndex('iPids', function () {
-        return basicArrayIndexer([].concat(this.auteurs, this.auteursParents, this.contributeurs))
-      })
-      // les groupes chez qui la ressource est publiée
-      .defineIndex('groupes', {normalizer: getNormalizedName}, basicArrayIndexer)
-      // les groupes qui ont un droit d'écriture sur la ressource
-      .defineIndex('groupesAuteurs', {normalizer: getNormalizedName}, basicArrayIndexer)
       .defineIndex('langue')
       .defineIndex('publie', 'boolean')
       .defineIndex('indexable', 'boolean')
       .defineIndex('restriction', 'integer')
       .defineIndex('dateCreation', 'date')
       .defineIndex('dateMiseAJour', 'date')
+
+    // les array standard
+    // faut retourner une vraie fonction, qui sera appelée via fn.call(entity)
+    const getIndexer = (prop) => function () {
+      return basicArrayIndexer(this[prop])
+    }
+    const defineArrayStdIndex = (prop) => {
+      EntityRessource.defineIndex(prop, getIndexer(prop))
+    }
+    ;[
+      'categories',
+      'typePedagogiques',
+      'typeDocumentaires',
+      'auteurs',
+      'auteursParents',
+      'contributeurs'
+    ].forEach(defineArrayStdIndex)
+
+    // idem mais avec normalizer
+    // les groupes chez qui la ressource est publiée
+    EntityRessource.defineIndex('groupes', {normalizer: getNormalizedName}, getIndexer('groupes'))
+    // les groupes qui ont un droit d'écriture sur la ressource
+    EntityRessource.defineIndex('groupesAuteurs', {normalizer: getNormalizedName}, getIndexer('groupesAuteurs'))
+
+    // un index qui combine les champs contenant des pid
+    EntityRessource.defineIndex('iPids', function () {
+      return basicArrayIndexer([].concat(this.auteurs, this.auteursParents, this.contributeurs))
+    })
 
     // les champs à indexer pour le fulltext
     EntityRessource.defineTextSearchFields([
