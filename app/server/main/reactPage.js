@@ -30,8 +30,26 @@
  */
 'use strict'
 
+const fs = require('fs')
+const path = require('path')
+
+const log = require('sesajstools/utils/log')
 const {version} = require('../../../package')
 const {application: {name}} = require('../config')
+
+const root = path.resolve(__dirname, '..', '..', '..')
+
+let homeContent
+
+const homeContentFile = path.join(root, '_private', 'home.inc.html')
+if (fs.existsSync(homeContentFile)) {
+  homeContent = fs.readFileSync(homeContentFile, 'utf8')
+  if (!homeContent) {
+    log.error(`${homeContentFile} existe mais sans contenu`)
+  }
+}
+
+if (!homeContent) homeContent = 'Site en construction.'
 
 const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -43,6 +61,7 @@ const html = `<!DOCTYPE html>
   <title>${name}</title>
 </head>
 <body>
+<div id="homeContent" style="display: none;">${homeContent}</div>
 <div id="root" role="document"></div>
 <script
   type="application/javascript"
@@ -59,7 +78,7 @@ const getHtml = () => html
  * @param {Context} context
  * @param {string} [contentToAdd] Sera ajouté tel quel dans la page, après le div root (juste avant </body>), à priori du js…
  */
-function displayReactPage (context, data, contentToAdd) {
+function displayReactPage (context) {
   // sinon le content-type va imposer le transport html qui veut un template dust
   context.contentType = 'text/html'
   context.raw(html, {})

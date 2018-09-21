@@ -30,7 +30,6 @@
  */
 'use strict'
 
-const fs = require('fs')
 const path = require('path')
 
 const {application: {staticMaxAge}} = require('../config')
@@ -39,20 +38,7 @@ const {displayObsoletePage} = require('./obsoletePage')
 
 const envSesathequeConf = process.env.SESATHEQUE_CONF
 
-let homeContent
-
 const root = path.resolve(__dirname, '..', '..', '..')
-
-const homeContentFile = path.join(root, '_private', 'home.inc.html')
-if (fs.existsSync(homeContentFile)) {
-  homeContent = fs.readFileSync(homeContentFile)
-  if (homeContent) {
-    homeContent = homeContent.toString()
-  } else {
-    log.error(`${homeContentFile} existe mais sans contenu`)
-  }
-}
-if (!homeContent) homeContent = 'Site en construction.'
 
 /**
  * Controleur du composant main pour les routes "statiques"

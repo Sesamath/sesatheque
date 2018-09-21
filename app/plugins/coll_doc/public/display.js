@@ -46,7 +46,7 @@ const baseCollDoc = 'https://ressources.sesamath.net'
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  [next]     La fct à appeler quand le contenu sera chargé (sans argument ou avec une erreur)
  */
-module.exports = function display (ressource, options, next) {
+const display = (ressource, options, next) => {
   try {
     if (!next) next = (error) => { if (error) page.addError(error) }
     let isLoaded = false
@@ -96,3 +96,5 @@ module.exports = function display (ressource, options, next) {
     next(error)
   }
 }
+
+export default display

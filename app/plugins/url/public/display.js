@@ -49,8 +49,8 @@ const divIframeSelector = '#page'
  * @param {displayOptions} options    Les options après init
  * @param {errorCallback}  next       La fct à appeler quand le contenu sera chargé
  */
-module.exports = function urlDisplay (ressource, options, next) {
-  require.ensure(['jquery'], function (require) {
+const urlDisplay = (ressource, options, next) => {
+  import('jquery').then(({default: $}) => {
     /**
      * Ajoute le bouton vu et le listener sur unload quand il n'y a pas de réponse demandée
      */
@@ -160,7 +160,6 @@ module.exports = function urlDisplay (ressource, options, next) {
       resultatCallback(resultat, next)
     }
 
-    const $ = require('jquery')
     const {resultatCallback} = options
     let isLoaded
     // pour éviter de reposter au unload si on a cliqué sur le bouton vu avant
@@ -184,6 +183,8 @@ module.exports = function urlDisplay (ressource, options, next) {
       })
       // raccourcis
       const params = ressource.parametres || {}
+      params.question_option = params.question_option || 'off'
+      params.answer_option = params.answer_option || 'off'
       const url = params.adresse
       if (!url) throw new Error('Url manquante')
       if (!/^https?:\/\//.test(url)) throw new Error('Url invalide : ' + url)
@@ -205,8 +206,7 @@ module.exports = function urlDisplay (ressource, options, next) {
         })
       }
       // sinon, faut charger la gestion des dialog jQueryUi
-      require.ensure(['./displayUi'], function (require) {
-        const displayUi = require('./displayUi')
+      import('./displayUi').then(({default: displayUi}) => {
         // on ajoute l'entete avant la page
         const entete = dom.addElement(options.container, 'div', {id: 'entete'})
         addPage(url, params, () => {
@@ -221,3 +221,5 @@ module.exports = function urlDisplay (ressource, options, next) {
     }
   })
 }
+
+export default urlDisplay

@@ -42,15 +42,9 @@ import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
 import log from 'sesajstools/utils/log'
-// pour sesatheque-client on se sert dans src pour avoir les bonnes lignes dans les éventuelles erreurs
-// mais ça marche pas avec mocha, sauf si le module est linké (car y'a plus node_modules dans son path)
-// faudrait dire à babel-register de traiter les node_modules/sesatheque-client/src
-// mais pas réussi (cf test/initMocha.js)
-// import getClient from 'sesatheque-client/src'
-import getClient from 'sesatheque-client'
+import getClient from 'sesatheque-client/src'
 import Ref from 'sesatheque-client/src/constructors/Ref'
-// import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
-import ClientItem from 'sesatheque-client/dist/ClientItem'
+import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
 
 import {XMLHttpRequest} from 'xmlhttprequest'
 
@@ -87,7 +81,7 @@ const getAdditionPromise = (ressource) => new Promise((resolve, reject) => {
 
 describe('sesatheque-client', () => {
   let sesathequeClient
-  let consoleErrorSpy
+  let consoleErrorStub
   /**
    * Vérifie que item a les valeurs de expected pour toutes les propriétés par défaut d'une ref
    * @private
@@ -161,11 +155,12 @@ describe('sesatheque-client', () => {
   })
 
   beforeEach(() => {
-    consoleErrorSpy = sinon.spy(console, 'error')
+    consoleErrorStub = sinon.stub(console, 'error')
   })
   afterEach(() => {
-    expect(consoleErrorSpy).to.not.have.been.called
-    console.error.restore()
+    expect(consoleErrorStub).to.not.have.been.called
+    consoleErrorStub.reset()
+    consoleErrorStub.restore()
   })
 
   it('getRessource remonte une ressource', () => {
@@ -218,7 +213,7 @@ describe('sesatheque-client', () => {
     const expected = ressourceToItem(ressource)
     sesathequeClient.getItem(ressource.rid, false, (error, item) => {
       if (error) return done(error)
-      expect(consoleErrorSpy).to.have.been.calledOnce
+      expect(consoleErrorStub).to.have.been.calledOnce
       console.error.reset()
       item.$deletable = false // undefined au retour de getItem
       checkItem(item, expected)

@@ -46,17 +46,14 @@ const babelIgnoreFilter = (file) => {
 }
 
 require('ignore-styles')
-require('babel-core/register')({
+require('@babel/register')({
   // faut pas qu'il lise les preset du package.json, sinon ça donne du
   // Error: Options {"loose":true} passed to  /home/sesamath/projets/git/sesatheque/node_modules/babel-preset-env/lib/index.js which does not accept options. (While processing preset: …
   babelrc: false,
   // notre filtre sur les fichiers à traiter
-  ignore: babelIgnoreFilter,
-  presets: ['react'],
-  // et les plugins qu'il doit utiliser pour que mocha soit content
-  plugins: [
-    'transform-es2015-modules-commonjs',
-    'transform-object-rest-spread',
-    'transform-object-assign'
+  ignore: [babelIgnoreFilter],
+  presets: [
+    ['@babel/preset-env', {'targets': 'node 10'}],
+    ['@babel/preset-react']
   ]
 })

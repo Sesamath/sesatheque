@@ -27,6 +27,10 @@ const autoprefixer = require('autoprefixer')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
+// on va forcer l'utilisation notre conf babel pour
+// la compilation de certains node_modules
+// (seatheque-client, sesaeditgraphe et plugins d'édition)
+const babelConfig = require('./package.json').babel
 const appConfig = require('./app/server/config')
 const pluginsConfig = require('./app/plugins/webpack.plugins')
 const pluginsEntry = require('./app/plugins/webpack.entry')
@@ -57,7 +61,7 @@ const conf = {
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
-    // chunkFilename: '[id].js', // ça n'évite pas le ~ dans les noms de fichier variables exportées…
+    chunkFilename: '[id]-[chunkhash].js',
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
@@ -90,17 +94,53 @@ const conf = {
   module: {
     rules: [
       {test: /app\/(client|server)\/.*\.js/, loader: 'babel-loader'},
-      {test: /app\/(client-react|plugins)\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
-      {test: /test\/react\/.*\.jsx?/, loader: 'babel-loader', query: {presets: ['react']}},
+      {
+        test: /app\/(client-react|plugins)\/.*\.jsx?/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-react',
+              ...babelConfig.presets
+            ],
+            plugins: babelConfig.plugins
+          }
+        }
+      },
+      {
+        test: /test\/react\/.*\.jsx?/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-react',
+              ...babelConfig.presets
+            ],
+            plugins: babelConfig.plugins
+          }
+        }
+      },
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       // {test: /\.json$/, loader: 'json-loader'},
       {test: /app\/client\/.*\.html/, loader: 'file-loader'},
       {test: /app\/plugins\/.*\.html/, loader: 'file-loader'},
       // editgraphe doit passer par babel
-      {test: /sesaeditgraphe\/src\/.*\.js/, loader: 'babel-loader'},
+      {
+        test: /sesaeditgraphe\/src\/.*\.js/,
+        use: {
+          loader: 'babel-loader',
+          options: babelConfig
+        }
+      },
       // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-      {test: /sesatheque-client\/src\/.*\.js/, loader: 'babel-loader'},
+      {
+        test: /sesatheque-client\/src\/.*\.js/,
+        use: {
+          loader: 'babel-loader',
+          options: babelConfig
+        }
+      },
       // le statique
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},

@@ -1,11 +1,14 @@
 import React from 'react'
+import homeContent from '..'
 
-// @todo récupérer le contenu de _private/home.inc.html s'il existe (à faire au build)
+// homeContent est le contenu mis dans le source initial, mais pas à sa place,
+// il est récupéré et mis de coté avant suppression du dom au chargement de
+// l'appli (cf app/client-react/index.js)
 
 const Home = () => (
   <div>
     <h1>Bienvenue sur cette Sésathèque</h1>
-    <p>Site en construction.</p>
+    <div dangerouslySetInnerHTML={{__html: homeContent}}></div>
   </div>
 )
 
