@@ -33,6 +33,7 @@
 const bugsnagJs = require('bugsnag-js')
 // on récupère ce que webpackConfigLoader.js nous file
 const {application, bugsnag, version} = require('../../server/config')
+const getParentUrls = require('../../client-react/utils/getParentUrls')
 
 // ce fichier met un objet busgnagClient en global
 // ATTENTION il y a une deuxième conf bugsnag dans app/client-react/App.js pour le client react
@@ -66,6 +67,7 @@ function beforeSend (report) {
       if (report.stacktrace.some(trace => /replication_calculatice/.test(trace.file))) return false
     }
   }
+  report.metaData.frames = getParentUrls()
 }
 
 if (typeof window === 'undefined') {
