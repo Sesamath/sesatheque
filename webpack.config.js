@@ -107,6 +107,19 @@ const conf = {
           }
         }
       },
+      {
+        test: /test\/react\/.*\.jsx?/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-react',
+              ...babelConfig.presets
+            ],
+            plugins: babelConfig.plugins
+          }
+        }
+      },
       // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
       {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
       // {test: /\.json$/, loader: 'json-loader'},
