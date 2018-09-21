@@ -44,7 +44,7 @@ let homeContent
 const homeContentFile = path.join(root, '_private', 'home.inc.html')
 if (fs.existsSync(homeContentFile)) {
   homeContent = fs.readFileSync(homeContentFile, 'utf8')
-  if (homeContent) {
+  if (!homeContent) {
     log.error(`${homeContentFile} existe mais sans contenu`)
   }
 }
