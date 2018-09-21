@@ -35,6 +35,19 @@ const {listeMax, listeNbDefault} = require('./config')
 const {toAscii} = require('sesajstools')
 
 /**
+ * Retourne values purgé de null|undefined si c'est un tableau non vide, null sinon
+ * @param {Array} values
+ * @return {null|Array}
+ */
+function basicArrayIndexer (values) {
+  if (Array.isArray(values)) {
+    values = values.filter(elt => elt !== undefined && elt !== null)
+    if (values.length) return values
+  }
+  return null
+}
+
+/**
  * Normalise {skip, limit} et le retourne
  * @param {Object} [options]
  * @param {number} [options.limit]
@@ -62,6 +75,8 @@ function getNormalizedGrabOptions (options) {
  * @throws {Error} si strict et nom invalide (pas une string ou retournerait une chaîne vide après normalisation)
  */
 function getNormalizedName (nom, strict = true) {
+  // on peut être appelé avec null (sortie de basicArrayIndexer)
+  if (nom === null) return null
   if (!nom || typeof nom !== 'string' || nom === 'undefined') {
     if (strict) throw Error('nom invalide')
     else return ''
@@ -75,6 +90,7 @@ function getNormalizedName (nom, strict = true) {
 }
 
 module.exports = {
+  basicArrayIndexer,
   getNormalizedGrabOptions,
   getNormalizedName
 }

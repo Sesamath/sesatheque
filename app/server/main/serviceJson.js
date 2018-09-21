@@ -99,6 +99,12 @@ module.exports = function (component) {
         if (error) log.error('erreur invalide', error)
         message = 'Requête invalide'
       }
+      // on reformule certains messages comme
+      // E11000 duplicate key error collection: labomep2.Utilisateur index: entity_index_structureUniqueLogin-unique-sparse dup key: { : "la valeur en double"}
+      if (/duplicate key error collection/.test(message)) {
+        const chunks = message.match(/duplicate key error collection.* entity_index_([^- ]+).*"([^"]*)"/)
+        if (chunks && chunks.length > 2) message = `La valeur "${chunks[2]}" existe déjà (index unique ${chunks[1]})`
+      }
       context.status = 400
       context.json({message})
     }

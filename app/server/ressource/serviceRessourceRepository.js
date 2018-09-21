@@ -36,10 +36,10 @@ const uuid = require('an-uuid')
 const elementtree = require('elementtree')
 const _ = require('lodash')
 const request = require('request')
-const {parse, stringify} = require('sesajstools')
+const {parse} = require('sesajstools')
 const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
 const Ref = require('../../constructors/Ref')
-const {ensure} = require('../lib/tools')
+const {ensure, isEntity} = require('../lib/tools')
 const {getRidEnfants} = require('../lib/ressource')
 
 const config = require('./config')
@@ -459,7 +459,7 @@ module.exports = function (ressourceComponent) {
      * @param next appelé avec (error, archive)
      */
     function archive (ressource, next) {
-      if (!ressource.oid) throw new Error("Impossible d'archiver une ressource qui n’existe pas encore")
+      if (!ressource.oid) throw Error('Impossible d’archiver une ressource qui n’existe pas encore')
       const data = Object.assign({}, ressource, {oid: undefined})
       EntityArchive.create(data).store(next)
     }
@@ -778,18 +778,23 @@ module.exports = function (ressourceComponent) {
      */
     function save (ressource, next) {
       flow().seq(function () {
-        if (ressource.constructor.name !== 'Entity') {
+        if (!isEntity(ressource, 'EntityRessource')) {
           log.debug('save d’une ressource qui n’est pas une entity', ressource)
           // ça sort pas de la base, donc on le crée…
           ressource = EntityRessource.create(ressource)
-          // mais si y'a un oid faut le vrai original pour checkAgainstPrevious
-          if (ressource.oid) return load(ressource.oid, this)
         }
-        this()
+        // difficile de savoir si ça sort de la base ou si c'est un objet avec oid passé au create
+        // car dans les deux cas onLoad est appelé et ça génère un $original, qui n'est donc pas forcément
+        // ce qu'il y a en base (faudra fixer ça dans lassi, mais y'avait une raison pour l'appeler sur
+        // du create avec oid…)
+        // donc si y'a un oid on refait un load car on veut dans $original ce qui sort de la base,
+        // c'est important pour checkAgainstPrevious
+        // (et si on venait d'aller le chercher en base il est en cache donc c'est pas trop cher)
+        if (ressource.oid) load(ressource.oid, this)
+        else this()
       }).seq(function (ressourceBdd) {
-        // si on vient d'aller la chercher, faut écraser le $original inutile mis au create
-        if (ressourceBdd) ressourceBdd.$original = stringify(ressourceBdd)
-        checkAgainstPrevious(ressource, this)
+        if (ressourceBdd) checkAgainstPrevious(ressource, this)
+        else this(null, ressource)
       }).seq(function (ressource) {
         if (ressource.type === 'ec2' && ressource.parametres && ressource.parametres.xml) {
           convertXmlEc2(ressource)

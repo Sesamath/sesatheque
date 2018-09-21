@@ -58,27 +58,34 @@ module.exports = function (component) {
      * @memberOf $cachePersonne
      */
     $cachePersonne.set = function (personne, next = log.ifError) {
+      if (typeof personne.values !== 'function') return next(Error('$cachePersonne.set veut une Entity'))
+      const values = personne.values()
       // by pid
-      $cache.set('personne_' + personne.pid, personne, ttl, log.ifError)
+      $cache.set('personne_' + personne.pid, values, ttl, log.ifError)
       // by oid
-      $cache.set('personne_' + personne.oid, personne, ttl, next)
+      $cache.set('personne_' + personne.oid, values, ttl, next)
     }
 
     /**
      * Efface un objet personne du cache
-     * @param {Integer}       oid
+     * @param {string}       oid
      * @param {errorCallback} [next]
      * @memberOf $cachePersonne
      */
     $cachePersonne.delete = function (oid, next = log.ifError) {
-      // on efface pas l'oid par origine, le get par origine renverra undefined quand même
-      $cache.delete('personne_' + oid, next)
+      // faut faire un get pour récupérer le pid
+      $cachePersonne.get(oid, (error, personne) => {
+        if (error) return next(error)
+        if (!personne) return next()
+        $cache.delete('personne_' + personne.pid, log.ifError)
+        $cache.delete('personne_' + oid, next)
+      })
     }
 
     // on ajoute une possibilité noCache en conf, on écrase seulement les getters pour qu'ils ne renvoient rien
     if ($settings.get('noCache', false)) {
       log('$cacheRessource désactivé')
-      $cachePersonne.get = function (oid, next) { next() }
+      $cachePersonne.get = (oid, next) => next()
     }
 
     return $cachePersonne

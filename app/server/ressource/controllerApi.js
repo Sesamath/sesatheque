@@ -164,11 +164,15 @@ module.exports = function (component) {
         } else if (ressourcePostee.origine && ressourcePostee.idOrigine) { // ou par origine/idOrigine
           $ressourceRepository.loadByOrigin(ressourcePostee.origine, ressourcePostee.idOrigine, next)
         } else {
+          // ça ressemble fort à une création
+          // si c'est un arbre on init enfants si c'est pas déjà fait
+          if (ressourcePostee.type === 'arbre' && !ressourcePostee.enfants) ressourcePostee.enfants = []
+          // si y'a pas d'origine on met la notre
           if (!ressourcePostee.origine) ressourcePostee.origine = myBaseId
           // l'idOrigine n'est pas obligatoire si c'est une création ici ($ressourceRepository.save créera une clé si besoin
           if (ressourcePostee.origine !== myBaseId && !ressourcePostee.idOrigine) {
             log.debug('ressource postée invalide', ressourcePostee)
-            next(new Error('Il faut fournir oid, rid ou au moins origine'))
+            next(new Error('Il faut fournir oid, rid ou origine ET idOrigine'))
           } else {
             next()
           }
@@ -195,8 +199,7 @@ module.exports = function (component) {
       }).seq(function (cleanData) {
         log.debug(`après valide ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
-        const groupesSup = ressourcePostee.hasOwnProperty('_groupesSup') ? ressourcePostee._groupesSup : ''
-        $personneControl.checkGroupes(context, ressourceBdd, cleanData, groupesSup, this)
+        $personneControl.checkGroupes(context, ressourceBdd, cleanData, this)
       }).seq(function (cleanData) {
         log.debug(`après checkGroupes ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // on ajoute le user courant pour serie et sequenceModele,

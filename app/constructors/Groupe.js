@@ -28,61 +28,7 @@
  * (cf LICENCE.txt et http://vvlibri.org/fr/Analyse/gnu-affero-general-public-license-v3-analyse
  * pour une explication en français)
  */
+
 'use strict'
 
-/**
- * Un groupe d'utilisateurs
- * @constructor
- * @private
- * @param {Object} initObj Un objet ayant des propriétés d'un groupe
- */
-function Groupe (initObj) {
-  if (!initObj || typeof initObj !== 'object') initObj = {}
-  /**
-   * L'identifiant interne à la sésathèque
-   * @type {Integer}
-   * @default undefined
-   */
-  this.oid = initObj.oid || undefined
-  /**
-   * Nom
-   * @type {string}
-   * @default ''
-   */
-  if (typeof initObj.nom === 'string') this.nom = initObj.nom.trim()
-  else this.nom = ''
-  /**
-   * Description
-   * @type {string}
-   * @default ''
-   */
-  if (typeof initObj.description === 'string') this.description = initObj.description
-  else this.description = ''
-  /**
-   * Tout le monde peut s'y inscrire
-   * @type {boolean}
-   * @default false
-   */
-  this.ouvert = !!initObj.ouvert
-  /**
-   * Visible dans la liste générale des groupes, tout le monde peut suivre ses publications
-   * @type {boolean}
-   */
-  this.public = !!initObj.public
-  /**
-   * liste de pid de ceux qui peuvent gérer le groupe (le créateur et ceux à qui il a délégué la gestion)
-   * @type {string[]}
-   */
-  this.gestionnaires = initObj.gestionnaires || []
-  /**
-   * @name dateCreation
-   * @type {Date}
-   * @default undefined
-   */
-  if (initObj.dateCreation) {
-    if (typeof initObj.dateCreation === 'string') this.dateCreation = new Date(initObj.dateCreation)
-    else if (initObj.dateCreation instanceof Date) this.dateCreation = initObj.dateCreation
-  } // sinon, sera ajouté à l'écriture en Bdd
-}
-
-module.exports = Groupe
+module.exports = require('sesatheque-client/src/constructors/Groupe')

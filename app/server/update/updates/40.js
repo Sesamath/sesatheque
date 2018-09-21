@@ -30,44 +30,11 @@
  */
 'use strict'
 
-const flow = require('an-flow')
-
-const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
-const updateLog = require('an-log')('update' + updateNum)
-
 module.exports = {
-  name: 'met les paramètres mathgraph au nouveau format (avec content)',
+  name: 'reindex personnes (pour remplacer les array vide par null)',
   description: '',
   run: function run (next) {
-    const EntityRessource = lassi.service('EntityRessource')
-    const $ressourceRepository = lassi.service('$ressourceRepository')
-    let nbRess = 0
-    let nbRessMod = 0
-    let lastOid
-
-    flow().seq(function () {
-      const onEach = (ressource, next) => {
-        lastOid = ressource.oid
-        nbRess++
-        if (ressource.parametres.content) return next()
-        nbRessMod++
-        ressource.parametres.content = {}
-        Object.entries(ressource.parametres).forEach(([k, v]) => {
-          if (['content', 'width', 'height', 'dys', 'open', 'newFig'].includes(k)) return
-          // ça c'est un reste des versions java
-          if (k === 'figure') ressource.parametres.content.fig = v
-          else ressource.parametres.content[k] = v
-          delete ressource.parametres[k]
-        })
-        $ressourceRepository.save(ressource, next)
-      }
-      EntityRessource.match('type').equals('mathgraph').sort('oid').forEachEntity(onEach, this)
-    }).seq(function () {
-      updateLog(`${nbRessMod} ressource Mathgraph modifiées (sur ${nbRess})`)
-      next()
-    }).catch(function (error) {
-      console.error(`plantage dans l’update ${updateNum} avec la ressource ${lastOid}, ${nbRess} traitées, `)
-      next(error)
-    })
+    const $entitiesCli = require('lassi/source/services/entities-cli')
+    $entitiesCli().commands().reindexAll('EntityPersonne', next)
   } // run
 }

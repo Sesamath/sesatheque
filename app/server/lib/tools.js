@@ -113,6 +113,39 @@ function isApi (url) {
 }
 
 /**
+ * Retourne true si ar1 et ar2 ont autant d'élément tous égaux (comparaison ===)
+ * @todo déplacer ça dans sesajstools
+ * @param {Array} ar1
+ * @param {Array} ar2
+ * @return {boolean}
+ */
+function isSameSimpleArray (ar1, ar2) {
+  if (!Array.isArray(ar1) || !Array.isArray(ar2)) throw Error(`Array expected`)
+  if (ar1.length !== ar2.length) return false
+  return ar1.every((elt, i) => elt === ar2[i])
+}
+
+/**
+ * Vérif basique que obj est bien une Entity entityName (si entityName n'est pas fourni
+ * ça renvoie true si obje est une entity Lassi)
+ * @param {Object} obj
+ * @param {string} [entityName]
+ * @return {boolean}
+ */
+function isEntity (obj, entityName) {
+  if (
+    !obj ||
+    !obj.definition ||
+    !obj.constructor ||
+    obj.constructor.name !== 'Entity'
+  ) return false
+  if (entityName) return obj.definition.name === entityName
+  // si on voulait juste savoir si c'était une Entity sans préciser laquelle,
+  // avoir un constructor nommé Entity nous suffit
+  return true
+}
+
+/**
  * Retourne true si l'url concerne un fichier statique
  * (statique i.e. les extensions susceptibles d'exister dans sesatheque, c'est pas exaustif)
  * @memberOf tools
@@ -266,6 +299,8 @@ module.exports = {
   ensure,
   idListToArray,
   isApi,
+  isEntity,
+  isSameSimpleArray,
   isStatic,
   isPublic,
   link,

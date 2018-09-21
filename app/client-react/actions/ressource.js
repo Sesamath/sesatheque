@@ -124,6 +124,9 @@ export const saveRessource = (
       level: 'info',
       message: 'La ressource a été sauvegardée'
     }))
+    if (responseRessource.$warnings) {
+      responseRessource.$warnings.forEach(warning => dispatch(addNotification({level: 'warning', message: warning})))
+    }
     dispatch(setRessource(responseRessource))
 
     return success(responseRessource)

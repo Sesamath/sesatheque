@@ -34,7 +34,7 @@ const {exists, getRidComponents} = require('sesatheque-client/src/sesatheques')
 const {stringify} = require('sesajstools')
 
 const tools = require('../lib/tools')
-const {getNormalizedName} = require('../lib/normalize')
+const {basicArrayIndexer, getNormalizedName} = require('../lib/normalize')
 const {getRidEnfants} = require('../lib/ressource')
 
 const Ressource = require('../../constructors/Ressource')
@@ -77,11 +77,6 @@ module.exports = function (component) {
         if (values.dateMiseAJour && !(values.dateMiseAJour instanceof Date)) values.dateMiseAJour = tools.toDate(values.dateMiseAJour)
       }
 
-      // ajoute les éventuelles propriétés supplémentaire de notre objet initial
-      // _.each(values, function (value, key) {
-      //  if (!entity.hasOwnProperty(key) && typeof value !== 'function') log.debug('la propriété ' +key +' a été ignorée dans le constructeur de Ressource')
-      // })
-
       // la langue par défaut
       if (this.langue) {
         // on rectifie fre en fra
@@ -94,48 +89,69 @@ module.exports = function (component) {
     EntityRessource.validateJsonSchema(schema)
 
     EntityRessource
-      .defineIndex('rid', {unique: true, sparse: true}) // rid est obligatoire, mais on l'a pas encore à la création… => sparse
-      .defineIndex('cle', {unique: true, sparse: true}) // pour loadByCle
+      // rid est obligatoire, mais on l'a pas encore à la création… => sparse
+      .defineIndex('rid', {unique: true, sparse: true})
+      // pour loadByCle
+      .defineIndex('cle', {unique: true, sparse: true})
       .defineIndex('aliasOf')
       .defineIndex('origine')
       .defineIndex('idOrigine')
       .defineIndex('type')
       .defineIndex('titre')
       .defineIndex('niveaux')
-      .defineIndex('categories', 'integer')
-      .defineIndex('typePedagogiques', 'integer')
-      .defineIndex('typeDocumentaires', 'integer')
       // par défaut, la valeur de l'index est la valeur du champ, mais on peut fournir une callback qui la remplace
       // on retourne un tableau qui ne contient que les oid des éléments liés sans la nature de la relation
       // c'est une string car ça peut être 'alias/xxx' où xxx est l'oid de l'alias et pas l'oid d'une ressource
       // (pour gérer les relations avec des oid externes)
+      // @todo renommer l'index en relationRid
       .defineIndex('relations', function () {
+        if (!this.relations || !this.relations.length) return null
         // on retourne pour chaque relation l'item lié, tant pis pour la nature de la relation
         return this.relations.map(relation => relation[1])
       })
       // pour les arbres, on indexe tous les enfants, c'est lourd en écriture d'index
       // mais indispensable si on veut retrouver tous les arbres qui contiennent un item donné
       // (pour mettre à jour titre & résumé par ex).
-      .defineIndex('enfants', 'string', function () {
-        if (!this.enfants || !this.enfants.length) return
-        return getRidEnfants(this)
+      .defineIndex('enfants', function () {
+        if (!this.enfants || !this.enfants.length) return null
+        const rids = getRidEnfants(this)
+        if (rids.length) return null // arrive si l'arbre ne contient que des dossiers sans ressources dedans
+        return rids
       })
-      .defineIndex('auteurs')
-      .defineIndex('auteursParents')
-      .defineIndex('contributeurs')
-      .defineIndex('iPids', function () {
-        return [].concat(this.auteurs, this.auteursParents, this.contributeurs).filter(pid => pid)
-      })
-      // les groupes chez qui la ressource est publiée
-      .defineIndex('groupes', {normalizer: getNormalizedName})
-      // les groupes qui ont un droit d'écriture sur la ressource
-      .defineIndex('groupesAuteurs', {normalizer: getNormalizedName})
       .defineIndex('langue')
       .defineIndex('publie', 'boolean')
       .defineIndex('indexable', 'boolean')
       .defineIndex('restriction', 'integer')
       .defineIndex('dateCreation', 'date')
       .defineIndex('dateMiseAJour', 'date')
+
+    // les array standard
+    // faut retourner une vraie fonction, qui sera appelée via fn.call(entity)
+    const getIndexer = (prop) => function () {
+      return basicArrayIndexer(this[prop])
+    }
+    const defineArrayStdIndex = (prop) => {
+      EntityRessource.defineIndex(prop, getIndexer(prop))
+    }
+    ;[
+      'categories',
+      'typePedagogiques',
+      'typeDocumentaires',
+      'auteurs',
+      'auteursParents',
+      'contributeurs'
+    ].forEach(defineArrayStdIndex)
+
+    // idem mais avec normalizer
+    // les groupes chez qui la ressource est publiée
+    EntityRessource.defineIndex('groupes', {normalizer: getNormalizedName}, getIndexer('groupes'))
+    // les groupes qui ont un droit d'écriture sur la ressource
+    EntityRessource.defineIndex('groupesAuteurs', {normalizer: getNormalizedName}, getIndexer('groupesAuteurs'))
+
+    // un index qui combine les champs contenant des pid
+    EntityRessource.defineIndex('iPids', function () {
+      return basicArrayIndexer([].concat(this.auteurs, this.auteursParents, this.contributeurs))
+    })
 
     // les champs à indexer pour le fulltext
     EntityRessource.defineTextSearchFields([
@@ -150,7 +166,7 @@ module.exports = function (component) {
 
     // beforeStore était dans $ressourceRepository, pour des questions de cycle d'injection de dépendances
     // on le ramène ici pour vérifier l'intégrité "interne" de l'entity, en laissant là-bas un beforeSave
-    // pour vérifier l'intégrité des relations
+    // pour vérifier l'intégrité des relations et voir s'il faut archiver
 
     EntityRessource.beforeStore(function (next) {
       const logAndNext = (errorMessage) => {
@@ -234,7 +250,7 @@ module.exports = function (component) {
           }
         }
 
-        // on génère la clé si elle manque, on la vire si elle n'est plus nécessaire
+        // on génère la clé de lecture si elle manque, on la vire si elle n'est plus nécessaire
         if (this.publie && !this.restriction) {
           // public
           if (this.hasOwnProperty('cle')) delete this.cle
@@ -243,11 +259,9 @@ module.exports = function (component) {
           if (!this.cle) this.cle = uuid()
         }
 
-        // pas de parametres sur les arbres mais une propriété enfants obligatoire
+        // les arbres ont une propriété enfants obligatoire
         if (this.type === 'arbre') {
-          // @todo remettre ça après passage de l'update 35
-          // if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
-          if (!Array.isArray(this.enfants)) this.enfants = []
+          if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
         }
 
         // date de création
@@ -262,8 +276,14 @@ module.exports = function (component) {
           log.dataError(`Ressource ${id} restreinte à ses groupes sans préciser lesquels, on la passe privée`)
           this.restriction = configRessource.constantes.restriction.prive
         }
-        // check des relations dans beforeSave mais pas ici (pour permettre des batch qui sauvent
-        // des paires liées par ex, la 1re a pas encore sa relation en base)
+
+        // version & inc
+        if (!this.version) this.version = 0
+        if (!this.inc) this.inc = 0
+
+        // check des relations dans $ressourceRepository.beforeSave() mais pas ici
+        // (pour permettre des batch qui sauvent des paires liées par ex,
+        // quand la 1re a pas encore sa relation en base)
 
         next(null, this)
       } catch (error) {
