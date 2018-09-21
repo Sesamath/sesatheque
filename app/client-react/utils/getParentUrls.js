@@ -11,7 +11,9 @@ const getParentUrls = () => {
       i++
       frames.push(frame.location.href)
     }
-  } catch (_) {}
+  } catch (error) {
+    console.error(error)
+  }
 
   return frames
 }
