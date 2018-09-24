@@ -18,7 +18,7 @@ package.local-extras.json
 
 # fichiers générés
 documentation
-build
+build*
 
 # trucs qui peuvent traîner à la racine (pm2 qui tourne, dumps, etc.)
 *.pid
