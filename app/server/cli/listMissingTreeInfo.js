@@ -32,7 +32,7 @@
 const flow = require('an-flow')
 const logTask = require('an-log')('sesatheque-cli')
 const config = require('../config')
-const {getRidComponents, getBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {getRidComponents, getBaseUrl} = require('sesatheque-client/dist/server/sesatheques')
 
 /**
  * Rafraichit les datas de tous les arbres

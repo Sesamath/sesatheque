@@ -40,8 +40,8 @@ const config = require('../config')
 const configRessource = require('./config')
 const Ref = require('../../constructors/Ref')
 
-const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/src/sesatheques')
-const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/jstreeConvert')
+const {getBaseId, getBaseIdFromRid, getRidComponents} = require('sesatheque-client/dist/server/sesatheques')
+const {getJstreeChildren, toJstree} = require('sesatheque-client/dist/server/jstree/convert')
 
 const myBaseId = config.application.baseId
 

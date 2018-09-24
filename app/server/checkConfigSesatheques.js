@@ -30,7 +30,7 @@
  */
 'use strict'
 
-const {addSesatheque, getBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {addSesatheque, getBaseUrl} = require('sesatheque-client/dist/server/sesatheques')
 // Cette fonction ne peut pas être dans le module checkConfig, ça causerait des dépendances cycliques
 // checkConfig => config => checkConfigSesatheques (ce module)
 

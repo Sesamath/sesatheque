@@ -31,7 +31,7 @@
 'use strict'
 
 const {application: {baseId: myBaseId}, sesatheques} = require('../config')
-const {exists, getBaseIdFromRid} = require('sesatheque-client/src/sesatheques')
+const {exists, getBaseIdFromRid} = require('sesatheque-client/dist/server/sesatheques')
 
 module.exports = function entityExternalRefFactory (component) {
   component.entity('EntityExternalRef', function () {
