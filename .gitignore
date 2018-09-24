@@ -3,12 +3,12 @@
 .idea
 
 # on utilise yarn, npm possible mais son lock restera local
-package-lock.json
+/package-lock.json
 node_modules
 
 # logs
 *.log
-logs*/*
+/logs*
 
 # la conf locale, mais seulement à la racine
 /_private
@@ -17,10 +17,9 @@ logs*/*
 package.local-extras.json
 
 # fichiers générés
-documentation
-build*
+/documentation
+/build/
+/build.*/
 
-# trucs qui peuvent traîner à la racine (pm2 qui tourne, dumps, etc.)
-*.pid
-*.map
-*.sql
+# trucs qui peuvent traîner à la racine (pm2 qui tourne…)
+/*.pid
