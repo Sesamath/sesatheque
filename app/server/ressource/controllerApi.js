@@ -401,6 +401,10 @@ module.exports = function (component) {
 
       const send = (data) => {
         if (droits) addDroits(data)
+        // on vire les props $* (surtout $original qui double avec les même infos)
+        Object.keys(data).forEach(p => {
+          if (p.substr(0, 1) === '$') delete data[p]
+        })
         $json.send(context, null, data)
       }
 
