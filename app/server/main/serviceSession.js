@@ -56,7 +56,7 @@ module.exports = function (component) {
      * @throws {Error} Si y'avait déjà un user en session ou si personne n'a pas les propriétés minimales
      */
     function login (context, personne) {
-      if (context.session.user) log.error(Error('Il y avait déjà un utilisateur en session'))
+      if (context.session.user) log(Error('Il y avait déjà un utilisateur en session'))
       if (!isEntity(personne, 'EntityPersonne')) throw Error('user n’est pas une entity Utilisateur')
       if (typeof personne.values !== 'function') throw Error(`$session.login veut une entity`)
       context.session.user = personne.values()
