@@ -54,6 +54,7 @@ function getAttrs (ressource) {
       'data-dataurl': props.dataUrl,
       href: props.displayUrl
     }
+    if (ressource.resume) attrs['data-resume'] = ressource.resume
     if (ressource.description) attrs['data-description'] = ressource.description
     if (ressource.commentaires) attrs['data-commentaires'] = ressource.commentaires
     if (ressource.categories) attrs['data-categories'] = JSON.stringify(ressource.categories)
