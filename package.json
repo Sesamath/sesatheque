@@ -122,7 +122,7 @@
     "redux-thunk": "^2.3.0",
     "request": "^2.88.0",
     "roboto-fontface": "^0.10.0",
-    "sesaeditgraphe": "git+https://framagit.org/Sesamath/sesaeditgraphe.git#1.2.0",
+    "sesaeditgraphe": "git+https://framagit.org/Sesamath/sesaeditgraphe.git#1.2.1",
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.0",
