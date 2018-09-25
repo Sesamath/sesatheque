@@ -42,7 +42,7 @@ const isTest = process.env.BABEL_ENV === 'test'
 const isDebug = process.argv.includes('--debug')
 // prod d'après la conf (sauf --debug ou test)
 const isProd = !isDebug && !isTest && /prod/.test(appConfig.application.staging)
-const isUsingDevServer = !!appConfig.devServer
+const isDevServer = !!appConfig.devServer
 
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
@@ -55,6 +55,21 @@ if (process.env.SESATHEQUE_CONF) {
   // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
   // si on lui passe le même environnement)
   buildDir += '.' + process.env.SESATHEQUE_CONF
+}
+
+const defaultBabelLoader = {
+  loader: 'babel-loader',
+  options: babelConfig
+}
+const reactBabelLoader = {
+  loader: 'babel-loader',
+  options: {
+    presets: [
+      '@babel/preset-react',
+      ...babelConfig.presets
+    ],
+    plugins: babelConfig.plugins
+  }
 }
 
 // la conf identique dev/prod
@@ -73,7 +88,7 @@ const conf = {
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
-    chunkFilename: isUsingDevServer ? '[id].js' : '[id]-[chunkhash].js',
+    chunkFilename: isDevServer ? '[id].js' : '[id]-[chunkhash].js',
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
@@ -90,7 +105,11 @@ const conf = {
   }, */
   resolve: {
     extensions: ['.js', '.json', '.jsx'],
+    // on veut tester le path du require, indépendamment du fait que le module soit linké ou pas
+    // sinon avec du (npm|yarn) link sur qq modules, ils ne passent plus les tests de module.rules
+    symlinks: false,
     alias: {
+      // pour pouvoir faire des require('client-react/xxx') sans la collection de ../../..
       'client-react': path.resolve(__dirname, 'app/client-react'),
       plugins: path.resolve(__dirname, 'app/plugins'),
       server: path.resolve(__dirname, 'app/server')
@@ -104,54 +123,40 @@ const conf = {
     }
   },
   module: {
+    // si deux règles matchent sur un fichier les deux sont appliquées,
+    // la dernière de la liste s'applique d'abord
     rules: [
-      {test: /app\/(client|server)\/.*\.js/, loader: 'babel-loader'},
       {
+        test: /app\/(client|constructors|server)\/.*\.js/,
+        exclude: /node_modules/,
+        use: defaultBabelLoader
+      }, {
         test: /app\/(client-react|plugins)\/.*\.jsx?/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-react',
-              ...babelConfig.presets
-            ],
-            plugins: babelConfig.plugins
-          }
-        }
-      },
-      {
+        exclude: /node_modules/,
+        use: reactBabelLoader
+      }, {
         test: /test\/react\/.*\.jsx?/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-react',
-              ...babelConfig.presets
-            ],
-            plugins: babelConfig.plugins
-          }
-        }
-      },
-      // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
-      {test: /app\/server\/config\.js/, loader: 'config-loader', exclude: /node_modules/},
-      // {test: /\.json$/, loader: 'json-loader'},
-      {test: /app\/client\/.*\.html/, loader: 'file-loader'},
-      {test: /app\/plugins\/.*\.html/, loader: 'file-loader'},
-      // editgraphe doit passer par babel
-      {
+        exclude: /node_modules/,
+        use: reactBabelLoader
+      }, {
+        // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
+        // pour _private c'est mis plus loin hors test (ça plante les tests)
+        // important de déclarer ça après le match *.js plus haut (pour que ce config-loader passe avant le babel-loader)
+        test: /app\/server\/config\.js/,
+        exclude: /node_modules/,
+        use: 'config-loader'
+      }, {
+        // editgraphe doit passer par babel
         test: /sesaeditgraphe\/src\/.*\.js/,
-        use: {
-          loader: 'babel-loader',
-          options: babelConfig
-        }
-      },
-      // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-      {
+        use: defaultBabelLoader
+      }, {
+        // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
         test: /sesatheque-client\/src\/.*\.js/,
-        use: {
-          loader: 'babel-loader',
-          options: babelConfig
-        }
+        use: defaultBabelLoader
+      }, {
+        // html pour nos iframes
+        test: /app\/(client|plugins)\/.*\.html/,
+        use: 'file-loader'
       },
       // le statique
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
@@ -170,7 +175,7 @@ if (isTest) {
   // pas besoin de css en test
   conf.module.rules.push({
     test: /\.s?css$/,
-    rules: [{loader: 'null-loader'}]
+    loader: 'null-loader'
   })
 } else {
   // faut ajouter toutes les entry utilisées par nos html en iframe
@@ -203,7 +208,7 @@ if (isTest) {
 
   // On empêche de require un fichier du répertoire _private dans du code client
   // (mais ça plante en mode test)
-  conf.module.rules.unshift({test: /_private\//, loader: 'throw-loader', exclude: /node_modules/})
+  conf.module.rules.push({test: /_private\//, use: 'throw-loader', exclude: /node_modules/})
   conf.module.rules.push({
     test: /\.s?css$/,
     rules: [
@@ -231,7 +236,7 @@ if (isTest) {
   conf.plugins = [
     new CleanWebpackPlugin([buildDir]),
     new CopyWebpackPlugin([
-      {from: './node_modules/sesaeditgraphe/dist'},
+      // {from: './node_modules/sesaeditgraphe/dist'},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
@@ -278,7 +283,7 @@ if (isTest) {
   }
 }
 
-if (isUsingDevServer) {
+if (isDevServer) {
   const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
   conf.devServer = {
     contentBase: conf.output.path,
