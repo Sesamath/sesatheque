@@ -53,7 +53,7 @@ module.exports = function (mainComponent) {
       fsPath: path.join(root, 'build'),
       maxAge: staticMaxAge || '7d'
     }
-    if (envSesathequeConf) expressOptions.fsPath = path.join(expressOptions.fsPath, envSesathequeConf)
+    if (envSesathequeConf) expressOptions.fsPath += '.' + envSesathequeConf
     this.serve('/', expressOptions)
     // et les ressources statiques qui bougent pas (CopyWebpackPlugin arrive pas à les copier, y'en a trop)
     expressOptions.fsPath = path.join(root, 'app', 'assets')
@@ -62,6 +62,12 @@ module.exports = function (mainComponent) {
     // le source react pour toutes ses routes
     // (en dev on sera pas appelé car c'est webpack-dev-server qui gère)
     // cf app/client-react/App.js pour ne pas oublier de routes
+
+    // On continue à passer ici par un contrôleur pour toutes les pages statiques, même si à première
+    // vue ce serait plus intelligent de construire ça au build avec html-webpack-plugin et le servir
+    // en statique (via le serve qui précède), car les 3 routes dynamiques demandent un contrôleur et
+    // représentent > 90% des requêtes, pas la peine de doublonner du code pour optimiser un peu les
+    // 10% qui restent.
     const reactRoutes = [
       '/',
       '/autocomplete',
