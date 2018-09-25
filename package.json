@@ -242,6 +242,7 @@
     "app/assets",
     "_private",
     "build",
+    "build.*",
     "doc_src",
     "documentation"
   ],
