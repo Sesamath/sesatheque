@@ -125,7 +125,7 @@
     "sesaeditgraphe": "git+https://framagit.org/Sesamath/sesaeditgraphe.git#29b60cc3",
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
-    "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#4e9f459a1",
+    "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#2cd5f9e1b401",
     "url-polyfill": "^1.1.0",
     "whatwg-fetch": "^2.0.4"
   },
