@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 'use strict'
-const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {getBaseUrl} = require('sesatheque-client/dist/server/sesatheques')
 const config = require('../config')
 const {checkSesalab, checkSesatheque} = require('../checkConfig')
 

@@ -35,6 +35,8 @@
 const {version} = require('../../../package')
 const {application: {staging}} = require('../config')
 const isDev = !staging.includes('prod')
+const robotCanIndex = ['prod', 'production'].includes(staging) // mais pas preprod
+const {escapeForHtml} = require('sesajstools')
 
 const rawOptions = {headers: {'Content-Type': 'text/html'}}
 
@@ -45,7 +47,8 @@ const rawOptions = {headers: {'Content-Type': 'text/html'}}
  */
 module.exports = function displayRessource (context, ressource) {
   if (!ressource) throw Error('Impossible d’afficher une ressource sans la fournir')
-  const {titre} = ressource
+  const titre = escapeForHtml(ressource.titre)
+  const titreForArg = ressource.titre.replace(/"/g, '“')
 
   const page = `<!DOCTYPE html>
 <html>
@@ -53,10 +56,9 @@ module.exports = function displayRessource (context, ressource) {
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
   <meta charset="utf-8" />
-  <meta name="robots" content="noodp"/>
+  <meta name="robots" content="${robotCanIndex ? 'noodp' : 'noindex'}"/>
   <title>${titre}</title>
-  <meta property="og:title" content="${titre}"/>
-  <meta property="twitter:title" content="${titre}"/>
+  <meta property="og:title" content="${titreForArg}"/>
 </head>
 <body class="iframe">
   <div id="root" role="document">

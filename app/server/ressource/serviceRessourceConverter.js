@@ -32,7 +32,7 @@
 'use strict'
 const flow = require('an-flow')
 const {isArrayNotEmpty} = require('sesajstools')
-const {exists, getBaseUrl, getRidComponents} = require('sesatheque-client/src/sesatheques')
+const {exists, getBaseUrl, getRidComponents} = require('sesatheque-client/dist/server/sesatheques')
 // pour les constantes et les listes, ça reste nettement plus pratique d'accéder directement à l'objet
 // car on a l'autocomplétion sur les noms de propriété
 const config = require('./config')

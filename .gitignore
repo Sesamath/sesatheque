@@ -11,7 +11,7 @@ node_modules
 /logs*
 
 # la conf locale, mais seulement à la racine
-/_private
+/_private/
 
 # évenutelle surcharge locale pour npm
 package.local-extras.json

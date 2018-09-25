@@ -39,7 +39,7 @@ const log = require('sesajstools/utils/log')
 const sjtObj = require('sesajstools/utils/object')
 const sjtUrl = require('sesajstools/http/url')
 
-const {addSesatheque, reBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {addSesatheque, reBaseUrl} = require('sesatheque-client/dist/server/sesatheques')
 // la conf du composant ressource à part
 const configRessource = require('./ressource/config')
 const {version} = require('../../package')

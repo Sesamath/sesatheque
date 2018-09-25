@@ -31,7 +31,7 @@
  */
 
 'use strict'
-const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {getBaseUrl} = require('sesatheque-client/dist/server/sesatheques')
 
 const displayRessource = require('./displayRessource')
 const displayError = require('./displayError')

@@ -31,7 +31,7 @@
 
 'use strict'
 
-const {getBaseUrl, getComponents} = require('sesatheque-client/src/sesatheques')
+const {getBaseUrl, getComponents} = require('sesatheque-client/dist/server/sesatheques')
 const appConfig = require('../config')
 const myBaseId = appConfig.application.baseId
 const routes = appConfig.components.ressource.constantes.routes

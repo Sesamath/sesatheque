@@ -47,7 +47,7 @@ import config from '../../app/server/config'
 import anLog from 'an-log'
 // si on a pas de link vers le module on peut pas aller dans src
 // import sesatheques from 'sesatheque-client/src/sesatheques'
-import sesatheques from 'sesatheque-client/dist/sesatheques'
+import sesatheques from 'sesatheque-client/dist/server/sesatheques'
 import log from 'sesajstools/utils/log'
 
 /**

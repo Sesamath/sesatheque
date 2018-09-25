@@ -30,7 +30,7 @@
  */
 'use strict'
 const uuid = require('an-uuid')
-const {exists, getRidComponents} = require('sesatheque-client/src/sesatheques')
+const {exists, getRidComponents} = require('sesatheque-client/dist/server/sesatheques')
 const {stringify} = require('sesajstools')
 
 const tools = require('../lib/tools')
