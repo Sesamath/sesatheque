@@ -24,6 +24,7 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
 const path = require('path')
 const autoprefixer = require('autoprefixer')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
@@ -46,6 +47,16 @@ const isUsingDevServer = !!appConfig.devServer
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
 
+let buildDir = path.resolve(__dirname, 'build')
+// pour pouvoir compiler les js de plusieurs baseId dans des dossiers différents
+// (qui se retrouveront docroot si on passe le même env SESATHEQUE_CONF au lancement de l'appli)
+if (process.env.SESATHEQUE_CONF) {
+  console.log(`Compilation avec urls absolues pour ${process.env.SESATHEQUE_CONF}`)
+  // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
+  // si on lui passe le même environnement)
+  buildDir += '.' + process.env.SESATHEQUE_CONF
+}
+
 // la conf identique dev/prod
 const conf = {
   mode: isProd ? 'production' : 'development',
@@ -58,7 +69,7 @@ const conf = {
   // cf https://webpack.js.org/configuration/output/#output-filename
   // pour les variables utilisables
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: buildDir,
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
     filename: '[name].js',
@@ -218,6 +229,7 @@ if (isTest) {
   })
 
   conf.plugins = [
+    new CleanWebpackPlugin([buildDir]),
     new CopyWebpackPlugin([
       {from: './node_modules/sesaeditgraphe/dist'},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
@@ -264,15 +276,6 @@ if (isTest) {
     // Nice colored output
     colors: true
   }
-}
-
-// pour pouvoir compiler les js de plusieurs baseId dans des dossiers différents
-// (qui se retrouveront docroot si on passe le même env SESATHEQUE_CONF au lancement de l'appli)
-if (process.env.SESATHEQUE_CONF) {
-  console.log(`Compilation avec urls absolues pour ${process.env.SESATHEQUE_CONF}`)
-  // faut compiler dans un dossier spécifique (le serve des assets ira là-dedans
-  // si on lui passe le même environnement)
-  conf.output.path = path.resolve(__dirname, 'build', process.env.SESATHEQUE_CONF)
 }
 
 if (isUsingDevServer) {

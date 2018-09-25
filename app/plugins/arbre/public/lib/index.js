@@ -296,6 +296,7 @@ export function toRef (jstree, childId) {
     ref.type = child.a_attr['data-type']
     if (child.alt) ref.resume = child.alt
     if (child.a_attr['data-aliasof']) ref.aliasOf = child.a_attr['data-aliasof']
+    if (child.a_attr['data-resume']) ref.resume = child.a_attr['data-resume']
     if (child.a_attr['data-description']) ref.description = child.a_attr['data-description']
     if (child.a_attr['data-commentaires']) ref.commentaires = child.a_attr['data-commentaires']
     ref.public = child.a_attr.hasOwnProperty('data-public') ? child.a_attr['data-public'] === '1' : true
