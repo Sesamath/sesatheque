@@ -5,6 +5,7 @@ import {connect} from 'react-redux'
 import {GET} from '../utils/httpMethods'
 import {listes} from '../../server/ressource/config'
 import {getRessourceListUrl} from '../apiRoutes'
+import getDisplayName from '../utils/getDisplayName'
 
 const limitDefault = 25
 const limitMin = 5
@@ -73,6 +74,8 @@ const resourceListProvider = (WrappedComponent) => {
       )
     }
   }
+
+  ResourceListProvider.displayName = `resourceListProvider(${getDisplayName(WrappedComponent)})`
 
   ResourceListProvider.propTypes = {
     // fourni par le connect mapStateToProps (ça vient du router)

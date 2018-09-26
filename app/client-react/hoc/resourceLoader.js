@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {loadRessource} from '../actions/ressource'
+import getDisplayName from '../utils/getDisplayName'
 
 const mapDispatchToProps = {
   loadRessource
@@ -40,6 +41,8 @@ const resourceLoader = (WrappedComponent) => {
       )
     }
   }
+
+  ResourceLoader.displayName = `resourceLoader(${getDisplayName(WrappedComponent)})`
 
   ResourceLoader.propTypes = {
     match: PropTypes.shape({

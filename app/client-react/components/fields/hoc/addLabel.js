@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
+import getDisplayName from '../../../utils/getDisplayName'
 
 /**
  * High Order Component qui ajoute le label autour du WrappedComponent
@@ -26,6 +27,8 @@ const addLabel = (WrappedComponent, hasForAttr = true) => {
       )
     }
   }
+
+  AddLabel.displayName = `addLabel(${getDisplayName(WrappedComponent)})`
 
   AddLabel.propTypes = {
     className: PropTypes.string,
