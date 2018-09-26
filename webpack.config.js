@@ -35,7 +35,6 @@ const babelConfig = require('./package.json').babel
 const appConfig = require('./app/server/config')
 const pluginsConfig = require('./app/plugins/webpack.plugins')
 const pluginsEntry = require('./app/plugins/webpack.entry')
-const pluginsDir = path.resolve(__dirname, 'app', 'plugins')
 
 // ça c'est pour mocka-webpack
 const isTest = process.env.BABEL_ENV === 'test'
