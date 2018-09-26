@@ -111,7 +111,7 @@
     "morgan": "^1.9.1",
     "query-string": "^6.2.0",
     "react": "^16.5.2",
-    "react-ace": "^6.1.4",
+    "react-ace-builds": "^7.0.0",
     "react-dom": "^16.5.2",
     "react-hot-loader": "^4.3.11",
     "react-paginate": "^5.2.4",

@@ -1,3 +1,8 @@
 .ace_search {
     position: fixed;
 }
+
+// fix for a bug in current ace:
+.ace_editor {
+  overflow: visible;
+}
