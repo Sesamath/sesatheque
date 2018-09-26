@@ -22,6 +22,7 @@ Pour le découpage des chunks
 Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
+const fs = require('fs')
 const path = require('path')
 const autoprefixer = require('autoprefixer')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
@@ -35,6 +36,7 @@ const babelConfig = require('./package.json').babel
 const appConfig = require('./app/server/config')
 const pluginsConfig = require('./app/plugins/webpack.plugins')
 const pluginsEntry = require('./app/plugins/webpack.entry')
+const pluginsDir = path.resolve(__dirname, 'app', 'plugins')
 
 // ça c'est pour mocka-webpack
 const isTest = process.env.BABEL_ENV === 'test'
@@ -233,37 +235,46 @@ if (isTest) {
     ]
   })
 
+  // on veut copier dans build/plugin/xx/ tout ce qui est dans app/plugins/xxx/public
+  // car d'autres viennent piocher dedans (les formatters de sesatheque-client par ex)
+  const copyItems = [
+    // {from: './node_modules/sesaeditgraphe/dist'},
+    // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
+    {from: 'app/assets/favicon.png'}
+  ]
+  fs.readdirSync(pluginsDir).forEach(entry => {
+    const from = `${pluginsDir}/${entry}/public`
+    if (fs.existsSync(from)) copyItems.push({from, to: `build/plugins/${entry}`})
+  })
+  console.log(copyItems)
   conf.plugins = [
     new CleanWebpackPlugin([buildDir]),
-    new CopyWebpackPlugin([
-      // {from: './node_modules/sesaeditgraphe/dist'},
-      // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
-      {from: 'app/assets/favicon.png'}
-    ]),
+    new CopyWebpackPlugin(copyItems),
     ...pluginsConfig
   ]
 
-  // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
-  conf.optimization = {
-    // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
-    // noEmitOnErrors: false,
+  if (isProd) {
+    // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
+    conf.optimization = {
+      // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
+      // noEmitOnErrors: false,
 
-    minimizer: [
-      // we specify a custom UglifyJsPlugin here to get source maps in production
-      // cf https://stackoverflow.com/a/49059746
-      // sinon par défaut y'a du uglify en prod mais sans sourceMap
-      new UglifyJsPlugin({
-        cache: true,
-        parallel: true,
-        uglifyOptions: {
-          compress: false,
-          ecma: 5,
-          mangle: true
-        },
-        sourceMap: true
-      })
-    ]
-
+      minimizer: [
+        // we specify a custom UglifyJsPlugin here to get source maps in production
+        // cf https://stackoverflow.com/a/49059746
+        // sinon par défaut y'a du uglify en prod mais sans sourceMap
+        new UglifyJsPlugin({
+          cache: true,
+          parallel: true,
+          uglifyOptions: {
+            compress: false,
+            ecma: 5,
+            mangle: true
+          },
+          sourceMap: true
+        })
+      ]
+    }
     // cf https://webpack.js.org/plugins/split-chunks-plugin/
     // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
     /*, splitChunks: {
