@@ -99,6 +99,7 @@
     "ip": "^1.1.5",
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",
+    "js-polyfills": "^0.1.42",
     "jstree": "^3.3.5",
     "knacss": "^7.0.7",
     "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.7",
@@ -126,7 +127,6 @@
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.0",
-    "url-polyfill": "^1.1.0",
     "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
