@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
 import Warning from '../../Warning'
+import getDisplayName from '../../../utils/getDisplayName'
 
 /**
  * High Order Component qui affiche les erreurs éventuelles du WrappedComponent
@@ -20,6 +21,8 @@ const showInvalidField = (WrappedComponent) => {
       )
     }
   }
+
+  ShowInvalidField.displayName = `showInvalidField(${getDisplayName(WrappedComponent)})`
 
   ShowInvalidField.propTypes = {
     meta: PropTypes.shape({

@@ -3,6 +3,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import ensureLogged from '../../../hoc/ensureLogged'
 import {loadGroupes} from '../../../actions/groupes'
+import getDisplayName from '../../../utils/getDisplayName'
 
 const mapDispatchToProps = {
   loadGroupes
@@ -43,6 +44,8 @@ const groupesLoader = (WrappedComponent) => {
       )
     }
   }
+
+  GroupesLoader.displayName = `groupesLoader(${getDisplayName(WrappedComponent)})`
 
   GroupesLoader.propTypes = {
     loadGroupes: PropTypes.func,
