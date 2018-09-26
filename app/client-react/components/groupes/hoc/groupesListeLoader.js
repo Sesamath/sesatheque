@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {GET} from '../../../utils/httpMethods'
 import ensureLogged from '../../../hoc/ensureLogged'
+import getDisplayName from '../../../utils/getDisplayName'
 
 /**
  * Higher Order Component qui charge les groupes ouverts ou publics (suivant url passée)
@@ -29,6 +30,8 @@ const groupesListeLoader = url => WrappedComponent => {
       )
     }
   }
+
+  GroupesListeLoader.displayName = `groupesListeLoader(${getDisplayName(WrappedComponent)})`
 
   GroupesListeLoader.propTypes = {}
 

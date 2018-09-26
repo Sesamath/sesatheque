@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {forkAlias} from '../actions/ressource'
+import getDisplayName from '../utils/getDisplayName'
 
 const mapDispatchToProps = (dispatch) => ({
   ensuresIsForked: ({oid, aliasOf}) => {
@@ -44,6 +45,8 @@ const aliasForker = (ResourceForm) => {
       )
     }
   }
+
+  AliasForker.displayName = `aliasForker(${getDisplayName(ResourceForm)})`
 
   AliasForker.propTypes = {
     ensuresIsForked: PropTypes.func,

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import getDisplayName from '../utils/getDisplayName'
 
 const mapStateToProps = ({session}) => ({
   personne: session && session.personne
@@ -26,6 +27,8 @@ const ensureLogged = (WrappedComponent) => {
       )
     }
   }
+
+  EnsureLogged.displayName = `ensureLogged(${getDisplayName(WrappedComponent)})`
 
   EnsureLogged.propTypes = {
     personne: PropTypes.object
