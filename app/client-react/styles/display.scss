@@ -48,7 +48,7 @@ html, body {padding: 0; margin: 0;height: 100%;}
 #errors {
   margin: 0;
   padding: 0;
-  color: $color-danger;
+  color: $color-danger-dark;
   background-color: $background-base;
   text-align: center;
   font-size: 1.2em;
@@ -56,8 +56,8 @@ html, body {padding: 0; margin: 0;height: 100%;}
 }
 .error {
   @include avert($fa-var-exclamation-triangle);
-  color: $color-danger;
-  border-color: $color-danger;
+  color: $color-danger-dark;
+  border-color: $color-danger-dark;
 }
 .warning {
   @include avert($fa-var-exclamation);
