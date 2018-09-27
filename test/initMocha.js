@@ -55,5 +55,10 @@ require('@babel/register')({
   presets: [
     ['@babel/preset-env', {'targets': 'node 10'}],
     ['@babel/preset-react']
+  ],
+  plugins: [
+    ['module-resolver', {
+      root: ['./app']
+    }]
   ]
 })
