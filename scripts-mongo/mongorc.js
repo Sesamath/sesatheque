@@ -2,12 +2,12 @@
 // il est utilisé pour précharger ces fonctions utiles lorsque l'on ouvre un shell
 // avec ./scripts/mongoApp
 
-let aide = '\nCe shell ajoute plusieurs fonctions utiles pour sesalab: '
+let aide = '\nCe shell ajoute plusieurs fonctions utiles pour sesatheque : '
 /* global db print printjson */
 /* eslint-disable no-unused-vars */
 
 // des helpers
-aide += '\n\nCes fonctions peuvent aussi être utile dans un find().forEach(e => …)'
+aide += '\n\nCes fonctions peuvent être utile dans un find().forEach(e => …)'
 
 const printData = (entity) => printjson(entity._data)
 aide += '\n  printData(entity) => affiche entity._data'
@@ -56,11 +56,11 @@ aide += '\n  find(collectionName, criteria, filters) : alias de db[collectionNam
 const data = (collection, criteria, filters) => find(collection, criteria, filters).limit(50).forEach(printData)
 aide += '\n  data(collectionName, criteria, filters) : exécute find puis affiche les 50 premiers résultats (_data only, en clair)'
 
+const indexes = (collection, criteria, filters) => find(collection, criteria, filters).limit(50).forEach(printIndexes)
+aide += '\n  indexes(collectionName, criteria, filters) : exécute find puis affiche les 50 premiers résultats ({indexes, data})'
+
 const all = (collection, criteria, filters) => find(collection, criteria, filters).limit(50).forEach(printAll)
 aide += '\n  all(collectionName, criteria, filters) : exécute find puis affiche les 50 premiers résultats ({indexes, data})'
-
-const indexes = (collection, criteria, filters) => find(collection, criteria, filters).limit(50).forEach(printIndexes)
-aide += '\n  index(collectionName, criteria, filters) : exécute find puis affiche les 50 premiers résultats ({indexes, data})'
 
 aide += '\n\nLeurs déclinaisons sur nos collections'
 
