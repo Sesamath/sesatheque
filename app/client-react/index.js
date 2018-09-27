@@ -7,9 +7,6 @@ import {render} from 'react-dom'
 import App from './App'
 import checkBrowser from './utils/checkBrowser'
 
-// inclusion du polyfill URL:
-require('js-polyfills/url')
-
 checkBrowser()
 
 const homeContentContainer = document.getElementById('homeContent')
