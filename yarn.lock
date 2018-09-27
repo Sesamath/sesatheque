@@ -8860,8 +8860,8 @@ serve-static@1.13.2, serve-static@^1.13.1:
     sesatheque-client "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.0"
 
 "sesajstools@git+https://framagit.org/Sesamath/sesajstools.git":
-  version "1.0.24"
-  resolved "git+https://framagit.org/Sesamath/sesajstools.git#cd543e16b0fc9d07f1b2e1302006219b71084080"
+  version "1.0.25"
+  resolved "git+https://framagit.org/Sesamath/sesajstools.git#faba5dba959e088c550ba4810951c9ef57c791d1"
   dependencies:
     chai "^4.1.2"
     lodash.isequal "^4.5.0"
