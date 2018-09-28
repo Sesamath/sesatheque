@@ -36,12 +36,10 @@ const appConfig = require('./app/server/config')
 const pluginsConfig = require('./app/plugins/webpack.plugins')
 const pluginsEntry = require('./app/plugins/webpack.entry')
 
-// ça c'est pour mocka-webpack
-const isTest = process.env.BABEL_ENV === 'test'
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
 // prod d'après la conf (sauf --debug ou test)
-const isProd = !isDebug && !isTest && /prod/.test(appConfig.application.staging)
+const isProd = !isDebug && /prod/.test(appConfig.application.staging)
 const isDevServer = !!appConfig.devServer
 
 let baseUrl = appConfig.application.baseUrl
@@ -72,14 +70,33 @@ const reactBabelLoader = {
   }
 }
 
+// ajout en prod des js appelés par des sites tiers
+const conditionalEntries = isProd ? {
+  // le client classique
+  client: 'sesatheque-client',
+  // un autre client plus light qui ne fait que récupérer des ressources sur l'api (sites tiers)
+  fetch: 'sesatheque-client/src/fetch.js'
+} : {}
+
 // la conf identique dev/prod
 const conf = {
   mode: isProd ? 'production' : 'development',
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     ...pluginsEntry,
-    react: './app/client-react/index.js'
-    // le reste est mis plus bas si !isTest
+    react: './app/client-react/index.js',
+    // pour les html en iframe
+    bugsnag: './app/client/page/bugsnag.js',
+    display: './app/client/display/index.js',
+    // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
+    editArbre: './app/plugins/arbre/public/edit.js',
+    import: './app/client/edit/import.js',
+    // (c'est déjà inclus par display, est-ce bien utile ?)
+    page: './app/client/page/index.js',
+    // utilisé par editgraphe.html (plugin j3p)
+    registerSesatheques: './app/client/page/registerSesatheques.js',
+    // pour editGraphe et showParcours, c'est copié tel quel plus bas (il a sa conf webpack de son coté)
+    ...conditionalEntries
   },
   // cf https://webpack.js.org/configuration/output/#output-filename
   // pour les variables utilisables
@@ -162,78 +179,35 @@ const conf = {
       {test: /\.(jpe?g|png|gif|otf|eot)(\?.*)?$/, loader: 'url-loader?limit=10000'},
       {test: /\.svg(\?\S*)?$/, loader: 'url-loader?mimetype=image/svg+xml&limit=10000'},
       {test: /\.ttf(\?\S*)?$/, loader: 'url-loader?mimetype=application/octet-stream&limit=10000'},
-      {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'}
-      // css plus loin pour éviter la compil sass en test
-    ]
-  }
-}
-
-if (isTest) {
-  // pour avoir un dossier séparé faut aussi préciser un SESATHEQUE_CONF=test
-  // (mocha-webpack ne met rien dans output)
-
-  // pas besoin de css en test
-  conf.module.rules.push({
-    test: /\.s?css$/,
-    loader: 'null-loader'
-  })
-} else {
-  // faut ajouter toutes les entry utilisées par nos html en iframe
-  Object.assign(conf.entry, {
-    // pour les html en iframe
-    bugsnag: './app/client/page/bugsnag.js',
-    display: './app/client/display/index.js',
-    // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
-    editArbre: './app/plugins/arbre/public/edit.js',
-    import: './app/client/edit/import.js',
-    // (c'est déjà inclus par display, est-ce bien utile ?)
-    page: './app/client/page/index.js',
-    // utilisé par editgraphe.html (plugin j3p)
-    registerSesatheques: './app/client/page/registerSesatheques.js'
-    // pour editGraphe et showParcours, c'est copié tel quel plus bas (il a sa conf webpack de son coté)
-  })
-
-  if (isProd) {
-    // faut ajouter aussi les js appelés par des sites tiers
-    Object.assign(conf.entry, {
-      // le client classique
-      client: 'sesatheque-client',
-      // un autre client plus light qui ne fait que récupérer des ressources sur l'api (sites tiers)
-      fetch: 'sesatheque-client/src/fetch.js'
-    })
-  }
-
-  // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx
-  conf.devtool = isProd ? 'source-map' : 'eval'
-
-  // On empêche de require un fichier du répertoire _private dans du code client
-  // (mais ça plante en mode test)
-  conf.module.rules.push({test: /_private\//, use: 'throw-loader', exclude: /node_modules/})
-  conf.module.rules.push({
-    test: /\.s?css$/,
-    rules: [
-      {loader: 'style-loader'},
-      {loader: 'css-loader'},
+      {test: /\.woff2?(\?\S*)?$/, loader: 'url-loader?mimetype=application/font-woff&limit=10000'},
+      // On empêche de require un fichier du répertoire _private dans du code client:
+      {test: /_private\//, use: 'throw-loader', exclude: /node_modules/},
       {
-        loader: 'postcss-loader',
-        options: {
-          plugins: () => [
-            autoprefixer({
-              browsers: [
-                'ie 11',
-                'last 3 iOS versions',
-                'last 3 Safari versions',
-                'last 3 Android versions'
+        test: /\.s?css$/,
+        rules: [
+          {loader: 'style-loader'},
+          {loader: 'css-loader'},
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: () => [
+                autoprefixer({
+                  browsers: [
+                    'ie 11',
+                    'last 3 iOS versions',
+                    'last 3 Safari versions',
+                    'last 3 Android versions'
+                  ]
+                })
               ]
-            })
-          ]
-        }
-      },
-      {test: /\.scss$/, loader: 'sass-loader'}
+            }
+          },
+          {test: /\.scss$/, loader: 'sass-loader'}
+        ]
+      }
     ]
-  })
-
-  conf.plugins = [
+  },
+  plugins: [
     new CleanWebpackPlugin([buildDir]),
     new CopyWebpackPlugin([
       // {from: './node_modules/sesaeditgraphe/dist'},
@@ -241,10 +215,11 @@ if (isTest) {
       {from: 'app/assets/favicon.png'}
     ]),
     ...pluginsConfig
-  ]
-
+  ],
+  // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx
+  devtool: isProd ? 'source-map' : 'eval',
   // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
-  conf.optimization = {
+  optimization: {
     // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
     // noEmitOnErrors: false,
 
@@ -272,10 +247,9 @@ if (isTest) {
       automaticNameDelimiter: '_', // faut un caractère compatible avec un nom de variable js
       maxSize: 201000 // bytes, mais si on met ça on a plus de react.js, seulement des react_<chunckhasch>.js
     } */
-  }
-
+  },
   // cf https://webpack.js.org/configuration/stats/
-  conf.stats = {
+  stats: {
     // indique l'heure de build, très utile en mode watch
     builtAt: true,
     // Nice colored output

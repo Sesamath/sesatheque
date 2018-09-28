@@ -54,13 +54,12 @@ export const Header = ({
   personne,
   loginLink,
   logoutUrl,
-  sso,
-  currentUrl
+  sso
 }) => {
   if (isIframeLayout) return null
 
-  const setRedirect = (str) => {
-    return str.replace('((s))', currentUrl)
+  const setRedirect = str => {
+    return str.replace('((s))', document.location.href)
   }
 
   const loginButton = loginLink ? (
@@ -151,33 +150,18 @@ Header.propTypes = {
   sso: PropTypes.shape({
     links: PropTypes.arrayOf(PropTypes.object),
     name: PropTypes.string
-  }),
-  currentUrl: PropTypes.string
-}
-
-const getCurrentUrl = ({
-  pathname,
-  search,
-  hash
-}) => {
-  const currentUrl = new URL(pathname, document.location)
-  currentUrl.search = search
-  currentUrl.hash = hash
-
-  return currentUrl.href
+  })
 }
 
 const mapStateToProps = ({
-  session,
-  router: {location}
+  session
 }) => ({
   personne: session && session.personne,
   logoutUrl: session && session.logoutUrl,
   // we suppose that loginLinks is a singleton
   // todo: add support for several links
   loginLink: session && session.loginLinks && session.loginLinks[0],
-  sso: session && session.sso,
-  currentUrl: getCurrentUrl(location)
+  sso: session && session.sso
 })
 
 export default getContext({isIframeLayout: PropTypes.bool})(connect(mapStateToProps, {})(Header))

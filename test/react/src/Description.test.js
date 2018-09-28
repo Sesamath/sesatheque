@@ -1,12 +1,21 @@
 import React from 'react'
 import {Provider} from 'react-redux'
-import TestRenderer from 'react-test-renderer'
 import {expect} from 'chai'
-import {Description} from '../../app/client-react/components/Description'
+import {Description} from '../../../app/client-react/components/Description'
 import {createStore} from 'redux'
-import ressources from '../fixtures/ressources.js'
+import ressources from '../../fixtures/ressources.js'
 import {MemoryRouter} from 'react-router'
 import getUrls from 'sesatheque-client/src/getUrls'
+import Enzyme, { mount } from 'enzyme'
+import Adapter from 'enzyme-adapter-react-16'
+import window from '../setup'
+
+Enzyme.configure({adapter: new Adapter()})
+
+const domElement = document.getElementById('app')
+const mountOptions = {
+  attachTo: domElement
+}
 
 const getRoute = ({oid}) => `/ressource/decrire/${oid}`
 
@@ -21,32 +30,33 @@ const getStore = (ressource) => createStore(() => ({
   ressource
 }))
 
-const getTestRenderer = (ressource) => {
-  ressource._urls = getUrls(ressource)
-  const store = getStore(ressource)
-  const wrappedComponent = (
-    <MemoryRouter>
-      <Provider store={store}>
-        <Description ressource={ressource} />
-      </Provider>
-    </MemoryRouter>
-  )
-  return TestRenderer.create(wrappedComponent)
-}
-
 describe('<Description />', () => {
+  before(() => { global.window = window })
+  after(() => { delete global.window })
+
+  const getTestRenderer = (ressource) => {
+    ressource._urls = getUrls(ressource)
+    const store = getStore(ressource)
+    const WrappedComponent = () => (
+      <MemoryRouter>
+        <Provider store={store}>
+          <Description ressource={ressource} />
+        </Provider>
+      </MemoryRouter>
+    )
+    return mount(<WrappedComponent />, mountOptions)
+  }
+
   const check = (ressource) => {
     const testComponent = getTestRenderer(ressource)
 
     const isAlias = !!ressource.aliasOf
     // Le titre
-    const h1 = testComponent.root.findByType('h1')
-    expect(h1.children).to.have.length(1)
     const expectedTitre = ressource.titre + (isAlias ? ' (alias)' : '')
-    expect(h1.children[0]).to.equals(expectedTitre)
+    expect(testComponent.find('h1').text()).to.equals(expectedTitre)
 
     // Le bloc de description doit contenir le bon nb de div
-    const bloc = testComponent.root.findByProps({className: 'grid-5 has-gutter clear-right'})
+    const bloc = testComponent.find('.grid-5.has-gutter.clear-right')
     let expectedLength = 14 // la base pour tous
     if (isAlias) {
       expectedLength += 2
@@ -56,7 +66,7 @@ describe('<Description />', () => {
         if (ressource[key] && ressource[key].length) expectedLength += ressource[key].length * 2
       })
     }
-    expect(bloc.children).to.have.length(expectedLength)
+    expect(bloc.children()).to.have.length(expectedLength)
   }
 
   it('affiche les infos d’une ressource', () => {
