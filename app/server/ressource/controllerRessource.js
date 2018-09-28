@@ -102,11 +102,6 @@ module.exports = function (component) {
      * @route GET /ressource/voir/:oid
      */
     controller.get('ressource/voir/:oid', function (context) {
-      if (!$accessControl.isAuthenticated(context)) {
-        context.status = 401
-        return displayError(context, 'Vous devez être authentifié pour afficher cette page')
-      }
-
       $ressourceRepository.load(context.arguments.oid, function (error, ressource) {
         if (error) {
           context.status = 500
@@ -148,12 +143,6 @@ module.exports = function (component) {
         return displayError(context, `Chemin /ressource/cle inconnu`)
       }
 
-      // check auth
-      if (!$accessControl.isAuthenticated(context)) {
-        context.status = 401
-        return displayError(context, 'Vous devez être authentifié pour afficher cette page')
-      }
-
       // on peut charger
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) {
@@ -162,6 +151,9 @@ module.exports = function (component) {
         } else if (ressource) {
           if (isPublic(ressource)) {
             context.redirect(context.request.originalUrl.replace('ressource/', 'public/'), 302)
+          } else if (!$accessControl.isAuthenticated(context)) {
+            context.status = 401
+            displayError(context, 'Vous devez être authentifié pour visionner cette ressource')
           } else if ($accessControl.hasReadPermission(context, ressource)) {
             displayRessource(context, ressource)
           } else {
