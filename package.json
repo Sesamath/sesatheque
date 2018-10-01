@@ -41,7 +41,7 @@
     "start": "env NODE_ENV=production node app/server/start.js",
     "start:commun": "env NODE_ENV=production SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm run start:commun & npm start",
-    "start:dev": "node_modules/.bin/webpack-dev-server --hot & env NODE_ENV=dev node app/server/start.js",
+    "start:dev": "node_modules/.bin/webpack-dev-server --hot & env NODE_ENV=dev nodemon --watch app/server app/server/start.js",
     "start:devFront": "node_modules/.bin/webpack-dev-server --hot",
     "start:devBack": "env NODE_ENV=dev node -r trace --stack-trace-limit=100 app/server/start.js",
     "start:devcommun": "env SESATHEQUE_CONF=commun webpack-dev-server --hot & env NODE_ENV=dev SESATHEQUE_CONF=commun node app/server/start.js",
