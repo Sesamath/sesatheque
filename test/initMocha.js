@@ -40,6 +40,7 @@
 // faut retourner true pour que babel ignore le fichier
 const babelIgnoreFilter = (file) => {
   if (/\/node_modules\//.test(file)) {
+    if (/\/app\/plugins/.test(file)) return false
     return !/\/sesatheque-client\/src\//.test(file)
   }
   return false

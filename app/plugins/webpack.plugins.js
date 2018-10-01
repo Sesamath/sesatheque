@@ -1,9 +1,13 @@
-const mathgraph = require('./mathgraph/webpack.plugins')
-const em = require('./em/webpack.plugins')
+const {plugins} = require('./package')
+const {version} = require('../server/config')
 
-const plugins = [
-  ...mathgraph,
-  ...em
-]
+const params = {version}
 
-module.exports = plugins
+const webpackPlugins = []
+
+plugins.forEach(plugin => {
+  const newWebpackPlugins = require(`${plugin}/webpack.plugins`)(params)
+  webpackPlugins.push(...newWebpackPlugins)
+})
+
+module.exports = webpackPlugins

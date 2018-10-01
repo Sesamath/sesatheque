@@ -1,7 +1,10 @@
-const j3p = require('./j3p/webpack.entry')
-const mathgraph = require('./mathgraph/webpack.entry')
+const {plugins} = require('./package')
 
-module.exports = {
-  ...j3p,
-  ...mathgraph
-}
+const entries = {}
+
+plugins.forEach(plugin => {
+  const pluginEntries = require(`${plugin}/webpack.entry`)
+  Object.assign(entries, pluginEntries)
+})
+
+module.exports = entries
