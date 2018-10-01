@@ -33,7 +33,7 @@
 const bugsnagJs = require('bugsnag-js')
 // on récupère ce que webpackConfigLoader.js nous file
 const {application, bugsnag, version} = require('../../server/config')
-const getParentUrls = require('../../client-react/utils/getParentUrls')
+const getParentUrls = require('../../client-react/utils/getParentUrls').default
 
 // ce fichier met un objet busgnagClient en global
 // ATTENTION il y a une deuxième conf bugsnag dans app/client-react/App.js pour le client react
