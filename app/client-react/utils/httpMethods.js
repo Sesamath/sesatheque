@@ -39,7 +39,7 @@ const factory = (method) => (url, options = {}) => {
     'Accept': 'application/json'
   }
   const fetchOptions = {
-    credentials: 'include',
+    credentials: 'same-origin',
     ...options,
     method,
     headers

@@ -18,12 +18,7 @@ import './TextEditor.scss'
 function formatJSON (value) {
   if (typeof value === 'string') return value
 
-  try {
-    return JSON.stringify(value, null, 2)
-  } catch (error) {
-    console.error(error)
-    return '{}'
-  }
+  return JSON.stringify(value, null, 2)
 }
 
 const TextEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate, mode }) => (
@@ -33,7 +28,7 @@ const TextEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate, m
     fontSize={14}
     onChange={onChange}
     onFocus={onFocus}
-    onBlur={(_, editor) => onBlur(editor.getValue())}
+    onBlur={() => onBlur()}
     onValidate={onValidate}
     width="100%"
     highlightActiveLine={true}

@@ -1,4 +1,4 @@
-const {plugins} = require('./package')
+const {plugins} = require('./plugins')
 const {version} = require('../server/config')
 
 const params = {version}

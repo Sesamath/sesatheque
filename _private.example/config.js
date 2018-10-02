@@ -143,7 +143,25 @@ module.exports = {
       baseUrl: 'https://localhost:3000/'
     }
     // il pourrait y en avoir plusieurs
-  ]
+  ],
+  // configuration des plugins de visualisation et d'édition
+  // des ressources:
+  plugins: {
+    internal: [
+      'am',
+      'arbre',
+      'ato',
+      'coll_doc',
+      'ecjs',
+      'em',
+      'iep',
+      'j3p',
+      'url'
+    ],
+    external: {
+      '@sesatheque-plugins/mathgraph': 'git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git'
+    }
+  }
 }
 
 // pour ajouter le SSO Sésamath, il faut installer sesasso-bibli et l'ajouter dans son _private

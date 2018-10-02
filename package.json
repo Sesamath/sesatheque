@@ -10,7 +10,7 @@
     "url": "git@src.sesamath.net:sesatheque"
   },
   "scripts": {
-    "build": "env NODE_ENV=production node_modules/.bin/webpack",
+    "build": "env NODE_ENV=production node_modules/.bin/webpack && es-check es5 './build/**/*.js' -v",
     "build:commun": "env SESATHEQUE_CONF=commun npm run build",
     "build:commun:dev": "env SESATHEQUE_CONF=commun npm run build:dev",
     "build:commun:watch": "env SESATHEQUE_CONF=commun npm run build:watch",
@@ -58,7 +58,7 @@
     "prod": "./scripts/run -sp",
     "stop": "./scripts/run -s",
     "watch": "./scripts/run -swl",
-    "postinstall": "cd app/plugins && node buildPackageJson && yarn install"
+    "postinstall": "cd app/plugins && node buildSrc && yarn install"
   },
   "babel": {
     "presets": [
@@ -128,7 +128,7 @@
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.0",
-    "whatwg-fetch": "^2.0.4"
+    "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.0",
@@ -141,7 +141,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "autoprefixer": "^9.1.5",
-    "babel-eslint": "^9.0.0",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.2",
     "babel-plugin-module-resolver": "^3.1.1",
     "chai": "^4.1.2",
@@ -151,6 +151,7 @@
     "css-loader": "^1.0.0",
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
+    "es-check": "^4.0.0",
     "eslint": "^5.6.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",

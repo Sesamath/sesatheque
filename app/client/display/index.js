@@ -45,8 +45,6 @@ const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const xhr = require('sesajstools/http/xhr')
 
 const page = require('../page')
-const consoleErrorSpy = require('../page/consoleErrorSpy')
-const errorCatcher = require('../page/errorCatcher')
 const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
 const displays = require('plugins/displays').default
@@ -353,35 +351,6 @@ module.exports = function display (ressource, options, next) {
 
     // on ajoute notifyError à options
     options.notifyError = notifyError
-
-    // on veut récupérer les erreurs de la console pour les envoyer dans le log au unload
-    consoleErrorSpy.start()
-    // idem pour les autres erreurs
-    errorCatcher.start()
-    // et pour les envoyer au unload si y'en a
-    const unloadListener = () => {
-      // à priori si on est au unload window va être détruit et c'est inutile de faire ça
-      // mais au cas où on a envoyé un alert, pas la peine de boucler…
-      // (ou si un navigateur ne détruisait pas les listener au changement d'url d'une iframe par ex)
-      window.removeEventListener('unload', unloadListener)
-      // c'est quand même pénible, il reste plein de trucs vides…
-      // (alors que les error devraient toutes avoir été remplacées par leur stack)
-      const errors = consoleErrorSpy.stop().concat(errorCatcher.stop()).filter(e => {
-        const j = sjt.stringify(e)
-        if (j === '{}' || j === '{"isTrusted":true}') return false
-      })
-      if (!errors.length) return
-      const data = {
-        rid: ressource.rid,
-        type: ressource.type,
-        error: 'Erreurs du display',
-        // les Error ont déjà été remplacées par leur stack (pour éviter de se faire dégager
-        // par le stringify du post en JSON)
-        errors
-      }
-      xhrPostSync('/api/notifyError', data, alertIfError)
-    }
-    window.addEventListener('unload', unloadListener)
 
     // ajout de metadata pour bugsnag
     if (window.bugsnagClient) {
