@@ -40,6 +40,9 @@ import 'jstree/dist/themes/default/style.css'
 import {sesatheques} from '../../../server/config'
 import {addError} from '../../../client/page'
 import * as stJstree from './lib'
+import fermerImage from './images/fermer.png'
+import agrandirImage from './images/agrandir.png'
+import reduireImage from './images/reduire.png'
 
 import 'client-react/styles/display.scss'
 
@@ -68,7 +71,6 @@ const display = (ressource, options, next) => {
       const errorsContainer = options.errorsContainer
       if (!errorsContainer) throw new Error('Il faut passer dans les options un conteneur html pour les erreurs')
 
-      const pluginBase = options.pluginBase
       if (!ressource.base) ressource.base = '/'
 
       // un div d'aperçu
@@ -109,17 +111,17 @@ const display = (ressource, options, next) => {
             }
           })
           const apercuFermer = dom.addElement(boutons, 'img', {
-            src: pluginBase + 'images/fermer.png',
+            src: fermerImage,
             alt: "fermer l'aperçu",
             style: { float: 'right' }
           })
           const apercuAgrandir = dom.addElement(boutons, 'img', {
-            src: pluginBase + 'images/agrandir.png',
+            src: agrandirImage,
             alt: "agrandir l'aperçu",
             style: { float: 'right' }
           })
           const apercuReduire = dom.addElement(boutons, 'img', {
-            src: pluginBase + 'images/reduire.png',
+            src: reduireImage,
             alt: "réduire l'aperçu",
             style: { float: 'right' }
           })

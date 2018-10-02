@@ -33,8 +33,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 // (seatheque-client, sesaeditgraphe et plugins d'édition)
 const babelConfig = require('./package.json').babel
 const appConfig = require('./app/server/config')
-const pluginsConfig = require('./app/plugins/webpack.plugins')
-const pluginsEntry = require('./app/plugins/webpack.entry')
+const {entries, plugins, rules} = require('./app/plugins/webpack.config')
 
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
@@ -83,7 +82,7 @@ const conf = {
   mode: isProd ? 'production' : 'development',
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
-    ...pluginsEntry,
+    ...entries,
     react: './app/client-react/index.js',
     // pour les html en iframe
     bugsnag: './app/client/page/bugsnag.js',
@@ -150,6 +149,7 @@ const conf = {
         use: defaultBabelLoader
       }, {
         test: /app\/(client-react|plugins)\/.*\.jsx?$/,
+        exclude: /node_modules\/(?!(@sesatheque-plugins)\/).*/,
         use: reactBabelLoader
       }, {
         test: /test\/react\/.*\.jsx?/,
@@ -162,11 +162,8 @@ const conf = {
         test: /app\/server\/config\.js/,
         exclude: /node_modules/,
         use: 'config-loader'
-      }, {
-        // editgraphe doit passer par babel
-        test: /sesaeditgraphe\/src\/.*\.js/,
-        use: defaultBabelLoader
-      }, {
+      },
+      {
         // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
         test: /sesatheque-client\/.*\.js/,
         use: defaultBabelLoader
@@ -204,7 +201,11 @@ const conf = {
           },
           {test: /\.scss$/, loader: 'sass-loader'}
         ]
-      }
+      },
+      ...rules.map(regExp => ({
+        test: regExp,
+        use: reactBabelLoader
+      }))
     ]
   },
   plugins: [
@@ -214,7 +215,7 @@ const conf = {
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
-    ...pluginsConfig
+    ...plugins
   ],
   // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx
   devtool: isProd ? 'source-map' : 'eval',
