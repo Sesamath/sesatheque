@@ -24,5 +24,9 @@ package.local-extras.json
 # trucs qui peuvent traîner à la racine (pm2 qui tourne…)
 /*.pid
 
-# package.json des plugins
+# répertoire des plugins
 /app/plugins/package.json
+/app/plugins/display.js
+/app/plugins/editors.js
+/app/plugins/icons.js
+/app/plugins/yarn.lock
