@@ -33,7 +33,7 @@ const TextEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate, m
     fontSize={14}
     onChange={onChange}
     onFocus={onFocus}
-    onBlur={(_, editor) => onBlur(editor.getValue())}
+    onBlur={() => onBlur()}
     onValidate={onValidate}
     width="100%"
     highlightActiveLine={true}
