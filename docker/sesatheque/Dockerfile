@@ -10,8 +10,12 @@ RUN curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$
     && ln -snf /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
     && rm yarn-v$YARN_VERSION.tar.gz
 
-WORKDIR /sesatheque
+RUN userdel node
 
-RUN yarn config set cache-folder /sesatheque/.cache/yarn
+ARG UID=1000
+RUN useradd --uid $UID --create-home app
+USER app
+
+WORKDIR /home/app/sesatheque
 
 # le reste est fait au runtime, cf docker-compose.yml
