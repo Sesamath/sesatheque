@@ -10,7 +10,7 @@
     "url": "git@src.sesamath.net:sesatheque"
   },
   "scripts": {
-    "build": "env NODE_ENV=production node_modules/.bin/webpack",
+    "build": "env NODE_ENV=production node_modules/.bin/webpack && es-check es5 './build/**/*.js' -v",
     "build:commun": "env SESATHEQUE_CONF=commun npm run build",
     "build:commun:dev": "env SESATHEQUE_CONF=commun npm run build:dev",
     "build:commun:watch": "env SESATHEQUE_CONF=commun npm run build:watch",
@@ -151,6 +151,7 @@
     "css-loader": "^1.0.0",
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
+    "es-check": "^4.0.0",
     "eslint": "^5.6.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
