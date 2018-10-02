@@ -128,7 +128,7 @@
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.0",
-    "whatwg-fetch": "^2.0.4"
+    "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.0",
