@@ -168,7 +168,7 @@ const conf = {
         use: defaultBabelLoader
       }, {
         // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-        test: /sesatheque-client\/src\/.*\.js/,
+        test: /sesatheque-client\/.*\.js/,
         use: defaultBabelLoader
       }, {
         // html pour nos iframes
