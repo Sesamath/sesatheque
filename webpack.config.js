@@ -144,16 +144,12 @@ const conf = {
     // la dernière de la liste s'applique d'abord
     rules: [
       {
-        test: /app\/(client|constructors|server)\/.*\.js/,
-        exclude: /node_modules/,
+        test: /app\/(client|constructors|server)\/.*\.js$/,
+        exclude: /node_modules\/(?!(@sesatheque-plugins)\/).*/,
         use: defaultBabelLoader
       }, {
         test: /app\/(client-react|plugins)\/.*\.jsx?$/,
         exclude: /node_modules\/(?!(@sesatheque-plugins)\/).*/,
-        use: reactBabelLoader
-      }, {
-        test: /test\/react\/.*\.jsx?/,
-        exclude: /node_modules/,
         use: reactBabelLoader
       }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
