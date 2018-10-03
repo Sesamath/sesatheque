@@ -204,6 +204,7 @@ export const Description = ({
                       <a
                         href={url}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {titre}
                       </a>
