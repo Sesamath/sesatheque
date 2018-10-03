@@ -18,25 +18,11 @@ services:
       # est pas plus long que de lister ce que l'on exclu…
 
       # on exporte notre _private sous un autre nom
-      - ./_private:/sesatheque/_privateLocal
+      - ./_private:/home/app/sesatheque/_privateLocal
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
-      - ./docker/sesatheque/_private:/sesatheque/_private
-      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
-      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
-      # une compilation de modules faite pour l'architecture du docker (linux amd64)
-      - ./node_modules:/sesatheque/node_modules
-      # On a pas besoin de build car on démarre toujours en devServer
-      # le reste dont l'appli a besoin
-      - ~/.cache/yarn:/sesatheque/.cache/yarn
-      - ./app:/sesatheque/app
-      - ./logs:/sesatheque/logs
-      - ./package.json:/sesatheque/package.json
-      - ./scripts:/sesatheque/scripts
-      - ./tasks:/sesatheque/tasks
-      - ./webpack.config.js:/sesatheque/webpack.config.js
-      - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
-      - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
-      - ./yarn.lock:/sesatheque/yarn.lock
+      - ./docker/sesatheque/_private:/home/app/sesatheque/_private
+      - .:/home/app/sesatheque
+      - ~/.cache/yarn:/home/app/.cache/yarn
 
     links:
       - mongo
@@ -55,27 +41,13 @@ services:
       # est pas plus long que de lister ce que l'on exclu…
 
       # on exporte notre _private sous un autre nom
-      - ./_private:/sesatheque/_privateLocal
+      - ./_private:/home/app/sesatheque/_privateLocal
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
-      - ./docker/sesatheque/_private:/sesatheque/_private
-      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
-      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
-      # une compilation de modules faite pour l'architecture du docker (linux amd64)
-      - ./node_modules:/sesatheque/node_modules
+      - ./docker/sesatheque/_private:/home/app/sesatheque/_private
       # On a pas besoin de build en test
       # le reste dont l'appli a besoin
-      - ~/.cache/yarn:/sesatheque/.cache/yarn
-      - ./app:/sesatheque/app
-      - ./logsTest:/sesatheque/logsTest
-      - ./package.json:/sesatheque/package.json
-      - ./scripts:/sesatheque/scripts
-      - ./tasks:/sesatheque/tasks
-      - ./test:/sesatheque/test
-      - ./webpack.config.js:/sesatheque/webpack.config.js
-      - ./webpack.config-test.js:/sesatheque/webpack.config-test.js
-      - ./webpackConfigLoader.js:/sesatheque/webpackConfigLoader.js
-      - ./webpackThrowLoader.js:/sesatheque/webpackThrowLoader.js
-      - ./yarn.lock:/sesatheque/yarn.lock
+      - .:/home/app/sesatheque
+      - ~/.cache/yarn:/home/app/.cache/yarn
 
     links:
       - mongo

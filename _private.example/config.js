@@ -154,12 +154,12 @@ module.exports = {
       'coll_doc',
       'ecjs',
       'em',
-      'iep',
-      'j3p',
-      'url'
+      'iep'
     ],
     external: {
-      '@sesatheque-plugins/mathgraph': 'git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git'
+      '@sesatheque-plugins/mathgraph': 'git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.1',
+      '@sesatheque-plugins/url': 'git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.1',
+      '@sesatheque-plugins/j3p': 'git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.2'
     }
   }
 }
