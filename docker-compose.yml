@@ -21,8 +21,22 @@ services:
       - ./_private:/home/app/sesatheque/_privateLocal
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
       - ./docker/sesatheque/_private:/home/app/sesatheque/_private
-      - .:/home/app/sesatheque
+      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
+      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
+      # une compilation de modules faite pour l'architecture du docker (linux amd64)
+      - ./node_modules:/home/app/sesatheque/node_modules
+      # On a pas besoin de build car on démarre toujours en devServer
+      # le reste dont l'appli a besoin
       - ~/.cache/yarn:/home/app/.cache/yarn
+      - ./app:/home/app/sesatheque/app
+      - ./logs:/home/app/sesatheque/logs
+      - ./package.json:/home/app/sesatheque/package.json
+      - ./scripts:/home/app/sesatheque/scripts
+      - ./tasks:/home/app/sesatheque/tasks
+      - ./webpack.config.js:/home/app/sesatheque/webpack.config.js
+      - ./webpackConfigLoader.js:/home/app/sesatheque/webpackConfigLoader.js
+      - ./webpackThrowLoader.js:/home/app/sesatheque/webpackThrowLoader.js
+      - ./yarn.lock:/home/app/sesatheque/yarn.lock
 
     links:
       - mongo
@@ -44,10 +58,23 @@ services:
       - ./_private:/home/app/sesatheque/_privateLocal
       # le private du docker qui va récupérer le précédent et surcharger le minimum imposé par ce docker-compose
       - ./docker/sesatheque/_private:/home/app/sesatheque/_private
+      # on lui exporte notre dossier node_modules, pour pouvoir aller voir simplement ce qu'il contient
+      # ATTENTION, lors d'un yarn install ça va mettre dans ce dossier local
+      # une compilation de modules faite pour l'architecture du docker (linux amd64)
+      - ./node_modules:/home/app/sesatheque/node_modules
       # On a pas besoin de build en test
       # le reste dont l'appli a besoin
-      - .:/home/app/sesatheque
       - ~/.cache/yarn:/home/app/.cache/yarn
+      - ./app:/home/app/sesatheque/app
+      - ./logsTest:/home/app/sesatheque/logsTest
+      - ./package.json:/home/app/sesatheque/package.json
+      - ./scripts:/home/app/sesatheque/scripts
+      - ./tasks:/home/app/sesatheque/tasks
+      - ./test:/home/app/sesatheque/test
+      - ./webpack.config.js:/home/app/sesatheque/webpack.config.js
+      - ./webpackConfigLoader.js:/home/app/sesatheque/webpackConfigLoader.js
+      - ./webpackThrowLoader.js:/home/app/sesatheque/webpackThrowLoader.js
+      - ./yarn.lock:/home/app/sesatheque/yarn.lock
 
     links:
       - mongo
