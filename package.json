@@ -76,7 +76,8 @@
           "useBuiltIns": "entry",
           "forceAllTransforms": true
         }
-      ]
+      ],
+      "@babel/preset-react"
     ],
     "plugins": [
       "@babel/plugin-syntax-dynamic-import",

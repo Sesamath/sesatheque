@@ -54,19 +54,9 @@ if (process.env.SESATHEQUE_CONF) {
   buildDir += '.' + process.env.SESATHEQUE_CONF
 }
 
-const defaultBabelLoader = {
+const babelLoader = {
   loader: 'babel-loader',
   options: babelConfig
-}
-const reactBabelLoader = {
-  loader: 'babel-loader',
-  options: {
-    presets: [
-      '@babel/preset-react',
-      ...babelConfig.presets
-    ],
-    plugins: babelConfig.plugins
-  }
 }
 
 // ajout en prod des js appelés par des sites tiers
@@ -143,14 +133,13 @@ const conf = {
     // si deux règles matchent sur un fichier les deux sont appliquées,
     // la dernière de la liste s'applique d'abord
     rules: [
-      {
-        test: /app\/(client|constructors|server)\/.*\.js$/,
+      ...rules.map(regExp => ({
+        test: regExp,
+        use: babelLoader
+      })), {
+        test: /app\/(client|constructors|server|client-react|plugins)\/.*\.jsx?$/,
         exclude: /node_modules\/(?!(@sesatheque-plugins)\/).*/,
-        use: defaultBabelLoader
-      }, {
-        test: /app\/(client-react|plugins)\/.*\.jsx?$/,
-        exclude: /node_modules\/(?!(@sesatheque-plugins)\/).*/,
-        use: reactBabelLoader
+        use: babelLoader
       }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
         // pour _private c'est mis plus loin hors test (ça plante les tests)
@@ -162,8 +151,9 @@ const conf = {
       {
         // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
         test: /sesatheque-client\/.*\.js/,
-        use: defaultBabelLoader
-      }, {
+        use: babelLoader
+      },
+      {
         // html pour nos iframes
         test: /app\/(client|plugins)\/.*\.html/,
         use: 'file-loader'
@@ -197,11 +187,7 @@ const conf = {
           },
           {test: /\.scss$/, loader: 'sass-loader'}
         ]
-      },
-      ...rules.map(regExp => ({
-        test: regExp,
-        use: reactBabelLoader
-      }))
+      }
     ]
   },
   plugins: [
