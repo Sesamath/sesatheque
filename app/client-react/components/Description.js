@@ -2,6 +2,7 @@ import moment from 'moment'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {NavLink} from 'react-router-dom'
+import icons from 'plugins/icons'
 import resourceLoader from '../hoc/resourceLoader'
 import NavMenu from './NavMenu'
 import {formats, listes, labels} from '../../server/ressource/config'
@@ -198,14 +199,14 @@ export const Description = ({
                 <ul className="relations">
                   {_relations.map(({predicat, rid, titre, type, url}) => (
                     <li key={rid}>
-                      <img src={`/plugins/${type}/${type}.gif`} />
+                      <img src={icons[type]} />
                       {predicat}
-                      <NavLink
-                        to={url}
+                      <a
+                        href={url}
                         target="_blank"
                       >
                         {titre}
-                      </NavLink>
+                      </a>
                       ({rid})
                     </li>
                   ))}
