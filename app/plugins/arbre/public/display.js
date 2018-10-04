@@ -161,7 +161,7 @@ const display = (ressource, options, next) => {
         if (isApercu === false) {
           $apercuContainer.css('top', '5%')
           $apercuContainer.css('left', '5%')
-          $apercuContainer.height('90%')
+          $apercuContainer.height('90vh')
           $apercuContainer.width('90%')
           isApercu = true
         }
@@ -170,10 +170,10 @@ const display = (ressource, options, next) => {
       const reduire = () => {
         log('petit')
         if (isApercu) {
-          $apercuContainer.height('30%')
+          $apercuContainer.height('30vh')
           $apercuContainer.width('30%')
-          $apercuContainer.css('top', '70%')
-          $apercuContainer.css('left', '70%')
+          $apercuContainer.css('top', '65vh')
+          $apercuContainer.css('left', '65%')
           isApercu = false
         }
       }
