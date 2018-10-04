@@ -149,8 +149,8 @@ const conf = {
         use: 'config-loader'
       },
       {
-        // idem pour sesatheque-client, pour pouvoir utiliser les src/* dans notre code
-        test: /sesatheque-client\/.*\.js/,
+        // les node_modules qui doivent passer par babel:
+        test: /node_modules\/(sesatheque-client|query\-string)\/.*\.js/,
         use: babelLoader
       },
       {
