@@ -66,37 +66,43 @@ const ResourceList = ({
           </tr>
         </thead>
         <tbody>
-          {resources.map((ressource) => (
-            <tr key={ressource.oid}>
-              <td><img src={icons[ressource.type]} alt="" /></td>
-              <td>{ressource.type}</td>
-              <td>{ressource.oid}</td>
-              <td>{ressource.titre}</td>
+          {resources.map(({
+            oid,
+            rid,
+            titre,
+            type,
+            $droits
+          }) => (
+            <tr key={oid}>
+              <td><img src={icons[type]} alt="" /></td>
+              <td>{type}</td>
+              <td>{oid}</td>
+              <td>{titre}</td>
               <td colSpan="4" className="links">
                 <NavLink
-                  to={`/ressource/decrire/${ressource.oid}`}
+                  to={`/ressource/decrire/${oid}`}
                   title="Description"
                 >Description</NavLink>
                 <NavLink
-                  to={`/ressource/apercevoir/${ressource.oid}`}
+                  to={`/ressource/apercevoir/${oid}`}
                   title="Aperçu"
                 >Aperçu</NavLink>
                 <NavLink
-                  to={`/ressource/voir/${ressource.oid}`}
+                  to={`/ressource/voir/${oid}`}
                   title="Voir"
                   target="_blank"
                 >Voir</NavLink>
-                {ressource.$droits.includes('W') ? (
+                {$droits.includes('W') ? (
                   <NavLink
-                    to={`/ressource/modifier/${ressource.oid}`}
+                    to={`/ressource/modifier/${oid}`}
                     title="Modifier"
                   >Modifier</NavLink>
                 ) : null}
-                {ressource.$droits.includes('D') ? (
+                {$droits.includes('D') ? (
                   <a
                     onClick={(e) => {
                       e.preventDefault()
-                      askDelete(ressource.oid, refreshList)
+                      askDelete(oid, refreshList)
                     }}
                     href="#"
                     title="Supprimer"
@@ -105,7 +111,7 @@ const ResourceList = ({
                 <a
                   onClick={(e) => {
                     e.preventDefault()
-                    copy(ressource)
+                    copy(rid)
                   }}
                   href="#"
                   title="Copier">
@@ -152,10 +158,10 @@ ResourceList.propTypes = {
 
 const mapDispatchToProps = (dispatch, {refreshList}) => ({
   askDelete: askDelete(dispatch, refreshList),
-  copy: (ressource) => {
+  copy: (rid) => {
     parent.postMessage({
       action: 'ressource',
-      ressource
+      rid
     }, '*')
   }
 })
