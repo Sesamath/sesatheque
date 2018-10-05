@@ -11,6 +11,7 @@ import './ResourceList.scss'
 const ResourceList = ({
   handlePageClick,
   askDelete,
+  copy,
   refreshList,
   queryOptions,
   resources,
@@ -65,48 +66,51 @@ const ResourceList = ({
           </tr>
         </thead>
         <tbody>
-          {resources.map(({
-            oid,
-            titre,
-            type,
-            $droits
-          }) => (
-            <tr key={oid}>
-              <td><img src={icons[type]} alt="" /></td>
-              <td>{type}</td>
-              <td>{oid}</td>
-              <td>{titre}</td>
+          {resources.map((ressource) => (
+            <tr key={ressource.oid}>
+              <td><img src={icons[ressource.type]} alt="" /></td>
+              <td>{ressource.type}</td>
+              <td>{ressource.oid}</td>
+              <td>{ressource.titre}</td>
               <td colSpan="4" className="links">
                 <NavLink
-                  to={`/ressource/decrire/${oid}`}
+                  to={`/ressource/decrire/${ressource.oid}`}
                   title="Description"
                 >Description</NavLink>
                 <NavLink
-                  to={`/ressource/apercevoir/${oid}`}
+                  to={`/ressource/apercevoir/${ressource.oid}`}
                   title="Aperçu"
                 >Aperçu</NavLink>
                 <NavLink
-                  to={`/ressource/voir/${oid}`}
+                  to={`/ressource/voir/${ressource.oid}`}
                   title="Voir"
                   target="_blank"
                 >Voir</NavLink>
-                {$droits.includes('W') ? (
+                {ressource.$droits.includes('W') ? (
                   <NavLink
-                    to={`/ressource/modifier/${oid}`}
+                    to={`/ressource/modifier/${ressource.oid}`}
                     title="Modifier"
                   >Modifier</NavLink>
                 ) : null}
-                {$droits.includes('D') ? (
+                {ressource.$droits.includes('D') ? (
                   <a
                     onClick={(e) => {
                       e.preventDefault()
-                      askDelete(oid, refreshList)
+                      askDelete(ressource.oid, refreshList)
                     }}
                     href="#"
                     title="Supprimer"
                   >Supprimer</a>
                 ) : null}
-
+                <a
+                  onClick={(e) => {
+                    e.preventDefault()
+                    copy(ressource)
+                  }}
+                  href="#"
+                  title="Copier">
+                  Copier
+                </a>
               </td>
             </tr>
           ))}
@@ -136,6 +140,7 @@ ResourceList.propTypes = {
   total: PropTypes.number.isRequired,
   handlePageClick: PropTypes.func.isRequired,
   askDelete: PropTypes.func.isRequired,
+  copy: PropTypes.func.isRequired,
   // fourni par resourceListProvider
   query: PropTypes.object,
   queryOptions: PropTypes.shape({
@@ -146,7 +151,13 @@ ResourceList.propTypes = {
 }
 
 const mapDispatchToProps = (dispatch, {refreshList}) => ({
-  askDelete: askDelete(dispatch, refreshList)
+  askDelete: askDelete(dispatch, refreshList),
+  copy: (ressource) => {
+    parent.postMessage({
+      action: 'ressource',
+      ressource
+    }, '*')
+  }
 })
 
 export default connect(null, mapDispatchToProps)(ResourceList)
