@@ -107,7 +107,7 @@ module.exports = function (component) {
           if (format === 'full') {
             item = ressource
           } else if (format === 'light') {
-            item = pick(ressource, ['oid', 'titre', 'type', 'resume', 'description', 'commentaires'])
+            item = pick(ressource, ['oid', 'titre', 'type', 'resume', 'rid', 'description', 'commentaires'])
           } else {
             item = new Ref(ressource)
             // on rajoute les parametres pour les sequenceModele

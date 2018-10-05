@@ -63,10 +63,10 @@ describe('<ResourceList />', () => {
 
     // La première ressource doit posséder 5 liens (les 3 read + modifier + supprimer)
     const firstResourceLinks = tableBody.childAt(0).find('.links')
-    expect(firstResourceLinks.children()).to.have.length(5)
+    expect(firstResourceLinks.children()).to.have.length(6)
 
     // La seconde ressource doit posséder 4 liens (La base + supprimer)
     const secondResourceLinks = tableBody.childAt(1).find('.links')
-    expect(secondResourceLinks.children()).to.have.length(4)
+    expect(secondResourceLinks.children()).to.have.length(5)
   })
 })
