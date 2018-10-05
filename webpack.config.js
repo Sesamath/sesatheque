@@ -77,8 +77,6 @@ const conf = {
     // pour les html en iframe
     bugsnag: './app/client/page/bugsnag.js',
     display: './app/client/display/index.js',
-    // le js chargé par app/plugins/arbre/public/edit.html (mis en iframe)
-    editArbre: './app/plugins/arbre/public/edit.js',
     import: './app/client/edit/import.js',
     // (c'est déjà inclus par display, est-ce bien utile ?)
     page: './app/client/page/index.js',
@@ -150,7 +148,7 @@ const conf = {
       },
       {
         // les node_modules qui doivent passer par babel:
-        test: /node_modules\/(sesatheque-client|query\-string)\/.*\.js/,
+        test: /node_modules\/(sesatheque-client|query-string)\/.*\.js/,
         use: babelLoader
       },
       {
