@@ -11,7 +11,6 @@ import './ResourceList.scss'
 const ResourceList = ({
   handlePageClick,
   askDelete,
-  copy,
   refreshList,
   queryOptions,
   resources,
@@ -111,7 +110,10 @@ const ResourceList = ({
                 <a
                   onClick={(e) => {
                     e.preventDefault()
-                    copy(rid)
+                    window.parent.postMessage({
+                      action: 'ressource-copy',
+                      rid
+                    }, '*')
                   }}
                   href="#"
                   title="Copier">
@@ -146,7 +148,6 @@ ResourceList.propTypes = {
   total: PropTypes.number.isRequired,
   handlePageClick: PropTypes.func.isRequired,
   askDelete: PropTypes.func.isRequired,
-  copy: PropTypes.func.isRequired,
   // fourni par resourceListProvider
   query: PropTypes.object,
   queryOptions: PropTypes.shape({
@@ -157,13 +158,7 @@ ResourceList.propTypes = {
 }
 
 const mapDispatchToProps = (dispatch, {refreshList}) => ({
-  askDelete: askDelete(dispatch, refreshList),
-  copy: (rid) => {
-    parent.postMessage({
-      action: 'ressource',
-      rid
-    }, '*')
-  }
+  askDelete: askDelete(dispatch, refreshList)
 })
 
 export default connect(null, mapDispatchToProps)(ResourceList)
