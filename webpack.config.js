@@ -131,8 +131,8 @@ const conf = {
     // si deux règles matchent sur un fichier les deux sont appliquées,
     // la dernière de la liste s'applique d'abord
     rules: [
-      ...rules.map(regExp => ({
-        test: regExp,
+      ...rules.map(rule => ({
+        ...rule,
         use: babelLoader
       })), {
         test: /app\/(client|constructors|server|client-react|plugins)\/.*\.jsx?$/,
