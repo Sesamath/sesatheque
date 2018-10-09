@@ -147,19 +147,13 @@ module.exports = {
   // configuration des plugins de visualisation et d'édition
   // des ressources:
   plugins: {
-    internal: [
-      'am',
-      'arbre',
-      'ato',
-      'coll_doc',
-      'ecjs',
-      'em',
-      'iep'
-    ],
+    internal: [],
     external: {
-      '@sesatheque-plugins/mathgraph': 'git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.1',
-      '@sesatheque-plugins/url': 'git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.1',
-      '@sesatheque-plugins/j3p': 'git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.2'
+      '@sesatheque-plugins/arbre': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.6',
+      '@sesatheque-plugins/iep': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.0',
+      '@sesatheque-plugins/j3p': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.6',
+      '@sesatheque-plugins/mathgraph': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.3',
+      '@sesatheque-plugins/url': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.3'
     }
   }
 }
