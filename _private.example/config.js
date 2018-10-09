@@ -147,7 +147,7 @@ module.exports = {
   // configuration des plugins de visualisation et d'édition
   // des ressources:
   plugins: {
-    internal: [],
+    internal: ['mental', 'serie', 'sequenceModele'],
     external: {
       '@sesatheque-plugins/arbre': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.6',
       '@sesatheque-plugins/iep': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.0',
