@@ -3,12 +3,14 @@ import React, {Fragment} from 'react'
 import {connect} from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import {NavLink} from 'react-router-dom'
+import {getContext} from 'recompose'
 import icons from 'plugins/icons'
 import {askDelete} from '../utils/ressourceOperations'
 
 import './ResourceList.scss'
 
 const ResourceList = ({
+  isIframeLayout,
   handlePageClick,
   askDelete,
   refreshList,
@@ -57,7 +59,6 @@ const ResourceList = ({
       <table className="table resourceList">
         <thead>
           <tr>
-            <th></th>
             <th>Type</th>
             <th>Identifiant</th>
             <th>Titre</th>
@@ -73,29 +74,37 @@ const ResourceList = ({
             $droits
           }) => (
             <tr key={oid}>
-              <td><img src={icons[type]} alt="" /></td>
-              <td>{type}</td>
+              <td className="type"><img src={icons[type]} alt="" title={type} /></td>
               <td>{oid}</td>
               <td>{titre}</td>
               <td colSpan="4" className="links">
                 <NavLink
                   to={`/ressource/decrire/${oid}`}
-                  title="Description"
-                >Description</NavLink>
+                  title="Description">
+                  <span>Description</span>
+                  <i className={`fa fa fa-file-alt`}></i>
+                </NavLink>
                 <NavLink
                   to={`/ressource/apercevoir/${oid}`}
-                  title="Aperçu"
-                >Aperçu</NavLink>
+                  title="Aperçu">
+                  <span>Aperçu</span>
+                  <i className={`fa fa-eye`}></i>
+                </NavLink>
                 <NavLink
                   to={`/ressource/voir/${oid}`}
                   title="Voir"
                   target="_blank"
-                >Voir</NavLink>
+                  className="ignore--blank">
+                  <span>Voir</span>
+                  <i className={`fa fa-external-link-alt`}></i>
+                </NavLink>
                 {$droits.includes('W') ? (
                   <NavLink
                     to={`/ressource/modifier/${oid}`}
-                    title="Modifier"
-                  >Modifier</NavLink>
+                    title="Modifier">
+                    <span>Modifier</span>
+                    <i className={`fa fa-edit`}></i>
+                  </NavLink>
                 ) : null}
                 {$droits.includes('D') ? (
                   <a
@@ -104,21 +113,26 @@ const ResourceList = ({
                       askDelete(oid, refreshList)
                     }}
                     href="#"
-                    title="Supprimer"
-                  >Supprimer</a>
+                    title="Supprimer">
+                    <span>Supprimer</span>
+                    <i className={`fa fa-trash`}></i>
+                  </a>
                 ) : null}
-                <a
-                  onClick={(e) => {
-                    e.preventDefault()
-                    window.parent.postMessage({
-                      action: 'ressource-copy',
-                      rid
-                    }, '*')
-                  }}
-                  href="#"
-                  title="Copier">
-                  Copier
-                </a>
+                {isIframeLayout ? (
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault()
+                      window.parent.postMessage({
+                        action: 'ressource-copy',
+                        rid
+                      }, '*')
+                    }}
+                    href="#"
+                    title="Copier">
+                    <span>Copier</span>
+                    <i className={`fa fa-share`}></i>
+                  </a>
+                ) : null}
               </td>
             </tr>
           ))}
@@ -135,6 +149,7 @@ const ResourceList = ({
 }
 
 ResourceList.propTypes = {
+  isIframeLayout: PropTypes.bool,
   resources: PropTypes.arrayOf(PropTypes.shape({
     oid: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
@@ -161,4 +176,4 @@ const mapDispatchToProps = (dispatch, {refreshList}) => ({
   askDelete: askDelete(dispatch, refreshList)
 })
 
-export default connect(null, mapDispatchToProps)(ResourceList)
+export default getContext({isIframeLayout: PropTypes.bool})(connect(null, mapDispatchToProps)(ResourceList))
