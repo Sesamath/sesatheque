@@ -82,13 +82,13 @@ const ResourceList = ({
                   to={`/ressource/decrire/${oid}`}
                   title="Description">
                   <span>Description</span>
-                  <i className={`fa fa fa-file-alt`}></i>
+                  <i className="fa fa-file-alt"></i>
                 </NavLink>
                 <NavLink
                   to={`/ressource/apercevoir/${oid}`}
                   title="Aperçu">
                   <span>Aperçu</span>
-                  <i className={`fa fa-eye`}></i>
+                  <i className="fa fa-eye"></i>
                 </NavLink>
                 <NavLink
                   to={`/ressource/voir/${oid}`}
@@ -96,14 +96,14 @@ const ResourceList = ({
                   target="_blank"
                   className="ignore--blank">
                   <span>Voir</span>
-                  <i className={`fa fa-external-link-alt`}></i>
+                  <i className="fa fa-external-link-alt"></i>
                 </NavLink>
                 {$droits.includes('W') ? (
                   <NavLink
                     to={`/ressource/modifier/${oid}`}
                     title="Modifier">
                     <span>Modifier</span>
-                    <i className={`fa fa-edit`}></i>
+                    <i className="fa fa-edit"></i>
                   </NavLink>
                 ) : null}
                 {$droits.includes('D') ? (
@@ -115,7 +115,7 @@ const ResourceList = ({
                     href="#"
                     title="Supprimer">
                     <span>Supprimer</span>
-                    <i className={`fa fa-trash`}></i>
+                    <i className="fa fa-trash"></i>
                   </a>
                 ) : null}
                 {isIframeLayout ? (
@@ -130,7 +130,7 @@ const ResourceList = ({
                     href="#"
                     title="Copier">
                     <span>Copier</span>
-                    <i className={`fa fa-share`}></i>
+                    <i className="fa fa-share"></i>
                   </a>
                 ) : null}
               </td>
