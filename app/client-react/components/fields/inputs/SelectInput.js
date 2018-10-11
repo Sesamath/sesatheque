@@ -12,6 +12,27 @@ const getValue = (value, options, isMulti) => {
   return find(value)
 }
 
+const customStyles = {
+  control: (styles) => ({
+    ...styles,
+    backgroundColor: '#f8f9fb',
+    borderRadius: '3px',
+    border: '1px solid #eaeaec',
+    padding: '2px',
+    fontWeight: 'normal'
+  }),
+  multiValue: (styles) => ({
+    ...styles,
+    backgroundColor: 'rgba(0, 126, 255, 0.08)',
+    borderRadius: '2px',
+    border: '1px solid #c2e0ff'
+  }),
+  multiValueLabel: (styles) => ({
+    ...styles,
+    color: '#007eff'
+  })
+}
+
 const SelectInput = ({
   input: {name, onFocus, onBlur, onChange, value},
   meta: {error, warning, touched},
@@ -60,6 +81,7 @@ const SelectInput = ({
       loadingMessage={() => 'Recherche en cours'}
       isMulti={isMulti}
       isSearchable={isAsync}
+      styles={customStyles}
     />
   )
 }
