@@ -1,3 +1,4 @@
+import {identity} from 'lodash'
 import {DELETE, GET, POST} from '../utils/httpMethods'
 import {addNotification} from './notifications'
 import getUrls from 'sesatheque-client/src/getUrls'
@@ -7,6 +8,7 @@ import {
   getRessourceUrl,
   getForkAliasUrl
 } from '../apiRoutes'
+import editors from 'plugins/editors'
 
 /**
  * Retourne l'action de type SET_RESSOURCE pour affecter une ressource dans le store
@@ -15,9 +17,10 @@ import {
  */
 const setRessource = (ressource) => {
   ressource._urls = getUrls(ressource, baseUrl)
+  const {loadHook = identity} = editors[ressource.type]
   return {
     type: 'SET_RESSOURCE',
-    ressource
+    ressource: loadHook(ressource)
   }
 }
 
@@ -136,7 +139,8 @@ export const saveRessource = (
     message: `La sauvegarde a échoué : ${error.message}`
   }))
 
-  return POST(getRessourceUrl({format: 'full'}), {body: ressource})
+  const {saveHook = identity} = editors[ressource.type]
+  return POST(getRessourceUrl({format: 'full'}), {body: saveHook(ressource)})
     .then(requestSuccess, requestError)
 }
 
