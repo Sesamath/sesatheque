@@ -28,7 +28,11 @@ const optionLabelToText = label => labels[label]
 const debouncedGET = debounce((input, callback) => {
   autocomplete(config.baseId, input, (error, filters) => {
     if (error) return console.error(error)
-    const options = []
+    const options = [{
+      value: new OptionValue('fulltext', input),
+      label: `Texte libre : ${input}`
+    }]
+
     for (const filter in filters) {
       filters[filter].forEach(filterValue => {
         options.push({
@@ -44,6 +48,26 @@ const debouncedGET = debounce((input, callback) => {
 const getOptions = (input, setOptions) => {
   if (!input || input.length <= 2) return setOptions([])
   debouncedGET(input, setOptions)
+}
+
+const customStyles = {
+  multiValue: (styles, {data}) => {
+    const overridedStyles = {
+      ...styles,
+      backgroundColor: 'rgba(0, 126, 255, 0.08)',
+      borderRadius: '2px',
+      border: '1px solid #c2e0ff',
+      color: '#007eff'
+    }
+
+    if (data.value.filter === 'fulltext') {
+      overridedStyles['backgroundColor'] = '#fcf8e3'
+      overridedStyles['color'] = '#8a6d3b'
+      overridedStyles['border'] = '1px solid #DFCFB3'
+    }
+
+    return overridedStyles
+  }
 }
 
 class AutocompleteForm extends Component {
@@ -81,21 +105,24 @@ class AutocompleteForm extends Component {
       <Fragment>
         <h1>Recherche assistée (beta)</h1>
         <div className="grid-5">
-          <Select
-            classNamePrefix="react-select"
-            className="col-4"
-            value={this.state.selection}
-            clearable
-            closeOnSelect={false}
-            filterOption={this.filterOption.bind(this)}
-            hideSelectedOptions
-            onChange={selection => this.setState({selection})}
-            placeholder="Votre recherche"
-            noOptionsMessage={() => 'Aucun résultat trouvé'}
-            loadingMessage={() => 'Recherche en cours'}
-            loadOptions={getOptions}
-            isMulti
-          />
+          <div className="col-4">
+            <Select
+              classNamePrefix="react-select"
+              className="react-select"
+              value={this.state.selection}
+              clearable
+              closeOnSelect={false}
+              filterOption={this.filterOption.bind(this)}
+              hideSelectedOptions
+              onChange={selection => this.setState({selection})}
+              placeholder="Votre recherche"
+              noOptionsMessage={() => 'Aucun résultat trouvé'}
+              loadingMessage={() => 'Recherche en cours'}
+              loadOptions={getOptions}
+              styles={customStyles}
+              isMulti
+            />
+          </div>
           <button
             className="btn btn--rounded"
             onClick={this.searchResources.bind(this)}>Rechercher</button>

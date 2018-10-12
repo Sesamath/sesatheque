@@ -228,7 +228,7 @@ module.exports = function ($accessControl) {
     sanitizeSearchRestriction(context, canGrabPrivate, query, warnings)
 
     // input string (à priori single value pour les premiers, multiple autorisé)
-    ;['titre', 'oid', 'origine', 'idOrigine', 'type', 'langue', 'auteurs', 'contributeurs', 'niveaux'].forEach(prop => {
+    ;['titre', 'oid', 'origine', 'idOrigine', 'type', 'langue', 'auteurs', 'contributeurs', 'niveaux', 'fulltext'].forEach(prop => {
       const values = getStringValues(prop)
       if (!values) return
       query[prop] = values

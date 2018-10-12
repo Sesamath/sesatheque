@@ -58,6 +58,7 @@ module.exports = function (component) {
           // on vire les mots à exclure
           .filter(v => !excluded.includes(v))
           .forEach((valueToIndex) => {
+            if (!valueToIndex) return
             if (!knownValues[valueToIndex]) knownValues[valueToIndex] = []
             // on ajoute sous la forme d'un filter de recherche
             knownValues[valueToIndex].push({index: prop, value: key})
@@ -77,7 +78,8 @@ module.exports = function (component) {
       while (i++ < value.length) {
         const pattern = value.substr(0, i) // démarre à une longueur 3
         if (patternToFilters[pattern]) {
-          patternToFilters[pattern] = patternToFilters[pattern].concat(filters)
+          // Évite les valeurs multiples avec un Set
+          patternToFilters[pattern] = [...new Set([].concat(...[patternToFilters[pattern], filters]))]
         } else {
           patternToFilters[pattern] = filters
         }
