@@ -29,6 +29,8 @@
  * pour une explication en français)
  */
 'use strict'
+
+const path = require('path')
 /* eslint-env mocha */
 
 // on peut mettre dans mocha.opts un
@@ -59,7 +61,10 @@ require('@babel/register')({
   ],
   plugins: [
     ['module-resolver', {
-      root: ['./app']
+      root: ['./app'],
+      'alias': {
+        'plugins': path.join(__dirname, '../test/react/plugins')
+      }
     }]
   ]
 })
