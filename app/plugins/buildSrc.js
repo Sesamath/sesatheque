@@ -30,8 +30,8 @@ const editors =
 
 const editors = {}
 
-plugins.forEach(({type, defaultValue, editor, validate}) => {
-  editors[type] = {defaultValue, editor, validate}
+plugins.forEach(({type, ...others}) => {
+  editors[type] = others
 })
 
 export default editors
