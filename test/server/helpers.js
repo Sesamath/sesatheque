@@ -3,6 +3,7 @@ import {isObjectPlain} from 'sesajstools'
 
 const EntityGroupe = () => lassi.service('EntityGroupe')
 const EntityPersonne = () => lassi.service('EntityPersonne')
+const EntityRessource = () => lassi.service('EntityRessource')
 
 /**
  * Login via l'api d'un utilisateur (qui doit exister en base)
@@ -35,6 +36,21 @@ export const logout = (agent) => agent
 export const createPersonne = (personne) => {
   return new Promise((resolve, reject) => {
     EntityPersonne().create(personne).store((error, entity) => {
+      if (error) return reject(error)
+      resolve(entity)
+    })
+  })
+}
+
+/**
+ * Crée une ressource en base
+ * @param {supertestAgent} agent
+ * @param {Ressource} ressource
+ * @return {Promise}
+ */
+export const createRessource = (ressource) => {
+  return new Promise((resolve, reject) => {
+    EntityRessource().create(ressource).store((error, entity) => {
       if (error) return reject(error)
       resolve(entity)
     })

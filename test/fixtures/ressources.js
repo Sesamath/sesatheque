@@ -25,7 +25,8 @@ export default [
     relations: [],
     dateCreation: new Date(),
     dateMiseAJour: new Date(),
-    $droits: 'RWD'
+    $droits: 'RWD',
+    publie: true
   },
   {
     oid: '2',
@@ -35,7 +36,7 @@ export default [
     type: 'arbre',
     titre: 'Mon exercice ARBRE',
     resume: '',
-    description: '',
+    description: 'Une ressource avec une description originale',
     commentaires: '',
     parametres: {},
     niveaux: [],
@@ -45,12 +46,14 @@ export default [
     relations: [],
     dateCreation: new Date(),
     dateMiseAJour: new Date(),
-    $droits: 'RD'
+    $droits: 'RD',
+    publie: true,
+    enfants: []
   },
   {
     oid: '3',
     rid: `${baseId}/3`,
-    origine: otherBaseId,
+    origine: baseId,
     idOrigine: '3',
     aliasOf: `${otherBaseId}/42`,
     type: 'url',
@@ -58,6 +61,7 @@ export default [
     categories: [5],
     dateCreation: new Date(),
     dateMiseAJour: new Date(),
-    $droits: 'R'
+    $droits: 'R',
+    publie: true
   }
 ]

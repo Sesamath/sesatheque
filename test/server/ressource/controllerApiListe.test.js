@@ -40,7 +40,9 @@
 /* eslint-env mocha */
 import {expect} from 'chai'
 import {populate, purge} from '../populate'
+import {createRessource} from '../helpers'
 import boot from '../boot'
+import fixturesRessources from '../../fixtures/ressources'
 import {limites} from '../../../app/server/ressource/config'
 import Ref from '../../../app/constructors/Ref'
 import {update as urlUpdate} from '../../../app/server/lib/url'
@@ -185,5 +187,62 @@ describe('GET /api/liste', () => {
         d.liste.forEach((item, i) => checkAsRef(item, ressources[49 - i]))
         return Promise.resolve()
       })
+  })
+
+  describe('Recherche en texte libre', () => {
+    before(async () => {
+      await createRessource(fixturesRessources[0])
+      await createRessource(fixturesRessources[1])
+      await createRessource(fixturesRessources[2])
+    })
+
+    it(`récupère des ressources à partir d'une partie de titre`, function () {
+      const url = urlUpdate('/api/liste', {fulltext: ['exercice']})
+
+      return _superTestClient
+        .get(url)
+        .set('Content-Type', 'application/json')
+        .expect(200)
+        .then(res => {
+          const result = res.body
+          const data = result.data
+          expect(data.total).to.equals(2)
+          expect(data.liste[0].titre).to.equals('Mon exercice IEP')
+          expect(data.liste[1].titre).to.equals('Mon exercice ARBRE')
+          return Promise.resolve()
+        })
+    })
+
+    it(`récupère une ressource à partir de son titre`, function () {
+      const url = urlUpdate('/api/liste', {fulltext: ['ARBRE']})
+
+      return _superTestClient
+        .get(url)
+        .set('Content-Type', 'application/json')
+        .expect(200)
+        .then(res => {
+          const result = res.body
+          const data = result.data
+          expect(data.total).to.equals(1)
+          expect(data.liste[0].titre).to.equals('Mon exercice ARBRE')
+          return Promise.resolve()
+        })
+    })
+
+    it(`récupère une ressource à partir de sa description`, function () {
+      const url = urlUpdate('/api/liste', {fulltext: ['description originale']})
+
+      return _superTestClient
+        .get(url)
+        .set('Content-Type', 'application/json')
+        .expect(200)
+        .then(res => {
+          const result = res.body
+          const data = result.data
+          expect(data.total).to.equals(1)
+          expect(data.liste[0].titre).to.equals('Mon exercice ARBRE')
+          return Promise.resolve()
+        })
+    })
   })
 })
