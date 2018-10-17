@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React, {Component, Fragment} from 'react'
-import Warning from '../../Warning'
 import getDisplayName from '../../../utils/getDisplayName'
 
 /**
@@ -8,15 +7,22 @@ import getDisplayName from '../../../utils/getDisplayName'
  * @param {Component} WrappedComponent
  * @return {Component} Le composant enrichi
  */
-const showInvalidField = (WrappedComponent) => {
+const showInvalidField = (WrappedComponent, condition = 'touched') => {
   class ShowInvalidField extends Component {
     render () {
-      const {meta: {touched, error, warning}} = this.props
+      const {meta: {[condition]: show, error}} = this.props
 
       return (
         <Fragment>
           <WrappedComponent {...this.props} />
-          {touched && (error || warning) ? <Warning message={error || warning} /> : null}
+          {show && error ? (
+            <div
+              className="validation-error alert--danger"
+            >
+              <i className="fa fa-exclamation-circle"></i>
+              {error}
+            </div>
+          ) : null}
         </Fragment>
       )
     }
