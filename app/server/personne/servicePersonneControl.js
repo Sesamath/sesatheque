@@ -169,13 +169,13 @@ module.exports = function (component) {
       // et sinon qu'ils existent et que l'utilisateur peut les ajouter
       flow(groupesVoulus).seqEach(function (groupeNom) {
         const options = {
-          whiteList: ressourceOriginale.groupes
+          whiteList: (ressourceOriginale && ressourceOriginale.groupes) || []
         }
         addGroupe(context, ressourceNew, groupeNom, options, this)
         // @todo faudrait vérifier que l'on a pas viré de groupe auxquel on appartient pas, et si c'était le cas cloner ?
       }).set(groupesAuteursVoulus).seqEach(function (groupeNom) {
         const options = {
-          whiteList: ressourceOriginale.groupesAuteurs,
+          whiteList: (ressourceOriginale && ressourceOriginale.groupesAuteurs) || [],
           isGroupeAuteur: true
         }
         addGroupe(context, ressourceNew, groupeNom, options, this)
