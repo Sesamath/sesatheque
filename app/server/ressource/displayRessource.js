@@ -51,6 +51,9 @@ module.exports = function displayRessource (context, ressource) {
   const titre = escapeForHtml(ressource.titre)
   const titreForArg = ressource.titre.replace(/"/g, '“')
 
+  Object.keys(ressource).forEach(p => {
+    if (p.substr(0, 1) === '$') delete ressource[p]
+  })
   const correction = ressource.parametres && ressource.parametres.correction
   if (correction !== undefined) {
     const simpleCrypto = new SimpleCrypto(ressource.rid)
