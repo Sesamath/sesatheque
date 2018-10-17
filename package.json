@@ -127,6 +127,7 @@
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.0",
+    "simple-crypto-js": "^2.0.2",
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {

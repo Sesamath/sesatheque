@@ -48,6 +48,7 @@ const page = require('../page')
 const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
 const displays = require('plugins/displays').default
+const SimpleCrypto = require('simple-crypto-js').default
 const wd = window.document
 
 /**
@@ -232,6 +233,18 @@ function load (ressource, options, next) {
       page.hideTitle()
     }
 
+    if (ressource.parametres && ressource.parametres.correction) {
+      const {rid, parametres} = ressource
+      const {correction} = parametres
+      const simpleCrypto = new SimpleCrypto(rid)
+      ressource = {
+        ...ressource,
+        parametres: {
+          ...parametres,
+          correction: JSON.parse(simpleCrypto.decrypt(correction))
+        }
+      }
+    }
     // on regarde s'il faut ajouter une fct de sauvegarde des résultats
     addResultatCallback(ressource, options)
 

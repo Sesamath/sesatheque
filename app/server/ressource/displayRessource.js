@@ -39,6 +39,7 @@ const robotCanIndex = ['prod', 'production'].includes(staging) // mais pas prepr
 const {escapeForHtml} = require('sesajstools')
 
 const rawOptions = {headers: {'Content-Type': 'text/html'}}
+const SimpleCrypto = require('simple-crypto-js').default
 
 /**
  * Retourne le code html de la page pour afficher la ressource (à priori dans une iframe, pas de header / footer ici)
@@ -49,6 +50,15 @@ module.exports = function displayRessource (context, ressource) {
   if (!ressource) throw Error('Impossible d’afficher une ressource sans la fournir')
   const titre = escapeForHtml(ressource.titre)
   const titreForArg = ressource.titre.replace(/"/g, '“')
+
+  Object.keys(ressource).forEach(p => {
+    if (p.substr(0, 1) === '$') delete ressource[p]
+  })
+  const correction = ressource.parametres && ressource.parametres.correction
+  if (correction !== undefined) {
+    const simpleCrypto = new SimpleCrypto(ressource.rid)
+    ressource.parametres.correction = simpleCrypto.encrypt(JSON.stringify(correction))
+  }
 
   const page = `<!DOCTYPE html>
 <html>
