@@ -37,6 +37,8 @@
  */
 'use strict'
 
+require('client-react/styles/display.scss')
+
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjt = require('sesajstools')
