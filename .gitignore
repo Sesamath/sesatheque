@@ -24,7 +24,7 @@ package.local-extras.json
 # trucs qui peuvent traîner à la racine (pm2 qui tourne…)
 /*.pid
 
-# répertoire des plugins
+# fichiers générés par app/plugins/buildSrc.js au build
 /app/plugins/package.json
 /app/plugins/displays.js
 /app/plugins/editors.js

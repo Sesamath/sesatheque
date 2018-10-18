@@ -37,6 +37,8 @@
  */
 'use strict'
 
+require('client-react/styles/display.scss')
+
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjt = require('sesajstools')
@@ -216,10 +218,10 @@ function load (ressource, options, next) {
 
   // le display du plugin
   const pluginName = ressource.type
-  const pluginDisplay = displays[pluginName]
-  if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
+  const loadDisplay = displays[pluginName]
+  loadDisplay().then(({display: pluginDisplay}) => {
+    if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
 
-  try {
     if (options.container) dom.empty(options.container)
     else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
     if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
@@ -261,9 +263,7 @@ function load (ressource, options, next) {
       }
       next(error)
     })
-  } catch (error) {
-    next(error)
-  }
+  }).catch(next)
 } // load
 
 /**
