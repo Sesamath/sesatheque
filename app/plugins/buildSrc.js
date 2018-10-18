@@ -14,13 +14,11 @@ const getImports = (suffix) => {
 }
 
 const displays =
-`${getImports('display')}
+`${plugins.map((plugin, index) => `import type${index} from '${plugin}/type'`).join('\n')}
 
 const displays = {}
 
-plugins.forEach(({type, display}) => {
-  displays[type] = display
-})
+${plugins.map((plugin, index) => `displays[type${index}] = () => import('${plugin}/display')`).join('\n')}
 
 export default displays
 `

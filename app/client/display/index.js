@@ -216,54 +216,56 @@ function load (ressource, options, next) {
 
   // le display du plugin
   const pluginName = ressource.type
-  const pluginDisplay = displays[pluginName]
-  if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
+  const loadDisplay = displays[pluginName]
+  loadDisplay().then(({display: pluginDisplay}) => {
+    if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
 
-  try {
-    if (options.container) dom.empty(options.container)
-    else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
-    if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
-    // On vire le titre si on nous le demande via les options ou un param dans l'url
-    if (
-      (options.hasOwnProperty('showTitle') && !options.showTitle) ||
-      /\?.*showTitle=0/.test(wd.URL) ||
-      /\/apercevoir\//.test(wd.URL) ||
-      /\?(.+&)?layout=iframe/.test(wd.URL)
-    ) {
-      page.hideTitle()
-    }
+    try {
+      if (options.container) dom.empty(options.container)
+      else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
+      if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
+      // On vire le titre si on nous le demande via les options ou un param dans l'url
+      if (
+        (options.hasOwnProperty('showTitle') && !options.showTitle) ||
+        /\?.*showTitle=0/.test(wd.URL) ||
+        /\/apercevoir\//.test(wd.URL) ||
+        /\?(.+&)?layout=iframe/.test(wd.URL)
+      ) {
+        page.hideTitle()
+      }
 
-    if (ressource.parametres && ressource.parametres.correction) {
-      const {rid, parametres} = ressource
-      const {correction} = parametres
-      const simpleCrypto = new SimpleCrypto(rid)
-      ressource = {
-        ...ressource,
-        parametres: {
-          ...parametres,
-          correction: JSON.parse(simpleCrypto.decrypt(correction))
+      if (ressource.parametres && ressource.parametres.correction) {
+        const {rid, parametres} = ressource
+        const {correction} = parametres
+        const simpleCrypto = new SimpleCrypto(rid)
+        ressource = {
+          ...ressource,
+          parametres: {
+            ...parametres,
+            correction: JSON.parse(simpleCrypto.decrypt(correction))
+          }
         }
       }
-    }
-    // on regarde s'il faut ajouter une fct de sauvegarde des résultats
-    addResultatCallback(ressource, options)
+      // on regarde s'il faut ajouter une fct de sauvegarde des résultats
+      addResultatCallback(ressource, options)
 
-    // ajout du chemin du plugin aux options
-    options.pluginBase = options.base + 'plugins/' + pluginName + '/'
+      // ajout du chemin du plugin aux options
+      options.pluginBase = options.base + 'plugins/' + pluginName + '/'
 
-    // on peut afficher
-    pluginDisplay(ressource, options, function (error) {
-      options.startDate = new Date()
-      if (error) {
-        log("le display a terminé mais renvoyé l'erreur", error)
-      } else {
-        log('le display a terminé sans renvoyer d’erreur')
-      }
+      // on peut afficher
+      pluginDisplay(ressource, options, function (error) {
+        options.startDate = new Date()
+        if (error) {
+          log("le display a terminé mais renvoyé l'erreur", error)
+        } else {
+          log('le display a terminé sans renvoyer d’erreur')
+        }
+        next(error)
+      })
+    } catch (error) {
       next(error)
-    })
-  } catch (error) {
-    next(error)
-  }
+    }
+  })
 } // load
 
 /**
