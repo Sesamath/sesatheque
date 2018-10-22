@@ -16,12 +16,12 @@ import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
 import onSubmitFail from '../utils/onSubmitFail'
 import commonValidate from '../utils/ressourceValidate'
-import editors from 'plugins/editors'
+import getEditor from 'plugins/editors'
 
 const validate = (values) => {
   const errors = commonValidate(values)
   const {type} = values
-  const typeValidate = editors[type] && editors[type].validate
+  const {validate: typeValidate} = getEditor(type)
   if (typeValidate) {
     typeValidate(values, errors)
   }
@@ -29,7 +29,7 @@ const validate = (values) => {
 }
 
 const onSubmit = (values, dispatch, {saveRessource, initialize}) => {
-  const {saveHook = identity} = editors[values.type]
+  const {saveHook = identity} = getEditor(values.type)
 
   return saveRessource(saveHook(values), (savedRessource) => {
     // On notifie le parent concernant la mise à jour de la ressource
@@ -69,7 +69,7 @@ const ResourceForm = ({
   submitting,
   pristine
 }) => {
-  const Editor = (editors[type] && editors[type].editor) || EditorSimple
+  const {editor: Editor = EditorSimple} = getEditor(type)
 
   return (
     <Fragment>
@@ -116,7 +116,7 @@ export default ensureLogged(
     aliasForker( // fork si on édite un alias
       resourceSaver( // fournit saveRessource
         withProps(({ressource}) => {
-          const {loadHook = identity} = editors[ressource.type]
+          const {loadHook = identity} = getEditor(ressource.type)
 
           return {
             initialValues: loadHook(ressource)

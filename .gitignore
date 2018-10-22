@@ -26,7 +26,7 @@ package.local-extras.json
 
 # fichiers générés par app/plugins/buildSrc.js au build
 /app/plugins/package.json
-/app/plugins/displays.js
-/app/plugins/editors.js
+/app/plugins/generatedDisplays.js
+/app/plugins/generatedEditors.js
 /app/plugins/icons.js
 /app/plugins/yarn.lock
