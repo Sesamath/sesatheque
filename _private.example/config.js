@@ -151,7 +151,7 @@ module.exports = {
     external: {
       '@sesatheque-plugins/arbre': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.8',
       '@sesatheque-plugins/iep': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.0',
-      '@sesatheque-plugins/j3p': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.6',
+      '@sesatheque-plugins/j3p': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.8',
       '@sesatheque-plugins/mathgraph': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.3',
       '@sesatheque-plugins/url': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.3'
     }
