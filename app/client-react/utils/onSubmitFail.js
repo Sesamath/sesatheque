@@ -14,7 +14,7 @@ const onSubmitFail = (_, dispatch, error) => {
     }))
     throw error
   }
-  
+
   const elements = ArrayFrom.call(document.querySelectorAll('.validation-error'))
   if (elements.length) {
     const element = elements[0]
