@@ -49,7 +49,7 @@ const xhr = require('sesajstools/http/xhr')
 const page = require('../page')
 const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
-const displays = require('plugins/displays').default
+const getDisplay = require('plugins/displays').default
 const SimpleCrypto = require('simple-crypto-js').default
 const wd = window.document
 
@@ -218,13 +218,14 @@ function load (ressource, options, next) {
 
   // le display du plugin
   const pluginName = ressource.type
-  const loadDisplay = displays[pluginName]
+  const loadDisplay = getDisplay(pluginName)
   loadDisplay().then(({display: pluginDisplay}) => {
-    if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
-
     if (options.container) dom.empty(options.container)
     else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
     if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
+
+    if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
+
     // On vire le titre si on nous le demande via les options ou un param dans l'url
     if (
       (options.hasOwnProperty('showTitle') && !options.showTitle) ||

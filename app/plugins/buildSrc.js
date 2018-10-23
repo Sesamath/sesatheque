@@ -59,6 +59,6 @@ plugins.forEach(({type, icon}) => {
 export default icons
 `
 
-fs.writeFileSync('./displays.js', displays)
-fs.writeFileSync('./editors.js', editors)
+fs.writeFileSync('./generatedDisplays.js', displays)
+fs.writeFileSync('./generatedEditors.js', editors)
 fs.writeFileSync('./icons.js', icons)

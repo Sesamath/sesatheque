@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {reduxForm} from 'redux-form'
 import {parse} from 'query-string'
-import editors from 'plugins/editors'
+import getEditor from 'plugins/editors'
 
 import Classification from './Classification'
 import {labels} from '../../server/ressource/config'
@@ -135,11 +135,11 @@ const form = {
     const search = closerId ? `?closerId=${closerId}` : ''
     const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}${search}`))
     const {type} = values
-    const {defaultValue} = editors[type]
-    const ressourceData = defaultValue ? {
+    const {defaultValue = {}} = getEditor(type)
+    const ressourceData = {
       ...defaultValue,
       ...values
-    } : values
+    }
     saveRessource(ressourceData, onSave)
   },
   onSubmitFail,
