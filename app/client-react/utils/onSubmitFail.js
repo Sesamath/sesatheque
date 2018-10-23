@@ -6,7 +6,15 @@ const errorsMessage = 'La sauvegarde a échoué car des champs contiennent des e
 
 const ArrayFrom = Array.prototype.slice
 
-const onSubmitFail = (_, dispatch) => {
+const onSubmitFail = (_, dispatch, error) => {
+  if (error) {
+    dispatch(addNotification({
+      level: 'error',
+      message: `Erreur: ${error.message}`
+    }))
+    throw error
+  }
+
   const elements = ArrayFrom.call(document.querySelectorAll('.validation-error'))
   if (elements.length) {
     const element = elements[0]
