@@ -2,7 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 const NavButton = ({icon, id, onClick, title}) => (
-  <li><button id={id} onClick={onClick}><i className={`fa fa-${icon}`}></i> <span className="gt-medium-only">{title}</span></button></li>
+  <li>
+    <button id={id} onClick={onClick}>
+      <i className={`fa fa-${icon}`}></i>
+      <span className="gt-medium-only">{title}</span>
+    </button>
+  </li>
 )
 
 NavButton.propTypes = {

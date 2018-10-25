@@ -136,6 +136,13 @@ const queryToSearch = (query) => {
   return queryString.stringify(compactQuery)
 }
 
+SearchForm.propTypes = {
+  handleSubmit: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  query: PropTypes.object,
+  allowAnyOption: PropTypes.bool
+}
+
 // pour utiliser Field faut être un redux-form
 const formDef = reduxForm({
   // cf https://redux-form.com/7.4.2/docs/api/reduxform.md/#-code-enablereinitialize-boolean-code-optional-
@@ -150,12 +157,5 @@ const formDef = reduxForm({
     }))
   }
 })
-
-SearchForm.propTypes = {
-  handleSubmit: PropTypes.func.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  query: PropTypes.object,
-  allowAnyOption: PropTypes.bool
-}
 
 export default formDef(SearchForm)
