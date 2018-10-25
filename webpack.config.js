@@ -148,7 +148,7 @@ const conf = {
       },
       {
         // les node_modules qui doivent passer par babel:
-        test: /node_modules\/(sesatheque-client|query-string)\/.*\.js/,
+        test: /node_modules\/(sesatheque-client|query-string|strict-uri-encode)\/.*\.js/,
         use: babelLoader
       },
       {
