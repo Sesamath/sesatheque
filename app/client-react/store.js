@@ -1,4 +1,4 @@
-import { connectRouter, routerMiddleware } from 'connected-react-router'
+import {connectRouter, routerMiddleware} from 'connected-react-router'
 import {applyMiddleware, compose, createStore} from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import history from './history'

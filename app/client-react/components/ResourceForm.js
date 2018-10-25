@@ -18,46 +18,6 @@ import onSubmitFail from '../utils/onSubmitFail'
 import commonValidate from '../utils/ressourceValidate'
 import getEditor from 'plugins/editors'
 
-const validate = (values) => {
-  const errors = commonValidate(values)
-  const {type} = values
-  const {validate: typeValidate} = getEditor(type)
-  if (typeValidate) {
-    typeValidate(values, errors)
-  }
-  return errors
-}
-
-const onSubmit = (values, dispatch, {saveRessource, initialize}) => {
-  const {saveHook = identity} = getEditor(values.type)
-
-  return saveRessource(saveHook(values), (savedRessource) => {
-    // On notifie le parent concernant la mise à jour de la ressource
-    if (parent !== window && parent.postMessage) {
-      const parsedQuery = parse(window.location.search)
-      if (parsedQuery.closerId) {
-        // @todo harmoniser ces préfixes _ retournés par l'api pour mettre du $ partout (maintenant qu'on passe plus par context.rest qui les virait)
-        const ressource = {...savedRessource}
-        delete ressource._droits
-        ressource.$droits = savedRessource._droits
-        parent.postMessage({
-          action: 'iframeCloser',
-          id: parsedQuery.closerId,
-          ressource
-        }, '*')
-      }
-    }
-  })
-}
-
-const formDef = {
-  form: 'ressource',
-  validate,
-  onSubmit,
-  onSubmitFail,
-  enableReinitialize: true
-}
-
 const ResourceForm = ({
   initialValues: {
     type,
@@ -109,6 +69,46 @@ ResourceForm.propTypes = {
   saveRessource: PropTypes.func,
   pristine: PropTypes.bool,
   initialize: PropTypes.func
+}
+
+const validate = (values) => {
+  const errors = commonValidate(values)
+  const {type} = values
+  const {validate: typeValidate} = getEditor(type)
+  if (typeValidate) {
+    typeValidate(values, errors)
+  }
+  return errors
+}
+
+const onSubmit = (values, dispatch, {saveRessource, initialize}) => {
+  const {saveHook = identity} = getEditor(values.type)
+
+  return saveRessource(saveHook(values), (savedRessource) => {
+    // On notifie le parent concernant la mise à jour de la ressource
+    if (parent !== window && parent.postMessage) {
+      const parsedQuery = parse(window.location.search)
+      if (parsedQuery.closerId) {
+        // @todo harmoniser ces préfixes _ retournés par l'api pour mettre du $ partout (maintenant qu'on passe plus par context.rest qui les virait)
+        const ressource = {...savedRessource}
+        delete ressource._droits
+        ressource.$droits = savedRessource._droits
+        parent.postMessage({
+          action: 'iframeCloser',
+          id: parsedQuery.closerId,
+          ressource
+        }, '*')
+      }
+    }
+  })
+}
+
+const formDef = {
+  form: 'ressource',
+  validate,
+  onSubmit,
+  onSubmitFail,
+  enableReinitialize: true
 }
 
 export default ensureLogged(

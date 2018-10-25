@@ -12,7 +12,6 @@ import onSubmitFail from '../utils/onSubmitFail'
 import listes from '../utils/listesFromConfig'
 import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
-
 import {
   SelectField,
   SwitchField,
