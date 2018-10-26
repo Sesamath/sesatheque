@@ -16,7 +16,7 @@ const addLabel = (WrappedComponent, hasForAttr = true) => {
 
       return (
         <div
-          className={classList.join(' ') || null}
+          className={classList.join(' ')}
         >
           <label htmlFor={hasForAttr ? `${name}-field` : null}>
             {label} {info && (<i>{info}</i>)}
