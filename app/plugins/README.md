@@ -1,6 +1,6 @@
 # Plugins
 
-## installation
+## Installation
 Dans le fichier `config.js` de la sesathèque, on a besoin de:
 
 ```
@@ -16,9 +16,9 @@ plugins: {
 ```
 Lors de l'installation des paquets de la sesatheque, les plugins sont automatiquement installés et configurés.
 
-## architecture des plugins
+## Architecture des plugins
 
-### structure
+### Structure
 Chaque plugin a un type qui est une chaîne de caractères et qui lui est propre. Par exemple: 'j3p', 'arbre'.
 
 Chaque plugin doit exposer:
@@ -47,7 +47,7 @@ module.exports = ({version}) => ({
 ```
 Il permet au plugin de compléter la configuration webpack de la sesathèque. Les fichiers concernés par un des objets de `rules` seront transformés par babel avec la configuration de la sesathèque.
 
-### interactions
+### Interactions avec la sesathèque
 
 La configuration webpack de la sesathèque expose les alias:
 * client-react
@@ -60,7 +60,10 @@ Par exemple, les plugins peuvent utiliser les composants génériques du client 
 `import {InputField} from 'client-react/components/fields'`
 
 ou accéder aux icones des plugins:
+
 `import icons from 'plugins/icons'`
+
+Les plugins doivent utiliser les paquets installés par la sesathèque: 'react', 'prop-types', 'redux', 'redux-form', etc. sans les expliciter dans leur `package.json`.
 
 ## Limitations de l'architecture
 
@@ -68,7 +71,7 @@ Lors de l'installation des node_modules dans /app/plugins, il peut y avoir réin
 
 Ce problème concerne surtout la lecture des ressources lorsqu'un module est importé dans `/client/display` et aussi dans le display d'un plugin (par ex: `sesajstools/http/xhr`).
 
-Un test montre qu'on gagne 4% sur la taille de l'ensemble des fichiers construits par webpack (28848 Ko -> 27672Ko). En environnement de développement, on gagne 2,5% sur les fichiers chargés pour l'affichage d'une ressource qcm.
+En évitant toute duplication des node_modules, un test montre qu'on gagne 4% sur la taille de l'ensemble des fichiers construits par webpack (28848 Ko -> 27672Ko). En environnement de développement, on gagne 2,5% sur les fichiers chargés pour l'affichage d'une ressource de type qcm.
 
 Les yarn workspaces résolvent naturellement ce problème mais nécessitent une réorganisation profonde de l'application (mais pas a priori de l'architecture des plugins).
 
