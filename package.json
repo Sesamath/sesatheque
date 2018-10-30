@@ -103,7 +103,7 @@
     "jquery-ui": "^1.12.1",
     "jstree": "^3.3.5",
     "knacss": "^7.0.7",
-    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.7",
+    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.9",
     "loadjs": "^3.5.4",
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",

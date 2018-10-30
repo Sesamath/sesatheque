@@ -183,7 +183,7 @@ module.exports = function (ressourceComponent) {
         if (!Array.isArray(values)) throw new Error(`values invalides (pas un tableau) pour ${prop}`)
         if (values.length) {
           if (prop === 'fulltext') {
-            lassiQuery.textSearch(`"${values.join(' ')}"`)
+            lassiQuery.textSearch(`"${values.join('" "')}"`)
           } else if (values.length > 1) {
             lassiQuery.match(prop).in(values)
           } else {

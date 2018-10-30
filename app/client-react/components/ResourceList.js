@@ -17,6 +17,7 @@ const ResourceList = ({
   queryOptions,
   resources,
   showSearchLink,
+  subNavText,
   total
 }) => {
   // query et queryOptions vont toujours ensemble
@@ -46,7 +47,7 @@ const ResourceList = ({
       containerClassName={'pagination'}
       activeClassName={'active'} />
   ) : null
-  const subNav = (
+  const subNav = subNavText ? (<Fragment>{subNavText}</Fragment>) : (
     <Fragment>
       <p className="fl">Ressources de {skip + 1} à {last} sur {total}</p>
       {pagination}
@@ -72,70 +73,83 @@ const ResourceList = ({
             titre,
             type,
             $droits
-          }) => (
-            <tr key={oid}>
-              <td className="type"><img src={icons[type]} alt="" title={type} /></td>
-              <td>{oid}</td>
-              <td>{titre}</td>
-              <td colSpan="4" className="links">
-                <NavLink
-                  to={`/ressource/decrire/${oid}`}
-                  title="Description">
-                  <span>Description</span>
-                  <i className="fa fa-file-alt"></i>
-                </NavLink>
-                <NavLink
-                  to={`/ressource/apercevoir/${oid}`}
-                  title="Aperçu">
-                  <span>Aperçu</span>
-                  <i className="fa fa-eye"></i>
-                </NavLink>
-                <NavLink
-                  to={`/ressource/voir/${oid}`}
-                  title="Voir"
-                  target="_blank"
-                  className="ignore--blank">
-                  <span>Voir</span>
-                  <i className="fa fa-external-link-alt"></i>
-                </NavLink>
-                {$droits.includes('W') ? (
+          }, index) => {
+            // on peut avoir des items de type error avec seulement un titre
+            if (type === 'error') {
+              return (
+                <tr key={index}>
+                  <td className="type"><img src={icons[type]} alt="" title={type} /></td>
+                  <td></td>
+                  <td>{titre}</td>
+                  <td colSpan="4" className="links"></td>
+                </tr>
+              )
+            }
+            return (
+              <tr key={oid}>
+                <td className="type"><img src={icons[type]} alt="" title={type} /></td>
+                <td>{oid}</td>
+                <td>{titre}</td>
+                <td colSpan="4" className="links">
                   <NavLink
-                    to={`/ressource/modifier/${oid}`}
-                    title="Modifier">
-                    <span>Modifier</span>
-                    <i className="fa fa-edit"></i>
+                    to={`/ressource/decrire/${oid}`}
+                    title="Description">
+                    <span>Description</span>
+                    <i className="fa fa-file-alt"></i>
                   </NavLink>
-                ) : null}
-                {$droits.includes('D') ? (
-                  <a
-                    onClick={(e) => {
-                      e.preventDefault()
-                      askDelete(oid, refreshList)
-                    }}
-                    href="#"
-                    title="Supprimer">
-                    <span>Supprimer</span>
-                    <i className="fa fa-trash"></i>
-                  </a>
-                ) : null}
-                {isIframeLayout ? (
-                  <a
-                    onClick={(e) => {
-                      e.preventDefault()
-                      window.parent.postMessage({
-                        action: 'ressource-copy',
-                        rid
-                      }, '*')
-                    }}
-                    href="#"
-                    title="Copier">
-                    <span>Copier</span>
-                    <i className="fa fa-share"></i>
-                  </a>
-                ) : null}
-              </td>
-            </tr>
-          ))}
+                  <NavLink
+                    to={`/ressource/apercevoir/${oid}`}
+                    title="Aperçu">
+                    <span>Aperçu</span>
+                    <i className="fa fa-eye"></i>
+                  </NavLink>
+                  <NavLink
+                    to={`/ressource/voir/${oid}`}
+                    title="Voir"
+                    target="_blank"
+                    className="ignore--blank">
+                    <span>Voir</span>
+                    <i className="fa fa-external-link-alt"></i>
+                  </NavLink>
+                  {$droits.includes('W') ? (
+                    <NavLink
+                      to={`/ressource/modifier/${oid}`}
+                      title="Modifier">
+                      <span>Modifier</span>
+                      <i className="fa fa-edit"></i>
+                    </NavLink>
+                  ) : null}
+                  {$droits.includes('D') ? (
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault()
+                        askDelete(oid, refreshList)
+                      }}
+                      href="#"
+                      title="Supprimer">
+                      <span>Supprimer</span>
+                      <i className="fa fa-trash"></i>
+                    </a>
+                  ) : null}
+                  {isIframeLayout ? (
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault()
+                        window.parent.postMessage({
+                          action: 'ressource-copy',
+                          rid
+                        }, '*')
+                      }}
+                      href="#"
+                      title="Copier">
+                      <span>Copier</span>
+                      <i className="fa fa-share"></i>
+                    </a>
+                  ) : null}
+                </td>
+              </tr>
+            )
+          })}
           {!resources.length ? (
             <tr>
               <td colSpan="7" className="empty">-</td>
@@ -169,7 +183,8 @@ ResourceList.propTypes = {
     skip: PropTypes.number.isRequired,
     limit: PropTypes.number.isRequired
   }),
-  refreshList: PropTypes.func.isRequired
+  refreshList: PropTypes.func.isRequired,
+  subNavText: PropTypes.string
 }
 
 const mapDispatchToProps = (dispatch, {refreshList}) => ({
