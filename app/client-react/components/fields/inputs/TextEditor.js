@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import AceEditor from 'react-ace-builds'
 import 'react-ace-builds/webpack-resolver-min'
-
 import showInvalidField from '../hoc/showInvalidField'
 
 import './TextEditor.scss'
