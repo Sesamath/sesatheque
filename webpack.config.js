@@ -76,6 +76,8 @@ const conf = {
     react: './app/client-react/index.js',
     // pour les html en iframe
     bugsnag: './app/client/page/bugsnag.js',
+    // liste des fichiers connus qui utilisent ça :
+    // https://ressources.sesamath.net/coll/lecteur/voir_j3p.php
     display: './app/client/display/index.js',
     import: './app/client/edit/import.js',
     // (c'est déjà inclus par display, est-ce bien utile ?)
@@ -96,7 +98,8 @@ const conf = {
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
     // sauf qu'avec splitChunks [name] se retrouve valoir name~hash et ça plante l'export (var foo~bar = plante assez logiquement…)
-    library: 'st[name]', // ne plus changer cela car des scripts externes l'utilisent (j3p, nos plugins…)
+    // ATTENTION, ne plus changer ce préfixe st car des scripts externes l'utilisent (j3p, nos plugins…)
+    library: 'st[name]',
     // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library,
     // ici var => on aura l'export de l'entry dispo en global (obj ou fonction suivant le module)
     libraryTarget: 'var',
