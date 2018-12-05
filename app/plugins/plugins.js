@@ -1,3 +1,4 @@
+// mis là pour mutualisation entre webpack.config et buildSrc
 const {plugins: {internal, external}} = require('../server/config')
 
 const plugins = [
