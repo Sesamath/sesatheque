@@ -112,14 +112,14 @@ function addError (error, delay) {
 
 /**
  * Affiche le bouton vu, ajoute son comportement au clic et le retourne
- * @param sendResultat
+ * @param {function} onClickCb sera appelée à chaque clic sur le bouton
  * @return {Element} undefined si #boutonVu n'existait pas dans la page
  */
-function addBoutonVu (sendResultat) {
+function addBoutonVu (onClickCb) {
   try {
     const boutonVu = wd.getElementById('boutonVu')
     if (boutonVu) {
-      boutonVu.addEventListener('click', sendResultat)
+      boutonVu.addEventListener('click', onClickCb)
       dom.setStyles(boutonVu, {display: 'block'})
     }
     return boutonVu
