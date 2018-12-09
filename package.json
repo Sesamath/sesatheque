@@ -101,7 +101,7 @@
     "ip": "^1.1.5",
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",
-    "jstree": "^3.3.5",
+    "jstree": "^3.3.7",
     "knacss": "^7.0.7",
     "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.7",
     "loadjs": "^3.5.4",
