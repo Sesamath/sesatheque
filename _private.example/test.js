@@ -29,8 +29,15 @@ module.exports = {
     baseId,
     baseUrl,
     mail: 'sesatheque@example.com',
-    staging: 'test'
+    maintenance: {
+      lockFile: '_private/maintenance.lock',
+      message: 'Application en maintenance, merci d’essayer de nouveau dans quelques instants',
+      staticDir: '_private/maintenance'
+    },
+    staging: 'test' // avec dev ça décale le port de 20 pour être utilisé avec webpack-dev-server
   },
+
+  // config des services lassi
   $cache: {
     redis: {
       prefix: appName
@@ -43,10 +50,19 @@ module.exports = {
       port: '27017',
       name: appName,
       user: 'mocha',
-      password: 'mocha'
+      password: 'mocha',
+      options: {
+        poolSize: 10,
+        reconnectTries: 1800 // 1/2h avec le reconnectInterval à 1000ms par défaut
+      }
     }
   },
+  // options pour les middlewares
   $rail: {
+    accessLog: {
+      logFile: `logs/${baseId}.access.log`,
+      withSessionTracking: true
+    },
     cookie: {
       key: 'xxx' // à changer obligatoirement
     },
@@ -55,8 +71,8 @@ module.exports = {
     }
   },
   $server: {
-    hostname: hostname,
-    port: port
+    hostname,
+    port
   },
   // pour les tests unitaires il faut au moins un token
   apiTokens: [
@@ -73,8 +89,7 @@ module.exports = {
   extraModules: ['sesalab-sso'],
 
   // les dépendances à ajouter au composant principal, en premier
-  // extraDependenciesFirst : ['sesasso-bibli'],
-  // et en dernier
-  // suivant extraModules
+  // extraDependenciesFirst : [],
+  // et en dernier (adapter suivant extraModules)
   extraDependenciesLast: ['sesalab-sso']
 }

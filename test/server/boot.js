@@ -81,10 +81,12 @@ const resolvedValue = {}
 let timerId
 // un delay par défaut de 10s pour chaque describe qui appelle boot dans son before
 const defaultDelay = 10000
+
 const resetTimer = (delay = defaultDelay) => {
   if (timerId) clearTimeout(timerId)
   timerId = setTimeout(shutdown, delay)
 }
+
 const shutdown = (done) => {
   if (!resolvedValue.lassi) throw new Error('impossible de fermer l’appli avant de l’avoir démarrée')
   if (done) resolvedValue.lassi.on('shutdown', done)
@@ -131,7 +133,7 @@ const getBootPromise = (delay) => new Promise((resolve) => {
   // possibilité de modifier le logLevel là-bas
   anLog.config(config.lassiLogger)
   // boot
-  app(afterBootCallback).then((lassiInstance) => {
+  app({noCheckLocalOnRemote: true}, afterBootCallback).then((lassiInstance) => {
     // le boot retourne lassi en synchrone et afterBootCallback est appelée sur l'event startup
     // donc on est dans le then mais afterBootCallback n'a pas encore été appelée
 

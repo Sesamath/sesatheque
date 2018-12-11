@@ -14,7 +14,7 @@
 const path = require('path')
 const baseId = 'toBeConfigured'
 const hostname = 'toBeConfigured'
-const port = xxxx
+const port = 1234 // à adapter
 const baseUrl = `http://${hostname}:${port}/`
 
 module.exports = {

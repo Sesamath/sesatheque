@@ -213,38 +213,39 @@
     "rules": {
       "object-curly-spacing": 0
     },
-    "overrides": [
-      {
-        "files": "app/client*/**/*.js",
-        "env": {
-          "browser": true
-        }
-      },
-      {
-        "files": "app/server/**/*.js",
-        "env": {
-          "node": true
-        },
-        "globals": {
-          "lassi": true,
-          "log": true
-        }
-      },
-      {
-        "files": "test/**/*.js",
-        "rules": {
-          "no-unused-expressions": "off",
-          "react/jsx-uses-react": "error",
-          "react/jsx-uses-vars": "error"
-        },
-        "env": {
-          "mocha": true
-        },
-        "globals": {
-          "lassi": true
-        }
+    "overrides": [{
+      "files": "app/client*/**/*.js",
+      "env": {
+        "browser": true
       }
-    ]
+    }, {
+      "files": "app/server/**/*.js",
+      "env": {
+        "node": true
+      },
+      "globals": {
+        "lassi": true,
+        "log": true
+      }
+    }, {
+      "files": "test/**/*.js",
+      "rules": {
+        "no-unused-expressions": "off",
+        "react/jsx-uses-react": "error",
+        "react/jsx-uses-vars": "error"
+      },
+      "env": {
+        "mocha": true
+      },
+      "globals": {
+        "lassi": true
+      }
+    }],
+    "settings": {
+      "react": {
+        "version": "16.5.2"
+      }
+    }
   },
   "eslintIgnoreComment": [
     "eslint n’ignore pas les node_modules dans les sous-repertoires par défaut",
