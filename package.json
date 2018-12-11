@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -23,15 +23,15 @@
     "doc:react:build": "npx styleguidist build",
     "doc:react:serve": "npx styleguidist server",
     "docker:build": "docker-compose build",
-    "docker:refresh": "docker-compose run --rm sesatheque yarn install",
+    "docker:refresh": "docker-compose run --rm sesatheque pnpm install",
     "docker:buildFull": "docker-compose -f docker-compose.avec.sesalab.yml build",
     "docker:dev": "docker-compose up sesatheque",
     "docker:devFull": "docker-compose -f docker-compose.avec.sesalab.yml up",
     "docker:start": "docker-compose start",
-    "docker:_start": "yarn run start:dev",
+    "docker:_start": "pnpm run start:dev",
     "docker:stop": "docker-compose stop",
     "docker:test": "docker-compose run test",
-    "docker:_test": "yarn run test:all",
+    "docker:_test": "pnpm run test:all",
     "localInstall": "node scripts/npmi.js",
     "lint": "node_modules/.bin/eslint .",
     "maj": "git pull && npm install && npm run build",
@@ -49,7 +49,7 @@
     "start:testBoth": "npm run start:test & npm run start:testCommun",
     "start:testCommun": "env SESATHEQUE_CONF=testCommun node app/server/start.js",
     "test": "./scripts/run -t",
-    "test:all": "yarn run test:react && yarn run test:server && yarn run test:others",
+    "test:all": "pnpm run test:react && pnpm run test:server && pnpm run test:others",
     "test:react": "node_modules/.bin/mocha test/react/**/*.test.js",
     "test:server": "node_modules/.bin/mocha 'test/server/**/*.test.js'",
     "test:others": "node_modules/.bin/mocha 'test/others/**/*.test.js'",
@@ -58,7 +58,7 @@
     "prod": "./scripts/run -sp",
     "stop": "./scripts/run -s",
     "watch": "./scripts/run -swl",
-    "postinstall": "cd app/plugins && node buildSrc && yarn install"
+    "postinstall": "cd app/plugins && node buildSrc && pnpm install"
   },
   "babel": {
     "presets": [
@@ -87,16 +87,17 @@
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
     "@fortawesome/fontawesome-free": "^5.3.1",
-    "an-ansi": "git://src.sesamath.net/an-ansi#369cba2",
-    "an-flow": "git://src.sesamath.net/an-flow#118c528",
-    "an-format-date": "git://src.sesamath.net/an-format-date#a76218a",
-    "an-log": "git://src.sesamath.net/an-log#55ea104",
-    "an-uuid": "git://src.sesamath.net/an-uuid#4ba4304",
+    "an-ansi": "git://src.sesamath.net/an-ansi#2.0.4",
+    "an-flow": "git://src.sesamath.net/an-flow#3.0.1",
+    "an-format-date": "git://src.sesamath.net/an-format-date#2.0.2",
+    "an-log": "git://src.sesamath.net/an-log#3.1.6",
+    "an-uuid": "git://src.sesamath.net/an-uuid#1.0.6",
     "body-parser": "^1.18.2",
     "bugsnag-js": "^4.7.3",
     "bugsnag-react": "^1.1.1",
     "connected-react-router": "^5.0.1",
     "elementtree": "^0.1.7",
+    "eslint-import-resolver-node": "^0.3.2",
     "express": "^4.16.2",
     "history": "^4.7.2",
     "ip": "^1.1.5",
@@ -104,7 +105,7 @@
     "jquery-ui": "^1.12.1",
     "jstree": "^3.3.5",
     "knacss": "^7.0.7",
-    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.9",
+    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.12",
     "loadjs": "^3.5.4",
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",
@@ -128,7 +129,7 @@
     "roboto-fontface": "^0.10.0",
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git#1.0.14",
-    "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.0",
+    "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git#1.4.4",
     "simple-crypto-js": "^2.0.2",
     "whatwg-fetch": "^3.0.0"
   },
@@ -188,6 +189,14 @@
     "webpack-dev-server": "^3.1.9",
     "xmlhttprequest": "^1.8.0"
   },
+  "peerDependencies": {
+    "@sesatheque-plugins/arbre": "git+https://framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.15",
+    "@sesatheque-plugins/iep": "git+https://framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.2",
+    "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.12",
+    "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.5",
+    "@sesatheque-plugins/qcm": "git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.4",
+    "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.4"
+  },
   "eslintConfig": {
     "parser": "babel-eslint",
     "parserOptions": {
@@ -238,7 +247,7 @@
     ]
   },
   "eslintIgnoreComment": [
-    "eslint n'ignore pas les node_modules dans les sous-repertoires par défaut",
+    "eslint n’ignore pas les node_modules dans les sous-repertoires par défaut",
     "https://github.com/eslint/eslint/issues/1163#issuecomment-58378266",
     "Attention, les règles ci-dessous sont ignorées si un fichier .eslintignore existe"
   ],

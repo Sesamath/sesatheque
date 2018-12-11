@@ -85,9 +85,9 @@ do
     s) runDel='yes';;
     t)
       if [ -f "$dockerFlag" ]; then
-        yarn run docker:test
+        npm run docker:test
       else
-        yarn run test:all
+        npm run test:all
       fi
       exit $?
     ;;

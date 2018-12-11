@@ -2,9 +2,10 @@
 .vim
 .idea
 
-# on utilise yarn, npm possible mais son lock restera local
+# on utilise pnpm, yarn ou npm possible mais le lock restera local
 /package-lock.json
 node_modules
+/yarn.lock
 
 # logs
 *.log
@@ -30,3 +31,5 @@ package.local-extras.json
 /app/plugins/generatedEditors.js
 /app/plugins/icons.js
 /app/plugins/yarn.lock
+/app/plugins/package-lock.json
+/app/plugins/shrinkwrap.yaml

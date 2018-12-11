@@ -22,16 +22,17 @@ Pour le découpage des chunks
 Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
+const fs = require('fs')
 const path = require('path')
 const autoprefixer = require('autoprefixer')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
-// on va forcer l'utilisation notre conf babel pour
-// la compilation de certains node_modules
+// On récupère babelConfig pour forcer l'utilisation notre conf babel dans certains node_modules
 // (seatheque-client, sesaeditgraphe et plugins d'édition)
-const babelConfig = require('./package.json').babel
+const babelConfig = require('./package').babel
+
 const appConfig = require('./app/server/config')
 const {entries, plugins, rules} = require('./app/plugins/webpack.config')
 
@@ -114,7 +115,7 @@ const conf = {
     extensions: ['.js', '.json', '.jsx'],
     // on veut tester le path du require, indépendamment du fait que le module soit linké ou pas
     // sinon avec du (npm|yarn) link sur qq modules, ils ne passent plus les tests de module.rules
-    symlinks: false,
+    // symlinks: false,
     alias: {
       // pour pouvoir faire des require('client-react/xxx') sans la collection de ../../..
       'client-react': path.resolve(__dirname, 'app/client-react'),
@@ -138,8 +139,12 @@ const conf = {
         ...rule,
         use: babelLoader
       })), {
-        test: /app\/(client|constructors|server|client-react|plugins)\/.*\.jsx?$/,
-        exclude: /node_modules\/(?!(@sesatheque-plugins)\/).*/,
+        test: /app\/(client|client-react|constructors|plugins|server)\/.*\.jsx?$/,
+        exclude: /node_modules\//,
+        use: babelLoader
+      }, {
+        // avec pnpm nos plugins sont dans node_modules/.framagit.org/Sesamath/sesatheque-plugin-xx/yyy/node_modules/@sesatheque-plugins/xx
+        test: /node_modules\/@sesatheque-plugins\/.*\.jsx?/,
         use: babelLoader
       }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
@@ -252,6 +257,38 @@ if (isDevServer) {
       '/': nodeUrl
     }
   }
+}
+
+// reste le pb des modules non résolus par webpack lorsque les modules ont été installés par pnpm
+try {
+  require.resolve('prop-types')
+} catch (error) {
+  // on tente de le chercher dans les node_modules de react
+  const reactDir = path.dirname(require.resolve('react'))
+  const propTypesDir = path.resolve(reactDir, '..', '..', 'node_modules', 'prop-types')
+  if (fs.existsSync(path.resolve(propTypesDir, 'package.json'))) conf.resolve.alias['prop-types'] = propTypesDir
+  else throw Error(`require ne trouvera pas le module prop-types de react (ni node_modules/prop-types ni ${propTypesDir})`)
+}
+try {
+  require.resolve('core-js')
+} catch (error) {
+  // on tente de le chercher dans les node_modules de @babel, un peu scabreux car @babel/polyfill résoud sur
+  // node_modules/.registry.npmjs.org/@babel/polyfill/7.0.0/node_modules/@babel/polyfill/lib/index.js
+  // mais core-js est dans
+  // node_modules/.registry.npmjs.org/@babel/polyfill/7.0.0/node_modules/core-js
+  const babelPolyfillDir = path.dirname(require.resolve('@babel/polyfill', '..'))
+  const coreJsDir = path.resolve(babelPolyfillDir, '..', '..', '..', 'core-js')
+  if (fs.existsSync(path.resolve(coreJsDir, 'package.json'))) conf.resolve.alias['core-js'] = coreJsDir
+  else throw Error(`require ne trouvera pas le module core-js de babel (ni node_modules/core-js ni ${coreJsDir})`)
+}
+try {
+  require.resolve('regenerator-runtime')
+} catch (error) {
+  // idem core-js
+  const babelPolyfillDir = path.dirname(require.resolve('@babel/polyfill', '..'))
+  const regeneratorRuntimeDir = path.resolve(babelPolyfillDir, '..', '..', '..', 'regenerator-runtime')
+  if (fs.existsSync(path.resolve(regeneratorRuntimeDir, 'package.json'))) conf.resolve.alias['regenerator-runtime'] = regeneratorRuntimeDir
+  else throw Error(`require ne trouvera pas le module regenerator-runtime de babel (ni node_modules/regenerator-runtime ni ${regeneratorRuntimeDir})`)
 }
 
 module.exports = conf
