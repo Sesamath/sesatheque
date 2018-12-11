@@ -3,7 +3,7 @@
  */
 const path = require('path')
 const sesatheques = require('sesatheque-client/src/sesatheques')
-const logDir = path.join(__dirname, '../logsTest')
+const logDir = path.join(__dirname, '../logs.test')
 const appName = 'testSesatheque'
 const port = 3013
 const hostname = 'sesatheque.local'

@@ -4,7 +4,7 @@
 const path = require('path')
 const uuid = require('an-uuid')
 const sesatheques = require('sesatheque-client/src/sesatheques')
-const logDir = path.join(__dirname, '../logsTest')
+const logDir = path.join(__dirname, '../logs.test')
 // sert de préfixe de log, dbName et redisPrefix
 const appName = 'testSesatheque'
 const baseId = 'sesathequeTest'

@@ -44,7 +44,7 @@ const {addSesatheque, reBaseUrl} = require('sesatheque-client/dist/server/sesath
 const configRessource = require('./ressource/config')
 const {version} = require('../../package')
 const checkConfigSesatheques = require('./checkConfigSesatheques')
-const isTestEnv = process.argv[1].includes('mocha')
+const isTestEnv = process.argv.length > 1 && process.argv[1].includes('mocha')
 
 /**
  * Retourne les éléments de list avec une baseUrl valide
@@ -98,22 +98,32 @@ const config = {
   version,
   // dans localConf, sinon conf par défaut i.e. port 3000
   application: {
-    name: 'bibliotheque',
+    name: 'sesatheque',
     // ajouté en title
     title: 'Sésathèque',
     // h1 de la page d'accueil
     homeTitle: 'Bienvenue sur cette Sésathèque',
     // mis dans _private/config.js car dépendant de l'instance
     baseId: toBeConfigured, // l'id de cette sésathèque
-    baseUrl: toBeConfigured
-    // mail: 'user@example.com',
+    baseUrl: toBeConfigured,
+    mail: toBeConfigured,
     // staging plus loin
+    maintenance: {
+      lockFile: '_private/maintenance.lock',
+      message: 'Application en maintenance, merci d’essayer de nouveau dans quelques instants',
+      staticDir: '_private/maintenance'
+    }
   },
   $entities: {
     // mongo
     database: {
       host: 'localhost',
-      port: 27017
+      port: 27017,
+      // cf http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect
+      options: {
+        poolSize: 10,
+        reconnectTries: 1800 // 1/2h avec le reconnectInterval à 1000ms par défaut
+      }
     }
   },
   $server: {
@@ -214,11 +224,6 @@ const config = {
   // une liste d'autres serveurs d'authentification externes, {nom, baseId, baseUrl}
   authServers: [],
 
-  // une liste de login / pass admin
-  admin: {
-    // foo:'passDeFoo'
-  },
-
   // le reste est spécifique à sesatheque et ignoré par lassi
   // Cf _private.example/config.js
 
@@ -230,11 +235,12 @@ const config = {
     dataError: 'data.error.log',
     debug: 'debug.log',
     // perf      : 'perf.log', log les perfs si présent
-    // sql       : 'sql.log', log les requetes sql si présent
     // ajouter les exclusions voulues parmi ['cache', 'resssourceRepository', 'personneRepository', 'accessControl']
     debugExclusions: []
   },
-  varnish: false // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
+
+  // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
+  varnish: false
 }
 
 // on ajoute nos params locaux (accès à la base et port,
@@ -285,15 +291,14 @@ if (!config.lassiLogger) {
  */
 const isConfigured = (obj, path = '') => {
   if (typeof obj === 'object') {
-    return Object.keys(obj).every(prop => {
-      const value = obj[prop]
+    Object.entries(obj).forEach(([prop, value]) => {
       const currentPath = `${path}.${prop}`
       if (typeof value === 'object') return isConfigured(value, currentPath)
       if (value === toBeConfigured) throw new Error(`La propriété ${currentPath} doit être configurée`)
     })
   }
 }
-isConfigured(config)
+isConfigured(config, 'config')
 // on vérifie quand même ça aussi (au cas où ce serait une chaîne vide)
 if (!config.application.baseId) throw new Error('config.application.baseId manquant')
 if (!config.application.baseUrl) throw new Error('config.application.baseUrl manquant')

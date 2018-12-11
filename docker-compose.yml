@@ -66,7 +66,7 @@ services:
       # le reste dont l'appli a besoin
       - ~/.cache/yarn:/home/app/.cache/yarn
       - ./app:/home/app/sesatheque/app
-      - ./logsTest:/home/app/sesatheque/logsTest
+      - ./logs.test:/home/app/sesatheque/logs.test
       - ./package.json:/home/app/sesatheque/package.json
       - ./scripts:/home/app/sesatheque/scripts
       - ./tasks:/home/app/sesatheque/tasks
