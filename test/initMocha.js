@@ -79,7 +79,6 @@ if (process.argv.some(arg => /test\/react\//.test(arg))) {
     // on tente de le chercher dans les node_modules de react
     const reactDir = path.dirname(require.resolve('react'))
     const reactModules = path.resolve(reactDir, '..', '..', 'node_modules')
-    console.log('reactModules', reactModules)
     if (fs.existsSync(reactModules)) {
       process.env.NODE_PATH = reactModules + (process.env.NODE_PATH ? path.delimiter + process.env.NODE_PATH : '')
       // reste à regénérer les paths dans lesquels require fouine
