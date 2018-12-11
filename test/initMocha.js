@@ -30,6 +30,7 @@
  */
 'use strict'
 
+const fs = require('fs')
 const path = require('path')
 /* eslint-env mocha */
 
@@ -68,3 +69,23 @@ require('@babel/register')({
     }]
   ]
 })
+
+// si on lance les tests react, faut aider require à trouver prop-types
+// (il n'y arrive pas si les modules ont été installés avec pnpm
+if (process.argv.some(arg => /test\/react\//.test(arg))) {
+  try {
+    require('prop-types')
+  } catch (error) {
+    // on tente de le chercher dans les node_modules de react
+    const reactDir = path.dirname(require.resolve('react'))
+    const reactModules = path.resolve(reactDir, '..', '..', 'node_modules')
+    console.log('reactModules', reactModules)
+    if (fs.existsSync(reactModules)) {
+      process.env.NODE_PATH = reactModules + (process.env.NODE_PATH ? path.delimiter + process.env.NODE_PATH : '')
+      // reste à regénérer les paths dans lesquels require fouine
+      require('module')._initPaths()
+    } else {
+      throw Error(`require ne trouvera pas le module prop-types de react (ni node_modules/prop-types ni ${reactModules}/prop-types)`)
+    }
+  }
+}
