@@ -34,7 +34,7 @@
     "docker:_test": "npm run test:all",
     "localInstall": "node scripts/npmi.js",
     "lint": "node_modules/.bin/eslint .",
-    "maj": "git pull && npm install && npm run build",
+    "maj": "git pull && pnpm install && npm run build",
     "mongo": "./scripts/mongoApp",
     "mongo:commun": "./scripts/mongoApp -g ./_private/commun.js",
     "mongo:test": "./scripts/mongoApp -g ./_private/test.js",
