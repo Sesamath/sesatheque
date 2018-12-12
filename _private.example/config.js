@@ -135,7 +135,7 @@ module.exports = {
     internal: ['mental', 'serie', 'sequenceModele'],
     // la liste des plugins externes à activer
     external: {
-      // mettre le nom du module en clé, 
+      // mettre le nom du module en clé
       // pour la valeur mettre true pour utiliser url et version déclarés dans le package.json
       // (en peerDependencies, si le plugin y est déclaré bien sûr)
       // ou l'url de la source
