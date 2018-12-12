@@ -1,14 +1,14 @@
 dependencies:
   '@babel/polyfill': 7.0.0
+  '@bugsnag/js': 5.0.2
+  '@bugsnag/plugin-react': 5.0.2
   '@fortawesome/fontawesome-free': 5.5.0
   an-ansi: src.sesamath.net/an-ansi/369cba247330cb088a5640707c8ca5bd515f4f0d
-  an-flow: src.sesamath.net/an-flow/118c52817e521ca6bb2e7a7b3e2a7b2063084237
+  an-flow: src.sesamath.net/an-flow/cb06dacf3593f363ce98525a415bca650cfffc1a
   an-format-date: src.sesamath.net/an-format-date/a76218a71134029ac10b33398ba96510cef962cd
   an-log: src.sesamath.net/an-log/56cf46a8756190a1dab5ec8f98470dbba1b18355
   an-uuid: src.sesamath.net/an-uuid/df889c594b9c1682861c9b5dd7b021d6e8fe3602
   body-parser: 1.18.3
-  bugsnag-js: 4.7.3
-  bugsnag-react: 1.1.1
   connected-react-router: 5.0.1
   elementtree: 0.1.7
   eslint-import-resolver-node: 0.3.2
@@ -823,14 +823,34 @@ packages:
       to-fast-properties: 2.0.0
     resolution:
       integrity: sha512-b4v7dyfApuKDvmPb+O488UlGuR1WbwMXFsO/cyqMrnfvRAChZKJAYeeglWTjUO1b9UghKKgepAQM5tsvBJca6A==
-  /@bugsnag/cuid/3.0.0:
+  /@bugsnag/browser/5.0.2:
     dev: false
     resolution:
-      integrity: sha512-LOt8aaBI+KvOQGneBtpuCz3YqzyEAehd1f3nC5yr9TIYW1+IzYKa2xWS4EiMz5pPOnRPHkyyS5t/wmSmN51Gjg==
-  /@bugsnag/safe-json-stringify/2.1.0:
+      integrity: sha512-uhjfoMU8MGRHdsIE8QqGclhopxcrlGgbwrZVLsWVgtiet2H/phGdwJl/6DTw+W9rTK1SmW1CpzAUCN+XfVI+JA==
+  /@bugsnag/js/5.0.2:
+    dependencies:
+      '@bugsnag/browser': 5.0.2
+      '@bugsnag/node': 5.0.2
     dev: false
     resolution:
-      integrity: sha512-tE2cPhAq+WFnA9XrfMfP+u/6L63eH7+PmONMNSXtP6kPt/iUXnwkDsxc1Q6lUP1oM3LsmWBrxn+/93M8JE6fpA==
+      integrity: sha512-CdilcBCrP2vdosbtoMzEjORX4/BDGTOVp1+WrYY58KbjFoSDc1fUmjPjqAmHxdZKty7oi5PAQeQv0fh3nsdtgQ==
+  /@bugsnag/node/5.0.2:
+    dependencies:
+      byline: 5.0.0
+      error-stack-parser: 2.0.2
+      iserror: 0.0.2
+      pump: 3.0.0
+      request: 2.88.0
+      stack-generator: 2.0.3
+    dev: false
+    resolution:
+      integrity: sha512-ad1lR6cE8mXOzFVV9wt/pP8fxZ2gfCvR+p7BIm4c+urSaw+0UnW+/ej6uozbYmhlKTpp8KE1SXU/lr16EM2vvA==
+  /@bugsnag/plugin-react/5.0.2:
+    dev: false
+    peerDependencies:
+      '@bugsnag/browser': '* || >=5.0.0-rc.1'
+    resolution:
+      integrity: sha512-2syKnV1v1CQ69ELOb3Yx+bp9hKNDwYGEFJ2YQBO2gO7eLxiLcB2mQC1BSZvi2HP9MliuN68O0pd/NyE89IU0ZQ==
   /@emotion/babel-utils/0.6.10:
     dependencies:
       '@emotion/hash': 0.6.6
@@ -1821,13 +1841,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-qk62jl17ZYuqa/alfmMMvXqT0pg=
-  /browserify-versionify/1.0.6:
-    dependencies:
-      find-root: 0.1.2
-      through2: 0.6.3
-    dev: false
-    resolution:
-      integrity: sha1-qy3GHWoRnmJ77Eh1mNGYO3/bJ14=
   /browserify-zlib/0.2.0:
     dependencies:
       pako: 1.0.7
@@ -1893,23 +1906,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-bRu2AbB6TvztlwlBMgkwJ8lbwpg=
-  /bugsnag-js/4.7.3:
-    dependencies:
-      '@bugsnag/cuid': 3.0.0
-      '@bugsnag/safe-json-stringify': 2.1.0
-      browserify-versionify: 1.0.6
-      error-stack-parser: 2.0.2
-      iserror: 0.0.2
-      stack-generator: 2.0.3
-    deprecated: 'All projects should upgrade to our universal JS notifier: "@bugsnag/js". See https://github.com/bugsnag/bugsnag-js/blob/master/UPGRADING.md for more details.'
-    dev: false
-    resolution:
-      integrity: sha512-j9n6E45y8R0hx4A2IGkbOIEsDwRzZlhe+rtCfFo6RE6DgmTezeia+kqUMb4iitkSCZjEBMAPGhAe1l3vXfwbqQ==
-  /bugsnag-react/1.1.1:
-    deprecated: 'All projects should upgrade to our universal JS notifier: "@bugsnag/js" and the accompanying plugins, e.g. "@bugsnag/plugin-react". See https://github.com/bugsnag/bugsnag-js/blob/master/UPGRADING.md for more details.'
-    dev: false
-    resolution:
-      integrity: sha512-u+aodYDZwlmPMj0kCC+nZiO0Rhw4LaJ8ve1cYzEb5gcToPjuIkOfFIQO4T7QhR96V2Uy6UdVw7e04OEPR4/0wg==
   /builtin-modules/1.1.1:
     dev: true
     engines:
@@ -1920,6 +1916,12 @@ packages:
     dev: true
     resolution:
       integrity: sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
+  /byline/5.0.0:
+    dev: false
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha1-dBxSFkaOrcRXsDQQEYrXfejB3bE=
   /bytes/3.0.0:
     engines:
       node: '>= 0.8'
@@ -3258,7 +3260,6 @@ packages:
   /end-of-stream/1.4.1:
     dependencies:
       once: 1.4.0
-    dev: true
     resolution:
       integrity: sha512-1MkrZNvWTKCaigbn+W15elq2BB/L22nqrSY5DKlo3X6+vclJm8Bb5djXJBmEX6fS3+zCh/F4VBK5Z2KxJt4s2Q==
   /enhanced-resolve/4.1.0:
@@ -4060,10 +4061,6 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-LDUY6V1Xs5eFskUVYtIwatojt6+9xC9Chnlk/jYOOvn3FAFfSaWddxahDGyNHh0b2dMXa6YW2m0tk8TdVaXHlA==
-  /find-root/0.1.2:
-    dev: false
-    resolution:
-      integrity: sha1-mNImfP8ZFsyvJ0OzoO6oHXnX3NE=
   /find-root/1.1.0:
     dev: false
     resolution:
@@ -7485,7 +7482,6 @@ packages:
     dependencies:
       end-of-stream: 1.4.1
       once: 1.4.0
-    dev: true
     resolution:
       integrity: sha512-LwZy+p3SFs1Pytd/jYct4wpv49HiYCqd9Rlc5ZVdk0V+8Yzv6jR5Blk3TRmPL1ft69TxP0IMZGJ+WPFU2BFhww==
   /pumpify/1.5.1:
@@ -8003,15 +7999,6 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-jvHAYjxqbbDcZxPEv6xGMysjaPg=
-  /readable-stream/1.0.34:
-    dependencies:
-      core-util-is: 1.0.2
-      inherits: 2.0.3
-      isarray: 0.0.1
-      string_decoder: 0.10.31
-    dev: false
-    resolution:
-      integrity: sha1-Elgg40vIQtLyqq+v5MKRbuMsFXw=
   /readable-stream/2.3.6:
     dependencies:
       core-util-is: 1.0.2
@@ -9234,10 +9221,6 @@ packages:
       node: '>= 0.4'
     resolution:
       integrity: sha1-0E3iyJ4Tf019IG8Ia17S+ua+jOo=
-  /string_decoder/0.10.31:
-    dev: false
-    resolution:
-      integrity: sha1-YuIDvEF2bGwoyfyEMB2rHFMQ+pQ=
   /string_decoder/1.1.1:
     dependencies:
       safe-buffer: 5.1.2
@@ -9501,13 +9484,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
-  /through2/0.6.3:
-    dependencies:
-      readable-stream: 1.0.34
-      xtend: 4.0.1
-    dev: false
-    resolution:
-      integrity: sha1-eVKS/enyVMKjaLOPnMXRvUZjr7Y=
   /through2/2.0.5:
     dependencies:
       readable-stream: 2.3.6
@@ -10400,6 +10376,7 @@ packages:
     resolution:
       integrity: sha512-PHyM+sQouu7xspQQwELlGwwd05mXUFqwFYfqPO0cC7x4fxyHnnuetmQr6CjJiafIDoH4MogHb9dOoJzR/Y4rFg==
   /xtend/4.0.1:
+    dev: true
     engines:
       node: '>=0.4'
     resolution:
@@ -10574,6 +10551,14 @@ packages:
       repo: 'git://src.sesamath.net/an-flow'
       type: git
     version: 3.0.1
+  src.sesamath.net/an-flow/cb06dacf3593f363ce98525a415bca650cfffc1a:
+    dev: false
+    name: an-flow
+    resolution:
+      commit: cb06dacf3593f363ce98525a415bca650cfffc1a
+      repo: 'git://src.sesamath.net/an-flow'
+      type: git
+    version: 3.0.2
   src.sesamath.net/an-format-date/a76218a71134029ac10b33398ba96510cef962cd:
     dev: false
     name: an-format-date
@@ -10615,9 +10600,11 @@ specifiers:
   '@babel/preset-env': ^7.1.0
   '@babel/preset-react': ^7.0.0
   '@babel/register': ^7.0.0
+  '@bugsnag/js': ^5.0.2
+  '@bugsnag/plugin-react': ^5.0.2
   '@fortawesome/fontawesome-free': ^5.3.1
   an-ansi: 'git://src.sesamath.net/an-ansi#2.0.4'
-  an-flow: 'git://src.sesamath.net/an-flow#3.0.1'
+  an-flow: 'git://src.sesamath.net/an-flow#3.0.2'
   an-format-date: 'git://src.sesamath.net/an-format-date#2.0.2'
   an-log: 'git://src.sesamath.net/an-log#3.1.6'
   an-uuid: 'git://src.sesamath.net/an-uuid#1.0.6'
@@ -10626,8 +10613,6 @@ specifiers:
   babel-loader: ^8.0.2
   babel-plugin-module-resolver: ^3.1.1
   body-parser: ^1.18.2
-  bugsnag-js: ^4.7.3
-  bugsnag-react: ^1.1.1
   chai: ^4.1.2
   chai-as-promised: ^7.1.1
   clean-webpack-plugin: ^0.1.19

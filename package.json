@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -88,13 +88,13 @@
     "@babel/polyfill": "^7.0.0",
     "@fortawesome/fontawesome-free": "^5.3.1",
     "an-ansi": "git://src.sesamath.net/an-ansi#2.0.4",
-    "an-flow": "git://src.sesamath.net/an-flow#3.0.1",
+    "an-flow": "git://src.sesamath.net/an-flow#3.0.2",
     "an-format-date": "git://src.sesamath.net/an-format-date#2.0.2",
     "an-log": "git://src.sesamath.net/an-log#3.1.6",
     "an-uuid": "git://src.sesamath.net/an-uuid#1.0.6",
     "body-parser": "^1.18.2",
-    "bugsnag-js": "^4.7.3",
-    "bugsnag-react": "^1.1.1",
+    "@bugsnag/js": "^5.0.2",
+    "@bugsnag/plugin-react": "^5.0.2",
     "connected-react-router": "^5.0.1",
     "elementtree": "^0.1.7",
     "eslint-import-resolver-node": "^0.3.2",

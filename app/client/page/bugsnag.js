@@ -30,7 +30,7 @@
  */
 'use strict'
 // cf https://docs.bugsnag.com/platforms/browsers/js/
-const bugsnagJs = require('bugsnag-js')
+const bugsnagJs = require('@bugsnag/js')
 // on récupère ce que webpackConfigLoader.js nous file
 const {application, bugsnag, version} = require('../../server/config')
 const getParentUrls = require('../../client-react/utils/getParentUrls').default
