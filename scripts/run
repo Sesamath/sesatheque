@@ -83,7 +83,7 @@ do
     o) pm2opts="$OPTARG";;
     p) nodeEnv='prod'; runPm2='yes';;
     s) runDel='yes';;
-    t)
+    t) # on lance les tests dans docker ou localement suivant la présence de _private/.testOnDocker
       if [ -f "$dockerFlag" ]; then
         npm run docker:test
       else

@@ -69,6 +69,12 @@ Regarder le contenu du dossier script pour voir la liste des tâches automatisé
 
 Il y a aussi le dossier tasks avec les tâches d'import (à priori spécifique à l'instance sesatheque de Sésamath)
 
+Tests
+-----
+
+`npm run test:all` lance tous les tests localement, pour les lancer dans le conteneur docker il faut
+créer un fichier `_private/.testOnDocker` (vide, son contenu est ignoré) et lancer les tests avec `npm test`
+
 Documentation
 -------------
 

@@ -1,4 +1,5 @@
 --colors
+--recursive
 --require ./test/initMocha.js
 --reporter spec
 --slow 1500
