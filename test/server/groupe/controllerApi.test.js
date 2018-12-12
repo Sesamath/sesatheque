@@ -39,7 +39,7 @@
 'use strict'
 /* eslint-env mocha */
 import faker from 'faker/locale/fr'
-import {boot, keepAlive, shutdownDelayed} from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../../boot'
 import {expect} from 'chai'
 import {
   createGroupe,

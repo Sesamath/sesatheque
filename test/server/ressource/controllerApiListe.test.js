@@ -40,7 +40,7 @@
 /* eslint-env mocha */
 import {expect} from 'chai'
 import {populate, purge} from '../populate'
-import {boot, keepAlive, shutdownDelayed} from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../../boot'
 import {limites} from '../../../app/server/ressource/config'
 import Ref from '../../../app/constructors/Ref'
 import {update as urlUpdate} from '../../../app/server/lib/url'

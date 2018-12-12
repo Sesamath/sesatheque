@@ -40,7 +40,7 @@
 /* eslint-env mocha */
 
 import {expect} from 'chai'
-import {boot, keepAlive, shutdownDelayed} from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../../boot'
 import flow from 'an-flow'
 import fakePersonne from '../../fixtures/fakePersonne'
 import {getRandomPersonne, populate, purge} from '../populate'

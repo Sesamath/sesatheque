@@ -39,7 +39,7 @@
 'use strict'
 /* eslint-env mocha */
 import {expect} from 'chai'
-import {boot, keepAlive, shutdownDelayed} from './boot'
+import {boot, keepAlive, shutdownDelayed} from '../boot'
 import {getHtml} from '../../app/server/main/reactPage'
 import {purge} from './populate'
 

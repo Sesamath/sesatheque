@@ -36,7 +36,7 @@ import fetch from 'node-fetch'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
 
-import {boot, keepAlive, shutdownDelayed} from './boot'
+import {boot, keepAlive, shutdownDelayed} from '../boot'
 import {purge} from './populate'
 import {application} from '../../app/server/config'
 import {errors} from '../../app/server/main/controllerTest'
@@ -60,7 +60,7 @@ describe('httpMethods', function () {
 
   after(() => {
     delete global.fetch
-    keepAlive(timeout)
+    keepAlive(timeout) // le temps de purger
     return purge().then(shutdownDelayed)
   })
 

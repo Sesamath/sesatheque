@@ -48,7 +48,7 @@ import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
 
 import {XMLHttpRequest} from 'xmlhttprequest'
 
-import boot from '../../server/boot'
+import {boot, keepAlive, shutdownDelayed} from '../../boot'
 import config from '../../../app/server/config'
 import configRessource from '../../../app/server/ressource/config'
 import {addRessource, getRandomRessource, populate, purge} from '../../server/populate'
@@ -57,12 +57,10 @@ import fakeRessource from '../../fixtures/fakeRessource'
 chai.use(sinonChai)
 
 const myBaseUrl = config.application.baseUrl
-const sesatheques = [
-  {
-    baseId: config.application.baseId,
-    baseUrl: myBaseUrl
-  }
-]
+const sesatheques = [{
+  baseId: config.application.baseId,
+  baseUrl: myBaseUrl
+}]
 /**
  * Liste des propriétés communes à Ref & ClientItem (sauf aliasOf|rid, et les props facultatives enfants et parametres)
  * @private
@@ -135,6 +133,7 @@ describe('sesatheque-client', () => {
       .filter(p => !propsChecked.includes(p))
       .forEach(p => expect(item[p]).to.deep.equal(expected[p], `Pb item avec ${p}`))
   }
+
   const ressourceToItem = (ressource) => {
     const data = ressource
     if (!data.$droits) data.$droits = 'R'
@@ -145,9 +144,7 @@ describe('sesatheque-client', () => {
   // inutile ici de le faire à chaque test, c'est le client qu'on teste
   before(function () {
     this.timeout(20000)
-    return boot().then(({testsDone}) => {
-      after(purge)
-      after(testsDone)
+    return boot().then(() => {
       log.setLogLevel('error')
       sesathequeClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
       return populate()
@@ -156,12 +153,17 @@ describe('sesatheque-client', () => {
 
   beforeEach(() => {
     consoleErrorStub = sinon.stub(console, 'error')
+    return keepAlive()
   })
+
   afterEach(() => {
     expect(consoleErrorStub).to.not.have.been.called
     consoleErrorStub.reset()
     consoleErrorStub.restore()
   })
+
+  after(purge)
+  after(shutdownDelayed)
 
   it('getRessource remonte une ressource', () => {
     const getCheckPromise = (expected) => new Promise((resolve, reject) => {

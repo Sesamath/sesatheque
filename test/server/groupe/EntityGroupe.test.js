@@ -40,7 +40,7 @@
 /* eslint-env mocha */
 
 import {expect} from 'chai'
-import {boot, keepAlive, shutdownDelayed} from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../../boot'
 import {purge} from '../populate'
 
 describe('EntityGroupe', () => {
