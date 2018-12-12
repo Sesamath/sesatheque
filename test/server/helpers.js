@@ -61,6 +61,8 @@ export const createGroupe = (groupe, personneOids) => {
 /**
  * Vérifie récursivement que toCheck est identique à expected pour chacune des propriétés de expected
  * (le test passe si toCheck a des propriétés en plus)
+ * @private
+ * @throws {Error} si un test ne passe pas
  * @param expected
  * @param toCheck
  * @param path
@@ -79,28 +81,42 @@ const checkObj = (expected, toCheck, path = '') => {
 
 /**
  * Vérifie que la réponse est ok (et que son body contient expected si fourni)
+ * @throws {Error} si un test ne passe pas
  * @param response
  * @param {object} [expected]
+ * @return {Promise}
  */
 export const itIsSuccessfull = (response, expected) => {
-  expect(response.status).to.equal(200)
-  expect(response.body).to.have.property('message')
-  expect(response.body.message).to.equal('OK', `Expected message: OK, got:  ${JSON.stringify(response.body)}`)
-  if (expected) checkObj(expected, response.body.data)
+  try {
+    expect(response.status).to.equal(200)
+    expect(response.body).to.have.property('message')
+    expect(response.body.message).to.equal('OK', `Expected message: OK, got:  ${JSON.stringify(response.body)}`)
+    if (expected) checkObj(expected, response.body.data)
+    return Promise.resolve()
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 /**
  * Vérifie qu'on prend le code d'erreur status, avec le bon message si fourni
+ * @throws {Error} si un test ne passe pas
  * @param response
  * @param {string|RegExp} [expectedErrorMessage]
  * @param {number} status
+ * @return {Promise}
  */
 export const itFails = (response, expectedErrorMessage, status) => {
-  expect(response.status).to.equal(status)
-  if (typeof expectedErrorMessage === 'string') {
-    expect(response.body.message).to.equal(expectedErrorMessage)
-  } else if (expectedErrorMessage) {
-    expect(response.body.message).to.match(expectedErrorMessage)
+  try {
+    expect(response.status).to.equal(status)
+    if (typeof expectedErrorMessage === 'string') {
+      expect(response.body.message).to.equal(expectedErrorMessage)
+    } else if (expectedErrorMessage) {
+      expect(response.body.message).to.match(expectedErrorMessage)
+    }
+    return Promise.resolve()
+  } catch (error) {
+    return Promise.reject(error)
   }
 }
 

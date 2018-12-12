@@ -36,7 +36,8 @@ import fetch from 'node-fetch'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
 
-import boot from './boot'
+import {boot, keepAlive, shutdownDelayed} from './boot'
+import {purge} from './populate'
 import {application} from '../../app/server/config'
 import {errors} from '../../app/server/main/controllerTest'
 import {DELETE, GET, PATCH, POST, PUT} from '../../app/client-react/utils/httpMethods'
@@ -45,9 +46,11 @@ chai.use(sinonChai)
 
 const {baseUrl} = application
 const httpMethods = {DELETE, GET, PATCH, POST, PUT}
+// circleCI peut être assez lent
+const timeout = 10000
 
 describe('httpMethods', function () {
-  this.timeout(60000)
+  this.timeout(timeout * 5)
   let consoleErrorStub
 
   before(() => boot().then(() => {
@@ -57,10 +60,13 @@ describe('httpMethods', function () {
 
   after(() => {
     delete global.fetch
+    keepAlive(timeout)
+    return purge().then(shutdownDelayed)
   })
 
   beforeEach(() => {
     consoleErrorStub = sinon.stub(console, 'error')
+    keepAlive(timeout)
   })
   afterEach(() => {
     consoleErrorStub.reset()

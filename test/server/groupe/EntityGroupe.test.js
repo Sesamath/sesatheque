@@ -40,7 +40,8 @@
 /* eslint-env mocha */
 
 import {expect} from 'chai'
-import boot from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../boot'
+import {purge} from '../populate'
 
 describe('EntityGroupe', () => {
   // une erreur toute prête
@@ -77,6 +78,11 @@ describe('EntityGroupe', () => {
       })
     }).catch(done)
   })
+
+  beforeEach(keepAlive)
+
+  after(purge)
+  after(shutdownDelayed)
 
   it('create', function () {
     checkGroupe(EntityGroupe.create(groupeData))

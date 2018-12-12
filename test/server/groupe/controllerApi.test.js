@@ -39,7 +39,7 @@
 'use strict'
 /* eslint-env mocha */
 import faker from 'faker/locale/fr'
-import boot from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../boot'
 import {expect} from 'chai'
 import {
   createGroupe,
@@ -93,7 +93,10 @@ describe('API groupe', () => {
     return purge()
   }))
 
-  after(() => purge())
+  beforeEach(keepAlive)
+
+  after(purge)
+  after(shutdownDelayed)
 
   context('sans avoir de session', () => {
     it('/api/groupes/perso denied', async () => {
@@ -120,8 +123,8 @@ describe('API groupe', () => {
     it('autorise la récupération par oid', async () => {
       const groupe = await createGroupe(testGroup)
       const response = await agent.get(`/api/groupe/${groupe.oid}`)
-      itIsSuccessfull(response, testGroup)
-      return deleteGroupe(testGroup.nom)
+      return itIsSuccessfull(response, testGroup)
+        .then(() => deleteGroupe(testGroup.nom))
     })
   })
 
@@ -148,20 +151,22 @@ describe('API groupe', () => {
 
       // On doit être dans les gestionnaires
       groupeToCreate.gestionnaires = [testUser.oid]
-      itIsSuccessfull(response, groupeToCreate)
-      // et on teste aussi oid & dateCreation
-      const {message, data: {oid, dateCreation}} = response.body
-      expect(message).to.equals('OK')
-      expect(oid).to.exist
-      expect(dateCreation).to.exist
-      const creationTimestamp = (new Date(dateCreation)).getTime()
-      expect(creationTimestamp > start).to.be.true
-      expect(creationTimestamp < start + 2000).to.be.true
+      return itIsSuccessfull(response, groupeToCreate)
+        .then(() => {
+          // et on teste aussi oid & dateCreation
+          const {message, data: {oid, dateCreation}} = response.body
+          expect(message).to.equals('OK')
+          expect(oid).to.exist
+          expect(dateCreation).to.exist
+          const creationTimestamp = (new Date(dateCreation)).getTime()
+          expect(creationTimestamp > start).to.be.true
+          expect(creationTimestamp < start + 2000).to.be.true
 
-      return deleteGroupe(testGroup.nom)
+          return deleteGroupe(testGroup.nom)
+        })
     })
 
-    it(`création d'un groupe avec un nom seulement`, async () => {
+    it(`création d'un groupe avec un nom seulement`, () => {
       const groupeName = faker.lorem.words(3)
       const encodedName = encodeURIComponent(groupeName)
       const expected = {
@@ -172,13 +177,12 @@ describe('API groupe', () => {
       }
 
       // Création
-      let response = await agent.get(`/api/groupe/ajouter/${encodedName}`)
-      itIsSuccessfull(response)
-
-      // Récupération puis vérifications
-      response = await agent.get(`/api/groupe/byNom/${encodedName}`)
-      itIsSuccessfull(response, expected)
-      return deleteGroupe(groupeName)
+      return agent.get(`/api/groupe/ajouter/${encodedName}`)
+        .then(itIsSuccessfull)
+        // Récupération puis vérifications
+        .then(() => agent.get(`/api/groupe/byNom/${encodedName}`))
+        .then((response) => itIsSuccessfull(response, expected))
+        .then(() => deleteGroupe(groupeName))
     })
 
     it(`tente la récupération d'un groupe qui n'existe pas (depuis un oid)`, async () => {
@@ -190,8 +194,8 @@ describe('API groupe', () => {
     it(`tente la récupération d'un groupe qui existe (depuis un oid)`, async () => {
       const groupe = await createGroupe(testGroup)
       let response = await agent.get(`/api/groupe/${groupe.oid}`)
-      itIsSuccessfull(response, testGroup)
-      return deleteGroupe(testGroup.nom)
+      return itIsSuccessfull(response, testGroup)
+        .then(() => deleteGroupe(testGroup.nom))
     })
 
     it(`tente la récupération d'un groupe qui n'existe pas (depuis un nom)`, async () => {
@@ -203,8 +207,8 @@ describe('API groupe', () => {
     it(`tente la récupération d'un groupe qui existe (depuis un nom)`, async () => {
       await createGroupe(testGroup)
       let response = await agent.get(`/api/groupe/byNom/${testGroup.nom}`)
-      itIsSuccessfull(response, testGroup)
-      return deleteGroupe(testGroup.nom)
+      return itIsSuccessfull(response, testGroup)
+        .then(() => deleteGroupe(testGroup.nom))
     })
 
     it(`/api/groupes/perso répond avec les bonnes propriétés`, async () => {
@@ -219,8 +223,8 @@ describe('API groupe', () => {
         groupesSuivis: []
       }
       const response = await agent.get(`/api/groupes/perso`)
-      itIsSuccessfull(response, expected)
-      return deleteGroupe(testGroup.nom)
+      return itIsSuccessfull(response, expected)
+        .then(() => deleteGroupe(testGroup.nom))
     })
 
     describe('/api/groupes/perso reflète les modifs', () => {

@@ -79,7 +79,7 @@ let isBooted = false
  */
 const resolvedValue = {}
 let timerId
-// un delay par défaut de 10s pour chaque describe qui appelle boot dans son before
+// un delay par défaut de 2s pour chaque test qui appelle boot dans son before
 const defaultDelay = 10000
 
 const resetTimer = (delay = defaultDelay) => {
@@ -98,7 +98,7 @@ const shutdown = (done) => {
  * @param {number} [delay=3000] Le nb de ms à attendre après le boot pour éteindre
  * @return {Promise} qui sera résolue en passant un objet {superTestClient, lassi}
  */
-const getBootPromise = (delay) => new Promise((resolve) => {
+export const boot = (delay) => new Promise((resolve) => {
   const finish = () => {
     // on éteindra après delay ms (rappeller boot reset le timer)
     // c'est pour que mocha rende la main, même si on l'appelle sur un seul fichier
@@ -144,4 +144,23 @@ const getBootPromise = (delay) => new Promise((resolve) => {
   }).catch(log.error)
 })
 
-module.exports = getBootPromise
+/**
+ * Garde le serveur ouvert pendant timeout (ms)
+ * À mettre en beforeEach
+ * @param {number} timeout en ms
+ * @return {Promise<void>}
+ */
+export const keepAlive = (timeout = 2000) => {
+  resetTimer(timeout)
+  return Promise.resolve()
+}
+
+/**
+ * Fermera le serveur dans 200ms si personne n'a appelé boot() ou keepAlive() avant
+ * À mettre en after pour chaque test
+ * @return {Promise<void>}
+ */
+export const shutdownDelayed = () => {
+  resetTimer(200)
+  return Promise.resolve()
+}

@@ -39,8 +39,9 @@
 'use strict'
 /* eslint-env mocha */
 import {expect} from 'chai'
-import boot from './boot'
+import {boot, keepAlive, shutdownDelayed} from './boot'
 import {getHtml} from '../../app/server/main/reactPage'
+import {purge} from './populate'
 
 describe('prend un 404 sur les urls inexistantes', function () {
   const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
@@ -52,6 +53,9 @@ describe('prend un 404 sur les urls inexistantes', function () {
   }
   this.timeout(60000)
   before(() => boot().then(setClient))
+  beforeEach(keepAlive)
+  after(purge)
+  after(shutdownDelayed)
 
   const reactPage = getHtml()
 

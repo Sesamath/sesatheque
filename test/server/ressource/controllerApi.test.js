@@ -41,7 +41,7 @@
 import {expect} from 'chai'
 import faker from 'faker/locale/fr'
 import {getRandomPersonne, getRandomRessource, getRessources, populate, purge} from '../populate'
-import boot from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../boot'
 import configRessource from '../../../app/server/ressource/config'
 import config from '../../../app/server/config'
 import helpersFactory from './helpers'
@@ -82,6 +82,11 @@ describe('controller api ressource', () => {
       return purge()
     })
   })
+
+  beforeEach(keepAlive)
+
+  after(purge)
+  after(shutdownDelayed)
 
   it('POST enregistre une ressource et retourne son oid', function () {
     const getPostPromise = (ressource) => _superTestClient
