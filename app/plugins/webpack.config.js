@@ -1,4 +1,4 @@
-const {plugins} = require('./plugins')
+const {pluginsPaths} = require('./plugins')
 const {version} = require('../server/config')
 
 const params = {version}
@@ -7,7 +7,7 @@ const allEntries = {}
 const allPlugins = []
 const allRules = []
 
-plugins.forEach(plugin => {
+pluginsPaths.forEach(plugin => {
   const {entries, plugins, rules} = require(`${plugin}/webpack.config`)(params)
   Object.assign(allEntries, entries)
   allPlugins.push(...plugins)
