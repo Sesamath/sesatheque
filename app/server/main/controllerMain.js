@@ -53,6 +53,7 @@ module.exports = function (mainComponent) {
       fsPath: path.join(root, 'build'),
       maxAge: staticMaxAge || '7d'
     }
+    // cf conf webpack, si y'a un SESATHEQUE_CONF ça build dans build.*
     if (envSesathequeConf) expressOptions.fsPath += '.' + envSesathequeConf
     this.serve('/', expressOptions)
     // et les ressources statiques qui bougent pas (CopyWebpackPlugin arrive pas à les copier, y'en a trop)

@@ -9,10 +9,7 @@ const {application, bugsnag} = config
 let ErrorBoundary
 
 if (bugsnag && bugsnag.apiKey) {
-  const {
-    apiKey,
-    appVersion
-  } = bugsnag
+  const {apiKey, appVersion} = bugsnag
 
   const bugsnagClient = bugsnagJs({
     // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#apikey
@@ -23,9 +20,11 @@ if (bugsnag && bugsnag.apiKey) {
     releaseStage: application.staging
   })
 
-  ErrorBoundary = bugsnagClient.use(bugsnagReact(React))
+  // cf https://docs.bugsnag.com/platforms/javascript/react/
+  bugsnagClient.use(bugsnagReact, React)
+  ErrorBoundary = bugsnagClient.getPlugin('react')
 } else {
-  // Si la config bugsnag est absente, on rend les enfants:
+  // Si la config bugsnag est absente, ErrorBoundary rend les enfants tel quel
   ErrorBoundary = ({children}) => ({...children})
 }
 
