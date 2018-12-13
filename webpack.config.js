@@ -38,8 +38,8 @@ const {entries, plugins, rules} = require('./app/plugins/webpack.config')
 
 // passer --debug pour ne pas avoir de minification
 const isDebug = process.argv.includes('--debug')
-// prod d'après la conf (sauf --debug ou test)
-const isProd = !isDebug && /prod/.test(appConfig.application.staging)
+// prod d'après l'environnement ou la conf (sauf --debug ou test)
+const isProd = !isDebug && (process.NODE_ENV === 'production' || /prod/.test(appConfig.application.staging))
 const isDevServer = !!appConfig.devServer
 
 let baseUrl = appConfig.application.baseUrl

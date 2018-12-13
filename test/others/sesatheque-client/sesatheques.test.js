@@ -50,9 +50,7 @@ chai.use(sinonChai)
 
 const expected = {
   sesabibli: 'https://bibliotheque.sesamath.net/',
-  sesacommun: 'https://commun.sesamath.net/',
-  sesabiblidev: 'https://bibliotheque.devsesamath.net/',
-  sesacommundev: 'https://commun.devsesamath.net/'
+  sesacommun: 'https://commun.sesamath.net/'
 }
 
 describe('sesatheques', () => {
