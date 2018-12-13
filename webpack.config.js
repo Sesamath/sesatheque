@@ -61,7 +61,7 @@ const babelLoader = {
 }
 
 // ajout en prod des js appelés par des sites tiers
-const conditionalEntries = isProd ? {
+const entriesForPeers = isProd ? {
   // le client classique
   client: 'sesatheque-client',
   // un autre client plus light qui ne fait que récupérer des ressources sur l'api (sites tiers)
@@ -85,8 +85,7 @@ const conf = {
     page: './app/client/page/index.js',
     // utilisé par editgraphe.html (plugin j3p)
     registerSesatheques: './app/client/page/registerSesatheques.js',
-    // pour editGraphe et showParcours, c'est copié tel quel plus bas (il a sa conf webpack de son coté)
-    ...conditionalEntries
+    ...entriesForPeers
   },
   // cf https://webpack.js.org/configuration/output/#output-filename
   // pour les variables utilisables
@@ -197,6 +196,7 @@ const conf = {
     ]
   },
   plugins: [
+    // attention, laisser ce clean en premier plugin car webpack.config.external le vire
     new CleanWebpackPlugin([buildDir]),
     new CopyWebpackPlugin([
       // {from: './node_modules/sesaeditgraphe/dist'},
