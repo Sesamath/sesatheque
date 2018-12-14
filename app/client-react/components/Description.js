@@ -15,6 +15,7 @@ const {jour: dateFormat} = formats
 
 /**
  * Remplace les \n par des <br key="i" />
+ * str.replace(/\n/, '<br>') semble bcp plus simple, mais c'est pas du jsx et le html sera pas rendu
  * @private
  * @param {string} str
  * @return du jsx

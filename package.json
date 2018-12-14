@@ -86,6 +86,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
+    "@bugsnag/js": "^5.0.2",
+    "@bugsnag/plugin-react": "^5.0.2",
     "@fortawesome/fontawesome-free": "^5.3.1",
     "an-ansi": "git://src.sesamath.net/an-ansi#2.0.4",
     "an-flow": "git://src.sesamath.net/an-flow#3.0.2",
@@ -93,8 +95,6 @@
     "an-log": "git://src.sesamath.net/an-log#3.1.6",
     "an-uuid": "git://src.sesamath.net/an-uuid#1.0.6",
     "body-parser": "^1.18.2",
-    "@bugsnag/js": "^5.0.2",
-    "@bugsnag/plugin-react": "^5.0.2",
     "connected-react-router": "^5.0.1",
     "elementtree": "^0.1.7",
     "eslint-import-resolver-node": "^0.3.2",
@@ -127,6 +127,7 @@
     "redux-thunk": "^2.3.0",
     "request": "^2.88.0",
     "roboto-fontface": "^0.10.0",
+    "sanitize-html": "^1.19.3",
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git",
@@ -213,34 +214,38 @@
     "rules": {
       "object-curly-spacing": 0
     },
-    "overrides": [{
-      "files": "app/client*/**/*.js",
-      "env": {
-        "browser": true
-      }
-    }, {
-      "files": "app/server/**/*.js",
-      "env": {
-        "node": true
+    "overrides": [
+      {
+        "files": "app/client*/**/*.js",
+        "env": {
+          "browser": true
+        }
       },
-      "globals": {
-        "lassi": true,
-        "log": true
-      }
-    }, {
-      "files": "test/**/*.js",
-      "rules": {
-        "no-unused-expressions": "off",
-        "react/jsx-uses-react": "error",
-        "react/jsx-uses-vars": "error"
+      {
+        "files": "app/server/**/*.js",
+        "env": {
+          "node": true
+        },
+        "globals": {
+          "lassi": true,
+          "log": true
+        }
       },
-      "env": {
-        "mocha": true
-      },
-      "globals": {
-        "lassi": true
+      {
+        "files": "test/**/*.js",
+        "rules": {
+          "no-unused-expressions": "off",
+          "react/jsx-uses-react": "error",
+          "react/jsx-uses-vars": "error"
+        },
+        "env": {
+          "mocha": true
+        },
+        "globals": {
+          "lassi": true
+        }
       }
-    }],
+    ],
     "settings": {
       "react": {
         "version": "16.5.2"
