@@ -89,8 +89,9 @@ describe('httpMethods', function () {
           done(Error(`${methodName} résoud sa promesse sur une réponse texte`))
         })
         .catch(error => {
-          expect(error.message).to.contains('pas la réponse attendue')
-          expect(consoleErrorStub).to.have.been.calledOnce
+          expect(error.message).to.contains('pas au format attendu')
+          // 2 appel, un pour le json foireux et l'autre avec l'erreur générée
+          expect(consoleErrorStub).to.have.been.calledTwice
           done()
         }).catch(done) // au cas où le expect précédent throw
     })
@@ -102,10 +103,13 @@ describe('httpMethods', function () {
         throw error
       })
       .catch(error => {
-        if (error.notExpected) throw error
+        if (error.notExpected) {
+          console.error(error)
+          throw error
+        }
         expect(error.message).to.contains(errorMessageExpected, `pb ${methodName} ${url} `)
-        expect(consoleErrorStub).to.have.been.calledOnce
-        const consoleArgs = consoleErrorStub.args[0] // le 1er appel
+        expect(consoleErrorStub).to.have.been.calledTwice
+        const consoleArgs = consoleErrorStub.args[1] // le 2e appel
         expect(consoleArgs[0]).to.be.a('Error')
         expect(consoleArgs[0].toString()).to.contains(errorMessageExpected, `Le message en console n’était pas celui attendu : ${consoleArgs.join('\n')}`)
         // les promises sont appelées en //, faut reset à chaque fois
@@ -125,8 +129,7 @@ describe('httpMethods', function () {
       Object.entries(errors).forEach(([code, text]) => {
         ;['json', 'text'].forEach(type => {
           const url = `${baseUrl}test/${type}/${code}`
-          const errorMessageExpected = type === 'text' ? 'pas la réponse attendue' : text
-          promises.push(getPromise(url, errorMessageExpected))
+          promises.push(getPromise(url, text))
         })
       })
       return Promise.all(promises)
@@ -134,10 +137,11 @@ describe('httpMethods', function () {
 
     it(`${methodName} rejette si code >= 400 et forward le message en Error`, () => {
       const promises = []
-      Object.keys(errors).forEach(code => {
+      Object.entries(errors).forEach(([code, text]) => {
         const message = 'Un truc accentué'
         const url = `${baseUrl}test/api/error/${code}/${encodeURIComponent(message)}`
-        promises.push(getPromise(url, message))
+        // const expected = code === '400' ? text : message
+        promises.push(getPromise(url, text))
       })
       return Promise.all(promises)
     })

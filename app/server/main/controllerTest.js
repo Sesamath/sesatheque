@@ -38,8 +38,8 @@ const errors = {
   400: 'Bad Request',
   401: 'Unauthorized',
   403: 'Forbidden',
-  404: 'Not found',
-  418: 'I’am a teapot',
+  404: 'Not Found',
+  418: `I'm a Teapot`,
   500: 'Internal Server Error',
   503: 'Service Unavailable'
 }

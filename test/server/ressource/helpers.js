@@ -69,7 +69,17 @@ export default function helpersFactory (lassi, superTestClient) {
       if (!ressource) return reject(new Error(`aucune resssource ${oid} en base`))
       // console.log(`pour ${ressource.oid} version en db ${ressource.version}`)
       // Object.keys(ressourceExpected).forEach(p => expect(ressource[p]).to.deep.equals(ressourceExpected[p], `pb avec ${p} pour ${oid} : ${JSON.stringify(ressource[p])} ≠ ${JSON.stringify(ressourceExpected[p])}`))
-      Object.keys(ressourceExpected).forEach(p => expect(JSON.stringify(ressource[p])).to.equals(JSON.stringify(ressourceExpected[p]), `pb avec ${p} pour ${oid}`))
+      Object.keys(ressourceExpected).forEach(p => {
+        const expected = ressourceExpected[p]
+        const got = ressource[p]
+        if (['commentaires', 'description', 'resume'].includes(p)) {
+          expect(got.replace(/\\\\n/g, '\n')).to.equals(expected)
+        } else if (typeof got === 'object') {
+          expect(got).to.deep.equals(expected)
+        } else {
+          expect(got).to.equals(expected)
+        }
+      })
       resolve()
     })
   })

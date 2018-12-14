@@ -8,6 +8,7 @@ const handleResponse = (response) => {
   // on tente quand même le json avant de gérer les erreurs, car l'erreur peut être explicitée dans le json renvoyé
   return response.json()
     .then(result => {
+      // à priori avec status > 400 on devrait aller direct dans le catch…
       if (!ok || status >= 400) throw Error(result.message || `Erreur ${status} ${statusText}`)
       return result.data || result.message
     }).catch((error) => {
