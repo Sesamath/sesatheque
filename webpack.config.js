@@ -146,6 +146,14 @@ const conf = {
         test: /node_modules\/@sesatheque-plugins\/.*\.jsx?/,
         use: babelLoader
       }, {
+        // et on veut que ça fonctionne aussi s'ils sont linked
+        test: /\/sesatheque-plugin-[\w]+\/.*\.jsx?/,
+        use: babelLoader
+      }, {
+        // idem pour les html des modules en link local
+        test: /\/sesatheque-plugin-[\w]+\/.*\.html/,
+        use: 'file-loader'
+      }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
         // pour _private c'est mis plus loin hors test (ça plante les tests)
         // important de déclarer ça après le match *.js plus haut (pour que ce config-loader passe avant le babel-loader)
