@@ -48,7 +48,7 @@ const schema = require('./EntityRessource.schema')
 const myBaseId = config.application.baseId
 
 // on remplace aussi les qq <sup> par ^ (on verra plus tard pour mettre du latex entre $ ou $$)
-const cleanHtml = (text) => htmlToText.fromString(text.replace(/<sup> *([0-9]+) *<\/sup>/g, '^$1'))
+const cleanHtml = (text) => htmlToText.fromString(text.replace(/<sup> *([0-9]+) *<\/sup>/g, '^$1'), {preserveNewlines: true})
 
 module.exports = function (component) {
   component.entity('EntityRessource', function () {
