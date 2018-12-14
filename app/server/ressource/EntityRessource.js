@@ -32,7 +32,7 @@
 const uuid = require('an-uuid')
 const {exists, getRidComponents} = require('sesatheque-client/dist/server/sesatheques')
 const {stringify} = require('sesajstools')
-const sanitizeHtml = require('sanitize-html')
+const htmlToText = require('html-to-text')
 
 const tools = require('../lib/tools')
 const {basicArrayIndexer, getNormalizedName} = require('../lib/normalize')
@@ -47,32 +47,8 @@ const schema = require('./EntityRessource.schema')
 
 const myBaseId = config.application.baseId
 
-// notre fct de nettoyage de html
-/* on pourrait garder tout ça, mais coté front c'est compliqué car react veut des strings,
-il ne rend pas le html, ça obligerait à utiliser par exemple html-to-react ou dangerouslySetInnerHTML
-Pour commentaires / description / résumé on affiche ça dans du textarea et on se contente des \n
-- en base on a que du \n
-- à l'écran react ajoute les <br>
-const cleanHtml = (text) => sanitizeHtml(text, {
-  // cf https://github.com/punkave/sanitize-html, on vire iframe et ajoute img
-  allowedTags: ['h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
-    'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
-    'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'img'],
-  allowedAttributes: {
-    a: ['href']
-  },
-  transformTags: {
-    a: (tag, attrs) => {
-      // on ajoute toujours un target blank
-      attrs.target = '_blank'
-      return {
-        tagName: tag,
-        attribs: attrs
-      }
-    }
-  }
-}) */
-const cleanHtml = (text) => sanitizeHtml(text, {allowedTags: ['br']})
+// on remplace aussi les qq <sup> par ^ (on verra plus tard pour mettre du latex entre $ ou $$)
+const cleanHtml = (text) => htmlToText.fromString(text.replace(/<sup> *([0-9]+) *<\/sup>/g, '^$1'))
 
 module.exports = function (component) {
   component.entity('EntityRessource', function () {
@@ -296,7 +272,7 @@ module.exports = function (component) {
         // - on vire tous les tags html sauf <br>
         // - on remplace les <br /> par des \n
         ;['commentaires', 'resume', 'description'].forEach(p => {
-          if (this[p]) this[p] = cleanHtml(this[p]).replace(/<br[ /]*>/g, '\n')
+          if (this[p]) this[p] = cleanHtml(this[p])
         })
 
         // date de création
