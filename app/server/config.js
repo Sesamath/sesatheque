@@ -155,6 +155,16 @@ const config = {
     authentication: {}
   },
 
+  // le reste est spécifique à sesatheque et ignoré par lassi
+  // Cf _private.example/config.js
+
+  // une liste de tokens utilisables pour appeler l'api avec des droits en écriture
+  apiTokens: [],
+
+  // une liste d'autres serveurs d'authentification externes, {nom, baseId, baseUrl}
+  authServers: [],
+
+  // des paramètres pour nos composants
   components: {
     auth: {
       paths: {
@@ -206,27 +216,6 @@ const config = {
     ressource: configRessource
   },
 
-  // urls absolues des sésathèques que l'on accepte de référencer (pour les alias, par ex quand
-  // des sesalab connectés à plusieurs sésathèques mettent des ressources de l'une
-  // dans des arbres de l'autre)
-  // sous la forme baseId:baseUrl, ou nomQcq{id: baseId, baseUrl:laBaseHttpAbsolue, apiToken: leToken}
-  // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
-  sesatheques: [],
-
-  // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences
-  // sous la forme {nom, baseId, baseUrl}
-  // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
-  sesalabs: [],
-
-  // une liste de tokens utilisables pour appeler l'api avec des droits en écriture
-  apiTokens: [],
-
-  // une liste d'autres serveurs d'authentification externes, {nom, baseId, baseUrl}
-  authServers: [],
-
-  // le reste est spécifique à sesatheque et ignoré par lassi
-  // Cf _private.example/config.js
-
   // les différents logs
   logs: {
     dir: logDir,
@@ -238,6 +227,23 @@ const config = {
     // ajouter les exclusions voulues parmi ['cache', 'resssourceRepository', 'personneRepository', 'accessControl']
     debugExclusions: []
   },
+
+  // une liste de plugins à charger
+  plugins: [],
+  // et d'éventuelles options à leur passer
+  pluginsOptions: {},
+
+  // une liste de domaines 'sesalab' autorisés à appeler l'api pour stocker des séries ou séquences
+  // sous la forme {nom, baseId, baseUrl}
+  // écraser cette propriété avec un tableau vide dans _private/config.js pour s'en passer
+  sesalabs: [],
+
+  // urls absolues des sésathèques que l'on accepte de référencer (pour les alias, par ex quand
+  // des sesalab connectés à plusieurs sésathèques mettent des ressources de l'une
+  // dans des arbres de l'autre)
+  // sous la forme baseId:baseUrl, ou nomQcq{id: baseId, baseUrl:laBaseHttpAbsolue, apiToken: leToken}
+  // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle sera automatiquement ajoutée à la liste
+  sesatheques: [],
 
   // mettre true s'il y a un varnish en frontal pour purger les urls mises en cache
   varnish: false
@@ -256,6 +262,8 @@ const knownStagings = ['prod', 'preprod', 'dev', 'test']
 let staging
 if (isTestEnv) {
   staging = 'test'
+} else if (process.argv.some(arg => arg.includes('webpack-dev-server'))) {
+  staging = 'dev'
 } else if (process.env.NODE_ENV === 'production') {
   staging = 'prod'
 } else if (knownStagings.includes(process.env.NODE_ENV)) {
