@@ -47,7 +47,7 @@ dependencies:
   whatwg-fetch: 3.0.0
 devDependencies:
   '@babel/cli': 7.2.0
-  '@babel/core': 7.2.0
+  '@babel/core': 7.2.2
   '@babel/plugin-proposal-object-rest-spread': 7.2.0
   '@babel/plugin-syntax-dynamic-import': 7.2.0
   '@babel/plugin-transform-modules-commonjs': 7.2.0
@@ -126,27 +126,27 @@ packages:
     dev: true
     resolution:
       integrity: sha512-OfC2uemaknXr87bdLUkWog7nYuliM9Ij5HUcajsVcMCpQrcLmtxRbVFTIqmcSkSeYRBFBRxs2FiUqFJDLdiebA==
-  /@babel/core/7.2.0:
+  /@babel/core/7.2.2:
     dependencies:
       '@babel/code-frame': 7.0.0
-      '@babel/generator': 7.2.0
+      '@babel/generator': 7.2.2
       '@babel/helpers': 7.2.0
-      '@babel/parser': 7.2.0
-      '@babel/template': 7.1.2
-      '@babel/traverse': 7.1.6
-      '@babel/types': 7.2.0
+      '@babel/parser': 7.2.2
+      '@babel/template': 7.2.2
+      '@babel/traverse': 7.2.2
+      '@babel/types': 7.2.2
       convert-source-map: 1.6.0
       debug: 4.1.0
       json5: 2.1.0
       lodash: 4.17.11
-      resolve: 1.8.1
+      resolve: 1.9.0
       semver: 5.6.0
       source-map: 0.5.7
     dev: true
     engines:
       node: '>=6.9.0'
     resolution:
-      integrity: sha512-7pvAdC4B+iKjFFp9Ztj0QgBndJ++qaMeonT185wAqUnhipw8idm9Rv1UMyBuKtYjfl6ORNkgEgcsYLfHX/GpLw==
+      integrity: sha512-59vB0RWt09cAct5EIe58+NzGP4TFSD3Bz//2/ELy3ZeTeKF6VTD1AXlH8BGGbCX0PuobZBsIzO7IAI9PH67eKw==
   /@babel/generator/7.2.0:
     dependencies:
       '@babel/types': 7.2.0
@@ -157,6 +157,16 @@ packages:
     dev: true
     resolution:
       integrity: sha512-BA75MVfRlFQG2EZgFYIwyT1r6xSkwfP2bdkY/kLZusEYWiJs4xCowab/alaEaT0wSvmVuXGqiefeBlP+7V1yKg==
+  /@babel/generator/7.2.2:
+    dependencies:
+      '@babel/types': 7.2.2
+      jsesc: 2.5.2
+      lodash: 4.17.11
+      source-map: 0.5.7
+      trim-right: 1.0.1
+    dev: true
+    resolution:
+      integrity: sha512-I4o675J/iS8k+P38dvJ3IBGqObLXyQLTxtrR4u9cSUJOURvafeEWb/pFMOTwtNrmq73mJzyF6ueTbO1BtN0Zeg==
   /@babel/helper-annotate-as-pure/7.0.0:
     dependencies:
       '@babel/types': 7.2.0
@@ -301,9 +311,9 @@ packages:
       integrity: sha512-o9fP1BZLLSrYlxYEYyl2aS+Flun5gtjTIG8iln+XuEzQTs0PLagAGSXUcqruJwD5fM48jzIEggCKpIfWTcR7pQ==
   /@babel/helpers/7.2.0:
     dependencies:
-      '@babel/template': 7.1.2
-      '@babel/traverse': 7.1.6
-      '@babel/types': 7.2.0
+      '@babel/template': 7.2.2
+      '@babel/traverse': 7.2.2
+      '@babel/types': 7.2.2
     dev: true
     resolution:
       integrity: sha512-Fr07N+ea0dMcMN8nFpuK6dUIT7/ivt9yKQdEEnjVS83tG2pHwPi03gYmk/tyuwONnZ+sY+GFFPlWGgCtW1hF9A==
@@ -322,6 +332,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-M74+GvK4hn1eejD9lZ7967qAwvqTZayQa3g10ag4s9uewgR7TKjeaT0YMyoq+gVfKYABiWZ4MQD701/t5e1Jhg==
+  /@babel/parser/7.2.2:
+    dev: true
+    engines:
+      node: '>=6.0.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-UNTmQ5cSLDeBGBl+s7JeowkqIHgmFAGBnLDdIzFmUNSuS5JF0XBcN59jsh/vJO/YjfsBqMxhMjoFGmNExmf0FA==
   /@babel/plugin-proposal-async-generator-functions/7.2.0:
     dependencies:
       '@babel/helper-plugin-utils': 7.0.0
@@ -801,6 +818,14 @@ packages:
     dev: true
     resolution:
       integrity: sha512-SY1MmplssORfFiLDcOETrW7fCLl+PavlwMh92rrGcikQaRq4iWPVH0MpwPpY3etVMx6RnDjXtr6VZYr/IbP/Ag==
+  /@babel/template/7.2.2:
+    dependencies:
+      '@babel/code-frame': 7.0.0
+      '@babel/parser': 7.2.2
+      '@babel/types': 7.2.2
+    dev: true
+    resolution:
+      integrity: sha512-zRL0IMM02AUDwghf5LMSSDEz7sBCO2YnNmpg3uWTZj/v1rcG2BmQUvaGU8GhU8BvfMh1k2KIAYZ7Ji9KXPUg7g==
   /@babel/traverse/7.1.6:
     dependencies:
       '@babel/code-frame': 7.0.0
@@ -815,6 +840,20 @@ packages:
     dev: true
     resolution:
       integrity: sha512-CXedit6GpISz3sC2k2FsGCUpOhUqKdyL0lqNrImQojagnUMXf8hex4AxYFRuMkNGcvJX5QAFGzB5WJQmSv8SiQ==
+  /@babel/traverse/7.2.2:
+    dependencies:
+      '@babel/code-frame': 7.0.0
+      '@babel/generator': 7.2.2
+      '@babel/helper-function-name': 7.1.0
+      '@babel/helper-split-export-declaration': 7.0.0
+      '@babel/parser': 7.2.2
+      '@babel/types': 7.2.2
+      debug: 4.1.0
+      globals: 11.9.0
+      lodash: 4.17.11
+    dev: true
+    resolution:
+      integrity: sha512-E5Bn9FSwHpSkUhthw/XEuvFZxIgrqb9M8cX8j5EUQtrUG5DQUy6bFyl7G7iQ1D1Czudor+xkmp81JbLVVM0Sjg==
   /@babel/types/7.2.0:
     dependencies:
       esutils: 2.0.2
@@ -822,6 +861,14 @@ packages:
       to-fast-properties: 2.0.0
     resolution:
       integrity: sha512-b4v7dyfApuKDvmPb+O488UlGuR1WbwMXFsO/cyqMrnfvRAChZKJAYeeglWTjUO1b9UghKKgepAQM5tsvBJca6A==
+  /@babel/types/7.2.2:
+    dependencies:
+      esutils: 2.0.2
+      lodash: 4.17.11
+      to-fast-properties: 2.0.0
+    dev: true
+    resolution:
+      integrity: sha512-fKCuD6UFUMkR541eDWL+2ih/xFZBXPOg/7EQFeTluMDebfqR4jrpaCjLhkWlQS4hT6nRa2PMEgXKbRB5/H2fpg==
   /@bugsnag/browser/5.0.2:
     dev: false
     resolution:
@@ -8496,6 +8543,12 @@ packages:
       path-parse: 1.0.6
     resolution:
       integrity: sha512-AicPrAC7Qu1JxPCZ9ZgCZlY35QgFnNqc+0LtbRNxnVw4TXvjQ72wnuL9JQcEBgXkI9JM8MsT9kaQoHcpCRJOYA==
+  /resolve/1.9.0:
+    dependencies:
+      path-parse: 1.0.6
+    dev: true
+    resolution:
+      integrity: sha512-TZNye00tI67lwYvzxCxHGjwTNlUV70io54/Ed4j6PscB8xVfuBJpRenI/o6dVk0cY0PYTY27AgCoGGxRnYuItQ==
   /restore-cursor/1.0.1:
     dependencies:
       exit-hook: 1.1.1
@@ -10611,7 +10664,7 @@ shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
   '@babel/cli': ^7.1.0
-  '@babel/core': ^7.1.0
+  '@babel/core': ^7.2.0
   '@babel/plugin-proposal-object-rest-spread': ^7.0.0
   '@babel/plugin-syntax-dynamic-import': ^7.0.0
   '@babel/plugin-transform-modules-commonjs': ^7.1.0

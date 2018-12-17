@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -41,9 +41,10 @@
     "start": "env NODE_ENV=production node app/server/start.js",
     "start:commun": "env NODE_ENV=production SESATHEQUE_CONF=commun node app/server/start.js",
     "start:both": "npm run start:commun & npm start",
-    "start:dev": "node_modules/.bin/webpack-dev-server --hot & env NODE_ENV=dev nodemon --watch app/server app/server/start.js",
+    "start:dev": "NODE_ENV=dev node app/server/start.js",
+    "start:devAll": "node_modules/.bin/webpack-dev-server --hot & env NODE_ENV=dev",
     "start:devFront": "node_modules/.bin/webpack-dev-server --hot",
-    "start:devBack": "env NODE_ENV=dev node -r trace --stack-trace-limit=100 app/server/start.js",
+    "start:devBack": "env NODE_ENV=dev nodemon --watch app/server app/server/start.js",
     "start:devcommun": "env SESATHEQUE_CONF=commun webpack-dev-server --hot & env NODE_ENV=dev SESATHEQUE_CONF=commun node app/server/start.js",
     "start:test": "env SESATHEQUE_CONF=test node app/server/start.js",
     "start:testBoth": "npm run start:test & npm run start:testCommun",
@@ -134,7 +135,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.1.0",
-    "@babel/core": "^7.1.0",
+    "@babel/core": "^7.2.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "@babel/plugin-transform-modules-commonjs": "^7.1.0",
@@ -189,9 +190,9 @@
     "xmlhttprequest": "^1.8.0"
   },
   "peerDependencies": {
-    "@sesatheque-plugins/arbre": "git+https://framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.16",
+    "@sesatheque-plugins/arbre": "git+https://framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.17",
     "@sesatheque-plugins/iep": "git+https://framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.2",
-    "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.14",
+    "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.15",
     "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.5",
     "@sesatheque-plugins/qcm": "git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.4",
     "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.5"
