@@ -142,7 +142,7 @@ describe('controller api ressource', () => {
         .expect(200)
         .then(({body: {message, data}}) => {
           expect(message).to.equal('OK')
-          checkDb(ressource)
+          return checkDb(ressource)
         })
     }
     return populate({ressources: 10, personnes: 6})
