@@ -213,7 +213,7 @@ function getResultat (result, ressource, options) {
  * @param next
  */
 function load (ressource, options, next) {
-  log('display avec la ressource', ressource)
+  log('load avec la ressource', ressource)
   log('et les options après page.init', options)
 
   // le display du plugin

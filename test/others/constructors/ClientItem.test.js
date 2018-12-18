@@ -68,7 +68,7 @@ describe('ClientItem', () => {
         expect(item.$describeUrl).to.equal(`${myBaseUrl}ressource/${describe}/${ressource.oid}${suffix}`, 'pb $describeUrl')
         expect(item.$dataUrl).to.equal(`${myBaseUrl}api/public/${ressource.oid}${suffix}`, 'pb $dataUrl')
         expect(item, 'pb $editUrl').not.to.have.property('$editUrl')
-        expect(item.$deletable).to.equal(false, 'pb $deletable')
+        expect(item).not.to.have.property('$deleteUrlApi')
       })
   })
   it('Converti une ref', () => {
@@ -94,7 +94,7 @@ describe('ClientItem', () => {
           expect(item.$dataUrl).to.equal(`${myBaseUrl}api/ressource/${oid}`, 'pb $dataUrl')
         }
         expect(item, 'pb $editUrl').not.to.have.property('$editUrl')
-        expect(item.$deletable).to.equal(false, 'pb $deletable')
+        expect(item).not.to.have.property('$deleteUrlApi')
       })
   })
 
