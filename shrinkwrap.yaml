@@ -10,6 +10,7 @@ dependencies:
   an-uuid: src.sesamath.net/an-uuid/df889c594b9c1682861c9b5dd7b021d6e8fe3602
   body-parser: 1.18.3
   connected-react-router: 5.0.1
+  core-js: 2.6.1
   elementtree: 0.1.7
   eslint-import-resolver-node: 0.3.2
   express: 4.16.4
@@ -24,6 +25,7 @@ dependencies:
   minimist: 1.2.0
   moment: 2.22.2
   morgan: 1.9.1
+  prop-types: 15.6.2
   query-string: 6.2.0
   react: 16.6.3
   react-ace-builds: 7.2.3
@@ -38,6 +40,7 @@ dependencies:
   redux: 4.0.1
   redux-form: 7.4.2
   redux-thunk: 2.3.0
+  regenerator-runtime: 0.11.1
   request: 2.88.0
   roboto-fontface: 0.10.0
   sesajstools: framagit.org/Sesamath/sesajstools/faba5dba959e088c550ba4810951c9ef57c791d1
@@ -2679,6 +2682,10 @@ packages:
   /core-js/2.6.0:
     resolution:
       integrity: sha512-kLRC6ncVpuEW/1kwrOXYX6KQASCVtrh1gQr/UiaVgFlf9WE5Vp+lNe5+h3LuMr5PAucWnnEXwH0nQHRH/gpGtw==
+  /core-js/2.6.1:
+    dev: false
+    resolution:
+      integrity: sha512-L72mmmEayPJBejKIWe2pYtGis5r0tQ5NaJekdhyXgeMQTpJoBsH0NL4ElY2LfSoV15xeQWKQ+XTTOZdyero5Xg==
   /core-util-is/1.0.2:
     resolution:
       integrity: sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
@@ -10691,6 +10698,7 @@ specifiers:
   clean-webpack-plugin: ^0.1.19
   connected-react-router: ^5.0.1
   copy-webpack-plugin: ^4.5.2
+  core-js: ^2.5.7
   css-loader: ^1.0.0
   elementtree: ^0.1.7
   enzyme: ^3.6.0
@@ -10729,6 +10737,7 @@ specifiers:
   null-loader: ^0.1.1
   postcss-loader: ^3.0.0
   pre-push: ^0.1.1
+  prop-types: ^15.6.2
   query-string: ^6.2.0
   react: ^16.5.2
   react-ace-builds: ^7.2.2
@@ -10744,6 +10753,7 @@ specifiers:
   redux: ^4.0.0
   redux-form: ^7.3.0
   redux-thunk: ^2.3.0
+  regenerator-runtime: ^0.11.1
   request: ^2.88.0
   roboto-fontface: ^0.10.0
   sass-loader: ^7.1.0

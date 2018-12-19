@@ -22,7 +22,7 @@ Pour le découpage des chunks
 Pour charger des librairies tierces, on utilise page.loadAsync
 sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 */
-const fs = require('fs')
+// const fs = require('fs')
 const path = require('path')
 const autoprefixer = require('autoprefixer')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
@@ -40,7 +40,9 @@ const {entries, plugins, rules} = require('./app/plugins/webpack.config')
 const isDebug = process.argv.includes('--debug')
 // prod d'après l'environnement ou la conf (sauf --debug ou test)
 const isProd = !isDebug && (process.NODE_ENV === 'production' || /prod/.test(appConfig.application.staging))
+console.log('wepback production env', isProd ? 'yes' : 'no')
 const isDevServer = !!appConfig.devServer
+console.log('wepback-dev-server', isDevServer ? 'yes' : 'no')
 
 let baseUrl = appConfig.application.baseUrl
 if (baseUrl.substr(-1) !== '/') baseUrl += '/'
@@ -143,16 +145,10 @@ const conf = {
         use: babelLoader
       }, {
         // avec pnpm nos plugins sont dans node_modules/.framagit.org/Sesamath/sesatheque-plugin-xx/yyy/node_modules/@sesatheque-plugins/xx
-        test: /node_modules\/@sesatheque-plugins\/.*\.jsx?/,
+        // et on veut que ça fonctionne aussi s'ils sont linked (ils sont alors dans
+        // pathLocal/sesatheque-plugin-xxx/…)
+        test: /\/@?sesatheque-plugins\/.*\.jsx?/,
         use: babelLoader
-      }, {
-        // et on veut que ça fonctionne aussi s'ils sont linked
-        test: /\/sesatheque-plugin-[\w]+\/.*\.jsx?/,
-        use: babelLoader
-      }, {
-        // idem pour les html des modules en link local
-        test: /\/sesatheque-plugin-[\w]+\/.*\.html/,
-        use: 'file-loader'
       }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
         // pour _private c'est mis plus loin hors test (ça plante les tests)
@@ -160,15 +156,17 @@ const conf = {
         test: /app\/server\/config\.js/,
         exclude: /node_modules/,
         use: 'config-loader'
-      },
-      {
+      }, {
         // les node_modules qui doivent passer par babel:
         test: /node_modules\/(sesatheque-client|query-string|strict-uri-encode)\/.*\.js/,
         use: babelLoader
-      },
-      {
+      }, {
         // html pour nos iframes
         test: /app\/(client|plugins)\/.*\.html/,
+        use: 'file-loader'
+      }, {
+        // idem pour les html des modules en link local
+        test: /\/sesatheque-plugin-[\w]+\/.*\.html/,
         use: 'file-loader'
       },
       // le statique
@@ -189,6 +187,7 @@ const conf = {
               plugins: () => [
                 autoprefixer({
                   browsers: [
+                    // attention à mettre la même liste que dans package.json:babel
                     'ie 11',
                     'last 3 iOS versions',
                     'last 3 Safari versions',
@@ -268,6 +267,14 @@ if (isDevServer) {
 }
 
 // reste le pb des modules non résolus par webpack lorsque les modules ont été installés par pnpm
+// Plutôt que d'ajouter les chemins ici (qui sont peut-être la source de plantages dans le bootstrap.js
+// de webpack constatés sur des j3p avec des sections ancienexo_mep) on ajoute ces dépendances de
+// @babel/polyfill (qu'il indique pourtant comme dépendances) comme étant aussi les notres
+//   "core-js": "^2.5.7"
+//   "regenerator-runtime": "^0.11.1"
+// idem pour prop-types (qui est dans les dépendances des modules react et redux)
+//   "prop-types": "^15.6.2"
+/*
 try {
   require.resolve('prop-types')
 } catch (error) {
@@ -277,6 +284,7 @@ try {
   if (fs.existsSync(path.resolve(propTypesDir, 'package.json'))) conf.resolve.alias['prop-types'] = propTypesDir
   else throw Error(`require ne trouvera pas le module prop-types de react (ni node_modules/prop-types ni ${propTypesDir})`)
 }
+
 try {
   require.resolve('core-js')
 } catch (error) {
@@ -289,6 +297,7 @@ try {
   if (fs.existsSync(path.resolve(coreJsDir, 'package.json'))) conf.resolve.alias['core-js'] = coreJsDir
   else throw Error(`require ne trouvera pas le module core-js de babel (ni node_modules/core-js ni ${coreJsDir})`)
 }
+
 try {
   require.resolve('regenerator-runtime')
 } catch (error) {
@@ -298,5 +307,6 @@ try {
   if (fs.existsSync(path.resolve(regeneratorRuntimeDir, 'package.json'))) conf.resolve.alias['regenerator-runtime'] = regeneratorRuntimeDir
   else throw Error(`require ne trouvera pas le module regenerator-runtime de babel (ni node_modules/regenerator-runtime ni ${regeneratorRuntimeDir})`)
 }
+/* */
 
 module.exports = conf
