@@ -34,7 +34,6 @@
 // C'est le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
 // qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
 // Pas besoin de polyfill pour fetch en principe
-
 import '@babel/polyfill'
 
 const dom = require('sesajstools/dom')
@@ -45,7 +44,8 @@ const loadjs = require('loadjs')
 const autosize = require('./autosize')
 const refreshAuth = require('./refreshAuth')
 const inBrowser = (typeof window) !== 'undefined'
-// lui s'ajoute tout seul à window, suffit de le charger
+
+// bugsnag s'ajoute tout seul à window, suffit de le charger
 if (inBrowser) {
   require('../../client-react/utils/checkBrowser').default()
   require('./bugsnag')
@@ -61,18 +61,6 @@ const wd = w.document
 const externalModules = {
   ckeditor: 'vendor/ckeditor/ckeditor.js',
   ckeditorJquery: 'vendor/ckeditor/adapters/jquery.js',
-  // installé avec `bower install jquery1=jquery#1.11`
-  jquery: 'vendor/jquery1/dist/jquery.min.js',
-  // installé avec `bower install jquery2=jquery#2`
-  jquery2: 'vendor/jquery2/dist/jquery.min.js',
-  // une version mise à la main, on a aussi jquery-ui via bower
-  jqueryUi: 'vendor/jqueryUi/1.11.1/jquery-ui.min.js',
-  jqueryUiDialog: 'vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.js',
-  jsoneditor: 'vendor/jsoneditor/dist/jsoneditor.min.js',
-  jstree: 'vendor/jstree/dist/jstree.min.js',
-  mathjax: 'vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
-  mathquill: 'vendor/mathquill-0.9.4/mathquill.min.js',
-  pluginDetect: 'vendor/pluginDetect/javaFlashDetect.min.js',
   swfobject: 'vendor/swfobject/swfobject.2.3.min.js'
 }
 
