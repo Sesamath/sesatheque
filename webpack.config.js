@@ -213,7 +213,8 @@ const conf = {
     ...plugins
   ],
   // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx
-  devtool: isProd ? 'source-map' : 'eval',
+  // toujours source-map, eval rend le code illisible en console ou dans les js de build
+  devtool: 'source-map',
   // https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a
   optimization: {
     // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
