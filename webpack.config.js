@@ -146,8 +146,9 @@ const conf = {
       }, {
         // avec pnpm nos plugins sont dans node_modules/.framagit.org/Sesamath/sesatheque-plugin-xx/yyy/node_modules/@sesatheque-plugins/xx
         // et on veut que ça fonctionne aussi s'ils sont linked (ils sont alors dans
-        // pathLocal/sesatheque-plugin-xxx/…)
-        test: /\/@?sesatheque-plugins\/.*\.jsx?/,
+        // pathLocal/sesatheque-plugin-xxx/…
+        // ou dans un node_modules/@sesatheque-plugins/xxx/)
+        test: /\/@?sesatheque-plugin.*\.jsx?/,
         use: babelLoader
       }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
