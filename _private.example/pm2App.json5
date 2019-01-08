@@ -1,12 +1,12 @@
+/**
+ * Fichier de conf de l'appli pour démarrage avec pm2
+ * dans _private car spécifique à l'instance de l'appli qui tourne ici
+ */
 {
-  /**
-   * Fichier de conf de l'appli pour démarrage avec pm2
-   * dans _private car spécifique à l'instance de l'appli qui tourne ici
-   */
   "apps" : [
     {
       "name"             : "sesatheque",
-      "script"           : "app/start.js",
+      "script"           : "app/server/start.js",
       "log_date_format"  : "YYYY-MM-DD HH:mm:ss.sss",
       "exec_mode"        : "cluster",
       "exec_interpreter" : "node",

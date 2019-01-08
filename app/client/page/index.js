@@ -33,7 +33,7 @@
 // On ajoute les @babel/polyfill via ce fichier et non directement dans les entries de webpack.
 // C'est le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
 // qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
-// Pas besoin de polyfill pour fetch en principe
+// Cf https://babeljs.io/docs/en/babel-preset-env#usebuiltins-entry
 import '@babel/polyfill'
 
 const dom = require('sesajstools/dom')

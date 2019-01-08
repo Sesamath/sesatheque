@@ -14,6 +14,7 @@
     "build:check": "es-check es5 './build/**/*.js'",
     "build:commun": "env SESATHEQUE_CONF=commun npm run build",
     "build:commun:dev": "env SESATHEQUE_CONF=commun npm run build:dev",
+    "build:commun:prod": "env SESATHEQUE_CONF=commun npm run build:prod",
     "build:commun:watch": "env SESATHEQUE_CONF=commun npm run build:watch",
     "build:dev": "node_modules/.bin/webpack --debug --verbose",
     "build:prod": "env NODE_ENV=production node_modules/.bin/webpack && npm run build:check",
@@ -196,8 +197,8 @@
   "peerDependencies": {
     "@sesatheque-plugins/arbre": "git+https://framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.17",
     "@sesatheque-plugins/iep": "git+https://framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.2",
-    "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.15",
-    "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.5",
+    "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.16",
+    "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.6",
     "@sesatheque-plugins/qcm": "git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.4",
     "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.5"
   },

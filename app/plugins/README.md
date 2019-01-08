@@ -75,6 +75,30 @@ En évitant toute duplication des node_modules, un test montre qu'on gagne 4% su
 
 Les yarn workspaces résolvent naturellement ce problème mais nécessitent une réorganisation profonde de l'application (mais pas a priori de l'architecture des plugins).
 
+## Développer un plugin
+
+Pour le développement local, c'est pénible de devoir faire commit + push du plugin puis install dans la sésathèque simplement pour tester le code. Avec pnpm on peut faire du link en local :
+
+```
+# se mettre dans le dossier du plugin, par ex
+cd sesatheque-plugin-mathgraph
+# il faut avoir les droits d'écriture sur /usr/pnpm-global/node_modules
+pnpm link
+
+# se mettre dans le dossiers de la sésathèque
+cd ../sesatheque
+# si besoin màj des modules
+pnpm i
+# se placer dans le dossier des plugins
+cd app/plugins
+# linker le module précédent
+pnpm link @sesatheque-plugins/mathgraph
+# retour à la racine et rebuild
+cd ../..
+pnpm run build
+# ou pnpm run build:watch
+```
+
 ## Ce qu'il reste à faire
 
 On trouve une partie de la configuration des plugins dans server/ressource/config.js:
