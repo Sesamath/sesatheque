@@ -97,6 +97,13 @@ pnpm link @sesatheque-plugins/mathgraph
 cd ../..
 pnpm run build
 # ou pnpm run build:watch
+
+# pour retirer le link c'est
+cd app/plugins
+pnpm unlink @sesatheque-plugins/mathgraph
+cd ../..
+pnpm i
+pnpm run build
 ```
 
 ## Ce qu'il reste à faire
