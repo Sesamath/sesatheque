@@ -174,8 +174,9 @@ module.exports = function (component) {
 
     EntityRessource.beforeStore(function (next) {
       const logAndNext = (errorMessage) => {
+        log.dataError(errorMessage)
         const error = Error(errorMessage)
-        log.error(error)
+        error.noLog = true
         next(error)
       }
 
@@ -186,8 +187,8 @@ module.exports = function (component) {
         this.titre
 
       // type et titre obligatoire
-      if (!this.type) return next(Error(`Ressource sans type, impossible à sauvegarder (${id})`))
-      if (!this.titre) return next(Error(`Ressource sans titre, impossible à sauvegarder (${id})`))
+      if (!this.type) return logAndNext(`Ressource sans type, impossible à sauvegarder (${id})`)
+      if (!this.titre) return logAndNext(`Ressource sans titre, impossible à sauvegarder (${id})`)
 
       try {
         // on peut écraser une ressource en fournissant son rid (sans son oid),
@@ -240,17 +241,11 @@ module.exports = function (component) {
 
         // check aliasOf
         if (this.aliasOf) {
-          // y'a eu des 'undefined' enregistrés à une époque…
-          // @todo virer ça après update34
-          if (this.aliasOf === 'undefined' || this.aliasOf === '') {
-            delete this.aliasOf
-          } else {
-            // on vérifie que ça pointe vers une base connue
-            try {
-              getRidComponents(this.aliasOf)
-            } catch (error) {
-              return logAndNext(`aliasOf ${this.aliasOf} invalide (ressource ${id})`)
-            }
+          // on vérifie que ça pointe vers une base connue
+          try {
+            getRidComponents(this.aliasOf)
+          } catch (error) {
+            return logAndNext(`aliasOf ${this.aliasOf} invalide (ressource ${id})`)
           }
         }
 
@@ -298,7 +293,6 @@ module.exports = function (component) {
 
         next(null, this)
       } catch (error) {
-        log.dataError(error, this)
         next(error)
       }
     })

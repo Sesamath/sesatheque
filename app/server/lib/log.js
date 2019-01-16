@@ -84,6 +84,8 @@ function getLogStream (log, verbose) {
  *                                        max pour modifier la limite de la sortie (200 par défaut)
  */
 function out (message, objectToDump, filter, stream, options) {
+  // si on nous demande de laisse tomber on le fait
+  if (message && message.noLog) return
   if (!options) options = {}
   if (!filter || !exclusions[filter]) {
     let msg // le message qu'on enverra en console
