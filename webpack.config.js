@@ -28,6 +28,7 @@ const autoprefixer = require('autoprefixer')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+// const webpack = require('webpack')
 
 // On récupère babelConfig pour forcer l'utilisation notre conf babel dans certains node_modules
 // (seatheque-client, sesaeditgraphe et plugins d'édition)
@@ -122,7 +123,12 @@ const conf = {
       'client-react': path.resolve(__dirname, 'app/client-react'),
       plugins: path.resolve(__dirname, 'app/plugins'),
       server: path.resolve(__dirname, 'app/server'),
-      client: path.resolve(__dirname, 'app/client')
+      client: path.resolve(__dirname, 'app/client'),
+      // ça c'est pour obliger tous les require / import à prendre la même version
+      // car les plugins peuvent avoir la leur (et pas mal d'extension jquery font leur
+      // propre import jquery qu'elles augmentent sans le renvoyer)
+      // ça règle les pbs avec jquery-ui et jstree
+      jquery: path.resolve(__dirname, 'node_modules/jquery')
     }
   },
   // pour nos loaders perso
@@ -211,6 +217,13 @@ const conf = {
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
+    // on a tenté ça pour régler les pbs d'instance multiple, sans succès
+    // c'est remplacé par un alias qui force le jquery de la racine (et pas celui des plugins)
+    // new webpack.ProvidePlugin({
+    //   'jQuery': 'jquery',
+    //   '$': 'jquery',
+    //   'global.jQuery': 'jquery'
+    // }),
     ...plugins
   ],
   // cf https://webpack.js.org/configuration/devtool/#src/components/Sidebar/Sidebar.jsx

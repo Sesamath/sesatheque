@@ -89,7 +89,7 @@ Tous les plugins doivent exporter un module display (display.js dans le dossier 
 var log = require('../../tools/log')
 function display(ressource, options) {
   // le code
-})
+}
 module.exports = display
 ```
 
@@ -112,3 +112,12 @@ Le résultat est au format du constructeur {@link Resultat}
 Pour que la ressource puisse charger son dernier résultat, il faut lui passer un
 lastResultUrl, url que la ressource appelera en ajax pour récupérer le dernier résultat si elle le gère.
 
+Développement local
+-------------------
+
+Pour le développement en local, c'est nettement plus simple de pouvoir modifier un plugin et avoir le résultat en direct dans son navigateur. Pour y parvenir :
+- dans le dépôt git local du plugin (sesatheque-plugin-xxx) `pnpm link`
+- dans app/client/plugins `pnpm link @sesatheque-plugins/xxx` 
+- On démarre le serveur avec `pnpm run start:dev` (ça décale le port d'écoute de 3001 vers 3021)
+- On démarre webpack-dev-server avec `pnpm run start:devFront` (ça écoute sur le 3001 et proxy vers 3021 tout ce qui ne sort pas de webpack)
+- On peut alors modifier les js de sesatheque-plugin-xxx et avoir le résultat en live dans http://bibliotheque.local:3001/… (sans avoir besoin de recharger la page à chaque fois qu'un js change, c'est webpack-dev-server qui injecte le nouveau code en live dans la page courante)
