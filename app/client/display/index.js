@@ -110,7 +110,7 @@ function addResultatCallback (ressource, options) {
     }
   } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
     // callback message
-    resultatListener = (resultat) => sendMessage(options, resultat)
+    resultatListener = (resultat) => sendResultatMessage(options, resultat)
   } else if (isDebugMode) {
     log('activation de la récup du résultat en console pour débug')
     resultatListener = (resultat) => console.log('[DEBUG] resultat qui aurait été envoyé', resultat)
@@ -297,15 +297,15 @@ function printIfError (error) {
  * (faudrait passer dans le message une action de retour et un id, et ajouter un écouteur dessus)
  * c'est le parent qui affichera le feedback
  */
-function sendMessage (options, resultat) {
+function sendResultatMessage (options, resultat) {
   const chunks = options.resultatMessageAction.split('::')
   const action = options.resultatMessageAction
   // le nom de la propriété attendue par celui qui écoute
   const resultatProp = chunks[1] || 'resultat'
   const message = {
-    action: action
+    action,
+    [resultatProp]: resultat
   }
-  message[resultatProp] = resultat
   // on envoie
   window.top.postMessage(message, '*')
 }
@@ -347,6 +347,20 @@ module.exports = function display (ressource, options, next) {
       if (!options || typeof options !== 'object') {
         if (options) console.error(new Error('options invalides'), options)
         options = {}
+      }
+    }
+    const loadedMessageAction = sjtUrl.getParameter('loadedMessageAction')
+    if (loadedMessageAction) {
+      // qqun veut être prévenu en plus de next, on wrap next
+      const message = {
+        action: loadedMessageAction,
+        rid: ressource.rid
+      }
+      const originalNext = next
+      next = (error) => {
+        if (error) return originalNext(error)
+        window.top.postMessage(message, '*')
+        originalNext()
       }
     }
 

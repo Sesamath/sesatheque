@@ -55,7 +55,7 @@ module.exports = function displayRessource (context, ressource) {
     if (p.substr(0, 1) === '$') delete ressource[p]
   })
   const correction = ressource.parametres && ressource.parametres.correction
-  if (correction !== undefined) {
+  if (correction) {
     const simpleCrypto = new SimpleCrypto(ressource.rid)
     ressource.parametres.correction = simpleCrypto.encrypt(JSON.stringify(correction))
   }
@@ -82,18 +82,24 @@ module.exports = function displayRessource (context, ressource) {
   </div>
 <script type="text/javascript" src="/display.js?${version}"></script>
 <script type="application/javascript">
-try {
-  if (typeof stdisplay === 'undefined') throw new Error('Le chargement a échoué, impossible de charger le module display');
-  var options = {
-    isDev: ${isDev},
-    verbose: ${isDev}
-  };
-  if (window.location.hash === '#formateur') options.isFormateur = true
-  stdisplay(${JSON.stringify(ressource)}, options);
-} catch(error) {
-  document.getElementById('errors').innerHTML = error.toString();
-  if (console && console.error) console.error(error);
-}
+(function () {
+  function printError (error) {
+    if (!error) return
+    document.getElementById('errors').innerHTML = error.toString();
+    if (console && console.error) console.error(error);
+  }
+  try {
+    if (typeof stdisplay === 'undefined') throw new Error('Le chargement a échoué, impossible de charger le module display');
+    var options = {
+      isDev: ${isDev},
+      verbose: ${isDev}
+    };
+    if (window.location.hash === '#formateur') options.isFormateur = true
+    stdisplay(${JSON.stringify(ressource)}, options, printError);
+  } catch(error) {
+    printError(error)
+  }
+})()
 </script>
 </div>
 </body>
