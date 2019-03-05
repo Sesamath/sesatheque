@@ -256,9 +256,12 @@ function showNotification (htmlString, delay = 5) {
   notif.innerHTML = htmlString
   const closerElt = dom.addElement(notif, 'img', {src: '/medias/cocheVerte.png', alt: '', style: {position: 'absolute', top: '5px', right: '5px'}})
   const closeNotif = () => {
+    if (isClosed) return
+    isClosed = true
     closerElt.removeEventListener('click', closeNotif)
     parent.removeChild(notif)
   }
+  let isClosed = false
   closerElt.addEventListener('click', closeNotif)
   setTimeout(closeNotif, delay * 1000)
 }
