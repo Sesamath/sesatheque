@@ -57,9 +57,8 @@ function beforeSend (report) {
       if (/Accès refusé/.test(report.errorMessage)) return false
     }
     // on ignore pour le moment les erreurs des js de calculatice, y'en a un peu trop…
-    if (md.source && /\/replication_calculatice\//.test(md.source)) {
-      return false
-    } else if (type && type === 'ecjs') {
+    if (md.source && /\/replication_calculatice\//.test(md.source)) return false
+    if (type === 'ecjs') {
       // des erreurs fréquentes sur ecjs qu'on regardera le jour où on aura la main sur le code
       if (/BigError/.test(report.errorClass)) return false
       if (/Unable to get property/.test(report.errorMessage)) return false
@@ -67,6 +66,12 @@ function beforeSend (report) {
       if (report.stacktrace.some(trace => /replication_calculatice/.test(trace.file))) return false
     }
   }
+  if (report && Array.isArray(report.stacktrace)) {
+    // on vire tous les plantages qui concernent une extension firefox
+    if (report.stacktrace.some(trace => /^moz-extension:\/\//.test(trace.file))) return false
+  }
+
+  // si on est toujours là on ajoute ça avant d'envoyer
   report.metaData.frames = getParentUrls()
 }
 
