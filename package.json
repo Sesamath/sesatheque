@@ -106,7 +106,7 @@
     "history": "^4.7.2",
     "html-to-text": "^4.0.0",
     "ip": "^1.1.5",
-    "jquery": "3.3.1",
+    "jquery": "3.4.0",
     "knacss": "^7.0.7",
     "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.12",
     "loadjs": "^3.5.5",
