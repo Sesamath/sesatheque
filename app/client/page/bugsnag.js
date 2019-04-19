@@ -53,7 +53,7 @@ function beforeSend (report) {
     if (!type || ['am', 'em'].includes(type)) {
       // si pas de type on teste quand même ce qui suit
       // apparemment le flash tente de lire des trucs sur la fenêtre parente, et il a pas le droit
-      if (/Permission denied to access property/.test(report.errorMessage)) return false
+      if (/Permission denied to (get|access) property/.test(report.errorMessage)) return false
       if (/Accès refusé/.test(report.errorMessage)) return false
     }
     // on ignore pour le moment les erreurs des js de calculatice, y'en a un peu trop…
