@@ -1,8 +1,8 @@
 dependencies:
   '@babel/polyfill': 7.4.4
   '@bugsnag/browser': 6.2.0
-  '@bugsnag/js': 5.2.0
-  '@bugsnag/plugin-react': 5.2.0
+  '@bugsnag/js': 6.2.0
+  '@bugsnag/plugin-react': 6.2.0
   '@fortawesome/fontawesome-free': 5.8.1
   an-ansi: src.sesamath.net/an-ansi/369cba247330cb088a5640707c8ca5bd515f4f0d
   an-flow: src.sesamath.net/an-flow/cb06dacf3593f363ce98525a415bca650cfffc1a
@@ -11,7 +11,6 @@ dependencies:
   an-uuid: src.sesamath.net/an-uuid/df889c594b9c1682861c9b5dd7b021d6e8fe3602
   body-parser: 1.19.0
   connected-react-router: 5.0.1
-  core-js: 2.6.5
   elementtree: 0.1.7
   eslint-import-resolver-node: 0.3.2
   express: 4.16.4
@@ -28,15 +27,15 @@ dependencies:
   morgan: 1.9.1
   prop-types: 15.7.2
   query-string: 6.5.0
-  react: 16.8.6
+  react: 16.6.3
   react-ace-builds: 7.2.3
-  react-dom: 16.8.6
-  react-hot-loader: 4.8.4
+  react-dom: 16.6.3
+  react-hot-loader: 4.3.12
   react-paginate: 5.3.1
   react-redux: 5.1.1
   react-router: 4.3.1
   react-router-dom: 4.3.1
-  react-select: 2.4.3
+  react-select: 2.1.2
   recompose: 0.30.0
   redux: 4.0.1
   redux-form: 7.4.2
@@ -67,6 +66,7 @@ devDependencies:
   chai-as-promised: 7.1.1
   clean-webpack-plugin: 1.0.1
   copy-webpack-plugin: 4.6.0
+  core-js: 2.6.5
   css-loader: 2.1.1
   enzyme: 3.9.0
   enzyme-adapter-react-16: 1.12.1
@@ -865,38 +865,33 @@ packages:
       to-fast-properties: 2.0.0
     resolution:
       integrity: sha512-dOllgYdnEFOebhkKCjzSVFqw/PmmB8pH6RGOWkY4GsboQNd47b1fBThBSwlHAq9alF9vc1M3+6oqR47R50L0tQ==
-  /@bugsnag/browser/5.2.0:
-    dev: false
-    resolution:
-      integrity: sha512-QImSbwVjcEbaUjCxNRVOELUahdHmRfkZ9o0UJpMDsfYNqpMpYzI7DdyH0BUnXv/yI4ymGpAQbFSEqVMTqSa9WA==
   /@bugsnag/browser/6.2.0:
     dev: false
     resolution:
       integrity: sha512-3v3EZ74H3zaj1rGP/gR40Ahem1t4g+rk/1CwzA0dz/XoME3XVc9BgQBm8uk3TMeUxLTCOC7qCpjoo5N06Hyb9A==
-  /@bugsnag/js/5.2.0:
+  /@bugsnag/js/6.2.0:
     dependencies:
-      '@bugsnag/browser': 5.2.0
-      '@bugsnag/node': 5.2.0
+      '@bugsnag/browser': 6.2.0
+      '@bugsnag/node': 6.2.0
     dev: false
     resolution:
-      integrity: sha512-tL+Jr4DnQbCH+nLR6Kb9m5QbstIbmFbL9yKId2W3z0MvPxTg9vhRSlu35+99+04CRHrQu0VdY2n9RzDbD5kpgg==
-  /@bugsnag/node/5.2.0:
+      integrity: sha512-gU3Hu08LePqroG0+5JQTdDCL7EQSLlQrA0XOzlSKjtlMVkJ0T0iALgodGeiG7qac4QnFYullci155F+sQ/APYA==
+  /@bugsnag/node/6.2.0:
     dependencies:
       byline: 5.0.0
       error-stack-parser: 2.0.2
       iserror: 0.0.2
       pump: 3.0.0
-      request: 2.88.0
       stack-generator: 2.0.3
     dev: false
     resolution:
-      integrity: sha512-2KqUcZ/uTkNP9G4aGW+sKhdce3Z68pg9I+LnjUDvpMEQ82O/zxy+NLkGTSz9hveNBdznJ1YoqjfoBdRnHkyRSw==
-  /@bugsnag/plugin-react/5.2.0:
+      integrity: sha512-iRSbBlI2Ii3qxE3NaJ48H4YAAm/Bk4hPVXSpyAlOHkxmRM/JJd7y6A8O0NgPzuPiDz3u/oL0fg2tgNG9VrWAVw==
+  /@bugsnag/plugin-react/6.2.0:
     dev: false
     peerDependencies:
-      '@bugsnag/browser': '* || >=5.0.0-rc.1'
+      '@bugsnag/js': '*'
     resolution:
-      integrity: sha512-4qP3TMuNgqd85/G3+EjN55vae6+e7Y2JU1RZSL3Tzu/ZmEv0jW1xTtwV1fIn5UB4vQHiW2iYBUxYzTtg02VpMw==
+      integrity: sha512-JI56D3ZhXGjH5UqeSTltdxVTPjMpfNI/Vd5XP0V/gBAJb6CeILX3hLe5G1VmxxZciVNEfG5724YKgadqp6/uWg==
   /@emotion/babel-utils/0.6.10:
     dependencies:
       '@emotion/hash': 0.6.6
@@ -1754,6 +1749,7 @@ packages:
     resolution:
       integrity: sha512-+hN/Zh2D08Mx65pZ/4g5bsmNiZUuChDiQfTUQ7qJr4/kuopCr88xZsAXv6mBoZEsUI4OuGHlX59qE94K2mMW8Q==
   /big.js/5.2.2:
+    dev: true
     resolution:
       integrity: sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==
   /binary-extensions/1.13.1:
@@ -2736,7 +2732,6 @@ packages:
     resolution:
       integrity: sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
   /core-js/2.6.5:
-    dev: false
     resolution:
       integrity: sha512-klh/kDpwX8hryYL14M9w/xei6vrv6sE8gTHDG7/T/+SEovB/G4ejwcfE/CBzO6Edsu+OETZMZ3wcX/EjUkrl5A==
   /core-js/3.0.1:
@@ -3375,6 +3370,7 @@ packages:
     resolution:
       integrity: sha512-CwBLREIQ7LvYFB0WyRvwhq5N5qPhc6PMjD6bYggFlI5YyDgl+0vxq5VHbMOFqLg7hfWzmu8T5Z1QofhmTIhItA==
   /emojis-list/2.1.0:
+    dev: true
     engines:
       node: '>= 0.10'
     resolution:
@@ -5807,6 +5803,7 @@ packages:
   /json5/1.0.1:
     dependencies:
       minimist: 1.2.0
+    dev: true
     hasBin: true
     resolution:
       integrity: sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==
@@ -6048,6 +6045,7 @@ packages:
       big.js: 5.2.2
       emojis-list: 2.1.0
       json5: 1.0.1
+    dev: true
     engines:
       node: '>=4.0.0'
     resolution:
@@ -6332,10 +6330,10 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-qX2bG48pTqYRVmDB37rn/6PT7LcR8T7oAX3bf99u1Tt1nzxYfxkgqDwUwolPlXweM0XzBOBFzSx4kfp7KP1s/w==
-  /memoize-one/5.0.4:
+  /memoize-one/4.0.3:
     dev: false
     resolution:
-      integrity: sha512-P0z5IeAH6qHHGkJIXWw0xC2HNEgkx/9uWWBQw64FJj3/ol14VYdfVGWWr0fXfjhhv3TKVIqUq65os6O4GUNksA==
+      integrity: sha512-QmpUu4KqDmX0plH4u+tf0riMc1KHE1+lw95cMrLlXQAFOx/xnBtwhZ52XJxd9X2O6kwKBqX32kmhbhlobD0cuw==
   /memory-fs/0.4.1:
     dependencies:
       errno: 0.1.7
@@ -8033,17 +8031,17 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-tXbIvq7Hxdc92jW570rztqsz0adtWEM5FX8bShJYozT2Y6L/LeHvBMQcED6mSqJ72niiNMPV8fi3S37OHrGMEw==
-  /react-dom/16.8.6:
+  /react-dom/16.6.3:
     dependencies:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       prop-types: 15.7.2
-      scheduler: 0.13.6
+      scheduler: 0.11.3
     dev: false
     peerDependencies:
-      react: ^16.0.0
+      react: ^16.6.3
     resolution:
-      integrity: sha512-1nL7PIq9LTL3fthPqwkvr2zY7phIPjYrT0jp4HjyEQrEROnw4dG41VVwi/wfoCneoleqrNX7iAD+pXebJZwrwA==
+      integrity: sha512-8ugJWRCWLGXy+7PmNh8WJz3g1TaTUt1XyoIcFN+x0Zbkoz+KKdUyx1AQLYJdbFXjuF41Nmjn5+j//rxvhFjgSQ==
   /react-error-overlay/5.1.5:
     dev: true
     resolution:
@@ -8056,25 +8054,21 @@ packages:
       react: '>=15.0.0'
     resolution:
       integrity: sha1-jdfADDs10FzhZAIUWLsH1YDjABo=
-  /react-hot-loader/4.8.4:
+  /react-hot-loader/4.3.12:
     dependencies:
       fast-levenshtein: 2.0.6
       global: 4.3.2
-      hoist-non-react-statics: 3.3.0
-      loader-utils: 1.2.3
-      lodash: 4.17.11
+      hoist-non-react-statics: 2.5.5
       prop-types: 15.7.2
       react-lifecycles-compat: 3.0.4
       shallowequal: 1.1.0
-      source-map: 0.7.3
     dev: false
     engines:
       node: '>= 6'
     peerDependencies:
       react: ^15.0.0 || ^16.0.0
-      react-dom: ^15.0.0 || ^16.0.0
     resolution:
-      integrity: sha512-O98btZXcm24ZgP+aPBD0W9N+GEnkOg6vlLEy/IMZ53u3K/dGqO0I/RU4qrmQzE+wMDLpwNo5TwxaAjVw9Y+IBA==
+      integrity: sha512-GMM4TsqUVss2QPe+Y33NlgydA5/+7tAVQxR0rZqWvBpapM8JhD7p6ymMwSZzr5yxjoXXlK/6P6qNQBOqm1dqdg==
   /react-icon-base/2.1.0_prop-types@15.7.2:
     dependencies:
       prop-types: 15.7.2
@@ -8159,11 +8153,11 @@ packages:
       react: '>=15'
     resolution:
       integrity: sha512-yrvL8AogDh2X42Dt9iknk4wF4V8bWREPirFfS9gLU1huk6qK41sg7Z/1S81jjTrGHxa3B8R3J6xIkDAA6CVarg==
-  /react-select/2.4.3:
+  /react-select/2.1.2:
     dependencies:
       classnames: 2.2.6
       emotion: 9.2.12
-      memoize-one: 5.0.4
+      memoize-one: 4.0.3
       prop-types: 15.7.2
       raf: 3.4.1
       react-input-autosize: 2.2.1
@@ -8173,7 +8167,7 @@ packages:
       react: ^15.3.0 || ^16.0.0
       react-dom: ^15.3.0 || ^16.0.0
     resolution:
-      integrity: sha512-cmxNaiHpviRYkojeW9rGEUJ4jpX7QTmPe2wcscwA4d1lStzw/cJtr4ft5H2O/YhfpkrcwaLghu3XmEYdXhBo8Q==
+      integrity: sha512-+ceiz2KwIeEBxT/PgAXBIGohLXfa9YhkfwFSHMlqpTL55JYvjhgkGoBxoasGcMGeQ49J3RhAKZDD+x6ZHKmj6g==
   /react-styleguidist/8.0.6:
     dependencies:
       '@vxna/mini-html-webpack-template': 0.1.7
@@ -8270,17 +8264,17 @@ packages:
       react-dom: '>=15.0.0'
     resolution:
       integrity: sha512-+HzNTCHpeQyl4MJ/bdE0u6XRMe9+XG/+aL4mCxVN4DnPBQ0/5bfHWPDuOZUzYdMj94daZaZdCCc1Dzt9R/xSSg==
-  /react/16.8.6:
+  /react/16.6.3:
     dependencies:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       prop-types: 15.7.2
-      scheduler: 0.13.6
+      scheduler: 0.11.3
     dev: false
     engines:
       node: '>=0.10.0'
     resolution:
-      integrity: sha512-pC0uMkhLaHm11ZSJULfOBqV4tIZkx87ZLvbbQYunNixAAvjnC+snJCg0XQXn9VIsttVsbZP/H/ewzgsd5fxKXw==
+      integrity: sha512-zCvmH2vbEolgKxtqXL2wmGCUxUyNheYn/C+PD1YAjfxHC54+MhdruyhO7QieQrYsYeTxrn93PM2y0jRH1zEExw==
   /read-pkg-up/1.0.1:
     dependencies:
       find-up: 1.1.2
@@ -8944,10 +8938,18 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-FZeKhJglhJHk7eWG5YM0z46VHmI3KJpMBAQm3xa9meDvd+wevB5GuBB0wc0exPInZiBBHqi00DbS8AcvCGCFMw==
+  /scheduler/0.11.3:
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+    dev: false
+    resolution:
+      integrity: sha512-i9X9VRRVZDd3xZw10NY5Z2cVMbdYg6gqFecfj79USv1CFN+YrJ3gIPRKf1qlY+Sxly4djoKdfx1T+m9dnRB8kQ==
   /scheduler/0.13.6:
     dependencies:
       loose-envify: 1.4.0
       object-assign: 4.1.1
+    dev: true
     resolution:
       integrity: sha512-IWnObHt413ucAYKsD9J1QShUKkbKLQQHdxRyw73sw4FN26iWr3DY/H34xGPe4nmL1DwXyWmSWmMrA9TfQbE/XQ==
   /schema-utils/1.0.0:
@@ -10925,8 +10927,8 @@ specifiers:
   '@babel/preset-react': ^7.0.0
   '@babel/register': ^7.0.0
   '@bugsnag/browser': ^6.2.0
-  '@bugsnag/js': ^5.1.0
-  '@bugsnag/plugin-react': ^5.1.0
+  '@bugsnag/js': ^6.2.0
+  '@bugsnag/plugin-react': ^6.2.0
   '@fortawesome/fontawesome-free': ^5.3.1
   an-ansi: 'git://src.sesamath.net/an-ansi#2.0.4'
   an-flow: 'git://src.sesamath.net/an-flow#3.0.2'
@@ -10941,7 +10943,7 @@ specifiers:
   chai: ^4.1.2
   chai-as-promised: ^7.1.1
   clean-webpack-plugin: ^1.0.0
-  connected-react-router: ^5.0.1
+  connected-react-router: 5.0.1
   copy-webpack-plugin: ^4.6.0
   core-js: ^2.6.5
   css-loader: ^2.0.1
@@ -10984,21 +10986,21 @@ specifiers:
   pre-push: ^0.1.1
   prop-types: ^15.6.2
   query-string: ^6.2.0
-  react: ^16.5.2
-  react-ace-builds: ^7.2.2
-  react-dom: ^16.5.2
-  react-hot-loader: ^4.3.11
-  react-paginate: ^5.2.4
-  react-redux: ^5.0.7
-  react-router: ^4.3.1
-  react-router-dom: ^4.2.2
-  react-select: ^2.0.0
+  react: 16.6.3
+  react-ace-builds: 7.2.3
+  react-dom: 16.6.3
+  react-hot-loader: 4.3.12
+  react-paginate: 5.3.1
+  react-redux: 5.1.1
+  react-router: 4.3.1
+  react-router-dom: 4.3.1
+  react-select: 2.1.2
   react-styleguidist: ^8.0.1
-  recompose: ^0.30.0
-  redux: ^4.0.0
-  redux-form: ^7.3.0
-  redux-thunk: ^2.3.0
-  regenerator-runtime: ^0.12.0
+  recompose: 0.30.0
+  redux: 4.0.1
+  redux-form: 7.4.2
+  redux-thunk: 2.3.0
+  regenerator-runtime: 0.12.1
   request: ^2.88.0
   roboto-fontface: ^0.10.0
   sass-loader: ^7.1.0
