@@ -112,7 +112,6 @@ On trouve une partie de la configuration des plugins dans server/ressource/confi
 
 * listes.type contient les noms d'affichage de chaque plugin
 * editable contient des détails sur les permissions nécessaire pour créer une ressource d'un type particulier
-* typePerso n'est pas utilisé actuellement
 * typeIframe n'est pas utilisé actuellement
 * typeToCategories n'est pas utilisé actuellement
 

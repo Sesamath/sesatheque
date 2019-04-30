@@ -47,7 +47,7 @@ const ResourceCreate = ({
               label={labels.type}
               name="type"
               placeholder="Choisir le type"
-              options={listes[createAll ? 'type' : 'editableTypes']}
+              options={listes[createAll ? 'type' : 'createTypes']}
             />
             <SelectField
               label={labels.restriction}
