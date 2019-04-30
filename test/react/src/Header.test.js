@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {application} from '../../../_private/test'
 import {expect} from 'chai'
 import {Header} from '../../../app/client-react/components/Header'
@@ -44,6 +45,9 @@ describe('<Header />', () => {
     const headerProps = {...props}
     if (!connected) headerProps.personne = null
     return <MemoryRouter><Header {...headerProps} /></MemoryRouter>
+  }
+  WrappedComponent.propTypes = {
+    connected: PropTypes.bool
   }
 
   it('renders connected links', () => {
