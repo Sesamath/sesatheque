@@ -170,7 +170,8 @@ const configRessource = {
     iep: true,
     j3p: true,
     mathgraph: true,
-    url: true
+    url: true,
+    qcm: true
   },
 
   /**

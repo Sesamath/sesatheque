@@ -22,7 +22,7 @@ import validate from '../utils/ressourceValidate'
 
 const ResourceCreate = ({
   handleSubmit,
-  personne: {permissions: createAll},
+  personne: {permissions: {createAll}},
   pristine,
   submitting,
   submitSucceeded
