@@ -6,7 +6,7 @@ dependencies:
   '@sesatheque-plugins/ecjs': framagit.org/Sesamath/sesatheque-plugin-ecjs/1ce03847068461fcb1c489653d31752435f9295a
   '@sesatheque-plugins/em': framagit.org/Sesamath/sesatheque-plugin-em/fe8499907aafe6f7d90afa20236f5a96575f6cf9
   '@sesatheque-plugins/iep': framagit.org/Sesamath/sesatheque-plugin-iep/fc85698a3609cafa99ad0861313f25dbfa07c3fd
-  '@sesatheque-plugins/j3p': framagit.org/Sesamath/sesatheque-plugin-j3p/e617d72270b6381e543989bbb475950a34875316
+  '@sesatheque-plugins/j3p': framagit.org/Sesamath/sesatheque-plugin-j3p/60ef229d2b1fda79ba815f93da36da4e26cddf5a
   '@sesatheque-plugins/mathgraph': framagit.org/Sesamath/sesatheque-plugin-mathgraph/3bcf56fae379d1a501c70a0a93251cbbb10b2d94
   '@sesatheque-plugins/qcm': framagit.org/Sesamath/sesatheque-plugin-qcm/4f599aa3c2a8d8bc04eaae62b0911a9bee564bbb
   '@sesatheque-plugins/url': framagit.org/Sesamath/sesatheque-plugin-url/99397b20997f377ef5d5da56015da7a61f32abba
@@ -466,7 +466,7 @@ packages:
       repo: 'https://framagit.org/Sesamath/sesatheque-plugin-iep.git'
       type: git
     version: 1.0.3
-  framagit.org/Sesamath/sesatheque-plugin-j3p/e617d72270b6381e543989bbb475950a34875316:
+  framagit.org/Sesamath/sesatheque-plugin-j3p/60ef229d2b1fda79ba815f93da36da4e26cddf5a:
     dependencies:
       headjs: 1.0.3
       sesaeditgraphe: framagit.org/Sesamath/sesaeditgraphe/9a0cd82f291451fc3a43cb255b7b42216bebc7e6
@@ -475,10 +475,10 @@ packages:
       node: '>=8.6.0'
     name: '@sesatheque-plugins/j3p'
     resolution:
-      commit: e617d72270b6381e543989bbb475950a34875316
+      commit: 60ef229d2b1fda79ba815f93da36da4e26cddf5a
       repo: 'https://framagit.org/Sesamath/sesatheque-plugin-j3p.git'
       type: git
-    version: 1.0.20
+    version: 1.0.21
   framagit.org/Sesamath/sesatheque-plugin-mathgraph/3bcf56fae379d1a501c70a0a93251cbbb10b2d94:
     dev: false
     name: '@sesatheque-plugins/mathgraph'
@@ -528,7 +528,7 @@ specifiers:
   '@sesatheque-plugins/ecjs': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-ecjs.git#1.0.2'
   '@sesatheque-plugins/em': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-em.git#1.0.1'
   '@sesatheque-plugins/iep': 'git+https://framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.3'
-  '@sesatheque-plugins/j3p': 'git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.20'
+  '@sesatheque-plugins/j3p': 'git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.21'
   '@sesatheque-plugins/mathgraph': 'git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.8'
   '@sesatheque-plugins/qcm': 'git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.4'
   '@sesatheque-plugins/url': 'git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.5'
