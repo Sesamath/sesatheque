@@ -197,11 +197,12 @@ module.exports = function (component) {
         const data = partial ? Object.assign({}, ressourceBdd, ressourcePostee) : ressourcePostee
         $ressourceControl.valideRessourceFromPost(data, this)
       }).seq(function (cleanData) {
-        log.debug(`après valide ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
+        log.debug('ressource après valideRessourceFromPost', cleanData, 'api', {max: 10000})
+        log.debug(`après valide auteurs ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // la ressource est cohérente, ou avec errors/warnings et c'est writeAndOut qui gèrera
         $personneControl.checkGroupes(context, ressourceBdd, cleanData, this)
       }).seq(function (cleanData) {
-        log.debug(`après checkGroupes ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
+        log.debug(`après checkGroupes auteurs ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
         // on ajoute le user courant pour serie et sequenceModele,
         // pas encore pour tous les types par crainte d'effets de bords pas prévus…
         if (pid && (cleanData.type === 'serie' || cleanData.type === 'sequenceModele')) {
@@ -212,6 +213,7 @@ module.exports = function (component) {
         // on màj ressourceBdd par simplicité (ça évitera aussi de recréer une entity en cas d'update)
         if (ressourceBdd) update(ressourceBdd, cleanData)
         else ressourceBdd = cleanData
+        log.debug('ressource à sauvegarder', ressourceBdd, 'api', {max: 10000})
         writeAndOut(context, ressourceBdd)
       }).catch(function (error) {
         $json.send(context, error)
@@ -412,15 +414,18 @@ module.exports = function (component) {
 
       // init droits, ça vient de l'url donc toujours une string
       if (['false', 'no', 'off', '0', 'undefined', 'null'].includes(droits)) droits = false
+      else if (['true', 'yes', 'on', '1'].includes(droits)) droits = true
       else if (['ref', 'full'].includes(format)) droits = true
       else droits = false
 
       if (format === 'ref') {
         send(new Ref(ressource))
+      } else if (format === 'id') {
+        const {oid, rid, aliasOf} = ressource
+        send({oid, rid, aliasOf})
       } else if (format === 'full') {
         // ressource complète avec résolution des oid externes (auteurs, groupe…)
-        // c'est async, donc on sort pour éviter le send final
-        return $ressourceConverter.enhance(ressource, (error, ressource) => {
+        $ressourceConverter.enhance(ressource, (error, ressource) => {
           if (error) return $json.send(context, error)
           send(ressource)
         })

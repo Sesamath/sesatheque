@@ -42,7 +42,7 @@ import fakeRessource from '../fixtures/fakeRessource'
 import fakePersonne from '../fixtures/fakePersonne'
 import flow from 'an-flow'
 
-import boot from './boot'
+import {boot} from '../boot'
 import config from '../../app/server/config'
 
 const myBaseId = config.application.baseId

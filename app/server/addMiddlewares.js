@@ -31,23 +31,18 @@
 
 'use strict'
 
-var fs = require('fs')
-
 // pour json et urlencode on prend celui inclut dans express,
 // mais y'a pas text-plain, on prend body-parser
 const bodyParser = require('body-parser')
 const express = require('express')
-var _ = require('lodash')
-var morgan = require('morgan')
-var moment = require('moment')
-var sjt = require('sesajstools')
+const moment = require('moment')
 
-var tools = require('./lib/tools')
-var config = require('./config')
-var applog = require('an-log')(config.application.name)
+const tools = require('./lib/tools')
+const config = require('./config')
+const applog = require('an-log')(config.application.name)
 
-var staticTtl = 3600 * 24
-// var publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
+const staticTtl = 3600 * 24
+// const publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
 
 /**
  * Ajoute notre bodyParser après le middleware cookie
@@ -74,30 +69,30 @@ function afterCookie (rail) {
   } else {
     log.error('Il manque le settings $rail.noBodyParser pour mettre nos propres parsers')
   }
-}
+} // afterCookie
 
 /**
  * Ajoute sur le rail les requetes en console (en dev), CORS, expires, access.log et perf.log
  * @param {Object} rail le rail express
  */
 function afterSession (rail) {
-  // ajout d'express en global sur lassi
+  // ajout d'express en global sur lassi (utilisé dans les tests pour le passer à supertest)
   lassi.express = rail
   /**
    * Ajout du CORS (et timestamp dans res.locals.start)
    */
   applog('adding middleware', 'CORS')
-  var knownOrigins = {}
+  const knownOrigins = {}
   rail.use('/', function (req, res, next) {
     // un timestamp
     req.start = moment().format('HH:mm:ss.SSS')
-    var origin = req.header('Origin')
+    const origin = req.header('Origin')
     // le public est mis en cache, faut donc autoriser pour tout le monde (sinon faut filtrer sur varnish)
     if (tools.isStatic(req.url) || tools.isPublic(req.url)) {
       res.header('Access-Control-Allow-Origin', '*')
     } else if (origin) {
       // ça dépend de l'appelant, on regarde ceux que l'on a déjà autorisé
-      var isKnown = knownOrigins[origin]
+      let isKnown = knownOrigins[origin]
       // ceux-là sont toujours autorisés
       if (!isKnown) {
         isKnown = /https?:\/\/([^/]+\.)?(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)
@@ -162,54 +157,8 @@ function afterSession (rail) {
     next()
   })
 
-  /**
-   * access.log (mis sur le rail relativement au début mais il utilise on-finished pour écrire à la fin)
-   */
-  var accessLog = config.logs.dir + '/' + config.logs.access
-  try {
-    var logAccessWriteStream = fs.createWriteStream(accessLog, {'flags': 'a'})
-    if (logAccessWriteStream) {
-      // et la fermeture du log
-      lassi.on('shutdown', () => logAccessWriteStream.end())
-      // cf https://www.npmjs.com/package/morgan
-      // on met pas la forme réduite "combined", car si on ajoute le :post plus loin ça marche plus
-      // et de toute façon on ajoute :response-time (en ms, un seul chiffre après la virgule)
-      var format = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :response-time[1] :start'
-      // on réécrit le token remote-addr pour prendre x-real-ip en premier s'il existe
-      morgan.token('remote-addr', function (req) {
-        if (req.headers && req.headers['x-real-ip']) return req.headers['x-real-ip']
-        // le reste est la fct originale, cf node_modules/morgan/index.js
-        if (req.ip) return req.ip
-        if (req._remoteAddress) return req._remoteAddress
-        if (req.connection) return req.connection.remoteAddress
-        return undefined
-      })
-      morgan.token('start', (req) => req.start)
-      /** Les options morgan */
-      var options = {
-        skip: function (req) {
-          var excluded = ['css', 'js', 'ico', 'png', 'jpeg']
-          var i = req.url.lastIndexOf('.')
-          var suffix = (i > 0) ? req.url.substr(i + 1) : null // au moins un char avant le point
-          return (suffix && excluded.indexOf(suffix) > -1)
-        },
-        stream: logAccessWriteStream
-      }
-      // en dev on ajoute les var postées
-      if (!global.isProd) {
-        morgan.token('post', function (req) {
-          return (_.isEmpty(req.body)) ? '' : sjt.stringify(req.body)
-        })
-        format += ' :post'
-      }
-      applog('adding middleware', 'access.log', 'with format', accessLog, format)
-      rail.use('/', morgan(format, options))
-    } else {
-      log.error("Impossible d'ouvrir le log " + accessLog)
-    }
-  } catch (error) {
-    console.error(error.stack)
-  }
+  // access.log géré par lassi
+
   /**
    * En dev, ajout des requetes http en console et dans le log de debug
    */
@@ -239,20 +188,23 @@ function afterSession (rail) {
       }
       // on est après body-parser (-2 pour le {} ajouté au stringify)
       // if (request.body) response.perf.msg += '\treceived: ' +(tools.stringify(request.body).length -2)
-      var received = request.headers['content-length']
+      const received = request.headers['content-length']
       if (received) response.perf.msg += '\treceived: ' + received
       // on peut pas mettre de middleware après les controlleur, car response.end() sera appelé et les middleware ignorés
       // on ajoute donc un listener sur finish (appelé sans arguments, et c'est le seul event de response)
       response.on('finish', function () {
-        var cl = this.get('Content-Length')
+        const cl = this.get('Content-Length')
         if (cl) response.perf.msg += '\tsent:' + cl
         log.perf.out(response)
       })
       next()
     })
   }
-}
+} // afterSession
 
+/**
+ * Hooks qui seront ajoutés sur le rail par app/server/index.js
+ */
 module.exports = {
   afterCookie,
   afterSession

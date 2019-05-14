@@ -1,11 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import AceEditor from 'react-ace'
-import 'brace'
-import 'brace/mode/json'
-import 'brace/mode/xml'
-import 'brace/theme/github'
-import 'brace/ext/searchbox'
+import AceEditor from 'react-ace-builds'
+import 'react-ace-builds/webpack-resolver-min'
 import showInvalidField from '../hoc/showInvalidField'
 
 import './TextEditor.scss'
@@ -21,8 +17,9 @@ function formatJSON (value) {
   return JSON.stringify(value, null, 2)
 }
 
-const TextEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate, mode }) => (
+const TextEditor = ({ input: { value, onChange, onBlur, onFocus, name }, onValidate, mode }) => (
   <AceEditor
+    name={name}
     mode={mode}
     theme="github"
     fontSize={14}
@@ -37,9 +34,6 @@ const TextEditor = ({ input: { value, onChange, onBlur, onFocus }, onValidate, m
     maxLines={Infinity}
     tabSize={2}
     value={mode === 'json' ? formatJSON(value) : value}
-    editorProps={{
-      $blockScrolling: true
-    }}
   />
 )
 
@@ -52,7 +46,8 @@ TextEditor.propTypes = {
     ]),
     onBlur: PropTypes.func,
     onChange: PropTypes.func,
-    onFocus: PropTypes.func
+    onFocus: PropTypes.func,
+    name: PropTypes.string
   }),
   mode: PropTypes.string,
   onValidate: PropTypes.func

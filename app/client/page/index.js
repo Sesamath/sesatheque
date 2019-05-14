@@ -33,8 +33,7 @@
 // On ajoute les @babel/polyfill via ce fichier et non directement dans les entries de webpack.
 // C'est le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
 // qui va venir filtrer pour n'inclure que les polyfills nécessaires pour les browsers ciblés.
-// Pas besoin de polyfill pour fetch en principe
-
+// Cf https://babeljs.io/docs/en/babel-preset-env#usebuiltins-entry
 import '@babel/polyfill'
 
 const dom = require('sesajstools/dom')
@@ -45,7 +44,8 @@ const loadjs = require('loadjs')
 const autosize = require('./autosize')
 const refreshAuth = require('./refreshAuth')
 const inBrowser = (typeof window) !== 'undefined'
-// lui s'ajoute tout seul à window, suffit de le charger
+
+// bugsnag s'ajoute tout seul à window, suffit de le charger
 if (inBrowser) {
   require('../../client-react/utils/checkBrowser').default()
   require('./bugsnag')
@@ -61,18 +61,6 @@ const wd = w.document
 const externalModules = {
   ckeditor: 'vendor/ckeditor/ckeditor.js',
   ckeditorJquery: 'vendor/ckeditor/adapters/jquery.js',
-  // installé avec `bower install jquery1=jquery#1.11`
-  jquery: 'vendor/jquery1/dist/jquery.min.js',
-  // installé avec `bower install jquery2=jquery#2`
-  jquery2: 'vendor/jquery2/dist/jquery.min.js',
-  // une version mise à la main, on a aussi jquery-ui via bower
-  jqueryUi: 'vendor/jqueryUi/1.11.1/jquery-ui.min.js',
-  jqueryUiDialog: 'vendor/jqueryUi/1.11.4.dialogRedmond/jquery-ui.min.js',
-  jsoneditor: 'vendor/jsoneditor/dist/jsoneditor.min.js',
-  jstree: 'vendor/jstree/dist/jstree.min.js',
-  mathjax: 'vendor/mathjax/2.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;delayStartupUntil=configured&amp;dummy',
-  mathquill: 'vendor/mathquill-0.9.4/mathquill.min.js',
-  pluginDetect: 'vendor/pluginDetect/javaFlashDetect.min.js',
   swfobject: 'vendor/swfobject/swfobject.2.3.min.js'
 }
 
@@ -112,14 +100,14 @@ function addError (error, delay) {
 
 /**
  * Affiche le bouton vu, ajoute son comportement au clic et le retourne
- * @param sendResultat
+ * @param {function} onClickCb sera appelée à chaque clic sur le bouton
  * @return {Element} undefined si #boutonVu n'existait pas dans la page
  */
-function addBoutonVu (sendResultat) {
+function addBoutonVu (onClickCb) {
   try {
     const boutonVu = wd.getElementById('boutonVu')
     if (boutonVu) {
-      boutonVu.addEventListener('click', sendResultat)
+      boutonVu.addEventListener('click', onClickCb)
       dom.setStyles(boutonVu, {display: 'block'})
     }
     return boutonVu
@@ -268,9 +256,12 @@ function showNotification (htmlString, delay = 5) {
   notif.innerHTML = htmlString
   const closerElt = dom.addElement(notif, 'img', {src: '/medias/cocheVerte.png', alt: '', style: {position: 'absolute', top: '5px', right: '5px'}})
   const closeNotif = () => {
+    if (isClosed) return
+    isClosed = true
     closerElt.removeEventListener('click', closeNotif)
     parent.removeChild(notif)
   }
+  let isClosed = false
   closerElt.addEventListener('click', closeNotif)
   setTimeout(closeNotif, delay * 1000)
 }

@@ -1,6 +1,7 @@
+import {identity} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {renameProp} from 'recompose'
+import {withProps} from 'recompose'
 import {reduxForm} from 'redux-form'
 import {Prompt} from 'react-router'
 import {parse} from 'query-string'
@@ -15,43 +16,7 @@ import ensureLogged from '../hoc/ensureLogged'
 import NavMenu from './NavMenu'
 import onSubmitFail from '../utils/onSubmitFail'
 import commonValidate from '../utils/ressourceValidate'
-import editors from 'plugins/editors'
-
-const validate = (values) => {
-  const errors = commonValidate(values)
-  const {type} = values
-  const typeValidate = editors[type] && editors[type].validate
-  if (typeValidate) {
-    typeValidate(values, errors)
-  }
-  return errors
-}
-
-const onSubmit = (values, dispatch, {saveRessource, initialize}) => saveRessource(values, (savedRessource) => {
-  // On notifie le parent concernant la mise à jour de la ressource
-  if (parent !== window && parent.postMessage) {
-    const parsedQuery = parse(window.location.search)
-    if (parsedQuery.closerId) {
-      // @todo harmoniser ces préfixes _ retournés par l'api pour mettre du $ partout (maintenant qu'on passe plus par context.rest qui les virait)
-      const ressource = {...savedRessource}
-      delete ressource._droits
-      ressource.$droits = savedRessource._droits
-      parent.postMessage({
-        action: 'iframeCloser',
-        id: parsedQuery.closerId,
-        ressource
-      }, '*')
-    }
-  }
-  initialize(savedRessource)
-})
-
-const formDef = {
-  form: 'ressource',
-  validate,
-  onSubmit,
-  onSubmitFail
-}
+import getEditor from 'plugins/editors'
 
 const ResourceForm = ({
   initialValues: {
@@ -64,7 +29,7 @@ const ResourceForm = ({
   submitting,
   pristine
 }) => {
-  const Editor = (editors[type] && editors[type].editor) || EditorSimple
+  const {editor: Editor = EditorSimple} = getEditor(type)
 
   return (
     <Fragment>
@@ -106,11 +71,57 @@ ResourceForm.propTypes = {
   initialize: PropTypes.func
 }
 
+const validate = (values) => {
+  const errors = commonValidate(values)
+  const {type} = values
+  const {validate: typeValidate} = getEditor(type)
+  if (typeValidate) {
+    typeValidate(values, errors)
+  }
+  return errors
+}
+
+const onSubmit = (values, dispatch, {saveRessource, initialize}) => {
+  const {saveHook = identity} = getEditor(values.type)
+
+  return saveRessource(saveHook(values), (savedRessource) => {
+    // On notifie le parent concernant la mise à jour de la ressource
+    if (parent !== window && parent.postMessage) {
+      const parsedQuery = parse(window.location.search)
+      if (parsedQuery.closerId) {
+        // @todo harmoniser ces préfixes _ retournés par l'api pour mettre du $ partout (maintenant qu'on passe plus par context.rest qui les virait)
+        const ressource = {...savedRessource}
+        delete ressource._droits
+        ressource.$droits = savedRessource._droits
+        parent.postMessage({
+          action: 'iframeCloser',
+          id: parsedQuery.closerId,
+          ressource
+        }, '*')
+      }
+    }
+  })
+}
+
+const formDef = {
+  form: 'ressource',
+  validate,
+  onSubmit,
+  onSubmitFail,
+  enableReinitialize: true
+}
+
 export default ensureLogged(
   resourceLoader(
     aliasForker( // fork si on édite un alias
       resourceSaver( // fournit saveRessource
-        renameProp('ressource', 'initialValues')(
+        withProps(({ressource}) => {
+          const {loadHook = identity} = getEditor(ressource.type)
+
+          return {
+            initialValues: loadHook(ressource)
+          }
+        })(
           reduxForm(formDef)(ResourceForm)
         )
       )

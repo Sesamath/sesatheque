@@ -37,6 +37,8 @@
  */
 'use strict'
 
+require('client-react/styles/display.scss')
+
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjt = require('sesajstools')
@@ -47,7 +49,8 @@ const xhr = require('sesajstools/http/xhr')
 const page = require('../page')
 const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
-const displays = require('plugins/displays').default
+const getDisplay = require('plugins/displays').default
+const SimpleCrypto = require('simple-crypto-js').default
 const wd = window.document
 
 /**
@@ -107,7 +110,7 @@ function addResultatCallback (ressource, options) {
     }
   } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
     // callback message
-    resultatListener = (resultat) => sendMessage(options, resultat)
+    resultatListener = (resultat) => sendResultatMessage(options, resultat)
   } else if (isDebugMode) {
     log('activation de la récup du résultat en console pour débug')
     resultatListener = (resultat) => console.log('[DEBUG] resultat qui aurait été envoyé', resultat)
@@ -210,18 +213,19 @@ function getResultat (result, ressource, options) {
  * @param next
  */
 function load (ressource, options, next) {
-  log('display avec la ressource', ressource)
+  log('load avec la ressource', ressource)
   log('et les options après page.init', options)
 
   // le display du plugin
   const pluginName = ressource.type
-  const pluginDisplay = displays[pluginName]
-  if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
-
-  try {
+  const loadDisplay = getDisplay(pluginName)
+  loadDisplay().then(({display: pluginDisplay}) => {
     if (options.container) dom.empty(options.container)
     else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
     if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
+
+    if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
+
     // On vire le titre si on nous le demande via les options ou un param dans l'url
     if (
       (options.hasOwnProperty('showTitle') && !options.showTitle) ||
@@ -232,6 +236,18 @@ function load (ressource, options, next) {
       page.hideTitle()
     }
 
+    if (ressource.parametres && ressource.parametres.correction) {
+      const {rid, parametres} = ressource
+      const {correction} = parametres
+      const simpleCrypto = new SimpleCrypto(rid)
+      ressource = {
+        ...ressource,
+        parametres: {
+          ...parametres,
+          correction: JSON.parse(simpleCrypto.decrypt(correction))
+        }
+      }
+    }
     // on regarde s'il faut ajouter une fct de sauvegarde des résultats
     addResultatCallback(ressource, options)
 
@@ -248,9 +264,7 @@ function load (ressource, options, next) {
       }
       next(error)
     })
-  } catch (error) {
-    next(error)
-  }
+  }).catch(next)
 } // load
 
 /**
@@ -283,15 +297,15 @@ function printIfError (error) {
  * (faudrait passer dans le message une action de retour et un id, et ajouter un écouteur dessus)
  * c'est le parent qui affichera le feedback
  */
-function sendMessage (options, resultat) {
+function sendResultatMessage (options, resultat) {
   const chunks = options.resultatMessageAction.split('::')
   const action = options.resultatMessageAction
   // le nom de la propriété attendue par celui qui écoute
   const resultatProp = chunks[1] || 'resultat'
   const message = {
-    action: action
+    action,
+    [resultatProp]: resultat
   }
-  message[resultatProp] = resultat
   // on envoie
   window.top.postMessage(message, '*')
 }
@@ -333,6 +347,20 @@ module.exports = function display (ressource, options, next) {
       if (!options || typeof options !== 'object') {
         if (options) console.error(new Error('options invalides'), options)
         options = {}
+      }
+    }
+    const loadedMessageAction = sjtUrl.getParameter('loadedMessageAction')
+    if (loadedMessageAction) {
+      // qqun veut être prévenu en plus de next, on wrap next
+      const message = {
+        action: loadedMessageAction,
+        rid: ressource.rid
+      }
+      const originalNext = next
+      next = (error) => {
+        if (error) return originalNext(error)
+        window.top.postMessage(message, '*')
+        originalNext()
       }
     }
 

@@ -4,6 +4,7 @@ footer {
   @include cartouche();
   clear: both;
   background-color: #237;
+  flex-shrink: 0;
 
   ul {
     margin: 0;

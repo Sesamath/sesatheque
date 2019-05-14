@@ -151,7 +151,7 @@ module.exports = function (component) {
     /**
      * Retourne une liste de personnes d'apres une liste de pids
      * @param {string[]} pids Liste de pid
-     * @param next callback appelée avec (error, {personnes: Personne[], missing: string[]}) (missing étant les pids inconnus en bdd)
+     * @param {function} next callback appelée avec `(error, {personnes: Personne[], missing: string[]})` (missing étant les pids inconnus en bdd)
      */
     function loadByPids (pids, next) {
       if (!Array.isArray(pids)) return next(Error('arguments invalides'))

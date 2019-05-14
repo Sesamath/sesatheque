@@ -45,11 +45,13 @@ const sjt = require('sesajstools')
 const {merge} = require('sesajstools/utils/object')
 const log = require('sesajstools/utils/log')
 
-const addMiddlewares = require('./addMiddlewares')
+const {afterCookie, afterSession} = require('./addMiddlewares')
 const beforeTransport = require('./beforeTransport')
 const boot = require('./boot')
 const config = require('./config')
 const {checkLocalOnRemote} = require('./checkConfig')
+
+const getResolvedPromise = () => Promise.resolve()
 
 let lassiInstance
 
@@ -89,8 +91,8 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
      */
     lassi.on('afterRailUse', function (rail, name) {
       // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
-      if (name === 'cookie') addMiddlewares.afterCookie(rail)
-      else if (name === 'session') addMiddlewares.afterSession(rail)
+      if (name === 'cookie') afterCookie(rail)
+      else if (name === 'session') afterSession(rail)
     })
 
     // le listener beforeTransport
@@ -112,6 +114,8 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
 /**
  * Démarre l'application Sesathèque
  * @param {object} [options]
+ * @param {object} [options.settings] Éventuelles surcharges des settings
+ * @param {boolean} [options.noCheckLocalOnRemote=false] Passer true pour ne pas vérifier la cohérence de notre configuration sur les sésathèques distantes (déclarées dans notre configuration)
  * @param {simpleCallback} [afterBootCallback]
  * @return {Promise<Lassi>}
  */
@@ -140,12 +144,14 @@ function app (options, afterBootCallback) {
 
   // Rq : les callbacks beforeBoot et afterBoot sont sync, notre vérif async
 
-  // le notre check sur les sesathèques distantes est plus simple avant de lancer le boot
+  // le check sur les sesathèques distantes est plus simple avant de lancer le boot
   // mais si on en lance 2 en même temps chacune attend l'autre jusqu'au timeout
   // on le passe donc après, quitte à arrêter l'appli en cas de pb
   lassiInstance = boot(beforeBootsrap, bootOptions, afterBootCallbackWrapper)
 
-  return checkLocalOnRemote().then((result) => {
+  const check = options.noCheckLocalOnRemote ? getResolvedPromise : checkLocalOnRemote
+
+  return check().then((result) => {
     // si c'est résolu avec des erreurs, on les affiche sans bloquer la suite
     if (result && result.errors) result.errors.forEach(log.error)
     // et on résoud avec l'instance lassi

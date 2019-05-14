@@ -24,15 +24,6 @@ const resourceLoader = (WrappedComponent) => {
       this.props.loadRessource(ressourceOid)
     }
 
-    // et ensuite à chaque fois que l'oid change
-    // todo: clarify/simplify this loading code to avoid double fetches on same oid (here with componentDidUpdate)
-    componentDidUpdate (prevProps) {
-      const ressourceOid = this.props.match.params.ressourceOid
-      if (ressourceOid !== prevProps.match.params.ressourceOid) {
-        this.props.loadRessource(ressourceOid)
-      }
-    }
-
     render () {
       if (this.props.ressource === null) return null
 

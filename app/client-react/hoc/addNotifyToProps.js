@@ -1,4 +1,4 @@
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 import {addNotification} from '../actions/notifications'
 
 const mapDispatchToProps = (dispatch) => ({

@@ -63,7 +63,7 @@ module.exports = function (component) {
       let errors = []
       let isModif = false
       if (Array.isArray(relations)) {
-        console.log(relations)
+        console.log(`ajout à ${ressource.rid || `${ressource.origine}/${ressource.idOrigine}`} des relations `, relations)
         relations.forEach(relation => {
           if (!Array.isArray(relation)) {
             errors.push(`relation incorrecte : ${JSON.stringify(relation)}`)

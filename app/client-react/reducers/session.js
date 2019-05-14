@@ -1,4 +1,4 @@
-const filterGroups = (removeMe) => (nom) => (nom !== removeMe)
+const filterGroups = removeMe => nom => (nom !== removeMe)
 
 const sessionReducer = (state = null, {type, payload}) => {
   switch (type) {

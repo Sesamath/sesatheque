@@ -32,6 +32,7 @@
 const uuid = require('an-uuid')
 const {exists, getRidComponents} = require('sesatheque-client/dist/server/sesatheques')
 const {stringify} = require('sesajstools')
+const htmlToText = require('html-to-text')
 
 const tools = require('../lib/tools')
 const {basicArrayIndexer, getNormalizedName} = require('../lib/normalize')
@@ -45,6 +46,9 @@ const configRessource = require('./config')
 const schema = require('./EntityRessource.schema')
 
 const myBaseId = config.application.baseId
+
+// on remplace aussi les qq <sup> par ^ (on verra plus tard pour mettre du latex entre $ ou $$)
+const cleanHtml = (text) => htmlToText.fromString(text.replace(/<sup> *([0-9]+) *<\/sup>/g, '^$1'), {preserveNewlines: true, wordwrap: false})
 
 module.exports = function (component) {
   component.entity('EntityRessource', function () {
@@ -170,8 +174,9 @@ module.exports = function (component) {
 
     EntityRessource.beforeStore(function (next) {
       const logAndNext = (errorMessage) => {
+        log.dataError(errorMessage)
         const error = Error(errorMessage)
-        log.error(error)
+        error.noLog = true
         next(error)
       }
 
@@ -182,8 +187,8 @@ module.exports = function (component) {
         this.titre
 
       // type et titre obligatoire
-      if (!this.type) return next(Error(`Ressource sans type, impossible à sauvegarder (${id})`))
-      if (!this.titre) return next(Error(`Ressource sans titre, impossible à sauvegarder (${id})`))
+      if (!this.type) return logAndNext(`Ressource sans type, impossible à sauvegarder (${id})`)
+      if (!this.titre) return logAndNext(`Ressource sans titre, impossible à sauvegarder (${id})`)
 
       try {
         // on peut écraser une ressource en fournissant son rid (sans son oid),
@@ -236,17 +241,11 @@ module.exports = function (component) {
 
         // check aliasOf
         if (this.aliasOf) {
-          // y'a eu des 'undefined' enregistrés à une époque…
-          // @todo virer ça après update34
-          if (this.aliasOf === 'undefined' || this.aliasOf === '') {
-            delete this.aliasOf
-          } else {
-            // on vérifie que ça pointe vers une base connue
-            try {
-              getRidComponents(this.aliasOf)
-            } catch (error) {
-              return logAndNext(`aliasOf ${this.aliasOf} invalide (ressource ${id})`)
-            }
+          // on vérifie que ça pointe vers une base connue
+          try {
+            getRidComponents(this.aliasOf)
+          } catch (error) {
+            return logAndNext(`aliasOf ${this.aliasOf} invalide (ressource ${id})`)
           }
         }
 
@@ -263,6 +262,13 @@ module.exports = function (component) {
         if (this.type === 'arbre') {
           if (!Array.isArray(this.enfants)) return logAndNext(`arbre sans propriété enfants (${id})`)
         }
+
+        // dans résumé/commentaires/description :
+        // - on vire tous les tags html sauf <br>
+        // - on remplace les <br /> par des \n
+        ;['commentaires', 'resume', 'description'].forEach(p => {
+          if (this[p]) this[p] = cleanHtml(this[p])
+        })
 
         // date de création
         if (!this.dateCreation) this.dateCreation = new Date()
@@ -287,7 +293,6 @@ module.exports = function (component) {
 
         next(null, this)
       } catch (error) {
-        log.dataError(error, this)
         next(error)
       }
     })

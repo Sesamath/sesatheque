@@ -91,12 +91,16 @@ module.exports = function (component) {
      * @param {string|Error} error
      */
     function sendKo (context, error) {
-      let message = error
-      if (error instanceof Error) {
+      let message
+      if (typeof error === 'string') {
+        message = error
+      } else if (error instanceof Error) {
         log.error(error)
         message = error.toString()
-      } else if (typeof error !== 'string') {
-        if (error) log.error('erreur invalide', error)
+      } else if (Array.isArray(error) && error.every(err => typeof err === 'string')) {
+        message = `Il y a ${error.length} erreurs :\n- ${error.join('\n- ')}`
+      } else {
+        if (error) log.error('erreur à envoyer en json invalide', error)
         message = 'Requête invalide'
       }
       // on reformule certains messages comme

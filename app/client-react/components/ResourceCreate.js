@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {reduxForm} from 'redux-form'
 import {parse} from 'query-string'
-import editors from 'plugins/editors'
+import getEditor from 'plugins/editors'
 
 import Classification from './Classification'
 import {labels} from '../../server/ressource/config'
@@ -12,7 +12,6 @@ import onSubmitFail from '../utils/onSubmitFail'
 import listes from '../utils/listesFromConfig'
 import resourceSaver from '../hoc/resourceSaver'
 import ensureLogged from '../hoc/ensureLogged'
-
 import {
   SelectField,
   SwitchField,
@@ -23,7 +22,7 @@ import validate from '../utils/ressourceValidate'
 
 const ResourceCreate = ({
   handleSubmit,
-  personne: {permissions: createAll},
+  personne: {permissions: {createAll}},
   pristine,
   submitting,
   submitSucceeded
@@ -48,7 +47,7 @@ const ResourceCreate = ({
               label={labels.type}
               name="type"
               placeholder="Choisir le type"
-              options={listes[createAll ? 'type' : 'editableTypes']}
+              options={listes[createAll ? 'type' : 'createTypes']}
             />
             <SelectField
               label={labels.restriction}
@@ -135,11 +134,11 @@ const form = {
     const search = closerId ? `?closerId=${closerId}` : ''
     const onSave = ({oid}) => dispatch(push(`/ressource/modifier/${oid}${search}`))
     const {type} = values
-    const {defaultValue} = editors[type]
-    const ressourceData = defaultValue ? {
+    const {defaultValue = {}} = getEditor(type)
+    const ressourceData = {
       ...defaultValue,
       ...values
-    } : values
+    }
     saveRessource(ressourceData, onSave)
   },
   onSubmitFail,

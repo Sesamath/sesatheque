@@ -31,6 +31,9 @@
 
 /**
  * Script indépendant pour l'import (appelle l'api) et valide si ok ou affiche une erreur
+ * exporté par webpack
+ *
+ * Qui l'utilise ???
  */
 'use strict'
 

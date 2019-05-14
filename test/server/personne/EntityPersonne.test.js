@@ -40,7 +40,7 @@
 /* eslint-env mocha */
 
 import {expect} from 'chai'
-import boot from '../boot'
+import {boot, keepAlive, shutdownDelayed} from '../../boot'
 import flow from 'an-flow'
 import fakePersonne from '../../fixtures/fakePersonne'
 import {getRandomPersonne, populate, purge} from '../populate'
@@ -52,17 +52,17 @@ describe('EntityPersonne', () => {
   }
 
   // boot + récup des services et config nécessaires à nos tests
-  before(() => boot()
-    .then(({lassi}) => {
-      if (!lassi) return Promise.reject(new Error('boot KO lassi'))
-      EntityPersonne = lassi.service('EntityPersonne')
-      $settings = lassi.service('$settings')
-      return Promise.resolve()
-    })
-  )
+  before(() => boot().then(({lassi}) => {
+    if (!lassi) return Promise.reject(new Error('boot KO lassi'))
+    EntityPersonne = lassi.service('EntityPersonne')
+    $settings = lassi.service('$settings')
+    return purge()
+  }))
 
-  beforeEach(purge)
+  beforeEach(keepAlive)
+
   afterEach(purge)
+  after(shutdownDelayed)
 
   it('create (avec permissions set n’importe comment)', () => {
     // on teste un create avec tous les rôles définis en config, plus un inconnu

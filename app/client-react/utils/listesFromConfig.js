@@ -1,4 +1,4 @@
-import {editable, listes, listesOrdonnees} from '../../server/ressource/config'
+import {editable, listes, listesOrdonnees, typePerso} from '../../server/ressource/config'
 
 /**
  * Les listes sous forme de tableaux ordonnés avec label & value
@@ -22,5 +22,6 @@ Object.entries(listes).forEach(([key, values]) => {
 })
 
 formattedLists.editableTypes = formattedLists.type.filter(({value, label}) => editable[value])
+formattedLists.createTypes = formattedLists.type.filter(({value, label}) => typePerso[value])
 
 export default formattedLists

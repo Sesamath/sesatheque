@@ -6,6 +6,16 @@ let aide = '\nCe shell ajoute plusieurs fonctions utiles pour sesatheque : '
 /* global db print printjson */
 /* eslint-disable no-unused-vars */
 
+// affiche toutes les clés d'index (d'une collection ou de toutes)
+const getAllIndexes = (collectionName) => {
+  const colls = collectionName ? [collectionName] : db.getCollectionNames()
+  colls.forEach((coll) => {
+    db[coll].getIndexes().forEach(i => print(coll, Object.keys(i.key).join(', '), `(${i.name})`))
+  })
+}
+aide += '\n  getAllIndexes() retourne les index de toutes les collections (qui peuvent donc être utilisés dans une query)\n'
+aide += '  getAllIndexes(collectionName) retourne les index collectionName (qui peuvent donc être utilisés dans une query)\n'
+
 // des helpers
 aide += '\n\nCes fonctions peuvent être utile dans un find().forEach(e => …)'
 

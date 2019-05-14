@@ -29,7 +29,15 @@
  * pour une explication en français)
  */
 'use strict'
+
+const fs = require('fs')
+const path = require('path')
 /* eslint-env mocha */
+
+// faut ajouter notre sesathèque coté client
+const sesatheques = require('sesatheque-client/src/sesatheques')
+const {baseId, baseUrl} = require('../app/server/config').application
+sesatheques.addSesatheque(baseId, baseUrl)
 
 // on peut mettre dans mocha.opts un
 // --require babel-core/register
@@ -59,7 +67,29 @@ require('@babel/register')({
   ],
   plugins: [
     ['module-resolver', {
-      root: ['./app']
+      root: ['./app'],
+      'alias': {
+        'plugins': path.join(__dirname, '../test/react/plugins')
+      }
     }]
   ]
 })
+
+// si on lance les tests react, faut aider require à trouver prop-types
+// (il n'y arrive pas si les modules ont été installés avec pnpm)
+// en passant ici, on ne sait pas si on passe tous les tests (argv avec 'test/**/*.test.js')
+// ou seulement react (argv avec 'test/react/**/*.test.js', donc on l'inclus tout le temps
+try {
+  require('prop-types')
+} catch (error) {
+  // on tente de le chercher dans les node_modules de react
+  const reactDir = path.dirname(require.resolve('react'))
+  const reactModules = path.resolve(reactDir, '..', '..', 'node_modules')
+  if (fs.existsSync(reactModules)) {
+    process.env.NODE_PATH = reactModules + (process.env.NODE_PATH ? path.delimiter + process.env.NODE_PATH : '')
+    // reste à regénérer les paths dans lesquels require fouine
+    require('module')._initPaths()
+  } else {
+    throw Error(`require ne trouvera pas le module prop-types de react (ni node_modules/prop-types ni ${reactModules}/prop-types)`)
+  }
+}

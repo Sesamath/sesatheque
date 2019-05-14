@@ -13,6 +13,7 @@ const safeConfig = {
   baseId: config.application.baseId,
   baseUrl: config.application.baseUrl,
   bugsnag: config.bugsnag,
+  pluginsOptions: config.pluginsOptions,
   sesatheques: config.sesatheques.map(({baseId, baseUrl}) => ({baseId, baseUrl}))
 }
 

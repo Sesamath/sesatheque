@@ -1,19 +1,19 @@
+/**
+ * Pas trouvé le moyen d'arriver à avoir du watch en dev et pas en prod sans fichier de conf séparé
+ * créer un environnement custom pour préciser watch ne marche pas
+ */
 {
-  /**
-   * Pas trouvé le moyen d'arriver à avoir du watch en dev et pas en prod sans fichier de conf séparé
-   * créer un environnement custom pour préciser watch ne marche pas
-   */
   "apps" : [
     {
       "name"             : "sesatheque",
-      "script"           : "app/start.js",
+      "script"           : "app/server/start.js",
       "log_date_format"  : "YYYY-MM-DD HH:mm:ss",
       "exec_mode"        : "cluster",
       "exec_interpreter" : "node",
       "node_args"        : [],
       "instances"        : "2",
-      "watch"            : ["app", "test"],
-      "ignore_watch"     : ["app/main/public", "app/ressource/public"],
+      "watch"            : ["app/server", "test"],
+      // "ignore_watch"     : ["app/assets"],
       "pid_file"         : "sesatheque.pid",
       "error_file"       : "logs/error.log",
       "out_file"         : "logs/node.log",

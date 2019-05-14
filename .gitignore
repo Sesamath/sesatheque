@@ -2,9 +2,10 @@
 .vim
 .idea
 
-# on utilise yarn, npm possible mais son lock restera local
-/package-lock.json
 node_modules
+# on utilise pnpm, yarn ou npm possible mais le lock restera local
+/package-lock.json
+/yarn.lock
 
 # logs
 *.log
@@ -24,9 +25,11 @@ package.local-extras.json
 # trucs qui peuvent traîner à la racine (pm2 qui tourne…)
 /*.pid
 
-# répertoire des plugins
+# fichiers générés par app/plugins/buildSrc.js au build
 /app/plugins/package.json
-/app/plugins/displays.js
-/app/plugins/editors.js
-/app/plugins/icons.js
+/app/plugins/package-lock.json
 /app/plugins/yarn.lock
+/app/plugins/shrinkwrap.yaml
+/app/plugins/generatedDisplays.js
+/app/plugins/generatedEditors.js
+/app/plugins/icons.js

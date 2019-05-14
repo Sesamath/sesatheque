@@ -53,7 +53,8 @@ const configRessource = {
       mathgraph: 'figure Mathgraph',
       mental: 'calcul mental',
       sequenceModele: 'modèle de séquence',
-      url: 'page externe'
+      url: 'page externe',
+      qcm: 'QCM'
     },
     niveaux: common.niveaux,
     // Attention, il ne faut pas modifier les données suivantes, elles sont utilisées à de nombreux endroits dans le code
@@ -158,7 +159,8 @@ const configRessource = {
     j3p: true,
     mathgraph: true,
     mental: true,
-    url: true
+    url: true,
+    qcm: true
   },
   /**
    * types qui peuvent être utilisés pour une ressource perso (form de ressource/ajouter)
@@ -168,7 +170,8 @@ const configRessource = {
     iep: true,
     j3p: true,
     mathgraph: true,
-    url: true
+    url: true,
+    qcm: true
   },
 
   /**

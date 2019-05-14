@@ -97,6 +97,8 @@ module.exports = function (component) {
      */
     function getDeleteDeniedMessage (context, ressource) {
       if (isAuteur(context, ressource)) {
+        // si c'est un alias dont il est l'auteur il peut le virer
+        if (ressource.rid && ressource.aliasOf) return ''
         // il est un auteur, faut aussi qu'il soit le seul et que sa ressource soit privée
         // (sinon d'autres peuvent s'en servir)
         if (ressource.auteurs.length > 1) return 'Vous êtes auteur de cette ressource mais n’êtes pas le seul, vous ne pouvez pas la supprimer'

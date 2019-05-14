@@ -39,6 +39,7 @@ const robotCanIndex = ['prod', 'production'].includes(staging) // mais pas prepr
 const {escapeForHtml} = require('sesajstools')
 
 const rawOptions = {headers: {'Content-Type': 'text/html'}}
+const SimpleCrypto = require('simple-crypto-js').default
 
 /**
  * Retourne le code html de la page pour afficher la ressource (à priori dans une iframe, pas de header / footer ici)
@@ -49,6 +50,15 @@ module.exports = function displayRessource (context, ressource) {
   if (!ressource) throw Error('Impossible d’afficher une ressource sans la fournir')
   const titre = escapeForHtml(ressource.titre)
   const titreForArg = ressource.titre.replace(/"/g, '“')
+
+  Object.keys(ressource).forEach(p => {
+    if (p.substr(0, 1) === '$') delete ressource[p]
+  })
+  const correction = ressource.parametres && ressource.parametres.correction
+  if (correction) {
+    const simpleCrypto = new SimpleCrypto(ressource.rid)
+    ressource.parametres.correction = simpleCrypto.encrypt(JSON.stringify(correction))
+  }
 
   const page = `<!DOCTYPE html>
 <html>
@@ -72,18 +82,24 @@ module.exports = function displayRessource (context, ressource) {
   </div>
 <script type="text/javascript" src="/display.js?${version}"></script>
 <script type="application/javascript">
-try {
-  if (typeof stdisplay === 'undefined') throw new Error('Le chargement a échoué, impossible de charger le module display');
-  var options = {
-    isDev: ${isDev},
-    verbose: ${isDev}
-  };
-  if (window.location.hash === '#formateur') options.isFormateur = true
-  stdisplay(${JSON.stringify(ressource)}, options);
-} catch(error) {
-  document.getElementById('errors').innerHTML = error.toString();
-  if (console && console.error) console.error(error);
-}
+(function () {
+  function printError (error) {
+    if (!error) return
+    document.getElementById('errors').innerHTML = error.toString();
+    if (console && console.error) console.error(error);
+  }
+  try {
+    if (typeof stdisplay === 'undefined') throw new Error('Le chargement a échoué, impossible de charger le module display');
+    var options = {
+      isDev: ${isDev},
+      verbose: ${isDev}
+    };
+    if (window.location.hash === '#formateur') options.isFormateur = true
+    stdisplay(${JSON.stringify(ressource)}, options, printError);
+  } catch(error) {
+    printError(error)
+  }
+})()
 </script>
 </div>
 </body>

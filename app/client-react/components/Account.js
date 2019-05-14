@@ -16,7 +16,7 @@ const Account = ({personne, sso}) => {
       <p>Voici les informations vous concernant qui sont stockées dans cette sésathèque.</p>
       <div className="grid-6 has-gutter">
         <div className="txtright"><strong>Identifiant :</strong></div>
-        <div className="col-5">{personne.pid} <em>(vous pouvez le transmettre à un collègue pour qu’il vous ajoute à un groupe ou bien comme co-auteur d’une de ses ressource)</em></div>
+        <div className="col-5">{personne.pid} <em>(vous pouvez le transmettre à un collègue pour qu’il vous ajoute à un groupe ou bien comme co-auteur d’une de ses ressources)</em></div>
 
         <div className="txtright"><strong>Prénom :</strong></div>
         <div className="col-5">{personne.prenom}</div>

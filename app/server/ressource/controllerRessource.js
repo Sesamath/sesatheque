@@ -84,7 +84,7 @@ module.exports = function (component) {
         if (error) {
           context.status = 500
           displayError(context, error)
-        } else if (ressource && isPublic(ressource)) {
+        } else if (ressource && (isPublic(ressource) || origine === 'cle')) {
           displayRessource(context, ressource)
         } else if (ressource) {
           // elle n'était pas publique

@@ -41,8 +41,8 @@
 import {expect} from 'chai'
 import {populate, purge} from '../populate'
 import {createRessource} from '../helpers'
-import boot from '../boot'
 import fixturesRessources from '../../fixtures/ressources'
+import {boot, keepAlive, shutdownDelayed} from '../../boot'
 import {limites} from '../../../app/server/ressource/config'
 import Ref from '../../../app/constructors/Ref'
 import {update as urlUpdate} from '../../../app/server/lib/url'
@@ -86,7 +86,10 @@ describe('GET /api/liste', () => {
         })).catch((error) => Promise.reject(error))
     }))
 
+  beforeEach(keepAlive)
+
   after(purge)
+  after(shutdownDelayed)
 
   const checkDefault = (result) => {
     expect(result).to.have.property('message')

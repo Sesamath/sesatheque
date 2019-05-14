@@ -78,13 +78,15 @@ module.exports = function beforeTransport (context, data) {
     return
   }
 
+  const isVide = isEmpty(data)
   const url = context.request.originalUrl // démarre avec un /
   const reqHttp = getReqHttp(context)
 
   // force json sur /api (en râlant si c'était pas le cas)
   if (url.startsWith('/api/')) {
     if (!context.contentType) {
-      log.error(Error(`réponse /api/ sans contentType, faut passer par $json ! (${reqHttp})`))
+      // les réponses vides sont des 404, on râle pas dans le log pour ça
+      if (!isVide) log.error(Error(`réponse /api/ sans contentType, faut passer par $json ! (${reqHttp})`))
       context.contentType = 'application/json'
     } else if (context.contentType !== 'application/json') {
       log.error(Error(`route /api/ avec un contentType ${context.contentType} (${reqHttp})`))
@@ -93,7 +95,6 @@ module.exports = function beforeTransport (context, data) {
 
   const isJson = context.contentType === 'application/json'
   // const isTest = context.contentType === 'application/json' || url.startsWith('/test/')
-  const isVide = isEmpty(data)
 
   // Gestion de l'erreur sur le contexte (lassi ne l'a pas encore fait)
   if (context.error) {

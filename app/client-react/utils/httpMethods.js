@@ -4,16 +4,17 @@
  * @param {Response} response
  */
 const handleResponse = (response) => {
-  const {headers, status, statusText, ok} = response
-  const contentType = headers.get('content-type')
-  if (!contentType.startsWith('application/json')) {
-    // ça peut arriver, notamment sur des erreurs 500 ou 503 (backend unavailable)
-    throw Error(`Le serveur n’envoie pas la réponse attendue (${contentType} ${status} ${statusText})`)
-  }
+  const {status, statusText, ok} = response
+  // on tente quand même le json avant de gérer les erreurs, car l'erreur peut être explicitée dans le json renvoyé
   return response.json()
     .then(result => {
-      if (!ok) throw Error(result.message || `Erreur ${status} ${statusText}`)
+      // à priori avec status > 400 on devrait aller direct dans le catch…
+      if (!ok || status >= 400) throw Error(result.message || `Erreur ${status} ${statusText}`)
       return result.data || result.message
+    }).catch((error) => {
+      console.error(error)
+      if (!ok || status >= 400) throw Error(`Erreur ${status} ${statusText}`)
+      throw Error('La réponse n’était pas au format attendu (json)')
     })
 }
 

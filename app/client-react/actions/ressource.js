@@ -15,9 +15,10 @@ import {
  */
 const setRessource = (ressource) => {
   ressource._urls = getUrls(ressource, baseUrl)
+
   return {
     type: 'SET_RESSOURCE',
-    ressource
+    ressource: ressource
   }
 }
 

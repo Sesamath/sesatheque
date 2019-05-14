@@ -1,7 +1,7 @@
 Installation
 ============
 
-Après avoir récupéré le [projet](https://github.com/Sesamath/sesatheque) depuis Github,
+Après avoir récupéré le [projet](https://framagit.org/Sesamath/sesatheque) depuis framagit,
 choisissez le cas correspondant à votre environnement :
 
 Installation sans Docker
@@ -12,11 +12,11 @@ Installation sans Docker
 - copier app/_private.example en app/_private
 - modifier app/_private/config.js pour mettre les accès mongo (si open bar la config de base doit suffire). Vous pouvez surcharger n'importe quel paramètre de configuration de app/config.js
 - si vous utilisez pm2, modifier éventuellement app/_private/pm2App.json5 pour le chemin des logs pm2
-- installer les dépendances (avec `npm install` ou `yarn install`)
--   lancer l'appli avec au choix
-    - `node app/index.js`
-    - `npm start` (lancera l'appli avec pm2 s'il est installé)
-    - `./script/run` (ajouter -h pour voir les options)
+- installer les dépendances avec `pnpm install` (ou `npm install` ou `yarn install`, mais postinstall utilise pnpm)
+- lancer l'appli avec au choix
+  - `node app/index.js`
+  - `npm start` (lancera l'appli avec pm2 s'il est installé)
+  - `./script/run` (ajouter -h pour voir les options)
 
 Il est pratique d'ajouter dans votre $PATH les chemins `./node_modules/.bin` et `./scripts`, en ajoutant par ex
 `PATH="$PATH:./node_modules/.bin:./scripts"` à votre ~/.bashrc

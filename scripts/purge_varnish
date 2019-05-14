@@ -22,12 +22,11 @@ function usage() {
 function purge_one() {
   local url=$1
   echo -n "$url : "
-  curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
+  curl -s -X PURGE $url |sed -nre 's@.*<title>([^<]+)</title>.*@\1\n@p'
   if [ -n "$version" ]; then
-    echo -n " ?$version : "
-    curl -s -X PURGE $url?$version |sed -nre 's@.*<title>([^<]+)</title>.*@\1@p'
+    echo -n "$url?$version : "
+    curl -s -X PURGE $url?$version |sed -nre 's@.*<title>([^<]+)</title>.*@\1\n@p'
   fi
-  echo
 }
 
 function purge_varnish() {
@@ -46,14 +45,14 @@ function purge_varnish() {
   then
     echo "pas de baseUrl trouvée dans $CONFIG => pas de purge varnish"
   else
-    version=$(sed -nre 's/.*"version"[ \t]*:[ \t]*"([0-9\.]+)".*/\1/p' package.json)
+    version=$(node -e "console.log(require('./package.json').version)")
+    echo "Purge build"
     find build -type f $findOpt | while read file; do
       purge_one $baseUrl${file#*build} # on démarre au / qui suit build
-      purge_one $baseUrl${file#*build}?$version
     done
+    echo "Purge assets"
     find app/assets -type f $findOpt | while read file; do
       purge_one $baseUrl${file#*app/assets} # on démarre au / qui suit assets
-      purge_one $baseUrl${file#*app/assets}?version
     done
   fi
   touch "$LAST_FILE"

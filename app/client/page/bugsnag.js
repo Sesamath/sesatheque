@@ -30,7 +30,7 @@
  */
 'use strict'
 // cf https://docs.bugsnag.com/platforms/browsers/js/
-const bugsnagJs = require('bugsnag-js')
+const bugsnagJs = require('@bugsnag/js')
 // on récupère ce que webpackConfigLoader.js nous file
 const {application, bugsnag, version} = require('../../server/config')
 const getParentUrls = require('../../client-react/utils/getParentUrls').default
@@ -53,13 +53,12 @@ function beforeSend (report) {
     if (!type || ['am', 'em'].includes(type)) {
       // si pas de type on teste quand même ce qui suit
       // apparemment le flash tente de lire des trucs sur la fenêtre parente, et il a pas le droit
-      if (/Permission denied to access property/.test(report.errorMessage)) return false
+      if (/Permission denied to (get|access) property/.test(report.errorMessage)) return false
       if (/Accès refusé/.test(report.errorMessage)) return false
     }
     // on ignore pour le moment les erreurs des js de calculatice, y'en a un peu trop…
-    if (md.source && /\/replication_calculatice\//.test(md.source)) {
-      return false
-    } else if (type && type === 'ecjs') {
+    if (md.source && /\/replication_calculatice\//.test(md.source)) return false
+    if (type === 'ecjs') {
       // des erreurs fréquentes sur ecjs qu'on regardera le jour où on aura la main sur le code
       if (/BigError/.test(report.errorClass)) return false
       if (/Unable to get property/.test(report.errorMessage)) return false
@@ -67,6 +66,12 @@ function beforeSend (report) {
       if (report.stacktrace.some(trace => /replication_calculatice/.test(trace.file))) return false
     }
   }
+  if (report && Array.isArray(report.stacktrace)) {
+    // on vire tous les plantages qui concernent une extension firefox
+    if (report.stacktrace.some(trace => /^moz-extension:\/\//.test(trace.file))) return false
+  }
+
+  // si on est toujours là on ajoute ça avant d'envoyer
   report.metaData.frames = getParentUrls()
 }
 

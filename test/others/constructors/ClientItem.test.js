@@ -65,10 +65,10 @@ describe('ClientItem', () => {
         // url
         const suffix = ressource.inc ? `?inc=${ressource.inc}` : ''
         expect(item.$displayUrl).to.equal(`${myBaseUrl}public/${display}/${ressource.oid}${suffix}`, 'pb $displayUrl')
-        expect(item.$describeUrl).to.equal(`${myBaseUrl}public/${describe}/${ressource.oid}${suffix}`, 'pb $describeUrl')
+        expect(item.$describeUrl).to.equal(`${myBaseUrl}ressource/${describe}/${ressource.oid}${suffix}`, 'pb $describeUrl')
         expect(item.$dataUrl).to.equal(`${myBaseUrl}api/public/${ressource.oid}${suffix}`, 'pb $dataUrl')
         expect(item, 'pb $editUrl').not.to.have.property('$editUrl')
-        expect(item.$deletable).to.equal(false, 'pb $deletable')
+        expect(item).not.to.have.property('$deleteUrlApi')
       })
   })
   it('Converti une ref', () => {
@@ -86,7 +86,7 @@ describe('ClientItem', () => {
         const suffix = ref.inc ? `?inc=${ref.inc}` : ''
         if (ref.public) {
           expect(item.$displayUrl).to.equal(`${myBaseUrl}public/${display}/${oid}${suffix}`, 'pb $displayUrl')
-          expect(item.$describeUrl).to.equal(`${myBaseUrl}public/${describe}/${oid}${suffix}`, 'pb $describeUrl')
+          expect(item.$describeUrl).to.equal(`${myBaseUrl}ressource/${describe}/${oid}${suffix}`, 'pb $describeUrl')
           expect(item.$dataUrl).to.equal(`${myBaseUrl}api/public/${oid}${suffix}`, 'pb $dataUrl')
         } else {
           expect(item.$displayUrl).to.equal(`${myBaseUrl}public/${display}/cle/${ref.cle}${suffix}`, 'pb $displayUrl')
@@ -94,7 +94,7 @@ describe('ClientItem', () => {
           expect(item.$dataUrl).to.equal(`${myBaseUrl}api/ressource/${oid}`, 'pb $dataUrl')
         }
         expect(item, 'pb $editUrl').not.to.have.property('$editUrl')
-        expect(item.$deletable).to.equal(false, 'pb $deletable')
+        expect(item).not.to.have.property('$deleteUrlApi')
       })
   })
 

@@ -14,7 +14,7 @@ function usage() {
 
 function update() {
   cd $dirApp
-  git pull && npm install && npm install git+ssh://git@src.sesamath.net:npm-sesasso-bibli
+  git pull && pnpm install
 }
 
 # on veut exécuter fin avant de sortir

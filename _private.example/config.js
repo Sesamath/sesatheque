@@ -1,5 +1,3 @@
-var path = require('path')
-
 /**
  * Nos paramètres locaux, dont connexion à la base de données, que l'on conserve hors git,
  * dans un fichier js (et pas json) pour pouvoir mettre des commentaires
@@ -13,29 +11,38 @@ var path = require('path')
  * Pour une paire de sesatheques global/private (avec docker-compose-for-sesalab.yml)
  * prendre les js de _private.exemple-docker-sesamath
  */
+const path = require('path')
+
+const baseId = 'toBeConfigured'
+const hostname = 'toBeConfigured'
+const port = 1234
+const baseUrl = `http://${hostname}:${port}/`
+
+const logDir = path.join(__dirname, '..', `logs.${baseId}`)
+
 module.exports = {
   application: {
+    // OBLIGATOIRE identifiant de cette sésathèque, utilisé pour les rid des ressources créées ici
+    baseId,
+    // OBLIGATOIRE
+    baseUrl,
     // utilisé en préfixe des message de log et dans qq messages
-    name: 'toBeConfigured', // OBLIGATOIRE
-    // identifiant de cette sésathèque, utilisé pour les rid des ressources créées ici
-    baseId: 'toBeConfigured', // OBLIGATOIRE
-    baseUrl: 'toBeConfigured', // OBLIGATOIRE
-    // pour les envois de notification (du système)
-    mail: 'toBeConfigured', // OBLIGATOIRE
-    // utilisé par le SSO (sesasso-bibli et sesalab-sso), prod|dev
-    // délai de conservation en cache, peut être élevé car on change l'url à chaque publication de version
-    staticMaxAge: '7d',
-    maintenance: {
-      lockFile: '_private/maintenance.lock',
-      message: 'Application en maintenance, merci d’essayer de nouveau dans quelques instants',
-      staticDir: '_private/maintenance'
-    }
+    name: 'Sesatheque',
+    // ajouté en title
+    title: 'Sésathèque',
+    // h1 de la page d'accueil
+    homeTitle: 'Bienvenue sur cette Sésathèque',
+    // OBLIGATOIRE, pour les envois de notification (du système)
+    mail: 'toBeConfigured',
+    // ATTENTION, dev décale le port utilisé par node de 20 pour que le port prévu puisse
+    // être utilisé par webpack-dev-server
+    staging: 'dev'
   },
 
   // pour redis, prefix obligatoire
   $cache: {
     redis: {
-      prefix: 'sesatheque'
+      prefix: baseId
     }
   },
 
@@ -44,38 +51,50 @@ module.exports = {
     database: {
       host: 'localhost',
       port: 27017,
-      name: 'sesatheque',
+      name: '',
       user: '',
-      password: '',
-      // cf http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect
-      options: {
-        poolSize: 10,
-        reconnectTries: 1800 // 1/2h avec le reconnectInterval à 1000ms par défaut
-      }
+      password: ''
     }
   },
 
   // options pour les middlewares
   $rail: {
+    accessLog: {
+      logFile: `${logDir}/access.log`,
+      withSessionTracking: true
+    },
     cookie: {
-      // à préciser avec une chaîne aléatoire complexe
-      key: 'toBeConfigured' // OBLIGATOIRE
+      // OBLIGATOIRE, à préciser avec une chaîne aléatoire complexe
+      key: 'toBeConfigured'
     },
     session: {
-      // à préciser avec une chaîne aléatoire complexe
-      secret: 'toBeConfigured' // OBLIGATOIRE
+      // OBLIGATOIRE, à préciser avec une chaîne aléatoire complexe
+      secret: 'toBeConfigured'
     }
   },
 
   // ça c'est pour node qui va lancer l'appli, utilisé par lassi
   $server: {
-    hostname: 'localhost',
+    hostname,
     // port d'écoute de nodeJs, on peut indiquer ici un autre port ici que celui de baseUrl
     // (si y'a un proxy, ou par ex pour cli.js qui en mettra un autre)
-    port: 3001
+    port
   },
 
-  /* pour modifier le comportement par défaut on peut préciser ici qq overrides,
+  // éventuels tokens utilisables par une autre appli pour poster sur notre api
+  apiTokens: [
+  ],
+
+  // éventuelle liste d'ip hors lan autorisées à utiliser un token
+  apiIpsAllowed: [
+  ],
+
+  // préciser éventuellement une clé pour utiliser bugsnag
+  bugsnag: {
+    apiKey: ''
+  },
+
+  /* pour modifier le comportement par défaut de nos components, on peut préciser ici qq overrides,
   cf app/config.js pour les valeurs par défaut
   par ex pour empêcher un formateur de créer des groupes ou des ressources ici on peut mettre ça */
   components: {
@@ -86,31 +105,67 @@ module.exports = {
     }
   },
 
-  // les logs
+  // les modules à précharger avant bootstrap
+  // (plus la peine d'ajouter sesalab-sso, il est ajouté automatiquement s'il y a un sesalab en conf)
+  // extraModules: [],
+
+  // les dépendances à ajouter au composant principal, en premier
+  // extraDependenciesFirst : [],
+  // et en dernier (en fonction de extraModules)
+  // extraDependenciesLast: [],
+
+  // pour configurer les logs lassi
+  // cf _private.example/test.js
+
+  // les logs, accessLog géré par lassi et déclaré dans $rail plus haut
   logs: {
-    dir: path.join(__dirname, '../logs'),
+    dir: logDir,
     // le module log utilise des channels, on peut en exclure ici
     debugExclusions: ['cache'],
+    // à éviter en production, sauf pour des mesures ponctuellement
     perf: 'perf.log'
   },
 
-  // noCache:true,
-  // les modules à précharger avant bootstrap, ici pour fonctionner avec un sesalab
-  extraModules: ['sesalab-sso'],
+  // mettre à true pour éventuellement supprimer le cache redis, déconseillé même en dev
+  // noCache: false,
 
-  // les dépendances à ajouter au composant principal, en premier
-  // extraDependenciesFirst : ['sesasso-bibli'],
-  // et en dernier
-  // suivant extraModules
-  extraDependenciesLast: ['sesalab-sso'],
+  // la liste des plugins que l'on veut activer (pour la visualisation et d'édition des ressources)
+  plugins: {
+    // la liste des plugins à activer qui sont dans le repo principal (app/plugins/<plugin>)
+    internal: ['mental', 'serie', 'sequenceModele'],
+    // la liste des plugins externes à activer
+    external: {
+      // mettre le nom du module en clé
+      // pour la valeur mettre true pour utiliser url et version déclarés dans le package.json
+      // (en peerDependencies, si le plugin y est déclaré bien sûr)
+      // ou l'url de la source
+      '@sesatheque-plugins/arbre': true,
+      '@sesatheque-plugins/iep': true,
+      '@sesatheque-plugins/j3p': true,
+      '@sesatheque-plugins/mathgraph': true,
+      '@sesatheque-plugins/qcm': true,
+      '@sesatheque-plugins/url': true
+      // un plugin existant dans les peerDependencies mais dont on veut une autre version
+      // '@sesatheque-plugins/url': 'git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.4',
+      // et des plugins privés que l'on veut ajouter, avec leurs url et leur version
+      // (attention, pnpm accepte une version mais pas un commit hash, yarn râle si c'est pas un commit)
+      // '@sesatheque-plugins/xxx': 'git+https://framagit.org/user/sesatheque-plugin-xxx.git#1.0.3'
+    }
+  },
 
-  // éventuels tokens utilisables par une autre appli pour poster sur notre api
-  apiTokens: [
-  ],
-
-  // éventuelle liste d'ip hors lan autorisées à utiliser un token
-  apiIpsAllowed: [
-  ],
+  // les sesalab qui nous causent (et propagent ici une authentification via sesalab-sso)
+  // Attention, toutes les sésathèques que ces sesalab utilisent doivent être listées dans le module
+  // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
+  // vers ces autres sésathèques
+  sesalabs: [{
+    // pour d'éventuels affichage d'erreurs sur la page
+    name: 'mon sesalab local',
+    // sert de préfixe au pid des personnes qui viennent de ce sesalab
+    // NE PAS LE MODIFIER SANS METTRE À JOUR LA BASE
+    baseId: 'sesalabLocal3000',
+    // c'est ce qu'il nous envoie lorsqu'il boot, et on lui renvoie le baseId qu'on lui a attribué
+    baseUrl: 'https://localhost:3000/'
+  }],
 
   // urls absolues des sésathèques utilisées par nos ressources
   // (pour les alias d'une sesatheque dans une autre, mis par ex par un sesalab)
@@ -118,44 +173,18 @@ module.exports = {
   // et identiques à ceux de sesatheque-client/src/sesatheques.js s'ils y sont
   // si on est baseIdRegistrar on répondra sur /api/baseId/:id pour ces baseId
   // inutile d'ajouter la sesatheque courante (baseId:baseUrl), elle est toujours ajoutée à la liste au boot
-  sesatheques: [
-    {
-      baseId: 'localhost3002', // doit être le même que dans sesatheque-client/src/sesatheques.js s'il y est
-      baseUrl: 'http://localhost:3002/'
-      // apiToken: un token à utiliser par cette sesathèque pour lire des ressources restreintes chez elle
-      // (à priori pour créer des alias vers ces ressources)
-      // ce token devra être mis dans sa conf dans la liste des apiTokens
-    }
-    // on pourrait en mettre d'autres…
-  ],
+  sesatheques: [{
+    baseId: 'localhost3002',
+    baseUrl: 'http://localhost:3002/'
+    // le token à utiliser par la sesathèque courante pour lire des ressources restreintes sur cette sésathèque externe
+    // (à priori pour créer des alias vers ces ressources)
+    // ce token devra être mis dans sa conf dans la liste des apiTokens
+    // apiToken: 'xxx'
+  }],
 
-  // les sesalab qui nous causent (et propagent ici une authentification via sesalab-sso)
-  // Attention, toutes les sésathèques que ces sesalab utilisent doivent être listées dans le module
-  // sesatheque-client ou ci-dessus, pour qu'ils puissent créer des alias chez nous pointant
-  // vers ces autres sésathèques
-  sesalabs: [
-    {
-      // pour d'éventuels affichage d'erreurs sur la page
-      name: 'mon sesalab local',
-      // sert de préfixe au pid des personnes qui viennent de ce sesalab
-      baseId: 'sesalabLocal3000',
-      // c'est ce qu'il nous envoie lorsqu'il boot, et on lui renvoie le baseId qu'on lui a attribué
-      baseUrl: 'https://localhost:3000/'
-    }
-    // il pourrait y en avoir plusieurs
-  ],
-  // configuration des plugins de visualisation et d'édition
-  // des ressources:
-  plugins: {
-    internal: ['mental', 'serie', 'sequenceModele'],
-    external: {
-      '@sesatheque-plugins/arbre': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.0.6',
-      '@sesatheque-plugins/iep': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.0',
-      '@sesatheque-plugins/j3p': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.0.6',
-      '@sesatheque-plugins/mathgraph': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.3',
-      '@sesatheque-plugins/url': 'git+ssh://git@framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.3'
-    }
-  }
+  // préciser true si y'a un varnish au dessus de nodeJs,
+  // notamment pour purger les url en cas de modif (json par ex)
+  varnish: false
 }
 
 // pour ajouter le SSO Sésamath, il faut installer sesasso-bibli et l'ajouter dans son _private
@@ -165,9 +194,9 @@ module.exports = {
 // cd _private
 // git clone git@src.sesamath.net:sesasso-bibli
 // cd sesasso-bibli
-// yarn install
+// pnpm install
 //
-// et ensuite ajouter dans ce fichier, au début
+// et ensuite ajouter dans ce fichier de config, au début
 // const sesassoPath = path.resolve(__dirname, 'sesasso-bibli')
 // et plus loin dans la config
 // extraModules: [sesassoPath],

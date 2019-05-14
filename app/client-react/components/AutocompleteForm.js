@@ -93,6 +93,9 @@ class AutocompleteForm extends Component {
       if (queryFilters[element.value.filter] === undefined) queryFilters[element.value.filter] = []
       queryFilters[element.value.filter].push(element.value.filterValue)
     })
+    // on force public
+    queryFilters.restriction = 0
+    queryFilters.publie = true
 
     search(config.baseId, queryFilters, (error, resources) => {
       if (error) return console.error(error)
@@ -101,6 +104,7 @@ class AutocompleteForm extends Component {
   }
 
   render () {
+    const subNavText = this.state.resources.length === 100 ? 'Seules les 100 premières ressources sont affichées, vous devriez affiner la recherche' : `Ressources de 1 à ${this.state.resources.length}`
     return (
       <Fragment>
         <h1>Recherche assistée (beta)</h1>
@@ -127,11 +131,13 @@ class AutocompleteForm extends Component {
             className="btn btn--rounded"
             onClick={this.searchResources.bind(this)}>Rechercher</button>
         </div>
+        <p>La recherche est actuellement limitée aux ressources publiques (publiées et sans restriction).</p>
         <ResourceList
           handlePageClick={() => {}}
           refreshList={this.searchResources.bind(this)}
           queryOptions={defaultQuery}
           resources={this.state.resources}
+          subNavText={subNavText}
           total={this.state.resources.length} />
       </Fragment>
     )
