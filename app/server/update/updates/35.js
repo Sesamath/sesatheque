@@ -54,6 +54,9 @@ module.exports = {
     let nbDoublonsRid = 0
     let nbEmptyRid = 0
     let nbDoublonsCle = 0
+    let nbWeirdSerie = 0
+    let nbWeirdSeq = 0
+    let nbSansTitre = 0
 
     flow().seq(function () {
       EntityPersonne.getCollection().aggregate([
@@ -175,16 +178,37 @@ module.exports = {
       if (nbDoublonsCle) updateLog(`${nbDoublonsCle} doublons de clé modifiés`)
       else updateLog('Il n’y avait aucune cle en doublon')
 
-      // et on a aussi des titres vides !
-      const onEachEmptyTitle = (ressource, next) => {
-        console.log(ressource.oid)
-        ressource.titre = 'Sans titre'
-        $ressourceRepository.save(ressource, next)
+      // au cas où il y aurait des sequencesModele avec des séries contenant $droits dedans
+      // (mis avant que lassi ne les vire), ou des serie
+      EntityRessource.match('type').in(['sequenceModele', 'serie']).grab(this)
+    }).seqEach(function (ressource) {
+      let needStore = false
+      const cleanExo = (exo) => {
+        if (exo.hasOwnProperty('$droits')) {
+          delete exo.$droits
+          needStore = true
+        }
       }
-      EntityRessource.match('titre').in(['', 'undefined', 'null', null]).forEachEntity(onEachEmptyTitle, this)
-    }).seq(function (nbSsTitre) {
-      if (nbSsTitre) updateLog(`${nbSsTitre} ressource(s) sans titre (=> « Sans titre »)`)
-      else updateLog('Il n’y avait aucune ressource sans titre')
+      if (ressource.parametres.serie) {
+        ressource.parametres.serie.forEach(cleanExo)
+        if (needStore) nbWeirdSerie++
+      } else if (ressource.parametres.sousSequences) {
+        ressource.parametres.sousSequences.forEach(ssSeq => ssSeq.serie.forEach(cleanExo))
+        if (needStore) nbWeirdSeq++
+      }
+      if (needStore) ressource.store(this)
+      else this()
+    }).seq(function () {
+      updateLog(`${nbWeirdSerie} séries et ${nbWeirdSeq} sequenceModele nettoyées d’un param $droits sur un exercice d’une série`)
+
+      // au 25/08/2018 on avait une ressource sans titre
+      EntityRessource.match('titre').equals('').grab(this)
+    }).seqEach(function (ressource) {
+      ressource.titre = 'Sans titre'
+      ressource.store(this)
+      nbSansTitre++
+    }).seq(function () {
+      updateLog(`${nbSansTitre} ressource(s) sans titre`)
 
       updateLog('Réindexation de toute les entities')
       this(null, ['EntityArchive', 'EntityExternalRef', 'EntityGroupe', 'EntityPersonne', 'EntityRessource', 'EntityUpdate'])
