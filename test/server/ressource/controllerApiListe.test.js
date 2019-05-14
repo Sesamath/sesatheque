@@ -192,7 +192,8 @@ describe('GET /api/liste', () => {
       })
   })
 
-  describe('Recherche en texte libre', () => {
+  // FIXME quand on reviendra sur la recherche fulltext
+  describe.skip('Recherche en texte libre', () => {
     before(async () => {
       await createRessource(fixturesRessources[0])
       await createRessource(fixturesRessources[1])
