@@ -58,7 +58,7 @@ function applyUpdate (updateNum, done) {
     if (obj2dump) console.error(obj2dump)
   }
   const updateFile = path.join(__dirname, 'updates', updateNum + '.js')
-  const lockFile = path.join(__dirname, '../../_private/updates.lock')
+  const lockFile = path.join(__dirname, '../../../_private/updates.lock')
   if (fs.existsSync(lockFile)) return done(new Error(`${lockFile} présent, on ne peut pas lancer ${updateFile}`))
   // on le crée (en mettant dedans l'update qu'on va appliquer)
   else fs.appendFileSync(lockFile, updateFile)
