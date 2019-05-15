@@ -115,6 +115,9 @@ const GroupeEdition = ({
             : 'il faut être membre pour suivre les publications du groupe'
           })</span>
         </div>
+        <ul>
+          Gestionnaires :
+        </ul>
         <SelectField
           label={<LabelGestionnaires />}
           components={{ MultiValueRemove }}

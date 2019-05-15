@@ -158,10 +158,8 @@ module.exports = function (component) {
         $personneRepository.load(oid, this)
       }).seq(function (personne) {
         if (!personne) return $json.sendOk(context, {user: null})
-        else {
-          const {nom, oid, prenom} = personne
-          $json.sendOk(context, {user: {nom, oid, prenom}})
-        }
+        const {nom, oid, prenom} = personne
+        $json.sendOk(context, {user: {nom, oid, prenom}})
       }).catch(function (error) {
         $json.sendKo(context, error)
       })
