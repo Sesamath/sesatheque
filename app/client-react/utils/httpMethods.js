@@ -4,16 +4,23 @@
  * @param {Response} response
  */
 const handleResponse = (response) => {
-  const {status, statusText, ok} = response
+  const {status, statusText, ok} = response // ok est ajouté par l'api fetch
   // on tente quand même le json avant de gérer les erreurs, car l'erreur peut être explicitée dans le json renvoyé
   return response.json()
     .then(result => {
       // à priori avec status > 400 on devrait aller direct dans le catch…
-      if (!ok || status >= 400) throw Error(result.message || `Erreur ${status} ${statusText}`)
+      if (!ok || status >= 400) {
+        const error = Error(result.message || `Erreur ${status} ${statusText}`)
+        error.userFriendly = true
+        throw error
+      }
       return result.data || result.message
     }).catch((error) => {
+      if (error.userFriendly) throw error
+      // l'erreur ne vient pas du then précédent, à priori un pb json,
+      // mais ça peut être une erreur 500 ou une absence de réponse (que fetch traduit en 504 si la connexion est refusée)
       console.error(error)
-      if (!ok || status >= 400) throw Error(`Erreur ${status} ${statusText}`)
+      if (status >= 400) throw Error(`Erreur ${status} ${statusText}`)
       throw Error('La réponse n’était pas au format attendu (json)')
     })
 }
