@@ -30,18 +30,14 @@ const GroupesPublics = ({
             nom,
             description,
             ouvert,
-            gestionnaires,
             gestionnairesNames
           }) => {
             return (
               <li key={nom}><strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'})
                 <pre>{description}</pre>
-                <ul>
+                <ul className="admins">
                   Gestionnaire(s) :&nbsp;
-                  {gestionnaires.map((oid, index) => (
-                    <li key={oid}>{gestionnairesNames[index]} <span className="remarque">({oid})</span>
-                    </li>
-                  ))}
+                  {gestionnairesNames.map((name, index) => (<li key={index}>{name}</li>))}
                 </ul>
 
                 <span className="links">

@@ -30,7 +30,6 @@ const GroupesOuverts = ({
             nom,
             description,
             public: publicStatus,
-            gestionnaires,
             gestionnairesNames
           }) => {
             return (
@@ -55,12 +54,9 @@ const GroupesOuverts = ({
                   </NavLink>
                 </span>
                 <pre>{description}</pre>
-                <ul>
+                <ul className="admins">
                   Gestionnaire(s) :&nbsp;
-                  {gestionnaires.map((oid, index) => (
-                    <li key={oid}>{gestionnairesNames[index]} <span className="remarque">({oid})</span>
-                    </li>
-                  ))}
+                  {gestionnairesNames.map((name, index) => (<li key={index}>{name}</li>))}
                 </ul>
               </li>
             )
