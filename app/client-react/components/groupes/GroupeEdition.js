@@ -3,15 +3,16 @@ import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
 import {withProps} from 'recompose'
 import {formValues, reduxForm} from 'redux-form'
+
 import {
   SwitchField,
   InputField,
   TextareaField
 } from '../fields'
-import {saveGroupe} from '../../actions/groupes'
+import {saveGroupe} from 'client-react/actions/groupes'
+import onSubmitFail from 'client-react/utils/onSubmitFail'
+import validate, {asyncBlurFields, asyncValidate} from 'client-react/utils/groupeValidate'
 import groupesLoader from './hoc/groupesLoader'
-import onSubmitFail from '../../utils/onSubmitFail'
-import validate, {asyncBlurFields, asyncValidate} from '../../utils/groupeValidate'
 
 // Cf versions avant 2019-05-20 pour l'autocomplete MultiValueRemove
 // (ajout de gestionnaires, qu'on a viré car ça permettait d'interroger la base user
@@ -161,7 +162,8 @@ const formValuesToProps = {
   isOuvert: 'ouvert'
 }
 
-// groupesLoader contient ensureLogged
+// on a besoin de groupesLoader pour aller chercher les props du groupe courant
+// dans la liste des groupes persos (s'il s'y trouve pas c'est une création)
 export default groupesLoader(
   withProps(getInitialValues)(
     reduxForm(formDefinition)(
