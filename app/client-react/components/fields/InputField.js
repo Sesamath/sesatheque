@@ -8,12 +8,13 @@ const InputField = ({
   className,
   label,
   name,
+  placeholder,
   disabled,
   type = 'text'
 }) => (
   <Field
     className={className}
-    placeholder={label}
+    placeholder={placeholder || label}
     name={name}
     component={Input}
     type={type}
@@ -24,9 +25,21 @@ const InputField = ({
 InputField.propTypes = {
   className: PropTypes.string,
   label: PropTypes.string,
+  placeholder: PropTypes.string,
   name: PropTypes.string,
   disabled: PropTypes.bool,
   type: PropTypes.string
 }
 
+/**
+ * Composant d'input avec les props classiques
+ * - [className] une ou des classes css
+ * - [label] un label qui sera affiché dans un <label> lié au field
+ * - [info] un éventuel complément de label (affiché dans un <i>)
+ * - name le nom de l'input (variable du form)
+ * mais aussi
+ * - [type=text]
+ * - [disabled=false]
+ * - [placeholder=${label}]
+ */
 export default addLabel(InputField)

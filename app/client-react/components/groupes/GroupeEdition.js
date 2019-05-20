@@ -1,82 +1,31 @@
 import {push} from 'connected-react-router'
-import {debounce} from 'lodash'
 import PropTypes from 'prop-types'
 import React, {Fragment} from 'react'
-import {components} from 'react-select'
 import {withProps} from 'recompose'
 import {formValues, reduxForm} from 'redux-form'
-import {GET} from '../../utils/httpMethods'
+
 import {
   SwitchField,
   InputField,
-  TextareaField,
-  SelectField
+  TextareaField
 } from '../fields'
-import {saveGroupe} from '../../actions/groupes'
+import {saveGroupe} from 'client-react/actions/groupes'
+import onSubmitFail from 'client-react/utils/onSubmitFail'
+import validate, {asyncBlurFields, asyncValidate} from 'client-react/utils/groupeValidate'
 import groupesLoader from './hoc/groupesLoader'
-import {getPersonneByOidUrl} from '../../apiRoutes'
-import onSubmitFail from '../../utils/onSubmitFail'
-import validate from '../../utils/groupeValidate'
 
-const {MultiValueRemove: DefaultMultiValueRemove} = components
-
-const MultiValueRemove = ({
-  data,
-  ...props
-}) => (data.isUndeletable ? null : (
-  <DefaultMultiValueRemove
-    data={data}
-    {...props}
-  />
-))
-
-MultiValueRemove.propTypes = {
-  data: PropTypes.shape({})
-}
-
-const debouncedGET = debounce((input, setOptions) => {
-  GET(getPersonneByOidUrl({oid: input}))
-    .then(({user}) => {
-      if (user === null) {
-        return setOptions([])
-      }
-      const {oid, prenom, nom} = user
-
-      return setOptions([
-        {
-          value: oid,
-          label: `${prenom} ${nom} (${oid})`
-        }
-      ])
-    })
-    .catch(error => {
-      console.error(error)
-      setOptions([])
-    })
-}, 500)
-
-const emptyInputRe = /^\s*$/
-const getOptions = (input, setOptions) => {
-  if (emptyInputRe.test(input)) return setOptions([])
-  debouncedGET(input, setOptions)
-}
-
-const LabelGestionnaires = () => (
-  <Fragment>
-    Ajouter des gestionnaires
-    <span className="remarque"> (saisir l’identifiant d’un utilisateur, ATTENTION l’ajout est irrévocable)</span>
-  </Fragment>
-)
+// Cf versions avant 2019-05-20 pour l'autocomplete MultiValueRemove
+// (ajout de gestionnaires, qu'on a viré car ça permettait d'interroger la base user
+// en itérant sur sesasso/NN, mais le composant fonctionnait très bien)
 
 /**
  * Formulaire d'édition de groupe
  * Doit être dans un redux-form
  * @type {PureComponent}
  * @param {object} props
- * @param {boolean} props.detailed
  */
 const GroupeEdition = ({
-  initialValues: {oid, gestionnaires},
+  initialValues: {oid, gestionnairesNames},
   handleSubmit,
   isOuvert,
   isPublic,
@@ -115,15 +64,22 @@ const GroupeEdition = ({
             : 'il faut être membre pour suivre les publications du groupe'
           })</span>
         </div>
-        <SelectField
-          label={<LabelGestionnaires />}
-          components={{ MultiValueRemove }}
-          placeholder="Saisir un oid"
-          name="gestionnaires"
-          loadOptions={getOptions}
-          isMulti
-          isClearable={false}
-        />
+
+        <div>
+          <label className="field">Gestionnaire(s)</label>
+          <ul>
+            {gestionnairesNames.map((name, index) => (
+              <li key={index}>{name}</li>
+            ))}
+          </ul>
+          <label className="field">Ajouter un gestionnaire <i>(en le faisant vous vous engagez à lui avoir demandé son avis avant, toutes les modifications de gestionnaires sont enregistrées)</i></label>
+          <p>ATTENTION : l’ajout sera effectif lors du clic sur « Modifier » et il est irrévocable.</p>
+          <div className="grid-2">
+            <InputField name="newGestionnairePid" label="Son identifiant" placeholder="celui qui apparaît dans « mes informations personnelles »"/>
+            <InputField name="newGestionnaireNom" label="Son nom" placeholder="Entrez également le nom (insensible à la casse)" />
+          </div>
+        </div>
+
       </fieldset>
       <hr />
       <div className="buttons-area">
@@ -147,50 +103,42 @@ GroupeEdition.propTypes = {
   isPublic: PropTypes.bool
 }
 
+// fourni une prop initialValues (en le passant à withProps)
 const getInitialValues = ({
+  // tous les groupes chargés dans le store (appel de groupes/perso, fourni par le hoc groupesLoader)
   groupes,
+  // le nom du groupe édité d'après l'url
   match: {params: {groupe: groupeNom}},
+  // vient de la session (via ensureLogged appelé par groupesLoader)
   personne: {
     oid,
     nom,
     prenom
   }
 }) => {
+  // valeurs par défaut à la création
+  const newGroupe = {
+    ouvert: false,
+    public: true,
+    gestionnairesNames: [`${prenom} ${nom}`]
+  }
   let groupe
   if (groupeNom) {
-    groupe = groupes[groupeNom] || {
-      ouvert: false,
-      public: true,
-      gestionnaires: [oid],
-      gestionnairesNames: [`${prenom} ${nom}`],
-      nom: groupeNom
+    if (groupes[groupeNom]) {
+      // groupe existant
+      groupe = groupes[groupeNom]
+    } else {
+      // un nouveau groupe que l'on vient de créer, pas encore dans le state
+      groupe = {...newGroupe}
+      groupe.nom = groupeNom
     }
   } else {
-    groupe = {
-      ouvert: false,
-      public: true,
-      gestionnaires: [oid],
-      gestionnairesNames: [`${prenom} ${nom}`]
-    }
+    groupe = newGroupe
   }
-  const {gestionnaires, gestionnairesNames, ...others} = groupe
-  const gestionnairesItems = gestionnaires.map((oid, index) => ({
-    value: oid,
-    label: `${gestionnairesNames[index]} (${oid})`,
-    isUndeletable: true
-  }))
-  const initialValues = {
-    ...others,
-    gestionnaires: gestionnairesItems
-  }
-  return {initialValues}
+  return {initialValues: groupe}
 }
 
-const onSubmit = ({gestionnaires, ...others}, dispatch) => {
-  const groupe = {
-    ...others,
-    gestionnaires: gestionnaires.map(({value}) => value)
-  }
+const onSubmit = ({gestionnairesNames, ...groupe}, dispatch) => {
   const onSaveSuccess = () => dispatch(push('/groupes/perso'))
   const action = saveGroupe(groupe, onSaveSuccess)
   dispatch(action)
@@ -198,22 +146,27 @@ const onSubmit = ({gestionnaires, ...others}, dispatch) => {
 
 const formDefinition = {
   form: 'groupe-edition',
+  asyncValidate,
+  asyncBlurFields,
   onSubmit,
   validate,
   onSubmitFail
 }
 
-const propsFromForm = {
+// le mapping props => values que formValues apporte
+// le render en a besoin dynamiquement
+const formValuesToProps = {
   // public est un mot clé js, on préfixe avec is
   isPublic: 'public',
   // pour ouvert aussi par cohérence
   isOuvert: 'ouvert'
 }
 
-// groupesLoader contient ensureLogged
+// on a besoin de groupesLoader pour aller chercher les props du groupe courant
+// dans la liste des groupes persos (s'il s'y trouve pas c'est une création)
 export default groupesLoader(
   withProps(getInitialValues)(
     reduxForm(formDefinition)(
-      formValues(propsFromForm)(GroupeEdition))
+      formValues(formValuesToProps)(GroupeEdition))
   )
 )

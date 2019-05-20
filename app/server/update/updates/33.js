@@ -64,12 +64,19 @@ module.exports = {
       })
 
       if (pidsUnknown.length) {
-        $personneRepository.loadByPids(pidsUnknown, (error, personnes, missing) => {
+        $personneRepository.loadByPids(pidsUnknown, (error, _personnes) => {
           if (error) return nextGroupe(error)
-          // récup des oids
-          personnes.forEach(({oid, pid}) => {
-            oidByPid[pid] = oid
-            oids.push(oid)
+          const personnes = []
+          const missing = []
+          // récup des oids et tri des missing
+          _personnes.forEach((p, index) => {
+            if (p) {
+              oidByPid[p.pid] = p.oid
+              oids.push(p.oid)
+              personnes.push(p)
+            } else {
+              missing.push(pidsUnknown[index])
+            }
           })
           // on signale s'il en manque
           if (missing && missing.length) {

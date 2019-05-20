@@ -50,7 +50,7 @@ module.exports = function (component) {
      * Équivalent json de context.denied (qui renvoie du text/plain en 403), mais renvoie toujours du json,
      * avec une 401 si on est pas authentifié (403 sinon)
      * @param {Context} context
-     * @param {string|Error} [message=Authentification requise|Droits insuffisants] (mis dans le log d'erreur si c'est une Error)
+     * @param {string} [message=Authentification requise|Droits insuffisants] Le message à renvoyé, s'il n'existe pas le message par défaut dépend de context (authentifié ou pas)
      */
     function denied (context, message) {
       if (!$accessControl) $accessControl = lassi.service('$accessControl')
@@ -86,13 +86,18 @@ module.exports = function (component) {
     }
 
     /**
-     * Envoie une réponse 400 en json (log error si c'est une Error)
+     * Envoie une erreur en json (log error si c'est une Error)
      * @param {Context} context
      * @param {string|Error} error
+     * @param {number} [status=400] si non fourni, error.status sera utilisé s'il existe
      */
-    function sendKo (context, error) {
+    function sendKo (context, error, status) {
       let message
-      if (typeof error === 'string') {
+      if (!error) {
+        log.error(Error('sendKo appelé sans erreur'))
+        message = 'Erreur interne'
+        status = 500
+      } else if (typeof error === 'string') {
         message = error
       } else if (error instanceof Error) {
         log.error(error)
@@ -100,7 +105,7 @@ module.exports = function (component) {
       } else if (Array.isArray(error) && error.every(err => typeof err === 'string')) {
         message = `Il y a ${error.length} erreurs :\n- ${error.join('\n- ')}`
       } else {
-        if (error) log.error('erreur à envoyer en json invalide', error)
+        log.error(Error('erreur à envoyer en json invalide'), error)
         message = 'Requête invalide'
       }
       // on reformule certains messages comme
@@ -109,7 +114,9 @@ module.exports = function (component) {
         const chunks = message.match(/duplicate key error collection.* entity_index_([^- ]+).*"([^"]*)"/)
         if (chunks && chunks.length > 2) message = `La valeur "${chunks[2]}" existe déjà (index unique ${chunks[1]})`
       }
-      context.status = 400
+      status = status || error.status
+      // attention aux comparaisons sans cast préalable, null < 1 est true, pas de risque ici car on teste les deux sens d'inégalité
+      context.status = (status > 399 && status < 600) ? Number(status) : 400
       context.json({message})
     }
 

@@ -63,26 +63,29 @@ module.exports = function (component) {
       const data = context.post
       const myOid = $accessControl.getCurrentUserOid(context)
       const sendInternalError = (error) => $json.sendKo(context, error)
+
+      // checks de base
       if (!myOid) return $json.denied(context, 'Vous devez être authentifié pour créer des groupes')
       if (!data.nom) return $json.sendKo(context, 'Impossible de créer un groupe sans nom')
-      // on init les éventuelles valeurs manquantes par nos valeurs par défaut
+      data.nom = data.nom.trim()
+      if (!data.oid && !$accessControl.hasGenericPermission('createGroupe', context)) return $json.denied(context, 'Vous n’avez pas les droits suffisants pour créer un groupe')
 
-      // cas modif
-      if (data.oid) {
-        // update, faut aller voir en base
-        flow().seq(function () {
-          EntityGroupe.match('oid').equals(data.oid).grabOne(this)
-        }).seq(function (groupeBdd) {
+      flow().seq(function () {
+        if (data.oid) return EntityGroupe.match('oid').equals(data.oid).grabOne(this)
+        // à la création on cherche d'après le nom pour vérifier qu'il n'existe pas
+        EntityGroupe.match('nom').equals(data.nom).grabOne(this)
+      }).seq(function (groupeBdd) {
+        const nextStep = this
+        if (data.oid) {
           if (!groupeBdd) return $json.notFound(context, `Le groupe d’identifiant ${data.oid} n’existe pas`)
           if (!isManaged(context, groupeBdd)) return $json.denied(context, 'Vous n’êtes pas gestionnaire de ce groupe et ne pouvez pas le modifier')
 
           // si le nom change pas on passe à la suite
           const oldName = groupeBdd.nom
           const newName = data.nom
-          if (!newName || newName === oldName) return this(null, groupeBdd)
+          if (!newName || newName === oldName) return nextStep(null, groupeBdd)
 
           // mais sinon faut répercuter partout
-          const nextStep = this
           flow().seq(function () {
             $personneRepository.renameGroup(oldName, newName, this)
           }).seq(function () {
@@ -94,58 +97,53 @@ module.exports = function (component) {
             groupeBdd.nom = newName
             nextStep(null, groupeBdd)
           }).catch(sendInternalError)
-
-        // on peut passer aux autres propriétés du groupe
-        }).seq(function (groupeBdd) {
-          // les booléens
-          if (data.hasOwnProperty('ouvert')) groupeBdd.ouvert = Boolean(data.ouvert)
-          if (data.hasOwnProperty('public')) groupeBdd.public = Boolean(data.public)
-          // description
-          if (data.hasOwnProperty('description')) groupeBdd.description = data.description
-          // et les gestionnaires
-          if (Array.isArray(data.gestionnaires) && data.gestionnaires.length) {
-            // le seul gestionnaire qu'on peut enlever est soi-même
-            if (!data.gestionnaires.includes(myOid)) groupeBdd.gestionnaires = groupeBdd.gestionnaires.filter(oid => oid !== myOid)
-            // le reste ne peut être que des ajouts
-            data.gestionnaires.forEach(g => {
-              if (!groupeBdd.gestionnaires.includes(g)) groupeBdd.gestionnaires.push(g)
-            })
+          // fin rename group
+        } else {
+          if (groupeBdd) {
+            return $json.sendKo(context, `Le groupe « ${data.nom} » existe déjà`)
           }
-          groupeBdd.store(this)
-        }).seq(function (groupe) {
-          addGestionnairesNames(context, groupe, this)
-        }).seq(function (groupe) {
-          $json.sendOk(context, groupe)
-        }).catch(sendInternalError)
-
-      // cas nouveau groupe
-      } else {
-        if (!$accessControl.hasGenericPermission('createGroupe', context)) {
-          return $json.denied(context, 'Vous n’avez pas les droits suffisants pour créer un groupe')
+          const groupe = {
+            nom: data.nom,
+            gestionnaires: [myOid] // à la création c'est imposé
+          }
+          nextStep(null, EntityGroupe.create(groupe))
         }
-        const gestionnaires = data.gestionnaires || []
-        if (!gestionnaires.includes(myOid)) gestionnaires.push(myOid)
 
-        const groupe = {
-          nom: data.nom,
-          ouvert: data.hasOwnProperty('ouvert') ? Boolean(data.ouvert) : false,
-          public: data.hasOwnProperty('public') ? Boolean(data.public) : true,
-          description: data.description,
-          gestionnaires
-        }
-        // il manque une clé unique sur le nom?
-        EntityGroupe.create(groupe).store((error, groupe) => {
-          if (error) return $json.sendKo(context, error)
-
-          flow().seq(function () {
-            joinAndFollowGroup(context, groupe.nom, this)
-          }).seq(function () {
-            addGestionnairesNames(context, groupe, this)
-          }).seq(function () {
-            $json.sendOk(context, groupe)
-          }).catch(sendInternalError)
+      // on peut passer aux autres propriétés du groupe
+      }).seq(function (groupe) {
+        // les booléens
+        if (data.hasOwnProperty('ouvert')) groupe.ouvert = Boolean(data.ouvert)
+        if (data.hasOwnProperty('public')) groupe.public = Boolean(data.public)
+        // description
+        if (data.hasOwnProperty('description')) groupe.description = data.description
+        // et les gestionnaires à ajouter éventuellement, on shunt si les deux champs sont vides
+        // (si seul l'un des deux est vide ça tentera le chargement et renverra une erreur)
+        if (!data.newGestionnairePid && !data.newGestionnaireNom) return this(null, groupe)
+        // on va chercher l'oid de ce nouveau gestionnaire
+        $personneRepository.loadByPidAndNom(data.newGestionnairePid, data.newGestionnaireNom, (error, personne) => {
+          if (error) return this(error)
+          if (!groupe.gestionnaires.includes(personne.oid)) groupe.gestionnaires.push(personne.oid)
+          this(null, groupe)
+          // else faudrait ajouter un warning, mais le front redirige s'il récupère du 200, on laisse tomber
         })
-      }
+      }).seq(function (groupe) {
+        groupe.store(this)
+      }).seq(function (groupe) {
+        // à la création, faut imposer joinAndFollow + ajouter les gestionnairesNames
+        // lors d'une modif faut ajouter les gestionnairesNames s'ils ont changé
+        // vu que cette étape est assez rare on simplifie le back en renvoyant toujours tout
+        // (le front pourra évoluer comme il veut sans répercussions ici)
+        if (data.oid) return this(null, groupe)
+
+        joinAndFollowGroup(context, groupe.nom, (error) => {
+          if (error) return this(error)
+          this(null, groupe)
+        })
+      }).seq(function (groupe) {
+        addGestionnairesNames(context, groupe, this)
+      }).seq(function (groupe) {
+        $json.sendOk(context, groupe)
+      }).catch(sendInternalError)
     })
     controller.options('', optionsOk)
 

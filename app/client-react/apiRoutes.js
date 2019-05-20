@@ -19,7 +19,8 @@
  * @todo throw si un arg est une chaîne vide. Il faut d'abord s'assurer que le front ne le fait jamais
  * @returns {routeGetter}
  */
-const wrapper = (getRoute, argsNeeded = []) => (params, baseUrl) => {
+const makeGetter = (getRoute, argsNeeded = []) => (params, baseUrl) => {
+  if (argsNeeded.length && !params) throw Error(`Il faut passer les paramètres ${argsNeeded.join(' et ')} pour obtenir cette route`)
   argsNeeded.forEach(arg => {
     if (params[arg] === undefined) throw Error(`${arg} est un argument obligatoire pour cette route`)
     // les autres valeurs falsy seront castées en string dans l'url
@@ -30,23 +31,23 @@ const wrapper = (getRoute, argsNeeded = []) => (params, baseUrl) => {
 const liste = ({search}) => `liste?${search}`
 /**
  * Liste de ressource
- * @type {Function}
+ * @type {routeGetter}
  * @param {object} urlParams
  * @param {string} urlParams.search La queryString de la recherche (sans le ?)
  * @param {string} [baseUrl]
  */
-export const getRessourceListUrl = wrapper(liste, ['search'])
+export const getRessourceListUrl = makeGetter(liste, ['search'])
 
-const personneByOid = ({oid}) => `personne/byOid/${oid}`
+const checkPid = ({nom, pid}) => `personne/checkPid?nom=${encodeURIComponent(nom)}&pid=${pid}`
 /**
  * Personne d'après son oid
  * @type {routeGetter}
  * @param {object} urlParams
- * @param {string} urlParams.oid
+ * @param {string} urlParams.pid
  * @param {string} [baseUrl]
  * @returns {string}
  */
-export const getPersonneByOidUrl = wrapper(personneByOid, ['oid'])
+export const getCheckPidUrl = makeGetter(checkPid, ['nom', 'pid'])
 
 const groupesOuverts = () => `groupes/ouverts`
 /**
@@ -55,7 +56,7 @@ const groupesOuverts = () => `groupes/ouverts`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupesOuvertsUrl = wrapper(groupesOuverts)
+export const getGroupesOuvertsUrl = makeGetter(groupesOuverts)
 
 const groupesPublics = () => `groupes/publics`
 /**
@@ -64,7 +65,7 @@ const groupesPublics = () => `groupes/publics`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupesPublicsUrl = wrapper(groupesPublics)
+export const getGroupesPublicsUrl = makeGetter(groupesPublics)
 
 const personneCurrent = () => `personne/current`
 /**
@@ -73,7 +74,7 @@ const personneCurrent = () => `personne/current`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getCurrentPersonneUrl = wrapper(personneCurrent)
+export const getCurrentPersonneUrl = makeGetter(personneCurrent)
 
 const clone = ({oid}) => `clone/${oid}`
 /**
@@ -83,7 +84,7 @@ const clone = ({oid}) => `clone/${oid}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getRessourceCloneUrl = wrapper(clone, ['oid'])
+export const getRessourceCloneUrl = makeGetter(clone, ['oid'])
 
 const ressourceUrl = ({oid, format}) => 'ressource' + (oid ? `/${oid}` : '') + (format ? `?format=${format}` : '')
 /**
@@ -95,7 +96,7 @@ const ressourceUrl = ({oid, format}) => 'ressource' + (oid ? `/${oid}` : '') + (
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getRessourceUrl = wrapper(ressourceUrl)
+export const getRessourceUrl = makeGetter(ressourceUrl)
 
 const createAlias = ({baseId, oid}) => `createAlias/${baseId}/${oid}`
 /**
@@ -107,7 +108,7 @@ const createAlias = ({baseId, oid}) => `createAlias/${baseId}/${oid}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getCreateAliasUrl = wrapper(createAlias, ['baseId', 'oid'])
+export const getCreateAliasUrl = makeGetter(createAlias, ['baseId', 'oid'])
 
 const forkAlias = ({oid}) => `forkAlias/${oid}`
 /**
@@ -117,7 +118,7 @@ const forkAlias = ({oid}) => `forkAlias/${oid}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getForkAliasUrl = wrapper(forkAlias, ['oid'])
+export const getForkAliasUrl = makeGetter(forkAlias, ['oid'])
 
 const groupesPerso = () => `groupes/perso`
 /**
@@ -126,7 +127,7 @@ const groupesPerso = () => `groupes/perso`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupesPersoUrl = wrapper(groupesPerso)
+export const getGroupesPersoUrl = makeGetter(groupesPerso)
 
 const saveGroupe = () => `groupe`
 /**
@@ -135,7 +136,7 @@ const saveGroupe = () => `groupe`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getSaveGroupeUrl = wrapper(saveGroupe)
+export const getSaveGroupeUrl = makeGetter(saveGroupe)
 
 const groupe = ({nom}) => `groupe/${encodeURIComponent(nom)}`
 /**
@@ -145,7 +146,7 @@ const groupe = ({nom}) => `groupe/${encodeURIComponent(nom)}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupeUrl = wrapper(groupe, ['nom'])
+export const getGroupeUrl = makeGetter(groupe, ['nom'])
 
 const groupeJoin = ({nom}) => `groupe/rejoindre/${encodeURIComponent(nom)}`
 /**
@@ -155,7 +156,7 @@ const groupeJoin = ({nom}) => `groupe/rejoindre/${encodeURIComponent(nom)}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupeJoinUrl = wrapper(groupeJoin, ['nom'])
+export const getGroupeJoinUrl = makeGetter(groupeJoin, ['nom'])
 
 const groupeFollow = ({nom}) => `groupe/suivre/${encodeURIComponent(nom)}`
 /**
@@ -165,7 +166,7 @@ const groupeFollow = ({nom}) => `groupe/suivre/${encodeURIComponent(nom)}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupeFollowUrl = wrapper(groupeFollow, ['nom'])
+export const getGroupeFollowUrl = makeGetter(groupeFollow, ['nom'])
 
 const groupeLeave = ({nom}) => `groupe/quitter/${encodeURIComponent(nom)}`
 /**
@@ -175,7 +176,7 @@ const groupeLeave = ({nom}) => `groupe/quitter/${encodeURIComponent(nom)}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupeLeaveUrl = wrapper(groupeLeave, ['nom'])
+export const getGroupeLeaveUrl = makeGetter(groupeLeave, ['nom'])
 
 const groupeIgnore = ({nom}) => `groupe/ignorer/${encodeURIComponent(nom)}`
 /**
@@ -185,4 +186,4 @@ const groupeIgnore = ({nom}) => `groupe/ignorer/${encodeURIComponent(nom)}`
  * @param {string} [baseUrl]
  * @type {routeGetter}
  */
-export const getGroupeIgnoreUrl = wrapper(groupeIgnore, ['nom'])
+export const getGroupeIgnoreUrl = makeGetter(groupeIgnore, ['nom'])

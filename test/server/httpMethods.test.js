@@ -108,8 +108,9 @@ describe('httpMethods', function () {
           throw error
         }
         expect(error.message).to.contains(errorMessageExpected, `pb ${methodName} ${url} `)
-        expect(consoleErrorStub).to.have.been.calledTwice
-        const consoleArgs = consoleErrorStub.args[1] // le 2e appel
+        // calledTwice sur les erreurs json, calledOnce sinon
+        expect(consoleErrorStub).to.have.been.called
+        const consoleArgs = consoleErrorStub.args.pop() // dernier appel
         expect(consoleArgs[0]).to.be.a('Error')
         expect(consoleArgs[0].toString()).to.contains(errorMessageExpected, `Le message en console n’était pas celui attendu : ${consoleArgs.join('\n')}`)
         // les promises sont appelées en //, faut reset à chaque fois
@@ -141,7 +142,7 @@ describe('httpMethods', function () {
         const message = 'Un truc accentué'
         const url = `${baseUrl}test/api/error/${code}/${encodeURIComponent(message)}`
         // const expected = code === '400' ? text : message
-        promises.push(getPromise(url, text))
+        promises.push(getPromise(url, message))
       })
       return Promise.all(promises)
     })

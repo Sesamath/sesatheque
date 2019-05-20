@@ -17,28 +17,24 @@ import './Groupes.scss'
  * Composant qui liste les gestionnaires d'un groupe
  * @type {PureComponent}
  * @param {object} props
- * @param {string[]} props.gestionnaires liste d'oids
  * @param {string[]} props.gestionnairesNames liste des noms
  */
 const Admins = ({
-  gestionnaires,
   gestionnairesNames
 }) => {
-  if (!gestionnaires.length) return (<p>Aucun gestionnaire</p>)
-  if (gestionnaires.length === 1) return (<p>Gestionnaire&nbsp;: {gestionnairesNames[0]} <span className="remarque">({gestionnaires[0]})</span></p>)
+  // cf versions avant 2019-05-17 pour avoir aussi l'affichage des oid (il vaudrait mieux les pids
+  // vu que c'est ça qu'il faut saisir pour ajouter des gestionnaires, mais on préfère ne jamais
+  // les afficher pour obliger à demander le pid à qqun avant de le mettre gestionnaire)
+  if (!gestionnairesNames || !gestionnairesNames.length) return (<p>Aucun gestionnaire</p>)
+  if (gestionnairesNames.length === 1) return (<p>Gestionnaire&nbsp;: {gestionnairesNames[0]}</p>)
   return (
     <ul className="admins">Gestionnaires :&nbsp;
-      {gestionnaires.map((oid, index) => (
-        <li key={oid}>
-          {gestionnairesNames[index]} <span className="remarque">({oid})</span>
-        </li>
-      ))}
+      {gestionnairesNames.map((name, index) => (<li key={index}>{name}</li>))}
     </ul>
   )
 }
 
 Admins.propTypes = {
-  gestionnaires: PropTypes.arrayOf(PropTypes.string),
   gestionnairesNames: PropTypes.arrayOf(PropTypes.string)
 }
 
@@ -172,10 +168,7 @@ const Groupe = ({
   <li key={nom}>
     <strong>{nom}</strong> ({ouvert ? 'ouvert' : 'fermé'} {isPublic ? 'public' : 'privé'})
     <pre>{description}</pre>
-    <Admins
-      gestionnaires={gestionnaires}
-      gestionnairesNames={gestionnairesNames}
-    />
+    <Admins gestionnairesNames={gestionnairesNames} />
     <GroupeLinks nom={nom} {...others} />
   </li>
 )
