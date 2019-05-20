@@ -12,6 +12,7 @@ const handleResponse = (response) => {
       if (!ok || status >= 400) {
         const error = Error(result.message || `Erreur ${status} ${statusText}`)
         error.userFriendly = true
+        error.status = status
         throw error
       }
       return result.data || result.message
