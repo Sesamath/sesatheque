@@ -79,8 +79,8 @@ const getHtml = () => html
  * @param {string} [contentToAdd] Sera ajouté tel quel dans la page, après le div root (juste avant </body>), à priori du js…
  */
 function displayReactPage (context) {
-  // sinon le content-type va imposer le transport html qui veut un template dust
   context.contentType = 'text/html'
+  // faut utiliser raw sinon le content-type va imposer le transport html qui veut un template dust
   context.raw(html, {})
   // on peut fixer nos headers directement sur la réponse
   // context.response.append('Content-Length', reactPagelength)
