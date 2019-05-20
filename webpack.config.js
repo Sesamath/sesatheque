@@ -147,7 +147,7 @@ const conf = {
         ...rule,
         use: babelLoader
       })), {
-        test: /app\/(client|client-react|constructors|plugins|server)\/.*\.jsx?$/,
+        test: /app\/(client|client-react|constructors|plugins|server|utils)\/.*\.jsx?$/,
         exclude: /node_modules\//,
         use: babelLoader
       }, {
