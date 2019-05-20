@@ -20,6 +20,7 @@
  * @returns {routeGetter}
  */
 const makeGetter = (getRoute, argsNeeded = []) => (params, baseUrl) => {
+  if (argsNeeded.length && !params) throw Error(`Il faut passer les paramètres ${argsNeeded.join(' et ')} pour obtenir cette route`)
   argsNeeded.forEach(arg => {
     if (params[arg] === undefined) throw Error(`${arg} est un argument obligatoire pour cette route`)
     // les autres valeurs falsy seront castées en string dans l'url
@@ -37,16 +38,16 @@ const liste = ({search}) => `liste?${search}`
  */
 export const getRessourceListUrl = makeGetter(liste, ['search'])
 
-const personneByOid = ({oid}) => `personne/byOid/${oid}`
+const checkPid = ({nom, pid}) => `personne/checkPid?nom=${encodeURIComponent(nom)}&pid=${pid}`
 /**
  * Personne d'après son oid
  * @type {routeGetter}
  * @param {object} urlParams
- * @param {string} urlParams.oid
+ * @param {string} urlParams.pid
  * @param {string} [baseUrl]
  * @returns {string}
  */
-export const getPersonneByOidUrl = makeGetter(personneByOid, ['oid'])
+export const getCheckPidUrl = makeGetter(checkPid, ['nom', 'pid'])
 
 const groupesOuverts = () => `groupes/ouverts`
 /**
