@@ -34,6 +34,8 @@
 const _ = require('lodash')
 const flow = require('an-flow')
 const {merge} = require('sesajstools/utils/object')
+const {userError} = require('../../utils')
+const {looksLikePid} = require('../../utils/validators')
 
 module.exports = function (component) {
   component.service('$personneRepository', function (EntityPersonne, EntityGroupe, $cachePersonne, $groupeRepository) {
@@ -106,7 +108,6 @@ module.exports = function (component) {
      * @memberOf $personneRepository
      */
     function load (id, next) {
-      if (typeof id === 'number') id += ''
       if (typeof id !== 'string') {
         const error = new Error(`id invalide ${typeof id}`)
         log.error(error, id)
@@ -135,13 +136,9 @@ module.exports = function (component) {
      */
     function loadByOids (oids, next) {
       if (!Array.isArray(oids)) return next(Error('arguments invalides'))
-      // @todo add $cachePersonne.getByPid()
-      flow().seq(function () {
-        EntityPersonne.match('oid').in(oids).grab(this)
-      }).seq(function (personnesArray) {
-        const personnes = oids.map(refOid => {
-          return personnesArray.find(({oid}) => oid === refOid) || null
-        })
+      flow(oids).seqEach(function (oid) {
+        load(oid, this)
+      }).seq(function (personnes) {
         next(null, personnes)
       }).catch(function (error) {
         next(error)
@@ -149,25 +146,38 @@ module.exports = function (component) {
     }
 
     /**
+     * Retourne une personne d'après son pid si son nom correspond
+     * @param {string} pid
+     * @param {string} nom
+     * @param {personneCallback} next
+     */
+    function loadByPidAndNom (pid, nom, next) {
+      if (!looksLikePid(pid)) return next(Error('Paramètre pid invalide'))
+      if (!nom) return next(Error('Paramètre nom manquant'))
+
+      load(pid, (error, personne) => {
+        if (error) return next(error)
+        if (personne && personne.nom.trim().toLowerCase() === nom.trim().toLowerCase()) {
+          // ok
+          return next(null, personne)
+        }
+        // y'a un pb
+        next(userError(`Aucun utilisateur avec l’identifiant ${pid} et le nom "${nom}"`, {status: 404}))
+      })
+    }
+
+    /**
      * Retourne une liste de personnes d'apres une liste de pids
      * @param {string[]} pids Liste de pid
-     * @param {function} next callback appelée avec `(error, {personnes: Personne[], missing: string[]})` (missing étant les pids inconnus en bdd)
+     * @param {function} next callback appelée avec (error, personnes) (personnes étant un array de personne || null si le pid est inconnu en bdd)
      */
     function loadByPids (pids, next) {
       if (!Array.isArray(pids)) return next(Error('arguments invalides'))
-      const personnes = []
-      // @todo add $cachePersonne.getByPid()
-      flow().seq(function () {
-        EntityPersonne.match('pid').in(pids).grab(this)
-      }).seqEach(function (personne) {
-        if (personne && personne.oid) personnes.push(personne)
-        this()
-      }).seq(function () {
-        const missing = pids.filter(pid => !personnes.some(p => p.pid === pid))
-        next(null, personnes, missing)
-      }).catch(function (error) {
-        next(error)
-      })
+      flow(pids).seqEach(function (pid) {
+        load(pid, this)
+      }).seq(function (personnes) {
+        next(null, personnes)
+      }).catch(next)
     }
 
     /**
@@ -309,6 +319,7 @@ module.exports = function (component) {
       delete: deletePersonne,
       load,
       loadByOids,
+      loadByPidAndNom,
       loadByPids,
       removeGroup,
       renameGroup,

@@ -32,13 +32,14 @@
 'use strict'
 
 const flow = require('an-flow')
+const {looksLikePid} = require('../../utils/validators')
 
 module.exports = function (component) {
   /**
    * Controleurs de la route /api/personne/
    * @Controller controllerApiPersonne
    */
-  component.controller('api/personne', function (EntityPersonne, $personneRepository, $accessControl, $json, $groupeRepository, $session) {
+  component.controller('api/personne', function (EntityPersonne, $accessControl, $json, $groupeRepository, $personneRepository, $session) {
     // service $auth qu'on ne peut pas mettre en dépendance car le component auth
     // est chargé après ce component personne (il utilise ses services)
     let $auth
@@ -145,25 +146,22 @@ module.exports = function (component) {
     })
 
     /**
-     * Récupère le nom d'un utilisateur
-     * depuis son oid
-     * @route GET /api/personne/byOid/:oid
+     * Vérifie qu'un pid correspond à un nom et retourne un user: {oid,pid,nom,prenom} ou un message d'erreur
+     * @route GET /api/personne/checkPid?pid=xxx&nom=yyy
      */
-    this.get('byOid/:oid', function (context) {
+    this.get('checkPid', function (context) {
       const myOid = $accessControl.getCurrentUserOid(context)
       if (!myOid) return $json.denied(context, 'Vous devez être authentifié pour chercher des utilisateurs')
 
-      const {oid} = context.arguments
-      flow().seq(function () {
-        $personneRepository.load(oid, this)
-      }).seq(function (personne) {
-        if (!personne) return $json.sendOk(context, {user: null})
-        else {
-          const {nom, oid, prenom} = personne
-          $json.sendOk(context, {user: {nom, oid, prenom}})
-        }
-      }).catch(function (error) {
-        $json.sendKo(context, error)
+      const {nom: askedNom, pid: askedPid} = context.get
+
+      if (!looksLikePid(askedPid)) return $json.sendKo(context, 'Paramètre pid invalide')
+      if (!askedNom) return $json.sendKo(context, 'Paramètre nom manquant')
+
+      $personneRepository.loadByPidAndNom(askedPid, askedNom, (error, personne) => {
+        if (error) return $json.sendKo(context, error)
+        const {nom, oid, pid, prenom} = personne
+        $json.sendOk(context, {nom, oid, pid, prenom})
       })
     })
   })

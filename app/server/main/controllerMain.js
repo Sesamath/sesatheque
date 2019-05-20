@@ -66,19 +66,24 @@ module.exports = function (mainComponent) {
 
     // On continue à passer ici par un contrôleur pour toutes les pages statiques, même si à première
     // vue ce serait plus intelligent de construire ça au build avec html-webpack-plugin et le servir
-    // en statique (via le serve qui précède), car les 3 routes dynamiques demandent un contrôleur et
+    // en statique (via le serve qui précède), car les routes dynamiques demandent un contrôleur et
     // représentent > 90% des requêtes, pas la peine de doublonner du code pour optimiser un peu les
     // 10% qui restent.
     const reactRoutes = [
       '/',
       '/autocomplete',
+      '/compte',
       '/mentionsLegales',
       '/ressource/ajouter',
       '/ressource/modifier/:oid',
       '/ressource/apercevoir/:oid',
       '/ressource/decrire/:oid',
       '/ressource/rechercher',
-      '/ressources'
+      '/groupe/ajouter',
+      '/groupe/editer/:groupe',
+      '/groupes/perso',
+      '/groupes/ouverts',
+      '/groupes/publics'
     ]
     reactRoutes.forEach(route => this.get(route, displayReactPage))
 
@@ -86,7 +91,7 @@ module.exports = function (mainComponent) {
     this.get('/navigateurObsolete', displayObsoletePage)
 
     // lassi ne gère pas les requêtes head. nginx en frontal le fait pour nous,
-    // mais on veut répondre sur / pour le monitoring local (avec monit, 'protocol http' => head)
+    // mais on veut répondre sur / pour le monitoring local (avec monit le 'protocol http' donne du head)
     app.head('/', (req, res) => res.send())
   })
 }

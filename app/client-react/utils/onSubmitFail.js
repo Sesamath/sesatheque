@@ -6,7 +6,7 @@ const errorsMessage = 'La sauvegarde a échoué car des champs contiennent des e
 
 const ArrayFrom = Array.prototype.slice
 
-const onSubmitFail = (_, dispatch, error) => {
+const onSubmitFail = (errors, dispatch, error) => {
   if (error) {
     dispatch(addNotification({
       level: 'error',
@@ -15,7 +15,10 @@ const onSubmitFail = (_, dispatch, error) => {
     throw error
   }
 
+  // pourquoi aller chercher les messages d'erreur dans le dom alors qu'ils sont déjà dans l'objet errors ?
   const elements = ArrayFrom.call(document.querySelectorAll('.validation-error'))
+  // à creuser…
+  // console.log('onSubmitFail avec les erreurs', errors, 'qui devraient déjà être affichées dans le dom dans les éléments', elements)
   if (elements.length) {
     const element = elements[0]
     if (element && element.scrollIntoView) element.scrollIntoView(false)

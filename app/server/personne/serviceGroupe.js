@@ -138,7 +138,7 @@ module.exports = function (component) {
     // méthodes exportées
 
     /**
-     * Ajoute gestionnairesNames au groupe
+     * Ajoute gestionnairesNames au groupe (en allant chercher les noms en bdd)
      * @param {Context} context
      * @param {Groupe} groupe
      * @param {groupeCallback} next

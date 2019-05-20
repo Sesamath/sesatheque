@@ -27,6 +27,7 @@ const addLabel = (WrappedComponent, hasForAttr = true) => {
     }
   }
 
+  // pour le debug, cf https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
   AddLabel.displayName = `addLabel(${getDisplayName(WrappedComponent)})`
 
   AddLabel.propTypes = {

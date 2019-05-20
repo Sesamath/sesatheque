@@ -39,10 +39,7 @@ const saveGroupeAction = (groupe, isNew) => ({
   }
 })
 
-export const saveGroupe = (
-  groupe,
-  success = () => {}
-) => dispatch => {
+export const saveGroupe = (groupe, success) => dispatch => {
   const requestSuccess = responseGroup => {
     dispatch(
       addNotification({
