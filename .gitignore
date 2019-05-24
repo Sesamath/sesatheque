@@ -30,6 +30,7 @@ package.local-extras.json
 /app/plugins/package-lock.json
 /app/plugins/yarn.lock
 /app/plugins/shrinkwrap.yaml
+/app/plugins/pnpm-lock.yaml
 /app/plugins/generatedDisplays.js
 /app/plugins/generatedEditors.js
 /app/plugins/icons.js
