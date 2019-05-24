@@ -44,9 +44,9 @@ dependencies:
   regenerator-runtime: 0.12.1
   request: 2.88.0
   roboto-fontface: 0.10.0
-  sesajstools: framagit.org/Sesamath/sesajstools/faba5dba959e088c550ba4810951c9ef57c791d1
+  sesajstools: framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40
   sesalab-sso: framagit.org/Sesamath/sesalab-sso/a3fd3e447badd9922ba1eea77806b5afa54f5797
-  sesatheque-client: framagit.org/Sesamath/sesatheque-client/ee650c4b815790808dff15049889def7dfd57302
+  sesatheque-client: framagit.org/Sesamath/sesatheque-client/69e30580a95920351daf9993c51f532eb8e62d54
   simple-crypto-js: 2.0.2
   whatwg-fetch: 3.0.0
 devDependencies:
@@ -2514,6 +2514,13 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-brWl9y6vOB1xYPZcpZde3N9zDByXTosAeMDo4p1wzo6UMOX4vumB+TP1RZ76sfE6Md68Q0NJSrE/gbezd4Ul+w==
+  /combined-stream/1.0.8:
+    dependencies:
+      delayed-stream: 1.0.0
+    engines:
+      node: '>= 0.8'
+    resolution:
+      integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==
   /commander/2.1.0:
     dev: true
     engines:
@@ -4313,7 +4320,7 @@ packages:
   /form-data/2.3.3:
     dependencies:
       asynckit: 0.4.0
-      combined-stream: 1.0.7
+      combined-stream: 1.0.8
       mime-types: 2.1.24
     engines:
       node: '>= 0.12'
@@ -8671,7 +8678,7 @@ packages:
       aws-sign2: 0.7.0
       aws4: 1.8.0
       caseless: 0.12.0
-      combined-stream: 1.0.7
+      combined-stream: 1.0.8
       extend: 3.0.2
       forever-agent: 0.6.1
       form-data: 2.3.3
@@ -10872,9 +10879,9 @@ packages:
   framagit.org/Sesamath/sesalab-sso/a3fd3e447badd9922ba1eea77806b5afa54f5797:
     dependencies:
       an-flow: src.sesamath.net/an-flow/cb06dacf3593f363ce98525a415bca650cfffc1a
-      an-uuid: src.sesamath.net/an-uuid/df889c594b9c1682861c9b5dd7b021d6e8fe3602
+      an-uuid: src.sesamath.net/an-uuid/ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29
       request: 2.82.0
-      sesajstools: framagit.org/Sesamath/sesajstools/faba5dba959e088c550ba4810951c9ef57c791d1
+      sesajstools: framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40
     dev: false
     name: sesalab-sso
     resolution:
@@ -10882,7 +10889,7 @@ packages:
       repo: 'https://framagit.org/Sesamath/sesalab-sso.git'
       type: git
     version: 1.0.17
-  framagit.org/Sesamath/sesatheque-client/ee650c4b815790808dff15049889def7dfd57302:
+  framagit.org/Sesamath/sesatheque-client/69e30580a95920351daf9993c51f532eb8e62d54:
     dependencies:
       an-uuid: src.sesamath.net/an-uuid/ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29
       jquery: 3.3.1
@@ -10892,7 +10899,7 @@ packages:
     dev: false
     name: sesatheque-client
     resolution:
-      commit: ee650c4b815790808dff15049889def7dfd57302
+      commit: 69e30580a95920351daf9993c51f532eb8e62d54
       repo: 'https://framagit.org/Sesamath/sesatheque-client.git'
       type: git
     version: 1.4.10
