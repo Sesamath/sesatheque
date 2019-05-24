@@ -46,7 +46,7 @@ dependencies:
   roboto-fontface: 0.10.0
   sesajstools: framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40
   sesalab-sso: framagit.org/Sesamath/sesalab-sso/a3fd3e447badd9922ba1eea77806b5afa54f5797
-  sesatheque-client: framagit.org/Sesamath/sesatheque-client/7c142e4acabcada3bf09a6cf39f0cb9455bd5479
+  sesatheque-client: framagit.org/Sesamath/sesatheque-client/64c49067ea5b866b47b085a09f14875477c4f24a
   simple-crypto-js: 2.0.2
   whatwg-fetch: 3.0.0
 devDependencies:
@@ -10889,7 +10889,7 @@ packages:
       repo: 'https://framagit.org/Sesamath/sesalab-sso.git'
       type: git
     version: 1.0.17
-  framagit.org/Sesamath/sesatheque-client/7c142e4acabcada3bf09a6cf39f0cb9455bd5479:
+  framagit.org/Sesamath/sesatheque-client/64c49067ea5b866b47b085a09f14875477c4f24a:
     dependencies:
       an-uuid: src.sesamath.net/an-uuid/ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29
       jquery: 3.3.1
@@ -10899,7 +10899,7 @@ packages:
     dev: false
     name: sesatheque-client
     resolution:
-      commit: 7c142e4acabcada3bf09a6cf39f0cb9455bd5479
+      commit: 64c49067ea5b866b47b085a09f14875477c4f24a
       repo: 'https://framagit.org/Sesamath/sesatheque-client.git'
       type: git
     version: 1.4.10
