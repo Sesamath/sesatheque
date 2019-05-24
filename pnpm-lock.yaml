@@ -46,7 +46,7 @@ dependencies:
   roboto-fontface: 0.10.0
   sesajstools: framagit.org/Sesamath/sesajstools/faba5dba959e088c550ba4810951c9ef57c791d1
   sesalab-sso: framagit.org/Sesamath/sesalab-sso/a3fd3e447badd9922ba1eea77806b5afa54f5797
-  sesatheque-client: framagit.org/Sesamath/sesatheque-client/0dc43e39408439298c1f7204f1716fc1177593c3
+  sesatheque-client: framagit.org/Sesamath/sesatheque-client/ee650c4b815790808dff15049889def7dfd57302
   simple-crypto-js: 2.0.2
   whatwg-fetch: 3.0.0
 devDependencies:
@@ -10845,6 +10845,18 @@ packages:
       repo: 'https://framagit.org/Sesamath/lassi.git'
       type: git
     version: 2.4.12
+  framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40:
+    dependencies:
+      chai: 4.2.0
+      lodash.isequal: 4.5.0
+      mocha: 5.2.0
+    dev: false
+    name: sesajstools
+    resolution:
+      commit: 4976c0051a7b0164b8a7acce662a012db121de40
+      repo: 'https://framagit.org/Sesamath/sesajstools.git'
+      type: git
+    version: 1.0.26
   framagit.org/Sesamath/sesajstools/faba5dba959e088c550ba4810951c9ef57c791d1:
     dependencies:
       chai: 4.2.0
@@ -10870,20 +10882,20 @@ packages:
       repo: 'https://framagit.org/Sesamath/sesalab-sso.git'
       type: git
     version: 1.0.17
-  framagit.org/Sesamath/sesatheque-client/0dc43e39408439298c1f7204f1716fc1177593c3:
+  framagit.org/Sesamath/sesatheque-client/ee650c4b815790808dff15049889def7dfd57302:
     dependencies:
-      an-uuid: src.sesamath.net/an-uuid/df889c594b9c1682861c9b5dd7b021d6e8fe3602
+      an-uuid: src.sesamath.net/an-uuid/ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29
       jquery: 3.3.1
       jstree: 3.3.7
       query-string: 5.1.1
-      sesajstools: framagit.org/Sesamath/sesajstools/faba5dba959e088c550ba4810951c9ef57c791d1
+      sesajstools: framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40
     dev: false
     name: sesatheque-client
     resolution:
-      commit: 0dc43e39408439298c1f7204f1716fc1177593c3
+      commit: ee650c4b815790808dff15049889def7dfd57302
       repo: 'https://framagit.org/Sesamath/sesatheque-client.git'
       type: git
-    version: 1.4.8
+    version: 1.4.10
   src.sesamath.net/an-ansi/369cba247330cb088a5640707c8ca5bd515f4f0d:
     dev: false
     name: an-ansi
@@ -10924,6 +10936,14 @@ packages:
     name: an-uuid
     resolution:
       commit: df889c594b9c1682861c9b5dd7b021d6e8fe3602
+      repo: 'git://src.sesamath.net/an-uuid'
+      type: git
+    version: 1.0.6
+  src.sesamath.net/an-uuid/ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29:
+    dev: false
+    name: an-uuid
+    resolution:
+      commit: ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29
       repo: 'git://src.sesamath.net/an-uuid'
       type: git
     version: 1.0.6
