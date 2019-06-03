@@ -16,7 +16,7 @@ Cf INSTALL.md à la racine du projet
 Mise à jour
 -----------
 
-`npm run maj` va récupérer les dernières sources et reconstruire le js client. 
+`pnpm run maj` va récupérer les dernières sources et reconstruire le js client. 
 
 Framework Lassi
 ---------------
@@ -72,8 +72,8 @@ Il y a aussi le dossier tasks avec les tâches d'import (à priori spécifique �
 Tests
 -----
 
-`npm run test:all` lance tous les tests localement, pour les lancer dans le conteneur docker il faut
-créer un fichier `_private/.testOnDocker` (vide, son contenu est ignoré) et lancer les tests avec `npm test`
+`pnpm run test:all` lance tous les tests localement, pour les lancer dans le conteneur docker il faut
+créer un fichier `_private/.testOnDocker` (vide, son contenu est ignoré) et lancer les tests avec `pnpm test`
 
 Documentation
 -------------
