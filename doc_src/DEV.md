@@ -1,7 +1,11 @@
 Notes pour les développeurs
 ===========================
 
-Dans toute la doc, on utilise pnpm, mais vous pouvez utiliser npm ou yarn si vous préférez.
+Dans toute la doc, on utilise pnpm (`npm -g i pnpm` pour l'installer globalement), mais vous pouvez utiliser npm ou yarn si vous préférez.
+
+La motivation principale est la rapidité et le gain d'espace disque :
+- https://pnpm.js.org/docs/en/motivation.html
+- https://www.kochan.io/nodejs/why-should-we-use-pnpm.html
 
 Installation
 ------------
