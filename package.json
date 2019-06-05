@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.4.22",
+  "version": "1.4.23",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -109,7 +109,7 @@
     "ip": "^1.1.5",
     "jquery": "3.3.1",
     "knacss": "^7.0.7",
-    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.12",
+    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.14",
     "loadjs": "^3.5.5",
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",
