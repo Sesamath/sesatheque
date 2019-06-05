@@ -38,3 +38,8 @@ Installation avec Docker, avec sesalab
 
 @todo créer un docker-compose.sesalab.yml avec un docker/sesalab/Dockerfile
 (et rédiger la doc ci-dessous)
+
+Et ensuite ?
+------------
+
+cf doc_src/DEV.md et ses voisins…
