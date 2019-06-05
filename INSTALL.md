@@ -13,6 +13,7 @@ Installation sans Docker
 - modifier app/_private/config.js pour mettre les accès mongo (si open bar la config de base doit suffire). Vous pouvez surcharger n'importe quel paramètre de configuration de app/config.js
 - si vous utilisez pm2, modifier éventuellement app/_private/pm2App.json5 pour le chemin des logs pm2
 - installer les dépendances avec `pnpm install` (ou `npm install` ou `yarn install`, mais postinstall utilise pnpm)
+- compiler les js client avec `pnpm run build`
 - lancer l'appli avec au choix
   - `node app/index.js`
   - `npm start` (lancera l'appli avec pm2 s'il est installé)
