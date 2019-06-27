@@ -75,7 +75,6 @@ module.exports = {
 
   // ça c'est pour node qui va lancer l'appli, utilisé par lassi
   $server: {
-    hostname,
     // port d'écoute de nodeJs, on peut indiquer ici un autre port ici que celui de baseUrl
     // (si y'a un proxy, ou par ex pour cli.js qui en mettra un autre)
     port
@@ -103,6 +102,10 @@ module.exports = {
         formateur: {create: false, createGroupe: false}
       }
     }
+  },
+
+  devServer: {
+    host: hostname
   },
 
   // les modules à précharger avant bootstrap
