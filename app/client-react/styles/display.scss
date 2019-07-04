@@ -1,23 +1,22 @@
+/**
+ * Ce fichier n'est pas inclus dans client-react, seulement client (pour le display),
+ * mais laissé ici pour avoir tout au même endroit
+ */
+@import "./config.scss";
 @import "./fonts.scss";
 @import "./mixins.scss";
-
-/*
-des restes de ressources.css
-html, body {padding: 0; margin: 0;height: 100%;}
-/* faut du 100% de haut sur chaque parent de display (pourquoi ?) * /
-#body, #body .row, #content, #display {height: 100%;}
-*/
 
 #display {
   position: relative;
   margin: 0 auto;
   padding: 0;
   clear: both;
+  font-family: $font-family-base;
 }
 #titre {
   font-size: 1.4em;
   text-align:center;
-  font-family: Verdana, sans-serif;
+  font-family: $font-family-headings;
   width: 86%;
   margin:auto; /* centrage décalé de qq pixel à gauche à cause du feedback mais tant pis, plus simple comme ça */
   min-height:28px;
@@ -52,7 +51,7 @@ html, body {padding: 0; margin: 0;height: 100%;}
   background-color: $background-base;
   text-align: center;
   font-size: 1.2em;
-  font-family: Verdana, sans-serif;
+  font-family: $font-family-base;
 }
 .error {
   @include avert($fa-var-exclamation-triangle);

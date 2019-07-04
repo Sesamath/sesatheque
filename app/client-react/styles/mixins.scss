@@ -1,4 +1,5 @@
 @import './config.scss';
+@import '~@fortawesome/fontawesome-free/scss/_mixins.scss';
 
 /* Texte secondaire sur fond foncé primaire */
 @mixin cartouche() {
@@ -12,13 +13,13 @@
 
 /* Couleurs */
 @mixin avert($icon) {
-  @include fa-icon;
-  @extend .fa;
   background-color: $background-base;
   margin: 1rem;
   padding: 1rem;
   border: thin solid;
   &:before {
+    @include fa-icon;
+    @extend .fa;
     margin-right: 1rem;
     content: fa-content($icon);
   }

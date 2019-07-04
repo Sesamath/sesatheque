@@ -20,6 +20,17 @@ $medium      : 1024px;
 $large       : 1280px;
 $extra-large : 1600px;
 
+// quelques icones, prises dans ~@fortawesome/fontawesome-free/scss/_variables.scss
+$fa-var-exclamation: \f12a;
+$fa-var-exclamation-triangle: \f071;
+$fa-var-external-link-alt: \f35d;
+$fa-var-info-circle: \f05a;
+// et cette fct du même fichier
+@function fa-content($fa-var) {
+  @return unquote("\"#{ $fa-var }\"");
+}
+
+
 // ----------
 // Fonts zone
 // ----------
