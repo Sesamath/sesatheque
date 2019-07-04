@@ -17,15 +17,15 @@ function formatJSON (value) {
   return JSON.stringify(value, null, 2)
 }
 
+// La modif du Field redux-form se fait sur le onChange
+// cf https://github.com/manubb/react-ace-builds/blob/local/docs/Ace.md
 const TextEditor = ({ input: { value, onChange, onBlur, onFocus, name }, onValidate, mode }) => (
   <AceEditor
     name={name}
     mode={mode}
     theme="github"
     fontSize={14}
-    onChange={onChange}
-    onFocus={onFocus}
-    onBlur={() => onBlur()}
+    onChange={(value /*, event */) => onChange(value)}
     onValidate={onValidate}
     width="100%"
     highlightActiveLine={true}

@@ -11,13 +11,15 @@ class IframeField extends Component {
 
     this.state = {
       manualEdition: false,
-      disableEditor: false
+      disableGraphicEditor: false
     }
   }
 
+  // passé au onValidate de TextEditor, on bloque le passage au graphique
+  // si y'a des erreurs dans le mode texte
   onManualEditorChange (annotations) {
     const hasErrors = annotations.some(({type}) => type === 'error')
-    this.setState({disableEditor: hasErrors})
+    this.setState({disableGraphicEditor: hasErrors})
   }
 
   /**
@@ -35,30 +37,46 @@ class IframeField extends Component {
   render () {
     const isManual = this.props.allowManualEdition && this.state.manualEdition
 
+    // Field (https://redux-form.com/8.2.2/docs/api/field.md/) veut un name (couplé au state redux)
+    // et un component, il passe toutes les autres props au component
     return (
       <fieldset>
         {this.props.children}
-        {this.props.allowManualEdition ? (
-          <nav className="tabs-menu">
-            <button
-              type="button"
-              onClick={this.toggleManualEditor.bind(this, true)}
-              className={!this.state.manualEdition ? 'btn' : 'btn selected'}>Mode texte</button>
-            <button
-              type="button"
-              onClick={this.toggleManualEditor.bind(this, false)}
-              className={this.state.manualEdition ? 'btn' : 'btn selected'}
-              disabled={this.state.disableEditor}>Éditeur graphique</button>
-          </nav>
-        ) : null}
-        <Field
-          mode="json"
-          name={this.props.name}
-          onValidate={this.onManualEditorChange.bind(this)}
-          onLoad={this.props.onLoad}
-          src={this.props.src}
-          component={isManual ? TextEditor : Iframe}
-        />
+        {this.props.allowManualEdition
+          // les boutons manuel / graphique
+          ? (
+            <nav className="tabs-menu">
+              <button
+                type="button"
+                onClick={this.toggleManualEditor.bind(this, true)}
+                className={!this.state.manualEdition ? 'btn' : 'btn selected'}>Mode texte</button>
+              <button
+                type="button"
+                onClick={this.toggleManualEditor.bind(this, false)}
+                className={this.state.manualEdition ? 'btn' : 'btn selected'}
+                disabled={this.state.disableGraphicEditor}>Éditeur graphique</button>
+            </nav>
+          )
+          // sinon graphique only
+          : null
+        }
+        {isManual
+          ? (
+            <Field
+              name={this.props.name}
+              component={TextEditor}
+              mode="json"
+              onValidate={this.onManualEditorChange.bind(this)}
+            />
+          ) : (
+            <Field
+              name={this.props.name}
+              component={Iframe}
+              onLoad={this.props.onLoad}
+              src={this.props.src}
+            />
+          )
+        }
       </fieldset>
     )
   }
