@@ -35,7 +35,7 @@ const customStyles = {
 
 const SelectInput = ({
   input: {name, onFocus, onBlur, onChange, value},
-  meta: {error, warning, touched},
+  /* meta: {error, warning, touched}, */
   placeholder,
   options,
   isDisabled,
@@ -95,8 +95,14 @@ SelectInput.propTypes = {
     // value peut être de n'importe quel type parmi string|boolean|number, si on passe autre chose react-select râlera
     label: PropTypes.string
   })),
-  input: PropTypes.shape({}),
-  meta: PropTypes.shape({}),
+  // lui vient de redux-form qui garanti tout ça, mais faut lister ce qu'on utilise
+  input: PropTypes.shape({
+    name: PropTypes.string,
+    onBlur: PropTypes.func,
+    onChange: PropTypes.func,
+    onFocus: PropTypes.func,
+    value: PropTypes.string
+  }),
   loadOptions: PropTypes.func,
   components: PropTypes.object
 }
