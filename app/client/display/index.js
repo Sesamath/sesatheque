@@ -43,15 +43,18 @@ const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjt = require('sesajstools')
 const sjtUrl = require('sesajstools/http/url')
-const {getBaseUrl} = require('sesatheque-client/src/sesatheques')
 const xhr = require('sesajstools/http/xhr')
+const {addSesatheques, getBaseUrl} = require('sesatheque-client/src/sesatheques')
+const {sesatheques} = require('server/config')
 
 const page = require('../page')
 const xhrPostSync = require('../page/xhrPostSync')
 const Resultat = require('../../constructors/Resultat')
 const getDisplay = require('plugins/displays').default
 const SimpleCrypto = require('simple-crypto-js').default
+
 const wd = window.document
+addSesatheques(sesatheques)
 
 /**
  * Le timeout des requêtes ajax. 10s c'est bcp mais certains clients ont des BP catastrophiques
