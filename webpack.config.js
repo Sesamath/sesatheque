@@ -83,9 +83,8 @@ const conf = {
     // liste des fichiers connus qui utilisent ça :
     // https://ressources.sesamath.net/coll/lecteur/voir_j3p.php
     display: './app/client/display/index.js',
+    // qui utilise ça ?
     import: './app/client/edit/import.js',
-    // (c'est déjà inclus par display, est-ce bien utile ?)
-    page: './app/client/page/index.js',
     // utilisé par editgraphe.html (plugin j3p)
     registerSesatheques: './app/client/page/registerSesatheques.js',
     ...entriesForPeers
@@ -109,10 +108,6 @@ const conf = {
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
   },
-  /* externals: {
-    stePage: 'page',
-    steDisplay: 'display'
-  }, */
   resolve: {
     extensions: ['.js', '.json', '.jsx'],
     // on veut tester le path du require, indépendamment du fait que le module soit linké ou pas
@@ -125,8 +120,8 @@ const conf = {
       plugins: path.resolve(__dirname, 'app/plugins'),
       server: path.resolve(__dirname, 'app/server'),
       utils: path.resolve(__dirname, 'app/utils'),
-      // ça c'est pour obliger tous les require / import à prendre la même version
-      // car les plugins peuvent avoir la leur (et pas mal d'extension jquery font leur
+      // Un alias pour obliger tous les require / import à prendre la même instance de jQuery
+      // Car les plugins peuvent avoir la leur (et pas mal d'extension jquery font leur
       // propre import jquery qu'elles augmentent sans le renvoyer)
       // ça règle les pbs avec jquery-ui et jstree
       jquery: path.resolve(__dirname, 'node_modules/jquery')
@@ -211,14 +206,15 @@ const conf = {
     ]
   },
   plugins: [
-    // attention, laisser ce clean en premier plugin car webpack.config.external le vire
+    // On vide le dossier de build
     new CleanWebpackPlugin([buildDir]),
+    // statique
     new CopyWebpackPlugin([
       // {from: './node_modules/sesaeditgraphe/dist'},
       // ça c'est facultatif, il serait servi depuis assets, ça permet de l'inclure dans le js en data-uri ou dans les css
       {from: 'app/assets/favicon.png'}
     ]),
-    // on a tenté ça pour régler les pbs d'instance multiple, sans succès
+    // on a tenté ça pour régler les pbs d'instance multiple de jQuery, sans succès
     // c'est remplacé par un alias qui force le jquery de la racine (et pas celui des plugins)
     // new webpack.ProvidePlugin({
     //   'jQuery': 'jquery',
