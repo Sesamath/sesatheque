@@ -77,34 +77,7 @@ Les yarn workspaces résolvent naturellement ce problème mais nécessitent une 
 
 ## Développer un plugin
 
-Pour le développement local, c'est pénible de devoir faire commit + push du plugin puis install dans la sésathèque simplement pour tester le code. Avec pnpm on peut faire du link en local :
-
-```
-# se mettre dans le dossier du plugin, par ex
-cd sesatheque-plugin-mathgraph
-# il faut avoir les droits d'écriture sur /usr/pnpm-global/node_modules
-pnpm link
-
-# se mettre dans le dossiers de la sésathèque
-cd ../sesatheque
-# si besoin màj des modules
-pnpm i
-# se placer dans le dossier des plugins
-cd app/plugins
-# linker le module précédent
-pnpm link @sesatheque-plugins/mathgraph
-# retour à la racine et rebuild
-cd ../..
-pnpm run build
-# ou pnpm run build:watch
-
-# pour retirer le link c'est
-cd app/plugins
-pnpm unlink @sesatheque-plugins/mathgraph
-cd ../..
-pnpm i
-pnpm run build
-```
+Cf [../../doc_src/DEV.md]
 
 ## Ce qu'il reste à faire
 
