@@ -101,7 +101,7 @@ SelectInput.propTypes = {
     onBlur: PropTypes.func,
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
-    value: PropTypes.string
+    value: PropTypes.any
   }),
   loadOptions: PropTypes.func,
   components: PropTypes.object
