@@ -135,7 +135,7 @@ function refreshArbres (oid, done) {
             nextStep()
           })
         }).seq(function () {
-          ['titre', 'resume', 'description', 'commentaires', 'inc'].forEach(p => {
+          ['titre', 'resume', 'description', 'commentaires', 'inc', 'cle'].forEach(p => {
             if (ref[p] !== ressource[p]) {
               hasChanged = true
               ref[p] = ressource[p]
