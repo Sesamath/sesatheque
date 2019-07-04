@@ -153,6 +153,10 @@ const conf = {
         test: /\/@?sesatheque-plugin.*\.jsx?/,
         use: babelLoader
       }, {
+        // idem pour sesatheque-client ou sesaeditgraphe
+        test: /\/sesa(theque-client|editgraphe)\/.+\.js/,
+        use: babelLoader
+      }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
         // pour _private c'est mis plus loin hors test (ça plante les tests)
         // important de déclarer ça après le match *.js plus haut (pour que ce config-loader passe avant le babel-loader)
@@ -161,7 +165,7 @@ const conf = {
         use: 'config-loader'
       }, {
         // les node_modules qui doivent passer par babel:
-        test: /node_modules\/(sesatheque-client|query-string|strict-uri-encode|split-on-first)\/.*\.js/,
+        test: /node_modules\/(sesatheque-client|sesaeditgraphe|query-string|strict-uri-encode|split-on-first)\/.*\.js/,
         use: babelLoader
       }, {
         // html pour nos iframes
@@ -231,22 +235,6 @@ const conf = {
     // par défaut c'est false en dev et true en prod, décommenter la ligne suivante pour trouver l'origine d'un plantage de build en prod
     // noEmitOnErrors: false,
 
-    minimizer: [
-      // we specify a custom UglifyJsPlugin here to get source maps in production
-      // cf https://stackoverflow.com/a/49059746
-      // sinon par défaut y'a du uglify en prod mais sans sourceMap
-      new UglifyJsPlugin({
-        cache: true,
-        parallel: true,
-        uglifyOptions: {
-          compress: false,
-          ecma: 5,
-          mangle: true
-        },
-        sourceMap: true
-      })
-    ]
-
     // cf https://webpack.js.org/plugins/split-chunks-plugin/
     // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
     /*, splitChunks: {
@@ -263,6 +251,23 @@ const conf = {
     // Nice colored output
     colors: true
   }
+}
+if (isProd) {
+  conf.optimization.minimizer = [
+    // we specify a custom UglifyJsPlugin here to get source maps in production
+    // cf https://stackoverflow.com/a/49059746
+    // sinon par défaut y'a du uglify en prod mais sans sourceMap
+    new UglifyJsPlugin({
+      cache: true,
+      parallel: true,
+      uglifyOptions: {
+        compress: false,
+        ecma: 5,
+        mangle: true
+      },
+      sourceMap: true
+    })
+  ]
 }
 
 if (isDevServer) {
