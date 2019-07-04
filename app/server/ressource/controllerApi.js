@@ -852,7 +852,7 @@ module.exports = function (component) {
       const {idOrigine, origine} = context.arguments
       $ressourceRepository.loadByOrigin(origine, idOrigine, function (error, ressource) {
         if (error) $json.send(context, error)
-        else if (ressource && ressource.restriction === 0) sendRessource(context, null, ressource)
+        else if (ressource && (ressource.restriction === 0 || origine === 'cle')) sendRessource(context, null, ressource)
         else if (ressource) $json.denied(context, `La ressource ${origine}/${idOrigine} n’est pas publique`)
         else $json.notFound(context, `La ressource ${origine}/${idOrigine} n’existe pas`)
       })
