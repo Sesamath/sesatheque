@@ -1,0 +1,161 @@
+@import "./common.scss";
+@import "./forms.scss";
+@import './mixins.scss';
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+a:after {
+  display: none;
+}
+
+#main {
+  padding: 2rem;
+  flex: 1 0 auto;
+
+  h1 {
+    margin-bottom: 5px;
+    color: $primary-color-light;
+  }
+
+  h2 {
+    margin-bottom: 15px;
+  }
+
+  /* ----------------------------- */
+  /* Pagination                    */
+  /* ----------------------------- */
+  ul.pagination {
+    display: block;
+    padding-left: 15px;
+    padding-right: 15px;
+    text-align: center;
+
+    li {
+      display: inline-block;
+      padding: 5px;
+
+      a {
+        cursor: pointer;
+      }
+
+      &.active {
+        font-weight: bold;
+      }
+    }
+
+    .break a {
+      cursor: default;
+    }
+  }
+
+  .btn--rounded {
+    margin-left: 10px;
+    border-radius: 5px;
+  }
+
+  [class*="btn--"] {
+    i {
+      padding-right: 5px;
+    }
+  }
+
+/* --------------------------------------------- */
+/* Écrase le style de knackcss sur les alertes   */
+/* --------------------------------------------- */
+  .alert--danger, .alert--warning, .alert--info {
+    padding: 10px 10px;
+
+    i {
+      margin-right: 5px;
+    }
+
+    a {
+      display: inline;
+      padding: 0;
+    }
+  }
+
+  /* ------------------------------------------- */
+  /* Ajout d'une icône sur les liens externes    */
+  /* ------------------------------------------- */
+  a[target="_blank"]:not(.ignore--blank) {
+    &:after {
+      @include fa-icon;
+      @extend .fa;
+      margin-left: 5px;
+      vertical-align: 0.12em;
+      font-size: 11px;
+      content: fa-content($fa-var-external-link-alt);
+    }
+  }
+
+  .switch:checked {
+    box-shadow: inset 2rem 0 0 $green-500, inset 0 0 0 1px $green-500 !important;
+  }
+}
+
+/*
+ * Supprime les contours de selection Chrome
+ */
+*:focus {
+  outline: none !important;
+}
+
+
+/* ----------------------------- */
+/* Notifications                 */
+/* ----------------------------- */
+.notifications {
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: 500px;
+
+  .notification {
+    pointer-events: auto;
+    cursor: pointer;
+    border-radius: 10px;
+
+    &.alert--danger:hover {
+      background-color: darken($color-danger, 5%);
+    }
+    &.alert--info:hover {
+      background-color: darken($color-info, 5%);
+    }
+
+    div {
+      position: relative;
+      .left {
+        top: 50%;
+        position: absolute;
+        transform: translateY(-50%);
+      }
+      .right {
+        position: absolute;
+        top: -2px;
+        right: 0px;
+      }
+      p {
+        margin-left: 25px;
+        margin-right: 20px;
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: $tiny) {
+  .notifications {
+    width: 90%;
+  }
+}

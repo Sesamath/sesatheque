@@ -28,7 +28,7 @@ import isIframeLayout from './utils/isIframeLayout'
 import history from './history'
 import store from './store'
 
-import './styles/app.scss'
+import './App.scss'
 
 // ATTENTION il y a une deuxième conf bugsnag dans app/client/page/bugsnag.js pour le display et les editeurs iframes
 const beforeSend = (report) => {
