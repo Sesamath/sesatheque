@@ -49,8 +49,6 @@ module.exports = function (component) {
      * @route POST /api/personne/add
      */
     this.post('add', function (context) {
-      /* var reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-       log.error(new Error('une trace pour ' +reqHttp)) */
       if (context.perf) {
         var msg = 'start-pers-' + context.post.id
         log.perf(context.response, msg)

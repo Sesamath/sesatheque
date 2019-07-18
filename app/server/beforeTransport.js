@@ -55,7 +55,7 @@ function debug (context, data) {
  * @param context
  * @returns {string}
  */
-const getReqHttp = (context) => context.request.method + ' ' + context.request.parsedUrl.pathname + (context.request.parsedUrl.search || '')
+const getReqHttp = (context) => context.request.method + ' ' + context.request.url
 
 /**
  * Le listener beforeTransport, qui ne gère que les réponses de l'api, tous les autres contrôleurs (html à priori)

@@ -118,11 +118,13 @@ export const boot = (delay) => new Promise((resolve) => {
     isBooted = true
     finish()
   }
+
   if (isBooted) return finish()
 
-  // si le boot a démarré mais que l'événement startup n'est pas encore arrivé, faut l'attendre
+  // si le boot a démarré mais que l'événement startup n'est pas encore arrivé,
+  // (afterBootCallback pas encore appelée), faut l'attendre
   if (resolvedValue.lassi) {
-    log('waiting for boot')
+    log('boot already started, waiting for startup event')
     resolvedValue.lassi.on('startup', finish)
     return
   }

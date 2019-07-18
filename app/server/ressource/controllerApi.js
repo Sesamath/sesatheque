@@ -127,8 +127,6 @@ module.exports = function (component) {
      */
     function postRessource (context) {
       context.timeout = 5000
-      /* const reqHttp = context.request.method +' ' +context.request.parsedUrl.pathname +(context.request.parsedUrl.search||'')
-       log.error(new Error('une trace pour ' +reqHttp)) */
       const ressourcePostee = context.post
       const pid = $accessControl.getCurrentUserPid(context)
       let ressourceBdd
