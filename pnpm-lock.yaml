@@ -44,7 +44,7 @@ dependencies:
   regenerator-runtime: 0.12.1
   request: 2.88.0
   roboto-fontface: 0.10.0
-  sesajstools: framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40
+  sesajstools: framagit.org/Sesamath/sesajstools/d08aa5bc2a1a25b718d358a7078dd4289b1ae36c
   sesalab-sso: framagit.org/Sesamath/sesalab-sso/a3fd3e447badd9922ba1eea77806b5afa54f5797
   sesatheque-client: framagit.org/Sesamath/sesatheque-client/a9fd7d95592900bbae13604f0d27ffa32582f65a
   simple-crypto-js: 2.0.2
@@ -11046,6 +11046,18 @@ packages:
       repo: 'https://framagit.org/Sesamath/sesajstools.git'
       type: git
     version: 1.0.26
+  framagit.org/Sesamath/sesajstools/d08aa5bc2a1a25b718d358a7078dd4289b1ae36c:
+    dependencies:
+      chai: 4.2.0
+      lodash.isequal: 4.5.0
+      mocha: 5.2.0
+    dev: false
+    name: sesajstools
+    resolution:
+      commit: d08aa5bc2a1a25b718d358a7078dd4289b1ae36c
+      repo: 'https://framagit.org/Sesamath/sesajstools.git'
+      type: git
+    version: 1.0.28
   framagit.org/Sesamath/sesajstools/fcdbf5faeaf8f665ac08088808d4123ad541dc75:
     dependencies:
       chai: 4.2.0
