@@ -20,7 +20,7 @@ dependencies:
   ip: 1.1.5
   jquery: 3.3.1
   knacss: 7.1.0
-  lassi: framagit.org/Sesamath/lassi/50e8f30d15e82711fe09004e40ba55381d6e2b61
+  lassi: framagit.org/Sesamath/lassi/7aa697144361cb67902be37f2c25887a1b238f9c
   loadjs: 3.6.1
   lodash: 4.17.11
   minimist: 1.2.0
@@ -1304,13 +1304,22 @@ packages:
   /ajv-errors/1.0.1_ajv@6.10.0:
     dependencies:
       ajv: 6.10.0
+    dev: true
     peerDependencies:
       ajv: '>=5.0.0'
     resolution:
       integrity: sha512-DCRfO/4nQ+89p/RK43i8Ezd41EqdGIU4ld7nGF8OQ14oc/we5rEntLCUa7+jrn3nn83BosfwZA0wb4pon2o8iQ==
-  /ajv-i18n/3.4.0_ajv@6.10.0:
+  /ajv-errors/1.0.1_ajv@6.10.2:
     dependencies:
-      ajv: 6.10.0
+      ajv: 6.10.2
+    dev: false
+    peerDependencies:
+      ajv: '>=5.0.0'
+    resolution:
+      integrity: sha512-DCRfO/4nQ+89p/RK43i8Ezd41EqdGIU4ld7nGF8OQ14oc/we5rEntLCUa7+jrn3nn83BosfwZA0wb4pon2o8iQ==
+  /ajv-i18n/3.4.0_ajv@6.10.2:
+    dependencies:
+      ajv: 6.10.2
     dev: false
     peerDependencies:
       ajv: ^6.0.0
@@ -1319,10 +1328,19 @@ packages:
   /ajv-keywords/3.4.0_ajv@6.10.0:
     dependencies:
       ajv: 6.10.0
+    dev: true
     peerDependencies:
       ajv: ^6.9.1
     resolution:
       integrity: sha512-aUjdRFISbuFOl0EIZc+9e4FfZp0bDZgAdOOf30bJmw8VM9v84SHyVyxDfbWxpGYbdZD/9XoKxfHVNmxPkhwyGw==
+  /ajv-keywords/3.4.1_ajv@6.10.2:
+    dependencies:
+      ajv: 6.10.2
+    dev: false
+    peerDependencies:
+      ajv: ^6.9.1
+    resolution:
+      integrity: sha512-RO1ibKvd27e6FEShVFfPALuHI3WjSVNeK5FIsmme/LYRNxjKuNj+Dt7bucLa6NdSv3JcVTyMlm9kGR84z1XpaQ==
   /ajv/5.5.2:
     dependencies:
       co: 4.6.0
@@ -1340,6 +1358,15 @@ packages:
       uri-js: 4.2.2
     resolution:
       integrity: sha512-nffhOpkymDECQyR0mnsUtoCE8RlX38G0rYP+wgLWFyZuUyuuojSSvi/+euOiQBIn63whYwYVIIH1TvE3tu4OEg==
+  /ajv/6.10.2:
+    dependencies:
+      fast-deep-equal: 2.0.1
+      fast-json-stable-stringify: 2.0.0
+      json-schema-traverse: 0.4.1
+      uri-js: 4.2.2
+    dev: false
+    resolution:
+      integrity: sha512-TXtUUEYHuaTEbLZWIKUr5pmBuhDLy+8KYtPYdcV8qC+pOZL+NKqYwvWSRrVXHn+ZmRRAu8vJTAznH7Oag6RVRw==
   /amdefine/1.0.1:
     dev: true
     engines:
@@ -6270,6 +6297,10 @@ packages:
   /lodash/4.17.11:
     resolution:
       integrity: sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
+  /lodash/4.17.14:
+    dev: false
+    resolution:
+      integrity: sha512-mmKYbW3GLuJeX+iGP+Y7Gp1AiGHGbXHCOh/jZmrawMmsE7MS4znI3RL2FsjbqOyMayHInjOeykW7PEajUk1/xw==
   /log-symbols/2.2.0:
     dependencies:
       chalk: 2.4.2
@@ -6718,7 +6749,7 @@ packages:
     dependencies:
       bson: 1.1.1
       require_optional: 1.0.1
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.0
     dev: false
     optionalDependencies:
       saslprep: 1.0.3
@@ -6727,7 +6758,7 @@ packages:
   /mongodb/3.2.7:
     dependencies:
       mongodb-core: 3.2.7
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.0
     dev: false
     engines:
       node: '>=4'
@@ -9010,6 +9041,10 @@ packages:
   /safe-buffer/5.1.2:
     resolution:
       integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==
+  /safe-buffer/5.2.0:
+    dev: false
+    resolution:
+      integrity: sha512-fZEwUGbVl7kouZs1jCdMLdt95hdIv0ZeHg6L7qPeciMZhZ+/gdesW4wgTARkrFWEpspjEATAzUGPG8N2jJiwbg==
   /safe-regex/1.1.0:
     dependencies:
       ret: 0.1.15
@@ -10968,12 +11003,12 @@ packages:
     dev: true
     resolution:
       integrity: sha1-a6MY6xaWFyf10oT46gA+jWFU0Mg=
-  framagit.org/Sesamath/lassi/50e8f30d15e82711fe09004e40ba55381d6e2b61:
+  framagit.org/Sesamath/lassi/7aa697144361cb67902be37f2c25887a1b238f9c:
     dependencies:
-      ajv: 6.10.0
-      ajv-errors: 1.0.1_ajv@6.10.0
-      ajv-i18n: 3.4.0_ajv@6.10.0
-      ajv-keywords: 3.4.0_ajv@6.10.0
+      ajv: 6.10.2
+      ajv-errors: 1.0.1_ajv@6.10.2
+      ajv-i18n: 3.4.0_ajv@6.10.2
+      ajv-keywords: 3.4.1_ajv@6.10.2
       an-flow: src.sesamath.net/an-flow/cb06dacf3593f363ce98525a415bca650cfffc1a
       an-log: src.sesamath.net/an-log/f4511fd7ab17fb888e1a1c6b367d200bc7ff1340
       colors: 1.3.3
@@ -10984,21 +11019,21 @@ packages:
       dustjs-linkedin: 2.7.5
       express: 4.17.1
       express-session: 1.16.2
-      lodash: 4.17.11
+      lodash: 4.17.14
       moment: 2.24.0
       mongodb: 3.2.7
       morgan: 1.9.1
       progress: 2.0.3
       redis: 2.8.0
       serve-static: 1.14.1
-      sesajstools: framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40
+      sesajstools: framagit.org/Sesamath/sesajstools/fcdbf5faeaf8f665ac08088808d4123ad541dc75
     dev: false
     name: lassi
     resolution:
-      commit: 50e8f30d15e82711fe09004e40ba55381d6e2b61
+      commit: 7aa697144361cb67902be37f2c25887a1b238f9c
       repo: 'https://framagit.org/Sesamath/lassi.git'
       type: git
-    version: 2.4.14
+    version: 2.5.0
   framagit.org/Sesamath/sesajstools/4976c0051a7b0164b8a7acce662a012db121de40:
     dependencies:
       chai: 4.2.0
@@ -11011,6 +11046,18 @@ packages:
       repo: 'https://framagit.org/Sesamath/sesajstools.git'
       type: git
     version: 1.0.26
+  framagit.org/Sesamath/sesajstools/fcdbf5faeaf8f665ac08088808d4123ad541dc75:
+    dependencies:
+      chai: 4.2.0
+      lodash.isequal: 4.5.0
+      mocha: 5.2.0
+    dev: false
+    name: sesajstools
+    resolution:
+      commit: fcdbf5faeaf8f665ac08088808d4123ad541dc75
+      repo: 'https://framagit.org/Sesamath/sesajstools.git'
+      type: git
+    version: 1.0.27
   framagit.org/Sesamath/sesalab-sso/a3fd3e447badd9922ba1eea77806b5afa54f5797:
     dependencies:
       an-flow: src.sesamath.net/an-flow/cb06dacf3593f363ce98525a415bca650cfffc1a
@@ -11136,7 +11183,7 @@ specifiers:
   jsdoc: ^3.5.5
   jsdom: ^13.0.0
   knacss: ^7.0.7
-  lassi: 'git+https://framagit.org/Sesamath/lassi.git#2.4.14'
+  lassi: 'git+https://framagit.org/Sesamath/lassi.git#2.5.0'
   loadjs: ^3.5.5
   lodash: ^4.17.11
   minimist: ^1.2.0

@@ -109,7 +109,7 @@
     "ip": "^1.1.5",
     "jquery": "3.3.1",
     "knacss": "^7.0.7",
-    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.4.14",
+    "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.5.0",
     "loadjs": "^3.5.5",
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",
