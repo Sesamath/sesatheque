@@ -864,13 +864,10 @@ module.exports = function (component) {
     controller.get('public/getRid', function (context) {
       let id = context.get.id
       if (id) {
-        const slashPos = id.indexOf('/')
-        const debut = id.substr(0, slashPos)
-        if (debut === myBaseId) id = id.substr(slashPos + 1)
         $ressourceRepository.load(id, function (error, ressource) {
-          if (error) $json.Ko(context, error)
-          else if (ressource) $json.sendOk(context, {rid: ressource.rid})
-          else $json.sendKo(context, `cette ressource (${id}) n’existe pas`)
+          if (error) return $json.Ko(context, error)
+          if (ressource) return $json.sendOk(context, {rid: ressource.rid})
+          $json.notFound(context, `La ressource ${id} n’existe pas`)
         })
       } else {
         $json.sendKo(context, 'id manquant')

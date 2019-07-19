@@ -2806,10 +2806,12 @@ packages:
     resolution:
       integrity: sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
   /core-js/2.6.9:
+    requiresBuild: true
     resolution:
       integrity: sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
   /core-js/3.1.4:
     dev: true
+    requiresBuild: true
     resolution:
       integrity: sha512-YNZN8lt82XIMLnLirj9MhKDFZHalwzzrL9YLt6eb0T5D0EDl4IQ90IGkua8mHbnxNrkj1d8hbdizMc0Qmg1WnQ==
   /core-util-is/1.0.2:
@@ -10624,7 +10626,6 @@ packages:
     hasBin: true
     peerDependencies:
       webpack: 4.x.x
-    requiresBuild: true
     resolution:
       integrity: sha512-0vEa83M7kJtxK/jUhlpZ27WHIOndz5mghWL2O53kiDoA9DIxSKnfqB92LoqEn77cT4f3H2cZm1BMEat/6AZz3A==
   /webpack-dev-middleware/3.7.0_webpack@4.36.1:

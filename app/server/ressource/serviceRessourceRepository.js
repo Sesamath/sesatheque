@@ -607,20 +607,21 @@ module.exports = function (ressourceComponent) {
      * @returns {undefined}
      */
     function load (oid, next) {
-      if (_.isString(oid) && oid.indexOf('/') > 0) {
+      if (typeof oid !== 'string') throw Error(`load veut un id en string, pas ${typeof oid}`)
+      if (oid.includes('/')) {
         const [origin, idOrigin, bug] = oid.split('/')
-        if (bug) return next(new Error('identifiant invalide : ' + oid))
-        if (origin === 'cle') loadByCle(idOrigin, next)
-        else loadByOrigin(origin, idOrigin, next)
-      } else {
-        $cacheRessource.get(oid, function (error, ressourceCached) {
-          if (error) return next(error)
-          if (ressourceCached) return next(null, ressourceCached)
-          EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
-            cacheAndNext(error, ressource, next)
-          })
-        })
+        if (bug) return next(Error('identifiant invalide : ' + oid))
+        if (origin === 'cle') return loadByCle(idOrigin, next)
+        return loadByOrigin(origin, idOrigin, next)
       }
+      // sinon c'est un oid
+      $cacheRessource.get(oid, function (error, ressourceCached) {
+        if (error) return next(error)
+        if (ressourceCached) return next(null, ressourceCached)
+        EntityRessource.match('oid').equals(oid).grabOne(function (error, ressource) {
+          cacheAndNext(error, ressource, next)
+        })
+      })
     }
 
     /**
