@@ -39,7 +39,7 @@
 'use strict'
 /* eslint-env mocha */
 import faker from 'faker/locale/fr'
-import {boot, keepAlive, shutdownDelayed} from '../../boot'
+import boot from '../../boot'
 import {expect} from 'chai'
 import {
   createGroupe,
@@ -84,19 +84,17 @@ describe('API groupe', () => {
     $groupeRepository.delete(nom, (error) => error ? reject(error) : resolve())
   })
 
-  before(() => boot().then(({superTestAgent, lassi}) => {
+  before(() => boot().then(({lassi, superTestAgent, testsDone}) => {
     if (!superTestAgent) return Promise.reject(new Error('boot KO supertest non chargé'))
     agent = superTestAgent
     if (!lassi) return Promise.reject(new Error('boot KO lassi'))
+    after(testsDone)
     // EntityGroupe = lassi.service('EntityGroupe')
     $groupeRepository = lassi.service('$groupeRepository')
     return purge()
   }))
 
-  beforeEach(keepAlive)
-
   after(purge)
-  after(shutdownDelayed)
 
   context('sans avoir de session', () => {
     it('/api/groupes/perso denied', async () => {

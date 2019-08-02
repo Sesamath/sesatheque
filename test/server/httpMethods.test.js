@@ -36,7 +36,7 @@ import fetch from 'node-fetch'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
 
-import {boot, keepAlive, shutdownDelayed} from '../boot'
+import boot from '../boot'
 import {purge} from './populate'
 import {application} from '../../app/server/config'
 import {errors} from '../../app/server/main/controllerTest'
@@ -53,20 +53,19 @@ describe('httpMethods', function () {
   this.timeout(timeout * 5)
   let consoleErrorStub
 
-  before(() => boot().then(() => {
+  before(() => boot().then(({testsDone}) => {
+    after(testsDone)
     // faut mettre un pseudo fetch en global
     global.fetch = fetch
   }))
 
   after(() => {
     delete global.fetch
-    keepAlive(timeout) // le temps de purger
-    return purge().then(shutdownDelayed)
+    return purge()
   })
 
   beforeEach(() => {
     consoleErrorStub = sinon.stub(console, 'error')
-    keepAlive(timeout)
   })
   afterEach(() => {
     consoleErrorStub.reset()

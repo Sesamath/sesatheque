@@ -39,7 +39,7 @@ const errors = {
   401: 'Unauthorized',
   403: 'Forbidden',
   404: 'Not Found',
-  418: `I'm a Teapot`,
+  418: `I'm a teapot`,
   500: 'Internal Server Error',
   503: 'Service Unavailable'
 }

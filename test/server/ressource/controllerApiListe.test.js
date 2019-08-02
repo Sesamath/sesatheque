@@ -42,7 +42,7 @@ import {expect} from 'chai'
 import {populate, purge} from '../populate'
 import {createRessource} from '../helpers'
 import fixturesRessources from '../../fixtures/ressources'
-import {boot, keepAlive, shutdownDelayed} from '../../boot'
+import boot from '../../boot'
 import {limites} from '../../../app/server/ressource/config'
 import Ref from '../../../app/constructors/Ref'
 import {update as urlUpdate} from '../../../app/server/lib/url'
@@ -63,9 +63,10 @@ describe('GET /api/liste', () => {
 
   // boot + récup des services et config nécessaires à nos tests
   before(() => boot()
-    .then(({superTestClient, lassi}) => {
-      if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
+    .then(({lassi, superTestClient, testsDone}) => {
       if (!lassi) return Promise.reject(new Error('boot KO lassi'))
+      if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
+      after(testsDone)
       _superTestClient = superTestClient
       /* $settings = lassi.service('$settings')
       const apiToken = $settings.get('apiTokens')[0]
@@ -86,10 +87,7 @@ describe('GET /api/liste', () => {
         })).catch((error) => Promise.reject(error))
     }))
 
-  beforeEach(keepAlive)
-
   after(purge)
-  after(shutdownDelayed)
 
   const checkDefault = (result) => {
     expect(result).to.have.property('message')

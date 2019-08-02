@@ -48,7 +48,7 @@ import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
 
 import {XMLHttpRequest} from 'xmlhttprequest'
 
-import {boot, keepAlive, shutdownDelayed} from '../../boot'
+import boot from '../../boot'
 import config from '../../../app/server/config'
 import configRessource from '../../../app/server/ressource/config'
 import {addRessource, getRandomRessource, populate, purge} from '../../server/populate'
@@ -144,7 +144,8 @@ describe('sesatheque-client', () => {
   // inutile ici de le faire à chaque test, c'est le client qu'on teste
   before(function () {
     this.timeout(20000)
-    return boot().then(() => {
+    return boot().then(({testsDone}) => {
+      after(testsDone)
       log.setLogLevel('error')
       sesathequeClient = getClient(sesatheques, 'mochaBaseId', XMLHttpRequest)
       return populate()
@@ -153,7 +154,6 @@ describe('sesatheque-client', () => {
 
   beforeEach(() => {
     consoleErrorStub = sinon.stub(console, 'error')
-    return keepAlive()
   })
 
   afterEach(() => {
@@ -163,7 +163,6 @@ describe('sesatheque-client', () => {
   })
 
   after(purge)
-  after(shutdownDelayed)
 
   it('getRessource remonte une ressource', () => {
     const getCheckPromise = (expected) => new Promise((resolve, reject) => {

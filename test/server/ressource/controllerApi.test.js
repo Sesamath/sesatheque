@@ -41,7 +41,7 @@
 import {expect} from 'chai'
 import faker from 'faker/locale/fr'
 import {getRandomPersonne, getRandomRessource, getRessources, populate, purge} from '../populate'
-import {boot, keepAlive, shutdownDelayed} from '../../boot'
+import boot from '../../boot'
 import configRessource from '../../../app/server/ressource/config'
 import config from '../../../app/server/config'
 import helpersFactory from './helpers'
@@ -64,9 +64,10 @@ describe('controller api ressource', () => {
   // boot + récup des services et config nécessaires à nos tests
   before(function () {
     this.timeout(10000)
-    return boot().then(({superTestClient, lassi}) => {
+    return boot().then(({lassi, superTestClient, testsDone}) => {
       if (!superTestClient) return Promise.reject(new Error('boot KO stc'))
       if (!lassi) return Promise.reject(new Error('boot KO lassi'))
+      after(testsDone)
       _superTestClient = superTestClient
       $settings = lassi.service('$settings')
       const apiToken = $settings.get('apiTokens')[0]
@@ -83,10 +84,7 @@ describe('controller api ressource', () => {
     })
   })
 
-  beforeEach(keepAlive)
-
   after(purge)
-  after(shutdownDelayed)
 
   it('POST enregistre une ressource et retourne son oid', function () {
     const getPostPromise = (ressource) => _superTestClient

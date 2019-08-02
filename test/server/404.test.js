@@ -39,23 +39,21 @@
 'use strict'
 /* eslint-env mocha */
 import {expect} from 'chai'
-import {boot, keepAlive, shutdownDelayed} from '../boot'
+import boot from '../boot'
 import {getHtml} from '../../app/server/main/reactPage'
 import {purge} from './populate'
 
 describe('prend un 404 sur les urls inexistantes', function () {
   const paths = ['/public/foo/bar', '/ressource/foo/bar', '/public/foo', '/ressource/foo', '/foo/bar']
   let _superTestClient
-  const setClient = ({superTestClient}) => {
-    if (!superTestClient) return Promise.reject(new Error('pas de client express après le boot'))
-    _superTestClient = superTestClient
-    return Promise.resolve()
-  }
   this.timeout(60000)
-  before(() => boot().then(setClient))
-  beforeEach(keepAlive)
+
+  before(() => boot().then(({superTestClient, testsDone}) => {
+    after(testsDone)
+    _superTestClient = superTestClient
+  }))
+
   after(purge)
-  after(shutdownDelayed)
 
   const reactPage = getHtml()
 

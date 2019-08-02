@@ -40,7 +40,7 @@
 /* eslint-env mocha */
 
 import {expect} from 'chai'
-import {boot, keepAlive, shutdownDelayed} from '../../boot'
+import boot from '../../boot'
 import {purge} from '../populate'
 
 describe('EntityGroupe', () => {
@@ -68,9 +68,10 @@ describe('EntityGroupe', () => {
 
   // boot + récup des services et config nécessaires à nos tests
   before((done) => {
-    boot().then(({lassi}) => {
+    boot().then(({lassi, testsDone}) => {
       if (!lassi) return Promise.reject(new Error('boot KO lassi'))
       EntityGroupe = lassi.service('EntityGroupe')
+      after(testsDone)
       // on démarre sur une base vide
       EntityGroupe.match().purge((error) => {
         if (error) return done(error)
@@ -79,10 +80,7 @@ describe('EntityGroupe', () => {
     }).catch(done)
   })
 
-  beforeEach(keepAlive)
-
   after(purge)
-  after(shutdownDelayed)
 
   it('create', function () {
     checkGroupe(EntityGroupe.create(groupeData))

@@ -44,7 +44,7 @@ import sinon from 'sinon'
 // si on a pas de link vers le module on peut pas aller dans src (mocha aime pas les import que babel ne traite pas because node_modules)
 // import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/src/sesatheques'
 import {addSesatheque, exists, getBaseId, getBaseUrl} from 'sesatheque-client/dist/server/sesatheques'
-import {boot, keepAlive, shutdownDelayed} from '../../boot'
+import boot from '../../boot'
 
 chai.use(sinonChai)
 
@@ -63,17 +63,15 @@ describe('sesatheques', () => {
   let $settings
 
   before(() => boot()
-    .then(({lassi}) => {
+    .then(({lassi, testsDone}) => {
+      after(testsDone)
       $settings = lassi.service('$settings')
       return Promise.resolve()
     })
   )
 
-  after(shutdownDelayed)
-
   beforeEach(() => {
     consoleErrorStub = sinon.stub(console, 'error')
-    return keepAlive()
   })
   afterEach(() => {
     consoleErrorStub.reset()
