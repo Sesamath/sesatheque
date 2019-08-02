@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -156,7 +156,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "clean-webpack-plugin": "^1.0.0",
-    "copy-webpack-plugin": "^4.6.0",
+    "copy-webpack-plugin": "^5.0.4",
     "core-js": "^2.6.5",
     "css-loader": "^2.0.1",
     "enzyme": "^3.6.0",
@@ -197,12 +197,12 @@
     "xmlhttprequest": "^1.8.0"
   },
   "peerDependencies": {
-    "@sesatheque-plugins/arbre": "git+https://framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.1.5",
-    "@sesatheque-plugins/iep": "git+https://framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.3",
+    "@sesatheque-plugins/arbre": "git+https://framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.1.7",
+    "@sesatheque-plugins/iep": "git+https://framagit.org/Sesamath/sesatheque-plugin-iep.git#1.0.4",
     "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.1.2",
     "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.8",
-    "@sesatheque-plugins/qcm": "git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.4",
-    "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.5"
+    "@sesatheque-plugins/qcm": "git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.5",
+    "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.6"
   },
   "eslintConfig": {
     "parser": "babel-eslint",
