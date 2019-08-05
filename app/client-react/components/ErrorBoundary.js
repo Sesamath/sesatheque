@@ -1,25 +1,13 @@
-import bugsnagJs from '@bugsnag/js'
 import bugsnagReact from '@bugsnag/plugin-react'
 import PropTypes from 'prop-types'
 import React from 'react'
-import config from '../../server/config'
-
-const {application, bugsnag} = config
+import getBugsnagClient from '../utils/getBugsnagClient'
 
 let ErrorBoundary
 
-if (bugsnag && bugsnag.apiKey) {
-  const {apiKey, appVersion} = bugsnag
+const bugsnagClient = getBugsnagClient()
 
-  const bugsnagClient = bugsnagJs({
-    // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#apikey
-    apiKey,
-    // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#appversion
-    appVersion,
-    // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#releasestage
-    releaseStage: application.staging
-  })
-
+if (bugsnagClient) {
   // cf https://docs.bugsnag.com/platforms/javascript/react/
   bugsnagClient.use(bugsnagReact, React)
   ErrorBoundary = bugsnagClient.getPlugin('react')
