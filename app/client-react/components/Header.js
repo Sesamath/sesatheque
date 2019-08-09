@@ -22,6 +22,7 @@ const getButtons = (personne) => {
     return [buttonSearch]
   }
 
+  // on a du personne.permissions.create donc tous ces boutons
   return [
     {
       id: 'buttonAdd',

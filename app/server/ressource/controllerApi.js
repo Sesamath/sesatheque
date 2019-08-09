@@ -128,7 +128,7 @@ module.exports = function (component) {
     function postRessource (context) {
       context.timeout = 5000
       const ressourcePostee = context.post
-      const pid = $accessControl.getCurrentUserPid(context)
+      let isCreation
       let ressourceBdd
 
       if (context.perf) {
@@ -139,7 +139,8 @@ module.exports = function (component) {
       }
 
       log.debug('post /api/ressource a reçu', ressourcePostee, 'api', {max: 10000})
-      // faut au moins être authentifié
+      // faut être authentifié ou avoir un token ok
+      // (avec un token ok, hasAllRights est true mais isAuthenticated peut être false)
       if (!$accessControl.isAuthenticated(context) && !$accessControl.hasAllRights(context)) {
         return $json.denied(context, 'Vous devez être authentifié pour ajouter une ressource')
       }
@@ -177,22 +178,22 @@ module.exports = function (component) {
         }
       }).seq(function (_ressourceBdd) {
         ressourceBdd = _ressourceBdd
+        isCreation = !ressourceBdd
         if (log.perf) log.perf(context.response, 'loaded')
-        const errMsg = ressourceBdd
-          ? $accessControl.getDeniedMessage('update', context, ressourceBdd)
-          : $accessControl.getDeniedMessage('create', context, ressourcePostee)
+        const errMsg = isCreation
+          ? $accessControl.getDeniedMessage('create', context, ressourcePostee)
+          : $accessControl.getDeniedMessage('update', context, ressourceBdd)
         if (errMsg) return $json.denied(context, errMsg)
+
+        // on a le droit de créer ou modifier cette ressource
         if (ressourceBdd) log.debug(`auteurs venant de la bdd ${ressourceBdd.auteurs.join(' ')}, version ${ressourceBdd.version}`)
         // on ajoute la catégorie si y'en a pas et qu'on peut la déduire
         const tt = ressourcePostee.type
         if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
 
-        // le contenu est partiel si on le réclame ou si on a oid (ou idOrigine) sans titre ni catégorie
-        let partial = !!context.get.partial
-        if (!partial && !ressourcePostee.titre && !ressourcePostee.categories) {
-          partial = (ressourcePostee.oid || (ressourcePostee.origine && ressourcePostee.idOrigine))
-        }
-        const data = partial ? Object.assign({}, ressourceBdd, ressourcePostee) : ressourcePostee
+        // le contenu est partiel si on le réclame ou si c'est un update sans titre ni catégorie
+        let isMerge = ['1', 'true'].includes(context.get.merge) || (!isCreation && !ressourcePostee.titre && !ressourcePostee.categories)
+        const data = isMerge ? Object.assign({}, ressourceBdd, ressourcePostee) : ressourcePostee
         $ressourceControl.valideRessourceFromPost(data, this)
       }).seq(function (cleanData) {
         log.debug('ressource après valideRessourceFromPost', cleanData, 'api', {max: 10000})
@@ -201,10 +202,15 @@ module.exports = function (component) {
         $personneControl.checkGroupes(context, ressourceBdd, cleanData, this)
       }).seq(function (cleanData) {
         log.debug(`après checkGroupes auteurs ${cleanData.auteurs && cleanData.auteurs.join(' ')}, version ${cleanData.version}`)
-        // on ajoute le user courant pour serie et sequenceModele,
-        // pas encore pour tous les types par crainte d'effets de bords pas prévus…
-        if (pid && (cleanData.type === 'serie' || cleanData.type === 'sequenceModele')) {
-          cleanData.auteurs = [pid]
+        // on ajoute le user courant sur les créations
+        if (isCreation) {
+          const pid = $accessControl.getCurrentUserPid(context)
+          if (pid) {
+            // pas le cas si l'api est utilisée par un bot ayant les droits (tests par exemple)
+            cleanData.auteurs = [pid]
+          } else if (!$accessControl.hasAllRights(context)) {
+            throw Error('personne authentifiée sans pid')
+          }
         }
         $personneControl.checkPersonnes(context, ressourceBdd, cleanData, this)
       }).seq(function (cleanData) {
