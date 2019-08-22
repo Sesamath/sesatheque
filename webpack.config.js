@@ -178,8 +178,15 @@ const conf = {
         // et on veut que ça fonctionne aussi s'ils sont linked (ils sont alors dans
         // pathLocal/sesatheque-plugin-xxx/…
         // ou dans un node_modules/@sesatheque-plugins/xxx/)
-        test: /\/@?sesatheque-plugin.*\.jsx?/,
-        exclude: /\/@?sesatheque-plugin.*\/node_modules\//,
+        // ça c'est pour le build "ordinaire"
+        test: /\/@sesatheque-plugins\/.*\.jsx?/,
+        exclude: /\/@sesatheque-plugins\/.*\/node_modules\//,
+        use: babelLoader
+      }, {
+        // et ça pour le build avec module linké path local sans /@sesatheque-plugins/ dedans
+        test: /\/sesatheque-plugin-[a-z]+\/.*\.jsx?/,
+        // on exclue ça, déjà pris au test précédent
+        exclude: [/\/@sesatheque-plugins\//, /\/sesatheque-plugin-[a-z]+\/node_modules\//],
         use: babelLoader
       }, {
         // idem pour sesatheque-client ou sesaeditgraphe
