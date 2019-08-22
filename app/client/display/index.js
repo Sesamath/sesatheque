@@ -137,7 +137,7 @@ function addResultatCallback (ressource, options) {
 function alertIfError (error) {
   if (!error) return
   console.error(error)
-  /* global bugsnagClient, alert */
+  /* global bugsnagClient */
   if (typeof bugsnagClient !== 'undefined') bugsnagClient.notify(error)
   alert(error)
 }
