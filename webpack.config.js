@@ -25,7 +25,7 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 // const fs = require('fs')
 const path = require('path')
 const autoprefixer = require('autoprefixer')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 // const webpack = require('webpack')
@@ -224,15 +224,8 @@ const conf = {
             loader: 'postcss-loader',
             options: {
               plugins: () => [
-                autoprefixer({
-                  browsers: [
-                    // attention à mettre la même liste que dans package.json:babel
-                    'ie 11',
-                    'last 3 iOS versions',
-                    'last 3 Safari versions',
-                    'last 3 Android versions'
-                  ]
-                })
+                // il prend sa liste de browsers dans package.json:browserslist
+                autoprefixer()
               ]
             }
           },
@@ -243,7 +236,7 @@ const conf = {
   },
   plugins: [
     // On vide le dossier de build
-    new CleanWebpackPlugin([buildDir]),
+    new CleanWebpackPlugin(),
     // statique
     new CopyWebpackPlugin([
       // {from: './node_modules/sesaeditgraphe/dist'},
@@ -314,48 +307,5 @@ if (isDevServer) {
     }
   }
 }
-
-// reste le pb des modules non résolus par webpack lorsque les modules ont été installés par pnpm
-// Plutôt que d'ajouter les chemins ici (qui sont peut-être la source de plantages dans le bootstrap.js
-// de webpack constatés sur des j3p avec des sections ancienexo_mep) on ajoute ces dépendances de
-// @babel/polyfill (qu'il indique pourtant comme dépendances) comme étant aussi les notres
-//   "core-js": "^2.5.7"
-//   "regenerator-runtime": "^0.11.1"
-// idem pour prop-types (qui est dans les dépendances des modules react et redux)
-//   "prop-types": "^15.6.2"
-/*
-try {
-  require.resolve('prop-types')
-} catch (error) {
-  // on tente de le chercher dans les node_modules de react
-  const reactDir = path.dirname(require.resolve('react'))
-  const propTypesDir = path.resolve(reactDir, '..', '..', 'node_modules', 'prop-types')
-  if (fs.existsSync(path.resolve(propTypesDir, 'package.json'))) conf.resolve.alias['prop-types'] = propTypesDir
-  else throw Error(`require ne trouvera pas le module prop-types de react (ni node_modules/prop-types ni ${propTypesDir})`)
-}
-
-try {
-  require.resolve('core-js')
-} catch (error) {
-  // on tente de le chercher dans les node_modules de @babel, un peu scabreux car @babel/polyfill résoud sur
-  // node_modules/.registry.npmjs.org/@babel/polyfill/7.0.0/node_modules/@babel/polyfill/lib/index.js
-  // mais core-js est dans
-  // node_modules/.registry.npmjs.org/@babel/polyfill/7.0.0/node_modules/core-js
-  const babelPolyfillDir = path.dirname(require.resolve('@babel/polyfill', '..'))
-  const coreJsDir = path.resolve(babelPolyfillDir, '..', '..', '..', 'core-js')
-  if (fs.existsSync(path.resolve(coreJsDir, 'package.json'))) conf.resolve.alias['core-js'] = coreJsDir
-  else throw Error(`require ne trouvera pas le module core-js de babel (ni node_modules/core-js ni ${coreJsDir})`)
-}
-
-try {
-  require.resolve('regenerator-runtime')
-} catch (error) {
-  // idem core-js
-  const babelPolyfillDir = path.dirname(require.resolve('@babel/polyfill', '..'))
-  const regeneratorRuntimeDir = path.resolve(babelPolyfillDir, '..', '..', '..', 'regenerator-runtime')
-  if (fs.existsSync(path.resolve(regeneratorRuntimeDir, 'package.json'))) conf.resolve.alias['regenerator-runtime'] = regeneratorRuntimeDir
-  else throw Error(`require ne trouvera pas le module regenerator-runtime de babel (ni node_modules/regenerator-runtime ni ${regeneratorRuntimeDir})`)
-}
-/* */
 
 module.exports = conf

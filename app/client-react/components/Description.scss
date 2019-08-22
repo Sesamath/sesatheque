@@ -17,6 +17,13 @@
       margin: 0;
     }
 
+    /* le texte est complètement collé sans ces margin… */
+    .relations li {
+      img, a {
+        margin: 0 0.5em;
+      }
+    }
+
     .txtbold {
       font-weight: bold;
     }

@@ -34,11 +34,6 @@ const fs = require('fs')
 const path = require('path')
 /* eslint-env mocha */
 
-// faut ajouter notre sesathèque coté client
-const sesatheques = require('sesatheque-client/src/sesatheques')
-const {baseId, baseUrl} = require('../app/server/config').application
-sesatheques.addSesatheque(baseId, baseUrl)
-
 // on peut mettre dans mocha.opts un
 // --require babel-core/register
 // mais il faut lui passer des options, on le fait ici et remplace la ligne précédente par
@@ -47,6 +42,8 @@ sesatheques.addSesatheque(baseId, baseUrl)
 // on veut exclure les node_modules sauf sesatheque-client/src
 // faut retourner true pour que babel ignore le fichier
 const babelIgnoreFilter = (file) => {
+  // en cas de pb "Unexpected token import", décommenter la ligne suivante pour trouver qui pose pb
+  // console.log(`babelize ${file} ?`)
   if (/\/node_modules\//.test(file)) {
     if (/\/app\/plugins/.test(file)) return false
     return !/\/sesatheque-client\/src\//.test(file)

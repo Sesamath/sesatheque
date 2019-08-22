@@ -57,6 +57,8 @@ module.exports = function (component) {
           context.status = 500
           displayError(context, error)
         } else if (ressource && isPublic(ressource)) {
+          // faut préciser les droits en lecture seule (on est sur /public/, donc pas de cookie)
+          ressource._droits = 'R'
           displayRessource(context, ressource)
         } else if (ressource) {
           // elle n'était pas publique
@@ -85,6 +87,7 @@ module.exports = function (component) {
           context.status = 500
           displayError(context, error)
         } else if (ressource && (isPublic(ressource) || origine === 'cle')) {
+          ressource._droits = 'R'
           displayRessource(context, ressource)
         } else if (ressource) {
           // elle n'était pas publique

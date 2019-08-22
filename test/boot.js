@@ -46,9 +46,9 @@ import app from '../app/server'
 import config from '../app/server/config'
 import anLog from 'an-log'
 // si on a pas de link vers le module on peut pas aller dans src
-// import sesatheques from 'sesatheque-client/src/sesatheques'
 import sesatheques from 'sesatheque-client/dist/server/sesatheques'
 import log from 'sesajstools/utils/log'
+const {addSesatheque} = sesatheques
 
 /**
  * client supertest
@@ -129,7 +129,7 @@ export default function boot () {
     }
 
     // on enregistre notre sesatheque de test
-    sesatheques.addSesatheque(config.application.baseId, config.application.baseUrl)
+    addSesatheque(config.application.baseId, config.application.baseUrl)
     // on configure an-log d'après la conf
     // les logs de l'appli sont dans le dossier configuré dans _private/test.js
     // possibilité de modifier le logLevel là-bas
