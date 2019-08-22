@@ -124,7 +124,18 @@ const conf = {
       // Car les plugins peuvent avoir la leur (et pas mal d'extension jquery font leur
       // propre import jquery qu'elles augmentent sans le renvoyer)
       // ça règle les pbs avec jquery-ui et jstree
-      jquery: path.resolve(__dirname, 'node_modules/jquery')
+      jquery: path.resolve(__dirname, 'node_modules/jquery'),
+      // sans ces alias webpack plante sur les plugins en pnpm link
+      'prop-types': path.resolve(__dirname, 'node_modules/prop-types'),
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+      'react-hot-loader': path.resolve(__dirname, 'node_modules/react-hot-loader'),
+      'react-redux': path.resolve(__dirname, 'node_modules/react-redux'),
+      'redux': path.resolve(__dirname, 'node_modules/redux'),
+      'redux-form': path.resolve(__dirname, 'node_modules/redux-form'),
+      'redux-thunk': path.resolve(__dirname, 'node_modules/redux-thunk'),
+      'core-js': path.resolve(__dirname, 'node_modules/core-js'),
+      'regenerator-runtime': path.resolve(__dirname, 'node_modules/regenerator-runtime'),
     }
   },
   // pour nos loaders perso
@@ -204,7 +215,7 @@ const conf = {
   },
   plugins: [
     // On vide le dossier de build
-    new CleanWebpackPlugin([buildDir]),
+    new CleanWebpackPlugin(),
     // statique
     new CopyWebpackPlugin([
       // {from: './node_modules/sesaeditgraphe/dist'},

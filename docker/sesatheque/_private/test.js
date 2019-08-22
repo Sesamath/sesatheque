@@ -3,7 +3,7 @@
  */
 const path = require('path')
 const uuid = require('an-uuid')
-const sesatheques = require('sesatheque-client/src/sesatheques')
+const {addSesatheque} = require('sesatheque-client/src/sesatheques')
 const logDir = path.join(__dirname, '../logs.test')
 // sert de préfixe de log, dbName et redisPrefix
 const appName = 'testSesatheque'
@@ -12,7 +12,7 @@ const hostname = 'localhost'
 const port = 3011
 const host = `${hostname}:${port}`
 const baseUrl = `http://${host}/`
-sesatheques.addSesatheque(baseId, baseUrl)
+addSesatheque(baseId, baseUrl)
 
 const getLoggerConf = suffix => ({
   logLevel: 'error',

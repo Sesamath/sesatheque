@@ -31,4 +31,4 @@
 
 'use strict'
 
-module.exports = require('sesatheque-client/src/constructors/Groupe')
+module.exports = require('sesatheque-client/dist/server/constructors/Groupe').default

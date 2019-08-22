@@ -30,7 +30,7 @@
  */
 
 'use strict'
-const common = require('sesatheque-client/dist/server/config')
+const common = require('sesatheque-client/dist/server/config').default
 
 /**
  * Nos listes de types & co, qui changent rarement

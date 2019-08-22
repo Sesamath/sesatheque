@@ -100,7 +100,7 @@ module.exports = function (component) {
       } else if (typeof error === 'string') {
         message = error
       } else if (error instanceof Error) {
-        log.error(error)
+        console.error(error)
         message = error.toString()
       } else if (Array.isArray(error) && error.every(err => typeof err === 'string')) {
         message = `Il y a ${error.length} erreurs :\n- ${error.join('\n- ')}`

@@ -35,9 +35,9 @@ const path = require('path')
 /* eslint-env mocha */
 
 // faut ajouter notre sesathèque coté client
-const sesatheques = require('sesatheque-client/src/sesatheques')
+const {addSesatheque} = require('sesatheque-client/src/sesatheques')
 const {baseId, baseUrl} = require('../app/server/config').application
-sesatheques.addSesatheque(baseId, baseUrl)
+addSesatheque(baseId, baseUrl)
 
 // on peut mettre dans mocha.opts un
 // --require babel-core/register
