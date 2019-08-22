@@ -151,7 +151,7 @@ const conf = {
       'redux-form': path.resolve(__dirname, 'node_modules/redux-form'),
       'redux-thunk': path.resolve(__dirname, 'node_modules/redux-thunk'),
       'core-js': path.resolve(__dirname, 'node_modules/core-js'),
-      'regenerator-runtime': path.resolve(__dirname, 'node_modules/regenerator-runtime'),
+      'regenerator-runtime': path.resolve(__dirname, 'node_modules/regenerator-runtime')
     }
   },
   // pour nos loaders perso
