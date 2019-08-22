@@ -77,7 +77,7 @@ let base = '/'
  * @param {string|Error} error Le message à afficher
  * @param {number} [delay] Un éventuel délai d'affichage en secondes
  */
-function addError (error, delay) {
+export function addError (error, delay) {
   // on log toujours en console
   if (!error) return log.error(new Error('page.addError appelé sans erreur à afficher'))
   log.error(error)
@@ -108,7 +108,7 @@ function addError (error, delay) {
  * @param {function} onClickCb sera appelée à chaque clic sur le bouton
  * @return {Element} undefined si #boutonVu n'existait pas dans la page
  */
-function addBoutonVu (onClickCb) {
+export function addBoutonVu (onClickCb) {
   try {
     const boutonVu = wd.getElementById('boutonVu')
     if (boutonVu) {
@@ -124,7 +124,7 @@ function addBoutonVu (onClickCb) {
 /**
  * Cache le #titre (en global pour que les plugins puissent le faire)
  */
-function hideTitle () {
+export function hideTitle () {
   try {
     const titre = wd.getElementById('titre')
     if (titre && titre.style) titre.style.display = 'none'
@@ -143,7 +143,7 @@ function hideTitle () {
  * @param {initOptions}   options
  * @param {errorCallback} [next]
  */
-function init (options, next) {
+export function init (options, next) {
   if (!options) options = {}
   if (options.base) setBase(options.base)
   else options.base = base
@@ -189,7 +189,7 @@ function init (options, next) {
  * @param {boolean} [parallelLoad=true]
  * @param callback
  */
-function loadAsync (moduleNames, parallelLoad, callback) {
+export function loadAsync (moduleNames, parallelLoad, callback) {
   if (callback === undefined) {
     callback = parallelLoad
     parallelLoad = true
@@ -234,7 +234,7 @@ function loadAsync (moduleNames, parallelLoad, callback) {
  * Change la base (pour la mettre absolue après chargement de ce module en cross domain)
  * @param newBase
  */
-function setBase (newBase) {
+export function setBase (newBase) {
   if (newBase.substring(-1) !== '/') newBase += '/'
   base = newBase
 }
@@ -244,7 +244,7 @@ function setBase (newBase) {
  * @param {string} htmlString
  * @param {number} [delay=5] délai en s avant fermeture auto
  */
-function showNotification (htmlString, delay = 5) {
+export function showNotification (htmlString, delay = 5) {
   const parent = document.body
   const style = {
     position: 'absolute',
@@ -275,7 +275,17 @@ function showNotification (htmlString, delay = 5) {
  * Module de base pour les méthodes spécifiques à sesatheque et son dom (addError, hideTitle)
  * @service page
  */
-export {addError, addBoutonVu, autosize, hideTitle, init, loadAsync, refreshAuth, setBase, showNotification}
+export default {
+  addError,
+  addBoutonVu,
+  autosize,
+  hideTitle,
+  init,
+  loadAsync,
+  refreshAuth,
+  setBase,
+  showNotification
+}
 
 /* et l'on s'exporte dans le dom global pour pouvoir être utilisé hors webpack
 if (typeof window !== 'undefined') {
