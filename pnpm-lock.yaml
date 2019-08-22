@@ -66,7 +66,7 @@ devDependencies:
   chai-as-promised: 7.1.1_chai@4.2.0
   clean-webpack-plugin: 3.0.0_webpack@4.39.1
   copy-webpack-plugin: 5.0.4_webpack@4.39.1
-  core-js: 3.2.0
+  core-js: 3.2.1
   css-loader: 3.2.0_webpack@4.39.1
   enzyme: 3.10.0
   enzyme-adapter-react-16: 1.14.0_b543d0f872e4d79795800943b57d0a25
@@ -2886,6 +2886,11 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-gybgLzmr7SQRSF6UzGYXducx4eE10ONQlyEnQoqiGPbmbn7zLkb73tPfc4YbZN0lvcTQwoLNPjq4RuCaCumGyQ==
+  /core-js/3.2.1:
+    dev: true
+    requiresBuild: true
+    resolution:
+      integrity: sha512-Qa5XSVefSVPRxy2XfUC13WbvqkxhkwB3ve+pgCQveNgYzbM/UxZeu1dcOX/xr4UmfUd+muuvsaxilQzCyUurMw==
   /core-util-is/1.0.2:
     resolution:
       integrity: sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
@@ -11347,7 +11352,7 @@ specifiers:
   clean-webpack-plugin: ^3.0.0
   connected-react-router: 5.0.1
   copy-webpack-plugin: ^5.0.3
-  core-js: ^3.1.4
+  core-js: ^3.2.1
   css-loader: ^3.0.0
   elementtree: ^0.1.7
   enzyme: ^3.6.0
