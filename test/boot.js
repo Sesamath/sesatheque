@@ -46,8 +46,9 @@ import app from '../app/server'
 import config from '../app/server/config'
 import anLog from 'an-log'
 // si on a pas de link vers le module on peut pas aller dans src
-import {addSesatheque} from 'sesatheque-client/dist/server/sesatheques'
+import sesatheques from 'sesatheque-client/dist/server/sesatheques'
 import log from 'sesajstools/utils/log'
+const {addSesatheque} = sesatheques
 
 /**
  * client supertest
