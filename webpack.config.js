@@ -62,6 +62,22 @@ const babelLoader = {
   loader: 'babel-loader',
   options: babelConfig
 }
+/* **
+ * Remplacer la déclaration précédente par ce qui suit pour voir en console la liste des fichiers qui passent par babel
+ * (c'est parfois nécessaire pour trouver la cause d'une erreur au runtime du genre "_typeof is not defined")
+ * /
+const babelized = new Set()
+const babelLoader = ({realResource}) => {
+  if (!babelized.has(realResource)) {
+    console.log(`babelize`, realResource)
+    babelized.add(realResource)
+  }
+  return {
+    loader: 'babel-loader',
+    options: babelConfig
+  }
+}
+/* */
 
 // ajout en prod des js appelés par des sites tiers
 const entriesForPeers = isProd ? {
@@ -124,7 +140,18 @@ const conf = {
       // Car les plugins peuvent avoir la leur (et pas mal d'extension jquery font leur
       // propre import jquery qu'elles augmentent sans le renvoyer)
       // ça règle les pbs avec jquery-ui et jstree
-      jquery: path.resolve(__dirname, 'node_modules/jquery')
+      jquery: path.resolve(__dirname, 'node_modules/jquery'),
+      // sans ces alias webpack plante sur les plugins en pnpm link
+      'prop-types': path.resolve(__dirname, 'node_modules/prop-types'),
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+      'react-hot-loader': path.resolve(__dirname, 'node_modules/react-hot-loader'),
+      'react-redux': path.resolve(__dirname, 'node_modules/react-redux'),
+      'redux': path.resolve(__dirname, 'node_modules/redux'),
+      'redux-form': path.resolve(__dirname, 'node_modules/redux-form'),
+      'redux-thunk': path.resolve(__dirname, 'node_modules/redux-thunk'),
+      'core-js': path.resolve(__dirname, 'node_modules/core-js'),
+      'regenerator-runtime': path.resolve(__dirname, 'node_modules/regenerator-runtime'),
     }
   },
   // pour nos loaders perso
@@ -137,6 +164,7 @@ const conf = {
   module: {
     // si deux règles matchent sur un fichier les deux sont appliquées,
     // la dernière de la liste s'applique d'abord
+    // en cas d'erreur "_typeof is not defined", c'est qu'un fichier est passé deux fois par babel, ou qu'il faut l'exclure du babel-loader
     rules: [
       ...rules.map(rule => ({
         ...rule,
@@ -151,10 +179,12 @@ const conf = {
         // pathLocal/sesatheque-plugin-xxx/…
         // ou dans un node_modules/@sesatheque-plugins/xxx/)
         test: /\/@?sesatheque-plugin.*\.jsx?/,
+        exclude: /\/@?sesatheque-plugin.*\/node_modules\//,
         use: babelLoader
       }, {
         // idem pour sesatheque-client ou sesaeditgraphe
         test: /\/sesa(theque-client|editgraphe)\/.+\.js/,
+        exclude: /\/sesa(theque-client|editgraphe)\/node_modules\//,
         use: babelLoader
       }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
@@ -165,14 +195,16 @@ const conf = {
         use: 'config-loader'
       }, {
         // les node_modules qui doivent passer par babel:
-        test: /node_modules\/(sesatheque-client|sesaeditgraphe|query-string|strict-uri-encode|split-on-first)\/.*\.js/,
+        test: /node_modules\/(query-string|strict-uri-encode|split-on-first)\/.*\.js/,
+        // mais pas leurs dépendances
+        exclude: /node_modules\/(query-string|strict-uri-encode|split-on-first)\/.*node_modules\//,
         use: babelLoader
       }, {
         // html pour nos iframes
         test: /app\/(client|plugins)\/.*\.html/,
         use: 'file-loader'
       }, {
-        // idem pour les html des modules en link local
+        // idem pour les html des modules en link local (pas de @ donc on re-match pas les node_modules du test précédent)
         test: /\/sesatheque-plugin-[\w]+\/.*\.html/,
         use: 'file-loader'
       },
