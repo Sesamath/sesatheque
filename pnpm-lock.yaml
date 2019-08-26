@@ -71,7 +71,7 @@ devDependencies:
   enzyme-adapter-react-16: 1.14.0_b543d0f872e4d79795800943b57d0a25
   es-check: 5.0.0
   eslint: 6.2.1
-  eslint-config-standard: 12.0.0_aa241673e06ebb7ae7d833119305b4a8
+  eslint-config-standard: 14.0.0_aa241673e06ebb7ae7d833119305b4a8
   eslint-import-resolver-node: 0.3.2
   eslint-plugin-import: 2.18.2_eslint@6.2.1
   eslint-plugin-node: 9.1.0_eslint@6.2.1
@@ -3728,7 +3728,7 @@ packages:
       source-map: 0.6.1
     resolution:
       integrity: sha512-TuA+EhsanGcme5T3R0L80u4t8CpbXQjegRmf7+FPTJrtCTErXFeelblRgHQa1FofEzqYYJmJ/OqjTwREp9qgmg==
-  /eslint-config-standard/12.0.0_aa241673e06ebb7ae7d833119305b4a8:
+  /eslint-config-standard/14.0.0_aa241673e06ebb7ae7d833119305b4a8:
     dependencies:
       eslint: 6.2.1
       eslint-plugin-import: 2.18.2_eslint@6.2.1
@@ -3737,13 +3737,13 @@ packages:
       eslint-plugin-standard: 4.0.1_eslint@6.2.1
     dev: true
     peerDependencies:
-      eslint: '>=5.0.0'
-      eslint-plugin-import: '>=2.13.0'
-      eslint-plugin-node: '>=7.0.0'
-      eslint-plugin-promise: '>=4.0.0'
+      eslint: '>=6.0.1'
+      eslint-plugin-import: '>=2.18.0'
+      eslint-plugin-node: '>=9.1.0'
+      eslint-plugin-promise: '>=4.2.1'
       eslint-plugin-standard: '>=4.0.0'
     resolution:
-      integrity: sha512-COUz8FnXhqFitYj4DTqHzidjIL/t4mumGZto5c7DrBpvWoie+Sn3P4sLEzUGeYhRElWuFEf8K1S1EfvD1vixCQ==
+      integrity: sha512-bV6e2LFvJEetrLjVAy4KWPOUsIhPWr040c649MigTPR6yUtaGuOt6CEAyNeez2lRiC+2+vjGWa02byjs25EB3A==
   /eslint-import-resolver-node/0.3.2:
     dependencies:
       debug: 2.6.9
@@ -11328,13 +11328,13 @@ specifiers:
   enzyme-adapter-react-16: ^1.5.0
   es-check: ^5.0.0
   eslint: ^6.0.1
-  eslint-config-standard: ^12.0.0
+  eslint-config-standard: ^14.0.0
   eslint-import-resolver-node: ^0.3.2
   eslint-plugin-import: ^2.18.0
   eslint-plugin-node: ^9.1.0
   eslint-plugin-promise: ^4.2.1
   eslint-plugin-react: ^7.14.2
-  eslint-plugin-standard: ^4.0.0
+  eslint-plugin-standard: ^4.0.1
   express: ^4.16.2
   faker: ^4.1.0
   file-loader: ^4.0.0

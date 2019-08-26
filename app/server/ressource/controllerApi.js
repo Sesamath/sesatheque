@@ -192,7 +192,7 @@ module.exports = function (component) {
         if (!ressourcePostee.categories && tt) ressourcePostee.categories = configRessource.categoriesToTypes[tt]
 
         // le contenu est partiel si on le réclame ou si c'est un update sans titre ni catégorie
-        let isMerge = ['1', 'true'].includes(context.get.merge) || (!isCreation && !ressourcePostee.titre && !ressourcePostee.categories)
+        const isMerge = ['1', 'true'].includes(context.get.merge) || (!isCreation && !ressourcePostee.titre && !ressourcePostee.categories)
         const data = isMerge ? Object.assign({}, ressourceBdd, ressourcePostee) : ressourcePostee
         $ressourceControl.valideRessourceFromPost(data, this)
       }).seq(function (cleanData) {
@@ -868,7 +868,7 @@ module.exports = function (component) {
      * @route GET /api/public/getRid?id=xxx
      */
     controller.get('public/getRid', function (context) {
-      let id = context.get.id
+      const id = context.get.id
       if (id) {
         $ressourceRepository.load(id, function (error, ressource) {
           if (error) return $json.Ko(context, error)

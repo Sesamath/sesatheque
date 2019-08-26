@@ -33,6 +33,8 @@ const debouncedGET = debounce((input, callback) => {
       label: `Texte libre : ${input}`
     }]
 
+    // eslint reconnait plus l'usage d'un const dans un for…
+    // eslint-disable-next-line no-unused-vars
     for (const filter in filters) {
       filters[filter].forEach(filterValue => {
         options.push({

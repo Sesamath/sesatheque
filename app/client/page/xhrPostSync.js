@@ -53,7 +53,6 @@ function xhrPostSync (url, data, next) {
   // sauf qu'il faudrait ajouter un middleware pour décoder une simple string
   // ou alors utiliser les web workers et FormData, on verra plus tard…
   if (typeof navigator !== 'undefined' && navigator.sendBeacon && typeof Blob !== 'undefined') {
-    /* global Blob */
     data.deferUrl = url
     url = '/api/deferPost'
     // faut préciser le type sinon y'a un pb de preflight avec chrome

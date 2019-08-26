@@ -30,7 +30,6 @@
  */
 
 'use strict'
-/* global log */
 const moment = require('moment')
 const util = require('util')
 
