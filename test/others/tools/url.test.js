@@ -41,8 +41,8 @@ var url = require('../../../app/server/lib/url')
 describe('tools.url', function () {
   it('update', function () {
     const {update} = url
-    let urlWithoutAnchor = 'https://user:pass@sub.domain.tld:123/path/foo/bar/url.html'
-    let anchor = '#anchor'
+    const urlWithoutAnchor = 'https://user:pass@sub.domain.tld:123/path/foo/bar/url.html'
+    const anchor = '#anchor'
     let urlStr = urlWithoutAnchor + anchor
     assert.strictEqual(urlStr, update(urlStr))
     assert.strictEqual(urlStr, update(urlStr, null))
@@ -53,7 +53,7 @@ describe('tools.url', function () {
     assert.strictEqual(`${urlWithoutAnchor}?foo=${anchor}`, update(urlStr, {foo: null}))
     assert.strictEqual(`${urlWithoutAnchor}?foo=false${anchor}`, update(urlStr, {foo: false}))
     assert.strictEqual(`${urlWithoutAnchor}?foo=${anchor}`, update(urlStr, {foo: undefined}))
-    let qs = '?foo=bar&baz&titi=42'
+    const qs = '?foo=bar&baz&titi=42'
     urlStr = urlWithoutAnchor + qs + anchor
     assert.strictEqual(urlStr, update(urlStr))
     assert.strictEqual(urlStr, update(urlStr, null))

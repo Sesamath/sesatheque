@@ -133,7 +133,7 @@ describe('controller api ressource', () => {
         resume: ressource.resume
       }
       return _superTestClient
-        .post(`/api/ressource`)
+        .post('/api/ressource')
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
@@ -165,7 +165,7 @@ describe('controller api ressource', () => {
         auteurs: ressource.auteurs
       }
       return _superTestClient
-        .post(`/api/ressource`)
+        .post('/api/ressource')
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)
@@ -192,7 +192,7 @@ describe('controller api ressource', () => {
         relations: ressource.relations
       }
       return _superTestClient
-        .post(`/api/ressource`)
+        .post('/api/ressource')
         .set('Content-Type', 'application/json')
         .set('X-ApiToken', apiTokenEncoded)
         .send(postData)

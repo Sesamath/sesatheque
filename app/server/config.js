@@ -287,7 +287,7 @@ if (config.bugsnag && config.bugsnag.apiKey) {
 if (!config.lassiLogger) {
   // pour an-log, si on veut récupérer les logs db
   config.lassiLogger = {
-    '$entities': {
+    $entities: {
       logLevel: config.application.staging === 'prod' ? 'warning' : 'debug',
       renderer: {name: 'file', target: config.logs.dir + '/entities.log'}
     }

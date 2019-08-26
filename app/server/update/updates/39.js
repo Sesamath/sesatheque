@@ -43,7 +43,7 @@ module.exports = {
     const EntityGroupe = lassi.service('EntityGroupe')
     let nbRess = 0
     let nbRessGroup = 0
-    let nbRessMod = 0
+    const nbRessMod = 0
     // la liste des groupes indexés par lowerCase
     const knownGroupesByLowerCase = {}
     // un objet pour byPass getRealNames

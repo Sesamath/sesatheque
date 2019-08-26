@@ -90,7 +90,7 @@ export function addError (error, delay) {
   if (errorsContainer) {
     // on ajoute un peu de margin à ce div s'il n'en a pas
     if (errorsContainer.style && !errorsContainer.style.margin) errorsContainer.style.margin = '0.2em'
-    const errorBlock = dom.addElement(errorsContainer, 'p', {'class': 'error'}, errorMsg)
+    const errorBlock = dom.addElement(errorsContainer, 'p', {class: 'error'}, errorMsg)
     // si on a jQuery sous la main on scroll, sinon tant pis
     if (window.jQuery) window.jQuery(errorsContainer).scrollTop(0)
     if (delay) {
@@ -255,7 +255,7 @@ export function showNotification (htmlString, delay = 5) {
     'max-height': '50%',
     overflow: 'auto',
     'background-color': '#fff',
-    'border': 'solid #333'
+    border: 'solid #333'
   }
   const notif = dom.addElement(parent, 'div', {style})
   notif.innerHTML = htmlString

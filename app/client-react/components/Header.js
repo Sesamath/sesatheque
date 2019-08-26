@@ -13,8 +13,8 @@ const getButtons = (personne) => {
     id: 'buttonSearch',
     title: 'Recherche',
     to: {
-      pathname: `/ressource/rechercher`,
-      hash: `#form`
+      pathname: '/ressource/rechercher',
+      hash: '#form'
     },
     icon: 'search'
   }
@@ -35,9 +35,9 @@ const getButtons = (personne) => {
       id: 'buttonMyRessources',
       title: 'Mes ressources',
       to: {
-        pathname: `/ressource/rechercher`,
+        pathname: '/ressource/rechercher',
         search: `?auteurs=${personne.pid}`,
-        hash: `#results`
+        hash: '#results'
       },
       icon: 'bookmark'
     },
@@ -114,7 +114,7 @@ export const Header = ({
                     to="/compte"
                     title="Mes informations personnelles"
                   >
-                    <i className={`fa fa-user`}></i>
+                    <i className={'fa fa-user'}></i>
                     <span>Mes informations personnelles</span>
                   </NavLink>
                 </li>

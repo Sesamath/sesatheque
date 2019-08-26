@@ -87,7 +87,7 @@ function listMissing (done) {
     const props = ['resume', 'commentaires', 'description']
     const output = []
     props.forEach(p => output.push(p + (enfant[p] ? 'OK' : 'KO')))
-    let message = `${prefix} > ${enfant.titre} : ${output.join('\t')}`
+    const message = `${prefix} > ${enfant.titre} : ${output.join('\t')}`
     let baseId, baseUrl, oid
     if (enfant.oid) {
       baseId = config.application.baseId
@@ -112,9 +112,9 @@ function listMissing (done) {
   }
 
   let offset = 0
-  let limit = 10
+  const limit = 10
   let nbArbres = 0
-  let nbArbresModif = 0
+  const nbArbresModif = 0
   let nbRessources = 0
   const EntityRessource = lassi.service('EntityRessource')
   flow().seq(function () {

@@ -47,7 +47,7 @@ module.exports = function (component) {
      * @param {AuthClient} authClient
      */
     function checkValidClient (authClient) {
-      let msg = 'Service d’authentification invalide, il manque '
+      const msg = 'Service d’authentification invalide, il manque '
       if (typeof authClient.baseId !== 'string') throw new Error(msg + 'baseId')
       if (clients[authClient.baseId]) throw new Error(`Le client ${authClient.baseId} est déjà enregistré`)
       if (typeof authClient.description !== 'string') throw new Error(msg + 'description')
@@ -197,7 +197,7 @@ module.exports = function (component) {
       const loginLinks = []
       Object.keys(clients).forEach(baseId => {
         const client = clients[baseId]
-        let url = client.getLoginUrl && client.getLoginUrl(context, urlRetour)
+        const url = client.getLoginUrl && client.getLoginUrl(context, urlRetour)
         if (url) {
           const link = {
             href: url,

@@ -49,8 +49,8 @@ function addWrapper (parent, options) {
   var wrapper = dom.addElement(parent, 'div', divAttrs)
   if (options.label) {
     var label = dom.addElement(wrapper, 'label', {}, options.label)
-    if (options.required) dom.addElement(label, 'span', {'class': 'required', title: 'Ce champ est obligatoire'}, '*')
-    if (options.remarque) dom.addElement(label, 'span', {'class': 'remarque'}, options.remarque)
+    if (options.required) dom.addElement(label, 'span', {class: 'required', title: 'Ce champ est obligatoire'}, '*')
+    if (options.remarque) dom.addElement(label, 'span', {class: 'remarque'}, options.remarque)
   }
 
   return wrapper
@@ -68,7 +68,7 @@ function addWrapper (parent, options) {
  * @returns {Element} L'élément ajouté
  */
 function addElement (parent, tag, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group ' + tag})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {class: 'input-group ' + tag})
 
   return dom.addElement(container, tag, attrs)
 }
@@ -95,7 +95,7 @@ function addFormGroup (element, position) {
     else if (position === 'firstChild') addMethod = dom.addElementFirstChild
   }
 
-  return addMethod(element, 'div', {'class': 'form-group'})
+  return addMethod(element, 'div', {class: 'form-group'})
 }
 
 /**
@@ -108,11 +108,11 @@ function addFormGroup (element, position) {
  * @returns {Element} Le div avec tous les inputs
  */
 function addCheckboxes (parent, name, options, checkboxes) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group checkboxes'})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {class: 'input-group checkboxes'})
   if (Array.isArray(checkboxes)) {
     checkboxes.forEach(function (checkbox, i) {
       var id = checkbox.id || dom.getNewId()
-      var label = dom.addElement(container, 'label', {'for': id}, checkbox.label)
+      var label = dom.addElement(container, 'label', {for: id}, checkbox.label)
       var attrs = {type: 'checkbox', id: id, value: checkbox.value}
       // on ne renvoie un tableau qui si y'en a plusieurs
       if (checkboxes.length > 1) attrs.name = name + '[' + i + ']'
@@ -134,7 +134,7 @@ function addCheckboxes (parent, name, options, checkboxes) {
  * @returns {Element} L'input text
  */
 function addInputText (parent, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group text'})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {class: 'input-group text'})
   if (!attrs) attrs = {}
   attrs.type = 'text'
 
@@ -152,7 +152,7 @@ function addInputText (parent, attrs, options) {
  * @returns {Element} Le select
  */
 function addSelect (parent, attrs, options, choix) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group select'})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {class: 'input-group select'})
   if (!attrs) attrs = {}
   var select = dom.getElement('select', attrs)
   if (Array.isArray(choix)) {
@@ -181,7 +181,7 @@ function addSelect (parent, attrs, options, choix) {
  * @returns {Element} Le textarea
  */
 function addTextarea (parent, attrs, options) {
-  var container = dom.addElement(addWrapper(parent, options), 'div', {'class': 'input-group textarea'})
+  var container = dom.addElement(addWrapper(parent, options), 'div', {class: 'input-group textarea'})
 
   return dom.addElement(container, 'textarea', attrs, options.content || '')
 }

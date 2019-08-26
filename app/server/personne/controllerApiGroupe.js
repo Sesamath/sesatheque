@@ -305,7 +305,7 @@ module.exports = function (component) {
       $groupeRepository.loadByNom(nom, function (error, groupe) {
         if (error) return $json.sendKo(context, error)
         if (!groupe) return $json.notFound(context, `Le groupe ${nom} n’existe pas`)
-        if (!groupe.gestionnaires.includes(myOid)) return $json.denied(context, `Vous n’avez pas le droit de supprimer ce groupe`)
+        if (!groupe.gestionnaires.includes(myOid)) return $json.denied(context, 'Vous n’avez pas le droit de supprimer ce groupe')
         flow().seq(function () {
           $groupeRepository.delete(nom, this)
         }).seq(function () {

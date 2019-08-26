@@ -39,7 +39,7 @@ const errors = {
   401: 'Unauthorized',
   403: 'Forbidden',
   404: 'Not Found',
-  418: `I'm a teapot`,
+  418: 'I\'m a teapot',
   500: 'Internal Server Error',
   503: 'Service Unavailable'
 }
@@ -62,11 +62,11 @@ function controllerTestFactory (component) {
     })
 
     // 2 routes ok
-    controller.all(`text/200`, function (context) {
+    controller.all('text/200', function (context) {
       context.status = 200
       context.plain('OK')
     })
-    controller.all(`json/200`, function (context) {
+    controller.all('json/200', function (context) {
       context.status = 200
       context.json({message: 'OK'})
     })
@@ -77,7 +77,7 @@ function controllerTestFactory (component) {
     })
 
     // réponse ok avec retard
-    controller.all(`api/delay/:sToWait`, function (context) {
+    controller.all('api/delay/:sToWait', function (context) {
       const respond = () => {
         $json.sendOk(context, context.post)
       }

@@ -335,7 +335,7 @@ try {
         if (typeof next !== 'function') next = errorCallbackDefault
         if (!config) config = {}
         if (!config.editor) config.editor = 'simple'
-        if (!config.choices) config.choices = [ 'simple', 'mathquill', 'ckeditor' ]
+        if (!config.choices) config.choices = ['simple', 'mathquill', 'ckeditor']
         if (!config.ckeditor) config.ckeditor = {}
         if (!config.mathquill) config.mathquill = 'full'
         if (!config.changeCallback) config.changeCallback = function () {}

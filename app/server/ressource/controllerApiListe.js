@@ -152,7 +152,7 @@ module.exports = function (component) {
       if (!pids.length) return $json.sendKo(context, 'Aucun auteur demandé')
       const {queryOptions} = $accessControl.sanitizeSearch(context)
       const {limit, skip} = queryOptions
-      const query = {'auteurs': []}
+      const query = {auteurs: []}
 
       let nbRessources = 0 // pour savoir s'il faut du nextUrl
       let nbForbidden = 0

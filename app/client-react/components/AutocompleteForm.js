@@ -63,9 +63,9 @@ const customStyles = {
     }
 
     if (data.value.filter === 'fulltext') {
-      overridedStyles['backgroundColor'] = '#fcf8e3'
-      overridedStyles['color'] = '#8a6d3b'
-      overridedStyles['border'] = '1px solid #DFCFB3'
+      overridedStyles.backgroundColor = '#fcf8e3'
+      overridedStyles.color = '#8a6d3b'
+      overridedStyles.border = '1px solid #DFCFB3'
     }
 
     return overridedStyles

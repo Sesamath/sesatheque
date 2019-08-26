@@ -197,7 +197,7 @@ module.exports = function ($accessControl) {
    */
   const sanitizeSearch = (context) => {
     function getStringValues (prop) {
-      let values = context.get[prop]
+      const values = context.get[prop]
       if (!values) return
       if (Array.isArray(values)) return values
       // forcément une string (c'est du get), donc falsy => string vide

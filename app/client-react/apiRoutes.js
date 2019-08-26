@@ -49,7 +49,7 @@ const checkPid = ({nom, pid}) => `personne/checkPid?nom=${encodeURIComponent(nom
  */
 export const getCheckPidUrl = makeGetter(checkPid, ['nom', 'pid'])
 
-const groupesOuverts = () => `groupes/ouverts`
+const groupesOuverts = () => 'groupes/ouverts'
 /**
  * Liste des groupes ouverts
  * @param {object} [urlParams] ignoré
@@ -58,7 +58,7 @@ const groupesOuverts = () => `groupes/ouverts`
  */
 export const getGroupesOuvertsUrl = makeGetter(groupesOuverts)
 
-const groupesPublics = () => `groupes/publics`
+const groupesPublics = () => 'groupes/publics'
 /**
  * Liste des groupes publics
  * @param {object} [urlParams] ignoré
@@ -67,7 +67,7 @@ const groupesPublics = () => `groupes/publics`
  */
 export const getGroupesPublicsUrl = makeGetter(groupesPublics)
 
-const personneCurrent = () => `personne/current`
+const personneCurrent = () => 'personne/current'
 /**
  * User courant
  * @param {object} [urlParams] ignoré
@@ -120,7 +120,7 @@ const forkAlias = ({oid}) => `forkAlias/${oid}`
  */
 export const getForkAliasUrl = makeGetter(forkAlias, ['oid'])
 
-const groupesPerso = () => `groupes/perso`
+const groupesPerso = () => 'groupes/perso'
 /**
  * Liste des groupes du user courant
  * @param {object} [urlParams] ignoré
@@ -129,7 +129,7 @@ const groupesPerso = () => `groupes/perso`
  */
 export const getGroupesPersoUrl = makeGetter(groupesPerso)
 
-const saveGroupe = () => `groupe`
+const saveGroupe = () => 'groupe'
 /**
  * Modifier (ou créer) un groupe (POST)
  * @param {object} [urlParams] ignoré

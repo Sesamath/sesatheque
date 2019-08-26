@@ -84,7 +84,7 @@ module.exports = function (component) {
       $ressourceRepository.load(id, function (error, ressource) {
         if (error) return $json.sendKo(context, error)
         if (!ressource) return $json.notFound(context, `La ressource ${id} n’existe pas`)
-        if (!$accessControl.hasPermission('delete', context, ressource)) return $json.denied(context, `Vous n’avez pas de droits suffisants pour supprimer cette ressource`)
+        if (!$accessControl.hasPermission('delete', context, ressource)) return $json.denied(context, 'Vous n’avez pas de droits suffisants pour supprimer cette ressource')
         $ressourceRepository.remove(ressource.oid, function (error) {
           if (error) return $json.sendKo(context, error)
           $json.sendOk(context, {deleted: ressource.oid})
@@ -750,7 +750,7 @@ module.exports = function (component) {
         content_type: 'charset=UTF-8',
         timeout: 3000,
         headers: {
-          'Cookie': context.request.cookies
+          Cookie: context.request.cookies
         },
         form: context.post
       }
@@ -940,7 +940,7 @@ module.exports = function (component) {
           $ressourceRepository.load(context.arguments.oid, this)
         })
         .seq(function (ressource) {
-          if (!ressource) return $json.notFound(context, `La ressource n'existe pas`)
+          if (!ressource) return $json.notFound(context, 'La ressource n\'existe pas')
           if (!$accessControl.hasReadPermission(context, ressource)) return $json.denied(context, 'Vous n’avez pas de droits suffisants pour dupliquer cette ressource')
           if (!ressource.aliasOf) return $json.sendKo(context, 'Cette ressource n’est pas un alias')
 

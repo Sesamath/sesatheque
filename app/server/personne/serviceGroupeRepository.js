@@ -78,7 +78,7 @@ module.exports = function (component) {
      */
     function fetchListByNom (noms, next) {
       if (!Array.isArray(noms) || !noms.length) return next(Error('noms invalides'))
-      let groupes = []
+      const groupes = []
       flow(noms).seqEach(function (nom) {
         $cacheGroupe.getByNom(nom, this)
       }).seq(function (cachedGroups) {

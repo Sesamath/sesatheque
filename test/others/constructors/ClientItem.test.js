@@ -78,7 +78,7 @@ describe('ClientItem', () => {
         ref.$droits = 'R'
         const item = new ClientItem(ref)
         const expectedFields = ['type', 'titre', 'resume', 'commentaires', 'description', 'public', 'categories', 'inc']
-        expect(item.rid).to.equal(ref.aliasOf, `Pb aliasOf => rid`)
+        expect(item.rid).to.equal(ref.aliasOf, 'Pb aliasOf => rid')
         if (!ref.aliasOf && ref.type === 'arbre') expectedFields.push('enfants')
         expectedFields.forEach(p => expect(item[p]).to.deep.equal(ref[p], `Pb ${p}`))
         // url

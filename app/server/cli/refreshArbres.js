@@ -208,7 +208,7 @@ function refreshArbres (oid, done) {
   }
   if (typeof done !== 'function') throw new Error('Erreur interne, pas de callback de commande')
   let offset = 0
-  let limit = 10
+  const limit = 10
   let nbArbres = 0
   let nbArbresModif = 0
   let nbRessources = 0

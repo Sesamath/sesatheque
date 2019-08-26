@@ -45,7 +45,7 @@ const factory = (method) => (url, options = {}) => {
   // on met pas le test !['GET', 'HEAD'].includes(method), si qqun envoie un body il se prendra le throw de fetch
   const headers = {
     ...options.headers,
-    'Accept': 'application/json'
+    Accept: 'application/json'
   }
   const fetchOptions = {
     credentials: 'same-origin',

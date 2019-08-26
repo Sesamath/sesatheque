@@ -91,7 +91,7 @@ module.exports = {
     /* @type EntityDefinition */
     const EntityRessource = lassi.service('EntityRessource')
     const $cacheRessource = lassi.service('$cacheRessource')
-    let limit = 100
+    const limit = 100
     let skip = 0
     let nb = 0
     let nbModifs = 0

@@ -98,20 +98,20 @@ describe('API groupe', () => {
 
   context('sans avoir de session', () => {
     it('/api/groupes/perso denied', async () => {
-      const response = await agent.get(`/api/groupes/perso`)
+      const response = await agent.get('/api/groupes/perso')
       itNeedsAuth(response, 'Il faut être authentifié pour récupérer ses groupes')
       return Promise.resolve()
     })
 
     it('/api/groupe/ajouter/unNom denied', async () => {
-      const response = await agent.get(`/api/groupe/ajouter/unNom`)
+      const response = await agent.get('/api/groupe/ajouter/unNom')
       itNeedsAuth(response, 'Authentification requise')
       return Promise.resolve()
     })
 
     it('POST /api/groupe denied', async () => {
       const response = await agent
-        .post(`/api/groupe`)
+        .post('/api/groupe')
         .set('Content-Type', 'application/json')
         .send(testGroup)
       itNeedsAuth(response, 'Vous devez être authentifié pour créer des groupes')
@@ -136,14 +136,14 @@ describe('API groupe', () => {
       return logout(agent)
     })
 
-    it(`création d'un groupe`, async () => {
+    it('création d\'un groupe', async () => {
       const groupeToCreate = testGroup
       delete groupeToCreate.oid // Force une création
       delete groupeToCreate.gestionnaires // on veut vérifier que l'api le rajoute
       const start = Date.now()
 
       const response = await agent
-        .post(`/api/groupe`)
+        .post('/api/groupe')
         .send(groupeToCreate)
         .set('Content-Type', 'application/json')
 
@@ -164,7 +164,7 @@ describe('API groupe', () => {
         })
     })
 
-    it(`création d'un groupe avec un nom seulement`, () => {
+    it('création d\'un groupe avec un nom seulement', () => {
       const groupeName = faker.lorem.words(3)
       const encodedName = encodeURIComponent(groupeName)
       const expected = {
@@ -183,33 +183,33 @@ describe('API groupe', () => {
         .then(() => deleteGroupe(groupeName))
     })
 
-    it(`tente la récupération d'un groupe qui n'existe pas (depuis un oid)`, async () => {
-      let response = await agent.get(`/api/groupe/groupe-qui-existe-pas`)
+    it('tente la récupération d\'un groupe qui n\'existe pas (depuis un oid)', async () => {
+      const response = await agent.get('/api/groupe/groupe-qui-existe-pas')
       expect(response.status).to.equal(404)
       return Promise.resolve()
     })
 
-    it(`tente la récupération d'un groupe qui existe (depuis un oid)`, async () => {
+    it('tente la récupération d\'un groupe qui existe (depuis un oid)', async () => {
       const groupe = await createGroupe(testGroup)
-      let response = await agent.get(`/api/groupe/${groupe.oid}`)
+      const response = await agent.get(`/api/groupe/${groupe.oid}`)
       return itIsSuccessfull(response, testGroup)
         .then(() => deleteGroupe(testGroup.nom))
     })
 
-    it(`tente la récupération d'un groupe qui n'existe pas (depuis un nom)`, async () => {
-      let response = await agent.get(`/api/groupe/byNom/groupe-qui-existe-pas`)
+    it('tente la récupération d\'un groupe qui n\'existe pas (depuis un nom)', async () => {
+      const response = await agent.get('/api/groupe/byNom/groupe-qui-existe-pas')
       expect(response.status).to.equal(404)
       return Promise.resolve()
     })
 
-    it(`tente la récupération d'un groupe qui existe (depuis un nom)`, async () => {
+    it('tente la récupération d\'un groupe qui existe (depuis un nom)', async () => {
       await createGroupe(testGroup)
-      let response = await agent.get(`/api/groupe/byNom/${testGroup.nom}`)
+      const response = await agent.get(`/api/groupe/byNom/${testGroup.nom}`)
       return itIsSuccessfull(response, testGroup)
         .then(() => deleteGroupe(testGroup.nom))
     })
 
-    it(`/api/groupes/perso répond avec les bonnes propriétés`, async () => {
+    it('/api/groupes/perso répond avec les bonnes propriétés', async () => {
       await createGroupe(testGroup)
       const expectedGroup = {...testGroup, gestionnairesNames: [`${testUser.prenom} ${testUser.nom}`]}
       const expected = {
@@ -220,7 +220,7 @@ describe('API groupe', () => {
         groupesMembre: [],
         groupesSuivis: []
       }
-      const response = await agent.get(`/api/groupes/perso`)
+      const response = await agent.get('/api/groupes/perso')
       return itIsSuccessfull(response, expected)
         .then(() => deleteGroupe(testGroup.nom))
     })

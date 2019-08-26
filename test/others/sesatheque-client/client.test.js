@@ -101,9 +101,9 @@ describe('sesatheque-client', () => {
       if (p === 'public') {
         // on traite le cas où expected est une ressource
         if (expected.hasOwnProperty('public')) expect(item[p]).to.equal(expected[p], `Pb avec ${p}`)
-        else if (expected.publie === false) expect(item.public).to.equal(false, `Pb avec public (non publie)`)
-        else if (expected.restriction) expect(item.public).to.equal(false, `Pb avec public (restreint)`)
-        else expect(item.public).to.equal(true, `Pb avec public (pas d’info)`)
+        else if (expected.publie === false) expect(item.public).to.equal(false, 'Pb avec public (non publie)')
+        else if (expected.restriction) expect(item.public).to.equal(false, 'Pb avec public (restreint)')
+        else expect(item.public).to.equal(true, 'Pb avec public (pas d’info)')
       } else {
         expect(item[p]).to.deep.equal(expected[p], `Pb avec ${p}`)
       }

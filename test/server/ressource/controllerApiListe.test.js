@@ -198,7 +198,7 @@ describe('GET /api/liste', () => {
       await createRessource(fixturesRessources[2])
     })
 
-    it(`récupère des ressources à partir d'une partie de titre`, function () {
+    it('récupère des ressources à partir d\'une partie de titre', function () {
       const url = urlUpdate('/api/liste', {fulltext: ['exercice']})
 
       return _superTestClient
@@ -215,7 +215,7 @@ describe('GET /api/liste', () => {
         })
     })
 
-    it(`récupère une ressource à partir de son titre`, function () {
+    it('récupère une ressource à partir de son titre', function () {
       const url = urlUpdate('/api/liste', {fulltext: ['ARBRE']})
 
       return _superTestClient
@@ -231,7 +231,7 @@ describe('GET /api/liste', () => {
         })
     })
 
-    it(`récupère une ressource à partir de sa description`, function () {
+    it('récupère une ressource à partir de sa description', function () {
       const url = urlUpdate('/api/liste', {fulltext: ['description originale']})
 
       return _superTestClient

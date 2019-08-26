@@ -48,7 +48,6 @@ import anLog from 'an-log'
 // si on a pas de link vers le module on peut pas aller dans src
 import sesatheques from 'sesatheque-client/dist/server/sesatheques'
 import log from 'sesajstools/utils/log'
-const {addSesatheque} = sesatheques
 
 /**
  * client supertest
@@ -63,6 +62,7 @@ const {addSesatheque} = sesatheques
  * @type {object}
  */
 import supertest from 'supertest'
+const {addSesatheque} = sesatheques
 
 log.setLogLevel('error')
 

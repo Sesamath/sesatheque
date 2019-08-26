@@ -119,7 +119,7 @@ function isApi (url) {
  * @return {boolean}
  */
 function isSameSimpleArray (ar1, ar2) {
-  if (!Array.isArray(ar1) || !Array.isArray(ar2)) throw Error(`Array expected`)
+  if (!Array.isArray(ar1) || !Array.isArray(ar2)) throw Error('Array expected')
   if (ar1.length !== ar2.length) return false
   return ar1.every((elt, i) => elt === ar2[i])
 }

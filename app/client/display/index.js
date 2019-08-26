@@ -188,7 +188,7 @@ function feedbackKo (divFeedback) {
 function getResultat (result, ressource, options) {
   // on reçoit parfois des refs circulaires, faut nettoyer… ça clone au passage
   result = JSON.parse(sjt.stringify(result))
-  let resultat = new Resultat(result)
+  const resultat = new Resultat(result)
   // pour l'envoi au unload on ajoute ça
   if (options.urlResultatCallback && result.deferSync) resultat.deferSync = result.deferSync
   // on impose date et durée

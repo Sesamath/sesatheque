@@ -143,7 +143,7 @@ module.exports = function (component) {
       // on ne veut pas de cle/xxx sur /ressource (public only), c'est probablement une erreur en amont
       if (origine === 'cle') {
         context.status = 404
-        return displayError(context, `Chemin /ressource/cle inconnu`)
+        return displayError(context, 'Chemin /ressource/cle inconnu')
       }
 
       // on peut charger

@@ -48,7 +48,7 @@ var mqEditor = {}
  * @param button
  */
 function addButton (parent, button) {
-  var argBtn = {'class': 'mqButton', type: 'button'}
+  var argBtn = {class: 'mqButton', type: 'button'}
   if (mqTitle[button]) argBtn.title = mqTitle[button]
   var btn = dom.addElement(parent, 'button', argBtn)
   dom.addElement(btn, 'img', {src: basePath + 'images/' + button + '.png', alt: mqLabel[button]})
@@ -220,7 +220,7 @@ try {
           else if (config === 'full') config = fullConfig
           // on ajoute ces boutons
           for (var btn in config) {
-            if (config.hasOwnProperty(btn) && config[ btn ]) {
+            if (config.hasOwnProperty(btn) && config[btn]) {
               addButton(mqButtons, btn)
             }
           }

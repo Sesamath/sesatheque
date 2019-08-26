@@ -279,7 +279,7 @@ module.exports = function (component) {
     function updateOrCreate (personne, next) {
       function checkUpdate (personne, personneNew, next) {
         let needUpdate = false
-        for (let prop in personneNew) {
+        for (const prop in personneNew) {
           if (personneNew.hasOwnProperty(prop) && !_.isEqual(personne[prop], personneNew[prop])) {
             needUpdate = true
             // pour groupesMembre on fusionne, histoire de pas écraser les groupes locaux

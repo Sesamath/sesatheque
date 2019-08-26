@@ -51,7 +51,7 @@ const sjt = require('sesajstools')
  */
 function getLogStream (log, verbose) {
   const file = `${logDir}/${log}`
-  const options = {'flags': 'a', mode: '0644'}
+  const options = {flags: 'a', mode: '0644'}
   let stream
   try {
     stream = fs.createWriteStream(file, options)

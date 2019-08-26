@@ -115,7 +115,7 @@ module.exports = {
         nb++
         // si y'a déjà un remplaçant on passe
         if (getReplacedBy(ressource)) return this()
-        let url = ressource.parametres && (ressource.parametres.url || ressource.parametres.adresse)
+        const url = ressource.parametres && (ressource.parametres.url || ressource.parametres.adresse)
         if (!url) {
           updateLog.error(`Pas d’url pour ${ressource.oid}`, ressource.parametres)
           return this()
@@ -210,7 +210,7 @@ module.exports = {
 
         // coll_doc avec files
         if (ressource.parametres.files) {
-          let xmlFile = ressource.parametres.files.find(file => file.format === 'xml' && file.uri && (file.statut === 'o' || !ressource.publie))
+          const xmlFile = ressource.parametres.files.find(file => file.format === 'xml' && file.uri && (file.statut === 'o' || !ressource.publie))
           if (xmlFile && xmlFile.uri) {
             // faut chercher s'il existe déjà…
             return nextStep(null, `https://ressources.sesamath.net${xmlFile.uri}`)
@@ -284,7 +284,7 @@ module.exports = {
     const $ressourceRepository = lassi.service('$ressourceRepository')
     let skip = 0
     let nb = 0
-    let iepByUrl = new Map()
+    const iepByUrl = new Map()
     let animations3D = 0
     let matoumatheux = 0
     let voirFlash = 0
