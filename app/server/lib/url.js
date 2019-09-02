@@ -35,6 +35,8 @@
 // (et on préfère son comportement sur les params multiples)
 const querystring = require('querystring')
 const {getNormalizedGrabOptions} = require('./normalize')
+const { hasProp } = require('sesajstools')
+
 const {baseUrl} = require('./config')
 
 // fonctions privées
@@ -51,7 +53,7 @@ const {baseUrl} = require('./config')
  */
 function errorHandler (errorMessage, isStrict, value = '') {
   if (typeof isStrict === 'object') {
-    isStrict = isStrict.hasOwnProperty('strict') ? !!isStrict.strict : true
+    isStrict = hasProp(isStrict, 'strict') ? !!isStrict.strict : true
   }
   if (isStrict) throw new Error(errorMessage)
   console.error(new Error(errorMessage))
@@ -185,7 +187,7 @@ function split (url) {
  */
 function update (url, args, options) {
   if (typeof options !== 'object') options = {}
-  const isStrict = options.hasOwnProperty('strict') ? options.strict : true
+  const isStrict = hasProp(options, 'strict') ? options.strict : true
   // checks
   if (!url) return errorHandler('Pas d’url fournie', isStrict)
   if (typeof url !== 'string') return errorHandler('Url fournie invalide', isStrict)

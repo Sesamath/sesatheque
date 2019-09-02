@@ -79,7 +79,7 @@ function dumpDup (next) {
       var id = 0
       kdb.raw(query).exec(function (error, rows) {
         if (error) log.error(error)
-        var results = rows[ 0 ]
+        var results = rows[0]
         if (results.length === maxDumps) log('Les résultats ont été limités à ' + maxDumps)
         results.forEach(function (row) {
           if (row.id !== id) {

@@ -36,6 +36,7 @@
 const bodyParser = require('body-parser')
 const express = require('express')
 const moment = require('moment')
+const { hasProp } = require('sesajstools')
 
 const tools = require('./lib/tools')
 const config = require('./config')
@@ -57,7 +58,7 @@ function addBodyParsers (rail) {
     if (!bodyParserSettings.limit) bodyParserSettings.limit = '10mb'
     // ça c'est juste pour urlencoded, à priori on devrait pouvoir avoir des tableaux avec false
     // mais ça plante par ex sur un post de form avec `categories[2]: true`
-    if (!bodyParserSettings.hasOwnProperty('extended')) bodyParserSettings.extended = true
+    if (!hasProp(bodyParserSettings, 'extended')) bodyParserSettings.extended = true
     const jsonMiddleware = express.json(bodyParserSettings)
     const urlencodedMiddleware = express.urlencoded(bodyParserSettings)
     const textMiddleware = bodyParser.text(bodyParserSettings)

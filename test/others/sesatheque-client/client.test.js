@@ -41,6 +41,7 @@
 import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import sinon from 'sinon'
+import sjt from 'sesajstools'
 import log from 'sesajstools/utils/log'
 import getClient from 'sesatheque-client/src'
 import Ref from 'sesatheque-client/src/constructors/Ref'
@@ -53,6 +54,8 @@ import config from '../../../app/server/config'
 import configRessource from '../../../app/server/ressource/config'
 import {addRessource, getRandomRessource, populate, purge} from '../../server/populate'
 import fakeRessource from '../../fixtures/fakeRessource'
+
+const { hasProp } = sjt
 
 chai.use(sinonChai)
 
@@ -100,7 +103,7 @@ describe('sesatheque-client', () => {
     properties.forEach(p => {
       if (p === 'public') {
         // on traite le cas où expected est une ressource
-        if (expected.hasOwnProperty('public')) expect(item[p]).to.equal(expected[p], `Pb avec ${p}`)
+        if (hasProp(expected, 'public')) expect(item[p]).to.equal(expected[p], `Pb avec ${p}`)
         else if (expected.publie === false) expect(item.public).to.equal(false, 'Pb avec public (non publie)')
         else if (expected.restriction) expect(item.public).to.equal(false, 'Pb avec public (restreint)')
         else expect(item.public).to.equal(true, 'Pb avec public (pas d’info)')
@@ -122,7 +125,7 @@ describe('sesatheque-client', () => {
       // item n'a pas d'aliasOf mais un rid
       if (p === 'aliasOf') p = 'rid'
       // si c'est pas dans expected on veut passer le test de cette propriété
-      if (!expected.hasOwnProperty(p)) fakeExpected[p] = item[p]
+      if (!hasProp(expected, p)) fakeExpected[p] = item[p]
     })
     checkRefProperties(item, fakeExpected)
     if (expected.enfants && !item.enfants) throw new Error('Pas d’enfants sur l’item')

@@ -29,7 +29,7 @@
  * pour une explication en français)
  */
 'use strict'
-
+const { hasProp } = require('sesajstools')
 var dom = require('sesajstools/dom')
 var log = require('sesajstools/utils/log')
 
@@ -220,7 +220,7 @@ try {
           else if (config === 'full') config = fullConfig
           // on ajoute ces boutons
           for (var btn in config) {
-            if (config.hasOwnProperty(btn) && config[btn]) {
+            if (hasProp(config, btn) && config[btn]) {
               addButton(mqButtons, btn)
             }
           }

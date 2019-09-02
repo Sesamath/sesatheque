@@ -9,9 +9,8 @@ var _ = require('lodash')
 var request = require('request')
 var moment = require('moment')
 var flow = require('an-flow')
-
-var sjtObj = require('sesajstools/utils/object')
-var sjt = require('sesajstools')
+const {hasProp, stringify} = require('sesajstools')
+const {merge, update} = require('sesajstools/utils/object')
 var CounterMulti = require('../../app/server/lib/CounterMulti')
 
 // conf de l'appli
@@ -110,7 +109,7 @@ common.addPersonne = function (personne, next) {
       var errorString = 'erreur sur le post ' + options.url + ' : '
       if (error) errorString += error.toString()
       else if (body.error) errorString += body.error
-      else errorString += sjt.stringify(body)
+      else errorString += stringify(body)
       next(new Error(errorString))
     } else if (body.oid) {
       personne.oid = body.oid
@@ -146,7 +145,7 @@ function addRessource (ressource, next) {
       var errorString = 'erreur sur le post ' + options.url + ' : '
       if (error) errorString += error.toString()
       else if (body.error) errorString += body.error
-      else errorString += sjt.stringify(body)
+      else errorString += stringify(body)
       addError(idComb, errorString)
       if (opt.logApiCalls) log(idComb + ' KO : ' + errorString)
     } else {
@@ -263,13 +262,13 @@ common.displayResult = function (next) {
   log('sur ' + idsToRec.length + ' à enregistrer (reste ' + idsToRec.total() + ' appels à faire)')
   if (errors.length) {
     var logfile = path.resolve(__dirname, '../../logs/import.error.log')
-    var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
+    var writeStream = fs.createWriteStream(logfile, {flags: 'a'})
     log('erreurs vers ' + logfile)
     log(errors.length + ' ressources avec erreurs :')
     writeStream.write("Erreurs d'importation de " + __filename + ' à ' + moment().format('YYYY-MM-DD HH:mm:ss')) // eslint-disable-line no-path-concat
     var id, msg
     for (id in errors) {
-      if (errors.hasOwnProperty(id) && id !== 'length') {
+      if (hasProp(errors, id) && id !== 'length') {
         msg = id + ' : ' + errors[id]
         log(msg)
         writeStream.write(msg)
@@ -366,7 +365,7 @@ common.flushPendingRelations = function (next) {
           }).seq(function () {
             if (opt.logRelations) log('on va merger dans ' + ressource.oid, newRelations)
             var mergedRelations = ressource.relations || []
-            sjtObj.merge(mergedRelations, newRelations)
+            merge(mergedRelations, newRelations)
             common.mergeRessource({oid: ressource.oid, relations: mergedRelations}, this)
           }).seq(function () {
             // fin de subFlow
@@ -510,7 +509,7 @@ common.getRessource = function (origine, idOrigine, next) {
     } else if (ressource.oid) {
       next(ressource)
     } else {
-      next(new Error('La ressource récupérée avec ' + idComb + " n'a pas d'oid " + sjt.stringify(ressource)))
+      next(new Error('La ressource récupérée avec ' + idComb + " n'a pas d'oid " + stringify(ressource)))
     }
   })
 }
@@ -599,7 +598,7 @@ common.setPreviousAfterAllCb = function () {
  * @param options
  */
 common.setOptions = function (options) {
-  sjtObj.update(opt, options)
+  update(opt, options)
 }
 
 // en cas d'interruption on veut le résultat quand même

@@ -10,6 +10,7 @@ dependencies:
   an-uuid: src.sesamath.net/an-uuid/ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29
   body-parser: 1.19.0
   connected-react-router: 5.0.1_670e3f5990800090610dd2dbdc34c8ec
+  core-js: 3.2.1
   elementtree: 0.1.7
   express: 4.17.1
   glob: 7.1.4
@@ -39,7 +40,6 @@ dependencies:
   redux: 4.0.1
   redux-form: 7.4.2_f114d899b0c931a12c8e6145cdc60cd3
   redux-thunk: 2.3.0
-  regenerator-runtime: 0.13.3
   request: 2.88.0
   roboto-fontface: 0.10.0
   sesajstools: framagit.org/Sesamath/sesajstools/ac6283ba39b63def7e316a1f1c813915656c401e
@@ -65,7 +65,6 @@ devDependencies:
   chai-as-promised: 7.1.1_chai@4.2.0
   clean-webpack-plugin: 3.0.0_webpack@4.39.2
   copy-webpack-plugin: 5.0.4_webpack@4.39.2
-  core-js: 3.2.1
   css-loader: 3.2.0_webpack@4.39.2
   enzyme: 3.10.0
   enzyme-adapter-react-16: 1.14.0_b543d0f872e4d79795800943b57d0a25
@@ -2903,7 +2902,6 @@ packages:
     resolution:
       integrity: sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
   /core-js/3.2.1:
-    dev: true
     requiresBuild: true
     resolution:
       integrity: sha512-Qa5XSVefSVPRxy2XfUC13WbvqkxhkwB3ve+pgCQveNgYzbM/UxZeu1dcOX/xr4UmfUd+muuvsaxilQzCyUurMw==
@@ -11377,7 +11375,6 @@ specifiers:
   redux: 4.0.1
   redux-form: 7.4.2
   redux-thunk: 2.3.0
-  regenerator-runtime: ^0.13.2
   request: ^2.88.0
   roboto-fontface: ^0.10.0
   sass-loader: ^7.1.0

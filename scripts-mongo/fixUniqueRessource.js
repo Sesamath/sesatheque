@@ -42,7 +42,7 @@ if (nb === 0) print('Aucun doublon de clé')
 
 // il faut aller remplir tous les rid vides…
 // on doit récupérer notre baseId, mais on a pas de require… on va regarder en base
-let cursor = db.EntityRessource.find()
+const cursor = db.EntityRessource.find()
 let baseId
 while (cursor.hasNext() && !baseId) {
   const r = cursor.next()

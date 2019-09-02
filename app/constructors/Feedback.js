@@ -30,6 +30,7 @@
  */
 
 'use strict'
+const { hasProp } = require('sesajstools')
 
 /**
  * Un retour d'une api http qui enregistre des Resultat (surtout pour documenter le format utilisé dans sesatheque|sesalab)
@@ -43,7 +44,7 @@ function Feedback (values) {
    * @type {boolean}
    */
   this.ok = !!values.ok
-  if (values.hasOwnProperty('success')) {
+  if (hasProp(values, 'success')) {
     /**
      * Alternative à la propriété ok
      * @type {boolean}

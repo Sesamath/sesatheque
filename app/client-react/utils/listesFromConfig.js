@@ -1,4 +1,6 @@
+import sjt from 'sesajstools'
 import {editable, listes, listesOrdonnees, typePerso} from '../../server/ressource/config'
+const { hasProp } = sjt
 
 /**
  * Les listes sous forme de tableaux ordonnés avec label & value
@@ -8,7 +10,7 @@ import {editable, listes, listesOrdonnees, typePerso} from '../../server/ressour
 const formattedLists = {}
 
 Object.entries(listes).forEach(([key, values]) => {
-  if (listesOrdonnees.hasOwnProperty(key)) {
+  if (hasProp(listesOrdonnees, key)) {
     formattedLists[key] = listesOrdonnees[key].map(n => ({
       label: values[n],
       value: n

@@ -30,10 +30,11 @@
  */
 
 'use strict'
+const {hasProp} = require('sesajstools')
 
 const Ressource = require('../../constructors/Ressource')
-
 const ressourceSchema = require('./EntityRessource.schema')
+
 const properties = {...ressourceSchema.properties, dateArchivage: {instanceof: 'Date'}}
 const required = [...ressourceSchema.required, 'dateArchivage']
 const archiveSchema = {...ressourceSchema, properties, required}
@@ -50,7 +51,7 @@ module.exports = function (component) {
      */
     EntityArchive.construct(function (data) {
       if (!data) throw Error('constructeur d’archive appelé sans ressource ni archive')
-      if (!data.rid || !data.hasOwnProperty('version')) throw Error('rid et version sont obligatoires pour archiver une ressource')
+      if (!data.rid || !hasProp(data, 'version')) throw Error('rid et version sont obligatoires pour archiver une ressource')
       const ressource = new Ressource(data)
       Object.assign(this, ressource)
 

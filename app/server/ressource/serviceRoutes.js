@@ -31,8 +31,10 @@
 
 'use strict'
 
+const {hasProp} = require('sesajstools')
 const {getBaseUrl, getComponents} = require('sesatheque-client/dist/server/sesatheques')
 const appConfig = require('../config')
+
 const myBaseId = appConfig.application.baseId
 const routes = appConfig.components.ressource.constantes.routes
 
@@ -84,7 +86,7 @@ module.exports = function (component) {
      */
     $routes.getAbs = function (action, ressource, context) {
       let route
-      if (routes.hasOwnProperty(action)) {
+      if (hasProp(routes, action)) {
         route = '/'
         let id
         let isPublic = true

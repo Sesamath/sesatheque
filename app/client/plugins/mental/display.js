@@ -33,7 +33,7 @@
 /* eslint-disable camelcase */
 
 var dom = require('sesajstools/dom')
-var sjt = require('sesajstools')
+const { hasProp, isArray, isString } = require('sesajstools')
 var log = require('sesajstools/utils/log')
 
 var page = require('../../page/index')
@@ -46,7 +46,7 @@ var swf = require('../../display/swf')
  * @param params le contenu de ressource.parametres.xml, qui est du json !!
  */
 function getXmlParam (params) {
-  if (!sjt.isArray(params.series)) {
+  if (!isArray(params.series)) {
     throw new Error('Aucune série à traiter')
   }
 
@@ -296,7 +296,7 @@ function getOperations (serie) {
       // determination du résultat de l'opération
       // - attention, dans le cas d'un quotient, c'est la partie entière du quotient qui constitue le résultat
 
-      if (!nombres_generes[0].hasOwnProperty('valeur')) {
+      if (!hasProp(nombres_generes[0], 'valeur')) {
         throw new Error("Le premier nombre généré n'a pas de valeur")
       }
 
@@ -417,7 +417,7 @@ function xmlGenerate (o) {
  * @returns {number}
  */
 function nettoie_nombre (nb) {
-  if (sjt.isString(nb)) return Number(nb.replace(/,/g, '.').replace(/\s/g, ''))
+  if (isString(nb)) return Number(nb.replace(/,/g, '.').replace(/\s/g, ''))
   else return Number(nb)
 }
 
@@ -491,7 +491,7 @@ function genere_position_liste_liee (nombre) {
  * @return {Integer} Le nombre généré dans
  */
 function genere_intervalle (nombre) {
-  if (!nombre.hasOwnProperty('debut') || !nombre.hasOwnProperty('fin') || nombre.fin < nombre.debut) {
+  if (!hasProp(nombre, 'debut') || !hasProp(nombre, 'fin') || nombre.fin < nombre.debut) {
     throw new Error("Paramètres d'intervalle incorrects")
   }
   return rand(nombre.debut, nombre.fin)

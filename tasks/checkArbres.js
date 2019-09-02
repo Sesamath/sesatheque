@@ -110,7 +110,7 @@ var argv = process.argv.slice(2)
 if (argv[0] === '--log') {
   logfile = argv[1]
 }
-var writeStream = fs.createWriteStream(logfile, {'flags': 'a'})
+var writeStream = fs.createWriteStream(logfile, {flags: 'a'})
 
 var nb = 25
 var lastArbre

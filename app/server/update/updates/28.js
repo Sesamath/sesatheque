@@ -31,6 +31,7 @@
 'use strict'
 
 const flow = require('an-flow')
+const {hasProp} = require('sesajstools')
 const {getRidComponents} = require('sesatheque-client/dist/server/sesatheques')
 
 const config = require('../../config')
@@ -164,20 +165,20 @@ module.exports = {
      */
     function cleanItem (item) {
       let hasChanged = false
-      if (item.hasOwnProperty('restriction')) {
+      if (hasProp(item, 'restriction')) {
         if (item.restriction) {
           log.dataError(`item restreint dans l’arbre ${currentArbre}`, item)
           hasChanged = true
           item.restriction = 0
         }
-      } else if (item.hasOwnProperty('public')) {
+      } else if (hasProp(item, 'public')) {
         if (!item.public) {
           log.dataError(`item privé dans l’arbre ${currentArbre}`, item)
           hasChanged = true
           item.public = true
         }
       }
-      if (item.hasOwnProperty('publie') && !item.publie) {
+      if (hasProp(item, 'publie') && !item.publie) {
         log.dataError(`item privé dans l’arbre ${currentArbre}`, item)
         hasChanged = true
         item.publie = true

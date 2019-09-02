@@ -30,6 +30,7 @@
  */
 
 'use strict'
+const { hasProp } = require('sesajstools')
 
 /**
  * Une série de compteurs, chaque clé étant un compteur pouvant être incrémenté, décrémenté ou supprimé
@@ -48,7 +49,7 @@ function CounterMulti () {
  * @param key
  */
 CounterMulti.prototype.inc = function (key) {
-  if (this.hasOwnProperty(key)) this[key]++
+  if (hasProp(this, key)) this[key]++
   else {
     this[key] = 1
     this.length++
@@ -60,7 +61,7 @@ CounterMulti.prototype.inc = function (key) {
  * @param key
  */
 CounterMulti.prototype.dec = function (key) {
-  if (this.hasOwnProperty(key)) this[key]--
+  if (hasProp(this, key)) this[key]--
   else {
     this[key] = -1
     this.length++
@@ -72,7 +73,7 @@ CounterMulti.prototype.dec = function (key) {
  * @param key
  */
 CounterMulti.prototype.delete = function (key) {
-  if (this.hasOwnProperty(key)) delete this[key]
+  if (hasProp(this, key)) delete this[key]
   this.length--
 }
 
@@ -83,7 +84,7 @@ CounterMulti.prototype.delete = function (key) {
 CounterMulti.prototype.total = function () {
   var total = 0
   for (var key in this) {
-    if (this.hasOwnProperty(key) && key !== 'length') total += this[key]
+    if (hasProp(this, key) && key !== 'length') total += this[key]
   }
   return total
 }

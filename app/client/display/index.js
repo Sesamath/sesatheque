@@ -39,9 +39,9 @@
 
 require('client-react/styles/display.scss')
 
+const { hasProp, isFunction, isString, isUrlAbsolute, stringify } = require('sesajstools')
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
-const sjt = require('sesajstools')
 const sjtUrl = require('sesajstools/http/url')
 const xhr = require('sesajstools/http/xhr')
 const {addSesatheques, getBaseUrl} = require('sesatheque-client/src/sesatheques')
@@ -91,9 +91,9 @@ function addResultatCallback (ressource, options) {
 
   // pour envoyer les résultats, on regarde si on nous fourni une url ou une fct ou un nom de message
   // on prend en callback par ordre de priorité resultatCallback, urlResultatCallback, resultatMessageAction+
-  if (options.resultatCallback && sjt.isFunction(options.resultatCallback)) {
+  if (options.resultatCallback && isFunction(options.resultatCallback)) {
     resultatListener = options.resultatCallback
-  } else if (options.urlResultatCallback && sjt.isUrlAbsolute(options.urlResultatCallback)) {
+  } else if (options.urlResultatCallback && isUrlAbsolute(options.urlResultatCallback)) {
     // callback ajax
     resultatListener = (resultat) => {
       const url = options.urlResultatCallback
@@ -111,7 +111,7 @@ function addResultatCallback (ressource, options) {
         })
       }
     }
-  } else if (options && options.resultatMessageAction && sjt.isString(options.resultatMessageAction)) {
+  } else if (options && options.resultatMessageAction && isString(options.resultatMessageAction)) {
     // callback message
     resultatListener = (resultat) => sendResultatMessage(options, resultat)
   } else if (isDebugMode) {
@@ -156,7 +156,7 @@ function feedback (retour, divFeedback) {
     page.addError(retour.error)
   } else if ((retour && (retour.ok && retour.ok === true)) || (retour.success && retour.success === true)) {
     feedbackOk(divFeedback)
-  } else if (retour && (retour.hasOwnProperty('ok') || retour.hasOwnProperty('success'))) {
+  } else if (retour && (hasProp(retour, 'ok') || hasProp(retour, 'success'))) {
     feedbackKo(divFeedback)
     page.addError("Une erreur est survenue dans l'enregistrement du résultat")
   } else {
@@ -187,7 +187,7 @@ function feedbackKo (divFeedback) {
  */
 function getResultat (result, ressource, options) {
   // on reçoit parfois des refs circulaires, faut nettoyer… ça clone au passage
-  result = JSON.parse(sjt.stringify(result))
+  result = JSON.parse(stringify(result))
   const resultat = new Resultat(result)
   // pour l'envoi au unload on ajoute ça
   if (options.urlResultatCallback && result.deferSync) resultat.deferSync = result.deferSync
@@ -231,7 +231,7 @@ function load (ressource, options, next) {
 
     // On vire le titre si on nous le demande via les options ou un param dans l'url
     if (
-      (options.hasOwnProperty('showTitle') && !options.showTitle) ||
+      (hasProp(options, 'showTitle') && !options.showTitle) ||
       /\?.*showTitle=0/.test(wd.URL) ||
       /\/apercevoir\//.test(wd.URL) ||
       /\?(.+&)?layout=iframe/.test(wd.URL)
