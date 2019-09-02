@@ -202,7 +202,7 @@
     "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.1.4",
     "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.9",
     "@sesatheque-plugins/qcm": "git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.6",
-    "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.8"
+    "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.9"
   },
   "eslintConfig": {
     "parser": "babel-eslint",
