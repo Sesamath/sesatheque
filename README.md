@@ -8,6 +8,19 @@ Pour générer la doc, lancer depuis la racine
 (./script/doc pour afficher les options possibles)
 -->
 
+Présentation
+------------
+
+Sésathèque est une application web en nodeJs destiné à stocker / recenser
+des ressources pédagogiques. 
+
+Utilisée principalement pour les ressources à utiliser dans une application
+[Sesalab](https://framagit.org/Sesamath/sesalab).
+
+Créé par l'association [Sésamath](http://www.sesamath.net) pour [Labomep](http://labomep.sesamath.net), il est mis à disposition de ceux qui souhaitent sous licence [AGPL](https://www.gnu.org/licenses/agpl-3.0.html) ([article wikipédia](https://fr.wikipedia.org/wiki/GNU_Affero_General_Public_License)) sur [github](https://github.com/Sesamath/sesalab/)
+
+Merci à [Bugsnag](https://www.bugsnag.com/) pour son soutien aux projets open-source (c'est un outil permettant de tracer les erreurs qui peuvent se produire dans les navigateurs des utilisateurs).
+
 Installation
 ------------
 
