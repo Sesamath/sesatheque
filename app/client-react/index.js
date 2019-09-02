@@ -1,8 +1,3 @@
-// inclusion des polyfills
-// cf rmq dans app/client/page/index.js
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
-
 import 'whatwg-fetch'
 
 import {createElement} from 'react'

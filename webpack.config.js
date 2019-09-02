@@ -93,12 +93,12 @@ const conf = {
   // cf https://github.com/webpack/docs/wiki/configuration#entry
   entry: {
     ...entries,
-    react: './app/client-react/index.js',
+    react: ['./app/polyfill.js', './app/client-react/index.js'],
     // pour les html en iframe
     bugsnag: './app/client/page/bugsnag.js',
-    // liste des fichiers connus qui utilisent ça :
+    // fichiers connus qui utilisent ça :
     // https://ressources.sesamath.net/coll/lecteur/voir_j3p.php
-    display: './app/client/display/index.js',
+    display: ['./app/polyfill.js', './app/client/display/index.js'],
     // qui utilise ça ?
     import: './app/client/edit/import.js',
     // utilisé par editgraphe.html (plugin j3p)
@@ -143,11 +143,11 @@ const conf = {
       jquery: path.resolve(__dirname, 'node_modules/jquery'),
       // sans ces alias webpack plante sur les plugins en pnpm link
       'prop-types': path.resolve(__dirname, 'node_modules/prop-types'),
-      'react': path.resolve(__dirname, 'node_modules/react'),
+      react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
       'react-hot-loader': path.resolve(__dirname, 'node_modules/react-hot-loader'),
       'react-redux': path.resolve(__dirname, 'node_modules/react-redux'),
-      'redux': path.resolve(__dirname, 'node_modules/redux'),
+      redux: path.resolve(__dirname, 'node_modules/redux'),
       'redux-form': path.resolve(__dirname, 'node_modules/redux-form'),
       'redux-thunk': path.resolve(__dirname, 'node_modules/redux-thunk'),
       'core-js': path.resolve(__dirname, 'node_modules/core-js'),
