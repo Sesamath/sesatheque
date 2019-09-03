@@ -32,6 +32,7 @@
 'use strict'
 const dns = require('dns')
 const ip = require('ip')
+const { hasProp } = require('sesajstools')
 const sjtObj = require('sesajstools/utils/object')
 
 const config = require('../config')
@@ -458,7 +459,7 @@ module.exports = function (component) {
      */
     function getTokenValue (context, token) {
       let value
-      if (context && token && context.session.tokens && context.session.tokens.hasOwnProperty(token)) {
+      if (context && token && context.session.tokens && hasProp(context.session.tokens, token)) {
         value = context.session.tokens[token]
         delete context.session.tokens[token]
       }

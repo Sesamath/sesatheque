@@ -67,16 +67,16 @@ fluxFile.seqEach(function (file) {
 }).seq(function () {
   log('tout semble terminé, on peut poster labomep_all')
   var labomepAll = {
-    'titre': 'Ressources Sésamath',
-    'resume': 'Liste des arbres affichables dans le panneau « Ressources Sésamath » de Labomep',
-    'type': 'arbre',
-    'categories': [8],
-    'publie': true,
-    'restriction': 0,
-    'indexable': true,
-    'origine': 'sesamath',
-    'idOrigine': 'labomep_all',
-    'enfants': allEnfants
+    titre: 'Ressources Sésamath',
+    resume: 'Liste des arbres affichables dans le panneau « Ressources Sésamath » de Labomep',
+    type: 'arbre',
+    categories: [8],
+    publie: true,
+    restriction: 0,
+    indexable: true,
+    origine: 'sesamath',
+    idOrigine: 'labomep_all',
+    enfants: allEnfants
   }
   // on écrit le fichier
   fs.writeFileSync(path.join(jsonDir, 'sesamath-labomep_all.json'), JSON.stringify(labomepAll, null, 2))

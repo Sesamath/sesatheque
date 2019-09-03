@@ -7,7 +7,7 @@ db.EntityRessource.find({type: 'ec2'}).sort({dateCreation: 1}).forEach(r => {
     else if (data.parametres.swf) msg = `swf ${data.parametres.swf}`
     else msg = 'none ' + JSON.stringify(data.parametres)
   } else {
-    msg = `noParameters`
+    msg = 'noParameters'
   }
   print(r._id, msg, r.dateCreation, r.titre)
 })

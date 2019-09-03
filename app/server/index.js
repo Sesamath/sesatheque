@@ -45,7 +45,7 @@ const sjt = require('sesajstools')
 const {merge} = require('sesajstools/utils/object')
 const log = require('sesajstools/utils/log')
 
-const {afterCookie, afterSession} = require('./addMiddlewares')
+const {addBodyParsers, addCorsAndLog} = require('./addMiddlewares')
 const beforeTransport = require('./beforeTransport')
 const boot = require('./boot')
 const config = require('./config')
@@ -91,8 +91,8 @@ function beforeBootsrap (lassi, mainComponent, allComponents) {
      */
     lassi.on('afterRailUse', function (rail, name) {
       // on peut ajouter les arguments , settings, middleware puis log(middleware) pour voir le code de chaque middleware
-      if (name === 'cookie') afterCookie(rail)
-      else if (name === 'session') afterSession(rail)
+      if (name === 'cookie') addBodyParsers(rail)
+      else if (name === 'session') addCorsAndLog(rail)
     })
 
     // le listener beforeTransport

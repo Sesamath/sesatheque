@@ -93,8 +93,8 @@ function parseIds (idsFound) {
         kLabomep.raw(query + ' WHERE bib_id = ' + id).exec(function (error, rows) {
           try {
             if (error) throw error
-            if (rows[ 0 ] && rows[ 0 ][ 0 ]) {
-              row = rows[ 0 ][ 0 ]
+            if (rows[0] && rows[0][0]) {
+              row = rows[0][0]
               // faut voir si on complète avec les infos de oldBibli
               if (checkOldBibli) {
                 if (!row.bib_descriptif || !row.bib_commentaire) {
@@ -102,8 +102,8 @@ function parseIds (idsFound) {
                     rows) {
                     var result
                     if (error) throw error
-                    if (rows[ 0 ]) {
-                      result = rows[ 0 ][ 0 ]
+                    if (rows[0]) {
+                      result = rows[0][0]
                       if (result && !row.descriptif && result.description) row.descriptif = result.description
                       if (result && !row.commentaire && result.commentaires) row.commentaire = result.commentaires
                     } else {

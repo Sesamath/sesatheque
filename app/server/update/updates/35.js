@@ -32,6 +32,7 @@
 
 const flow = require('an-flow')
 const uuid = require('an-uuid')
+const {hasProp} = require('sesajstools')
 
 const updateNum = __filename.substring(__dirname.length + 1, __filename.length - 3)
 const updateLog = require('an-log')('update' + updateNum)
@@ -184,7 +185,7 @@ module.exports = {
     }).seqEach(function (ressource) {
       let needStore = false
       const cleanExo = (exo) => {
-        if (exo.hasOwnProperty('$droits')) {
+        if (hasProp(exo, '$droits')) {
           delete exo.$droits
           needStore = true
         }

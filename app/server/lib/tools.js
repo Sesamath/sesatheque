@@ -32,6 +32,7 @@
 'use strict'
 const moment = require('moment')
 const util = require('util')
+const { hasProp } = require('sesajstools')
 
 /**
  * Vérifie qu'une valeur est entière dans l'intervalle donné et recadre sinon (avec un message dans le log d'erreur)
@@ -193,7 +194,7 @@ function linkQs (path, texte, args) {
   if (args) {
     var paires = []
     for (var p in args) {
-      if (args.hasOwnProperty(p)) paires.push(p + '=' + encodeURIComponent(args[p]))
+      if (hasProp(args, p)) paires.push(p + '=' + encodeURIComponent(args[p]))
     }
     if (paires.length) path += '?' + paires.join('&')
   }

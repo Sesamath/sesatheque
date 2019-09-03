@@ -1,4 +1,6 @@
 import {isEmpty} from 'lodash'
+import sjt from 'sesajstools'
+const { hasProp } = sjt
 
 const requiredText = 'Ce champ est obligatoire'
 
@@ -14,7 +16,7 @@ const validate = ({
   })
 
   jsonFields.forEach(key => {
-    if (values.hasOwnProperty(key)) {
+    if (hasProp(values, key)) {
       const value = values[key]
       if (typeof value === 'string') {
         try {

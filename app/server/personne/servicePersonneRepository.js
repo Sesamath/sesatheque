@@ -34,6 +34,7 @@
 const _ = require('lodash')
 const flow = require('an-flow')
 const {merge} = require('sesajstools/utils/object')
+const {hasProp} = require('sesajstools')
 const {userError} = require('../../utils')
 const {looksLikePid} = require('../../utils/validators')
 
@@ -279,8 +280,9 @@ module.exports = function (component) {
     function updateOrCreate (personne, next) {
       function checkUpdate (personne, personneNew, next) {
         let needUpdate = false
+        // eslint-disable-next-line no-unused-vars
         for (const prop in personneNew) {
-          if (personneNew.hasOwnProperty(prop) && !_.isEqual(personne[prop], personneNew[prop])) {
+          if (hasProp(personneNew, prop) && !_.isEqual(personne[prop], personneNew[prop])) {
             needUpdate = true
             // pour groupesMembre on fusionne, histoire de pas écraser les groupes locaux
             // par des groupes donnés par l'authentification

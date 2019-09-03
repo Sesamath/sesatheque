@@ -4,5 +4,5 @@
 module.exports = function () {
   // avec mocha-webpack on a pas la trace, mais même en l'ajoutant + process.exit()
   // ça donne pas d'info sur celui qui appelle ça
-  throw new Error(`require d’un fichier protégé interdit via webpack`)
+  throw new Error('require d’un fichier protégé interdit via webpack')
 }

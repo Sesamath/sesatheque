@@ -32,6 +32,7 @@
 'use strict'
 
 const flow = require('an-flow')
+const { hasProp } = require('sesajstools')
 
 /**
  * Répond sur certaines requetes OPTIONS
@@ -112,10 +113,10 @@ module.exports = function (component) {
       // on peut passer aux autres propriétés du groupe
       }).seq(function (groupe) {
         // les booléens
-        if (data.hasOwnProperty('ouvert')) groupe.ouvert = Boolean(data.ouvert)
-        if (data.hasOwnProperty('public')) groupe.public = Boolean(data.public)
+        if (hasProp(data, 'ouvert')) groupe.ouvert = Boolean(data.ouvert)
+        if (hasProp(data, 'public')) groupe.public = Boolean(data.public)
         // description
-        if (data.hasOwnProperty('description')) groupe.description = data.description
+        if (hasProp(data, 'description')) groupe.description = data.description
         // et les gestionnaires à ajouter éventuellement, on shunt si les deux champs sont vides
         // (si seul l'un des deux est vide ça tentera le chargement et renverra une erreur)
         if (!data.newGestionnairePid && !data.newGestionnaireNom) return this(null, groupe)

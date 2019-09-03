@@ -36,6 +36,7 @@
 const bodyParser = require('body-parser')
 const express = require('express')
 const moment = require('moment')
+const { hasProp } = require('sesajstools')
 
 const tools = require('./lib/tools')
 const config = require('./config')
@@ -48,7 +49,7 @@ const staticTtl = 3600 * 24
  * Ajoute notre bodyParser après le middleware cookie
  * @param rail
  */
-function afterCookie (rail) {
+function addBodyParsers (rail) {
   if (config.$rail.noBodyParser) {
     const dateRegExp = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
     const bodyParserSettings = config.$rail.bodyParser || {
@@ -57,7 +58,7 @@ function afterCookie (rail) {
     if (!bodyParserSettings.limit) bodyParserSettings.limit = '10mb'
     // ça c'est juste pour urlencoded, à priori on devrait pouvoir avoir des tableaux avec false
     // mais ça plante par ex sur un post de form avec `categories[2]: true`
-    if (!bodyParserSettings.hasOwnProperty('extended')) bodyParserSettings.extended = true
+    if (!hasProp(bodyParserSettings, 'extended')) bodyParserSettings.extended = true
     const jsonMiddleware = express.json(bodyParserSettings)
     const urlencodedMiddleware = express.urlencoded(bodyParserSettings)
     const textMiddleware = bodyParser.text(bodyParserSettings)
@@ -69,13 +70,13 @@ function afterCookie (rail) {
   } else {
     log.error('Il manque le settings $rail.noBodyParser pour mettre nos propres parsers')
   }
-} // afterCookie
+} // addBodyParsers
 
 /**
  * Ajoute sur le rail les requetes en console (en dev), CORS, expires, access.log et perf.log
  * @param {Object} rail le rail express
  */
-function afterSession (rail) {
+function addCorsAndLog (rail) {
   // ajout d'express en global sur lassi (utilisé dans les tests pour le passer à supertest)
   lassi.express = rail
   /**
@@ -200,12 +201,12 @@ function afterSession (rail) {
       next()
     })
   }
-} // afterSession
+} // addCorsAndLog
 
 /**
  * Hooks qui seront ajoutés sur le rail par app/server/index.js
  */
 module.exports = {
-  afterCookie,
-  afterSession
+  addBodyParsers,
+  addCorsAndLog
 }

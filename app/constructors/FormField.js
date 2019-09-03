@@ -30,9 +30,10 @@
  */
 
 'use strict'
+const _ = require('lodash')
+const { hasProp } = require('sesajstools')
 
-var FormChoice = require('./FormChoice')
-var _ = require('lodash')
+const FormChoice = require('./FormChoice')
 
 /**
  * Un champ de FormGroup
@@ -179,7 +180,7 @@ FormField.prototype.addChoice = function addChoice (choice) {
   if (this.id && !choice.id) choice.id = this.id + i
   // et on ajoute les selected s'il y en a (comparaison avec cast en string)
   if (
-    choice.hasOwnProperty('value') &&
+    hasProp(choice, 'value') &&
       this.selectedValues &&
       this.selectedValues.length &&
       _.includes(this.selectedValues, String(choice.value))

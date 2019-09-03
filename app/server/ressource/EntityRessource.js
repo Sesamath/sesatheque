@@ -31,7 +31,7 @@
 'use strict'
 const uuid = require('an-uuid')
 const {exists, getRidComponents} = require('sesatheque-client/dist/server/sesatheques')
-const {stringify} = require('sesajstools')
+const {hasProp, stringify} = require('sesajstools')
 const htmlToText = require('html-to-text')
 
 const tools = require('../lib/tools')
@@ -66,7 +66,7 @@ module.exports = function (component) {
 
       // mais après on ne peut plus ajouter de propriété dans afterStore, pas trouvé pourquoi…
       // => TypeError: Cannot assign to read only property 'rid' of object '#<Entity>'
-      if (!this.hasOwnProperty('rid')) {
+      if (!hasProp(this, 'rid')) {
         Object.defineProperty(this, 'rid', {
           writable: true,
           enumerable: true,
@@ -252,7 +252,7 @@ module.exports = function (component) {
         // on génère la clé de lecture si elle manque, on la vire si elle n'est plus nécessaire
         if (this.publie && !this.restriction) {
           // public
-          if (this.hasOwnProperty('cle')) delete this.cle
+          if (hasProp(this, 'cle')) delete this.cle
         } else {
           // prive
           if (!this.cle) this.cle = uuid()

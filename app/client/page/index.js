@@ -30,17 +30,7 @@
  */
 
 'use strict'
-// On ajoutait les @babel/polyfill via ce fichier et non directement dans les entries de webpack.
-// C'était le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
-// (qui filtrait pour n'inclure que les polyfills nécessaires pour les browsers ciblés.)
-// depuis babel 7.4, y'a plus de @babel/polyfill,
-// on utilise directement core-js qui s'occupe d'ajouter les polyfill nécessaires,
-// cf https://www.thebasement.be/updating-to-babel-7.4/
-// https://babeljs.io/blog/2019/03/19/7.4.0
-// avec useBuiltIns: "usage" faut pas ces deux lignes (seulement avec entry)
-require('core-js/stable')
-require('regenerator-runtime/runtime')
-
+// les polyfill sont ajoutés par webpack (cf version 1.6.1 du 2019-08-26 pour l'inclusion directement ici)
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjtUrl = require('sesajstools/http/url')

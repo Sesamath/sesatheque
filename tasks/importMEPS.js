@@ -62,16 +62,16 @@ function getMepModele (mepRow) {
  */
 function getLangue (langueId) {
   var corres = {
-    'ar': 'ara',
-    'br': 'bre',
-    'ca': 'cat',
-    'de': 'deu',
-    'en': 'eng',
-    'es': 'spa',
-    'eu': 'eus',
-    'fr': 'fra',
-    'it': 'ita',
-    'pt': 'por'
+    ar: 'ara',
+    br: 'bre',
+    ca: 'cat',
+    de: 'deu',
+    en: 'eng',
+    es: 'spa',
+    eu: 'eus',
+    fr: 'fra',
+    it: 'ita',
+    pt: 'por'
   }
   if (corres[langueId]) {
     return corres[langueId]
