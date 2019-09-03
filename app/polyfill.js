@@ -41,3 +41,4 @@
 import 'core-js/stable'
 // lui ne serait nécessaire que si on utilisait des générateurs
 // import 'regenerator-runtime/runtime'
+// (mais faut quand même le mettre dans nos dépendances sinon la compil du plugin url plante, probablement à cause du async/await de display.ui)

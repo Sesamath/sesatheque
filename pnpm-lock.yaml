@@ -91,6 +91,7 @@ devDependencies:
   postcss-loader: 3.0.0
   pre-push: 0.1.1
   react-styleguidist: 8.0.6_d76646be7bb7f914b0aa800ed08843c6
+  regenerator-runtime: 0.13.3
   sass-loader: 7.3.1_webpack@4.39.2
   sinon: 7.4.1
   sinon-chai: 3.3.0_chai@4.2.0+sinon@7.4.1
@@ -11375,6 +11376,7 @@ specifiers:
   redux: 4.0.1
   redux-form: 7.4.2
   redux-thunk: 2.3.0
+  regenerator-runtime: ^0.13.3
   request: ^2.88.0
   roboto-fontface: ^0.10.0
   sass-loader: ^7.1.0
