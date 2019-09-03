@@ -30,7 +30,7 @@
  */
 
 'use strict'
-// les polyfill sont ajoutés par webpack
+// les polyfill sont ajoutés par webpack (cf version 1.6.1 du 2019-08-26 pour l'inclusion directement ici)
 const dom = require('sesajstools/dom')
 const log = require('sesajstools/utils/log')
 const sjtUrl = require('sesajstools/http/url')

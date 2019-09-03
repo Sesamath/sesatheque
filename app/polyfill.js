@@ -39,6 +39,5 @@
 // https://babeljs.io/blog/2019/03/19/7.4.0
 
 import 'core-js/stable'
-// lui ne serait nécessaire que si on utilisait des générateurs
-// import 'regenerator-runtime/runtime'
-// (mais faut quand même le mettre dans nos dépendances sinon la compil du plugin url plante, probablement à cause du async/await de display.ui)
+// lui est nécessaire si on utilise des générateurs (pas le cas) ou async/await (y'en a dans le plugin url)
+import 'regenerator-runtime/runtime'
