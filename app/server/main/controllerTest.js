@@ -34,12 +34,14 @@
 const flow = require('an-flow')
 
 // Des retours d'erreur, pour tester la gestion d'erreur de nos clients
+// Attention, nos tests s'attendent à trouver ça, mais ils récupèrent ce que renvoit le module http-errors !
+// (pas trouvé pourquoi…)
 const errors = {
   400: 'Bad Request',
   401: 'Unauthorized',
   403: 'Forbidden',
   404: 'Not Found',
-  418: 'I\'m a teapot',
+  418: 'I\'m a Teapot',
   500: 'Internal Server Error',
   503: 'Service Unavailable'
 }
