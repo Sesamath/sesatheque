@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -201,7 +201,7 @@
     "@sesatheque-plugins/arbre": "git+https://framagit.org/Sesamath/sesatheque-plugin-arbre.git#1.1.10",
     "@sesatheque-plugins/iep": "git+https://framagit.org/Sesamath/sesatheque-plugin-iep.git#2.0.0",
     "@sesatheque-plugins/j3p": "git+https://framagit.org/Sesamath/sesatheque-plugin-j3p.git#1.1.4",
-    "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.9",
+    "@sesatheque-plugins/mathgraph": "git+https://framagit.org/Sesamath/sesatheque-plugin-mathgraph.git#1.0.10",
     "@sesatheque-plugins/qcm": "git+https://framagit.org/Sesamath/sesatheque-plugin-qcm.git#1.2.6",
     "@sesatheque-plugins/url": "git+https://framagit.org/Sesamath/sesatheque-plugin-url.git#1.0.9"
   },
