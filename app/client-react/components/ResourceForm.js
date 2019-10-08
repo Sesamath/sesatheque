@@ -111,20 +111,26 @@ const propsAfterLoadHook = ({ressource}) => {
     initialValues: loadHook(ressource)
   }
 }
-const formDef = {
+const withPropsWrapper = withProps(propsAfterLoadHook)
+
+const reduxFormWrapper = reduxForm({
+  // ATTENTION, ne pas modifier cet id car des plugins l'utilisent pour se brancher sur notre redux-form
+  // (plugin iep qui a besoin de notre props.change par ex, il le récupère en wrappant son subForm avec
+  // reduxForm et le même id)
   form: 'ressource',
   validate,
   onSubmit,
   onSubmitFail,
   enableReinitialize: true
-}
-const formComponent = reduxForm(formDef)(ResourceForm)
+})
 
 export default ensureLogged(
   resourceLoader(
     aliasForker( // fork si on édite un alias
       resourceSaver( // fournit saveRessource
-        withProps(propsAfterLoadHook)(formComponent)
+        withPropsWrapper(
+          reduxFormWrapper(ResourceForm)
+        )
       )
     )
   )

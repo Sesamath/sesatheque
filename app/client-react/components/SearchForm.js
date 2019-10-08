@@ -144,11 +144,11 @@ SearchForm.propTypes = {
 }
 
 // pour utiliser Field faut être un redux-form
-const formDef = reduxForm({
+const reduxFormWrapper = reduxForm({
+  form: 'searchForm',
   // cf https://redux-form.com/7.4.2/docs/api/reduxform.md/#-code-enablereinitialize-boolean-code-optional-
   // sinon le form garde son état interne entre clic sur "mes ressources" puis "rechercher"
   enableReinitialize: true,
-  form: 'searchForm',
   onSubmit: (query, dispatch) => {
     dispatch(push({
       pathname: '/ressource/rechercher',
@@ -158,4 +158,4 @@ const formDef = reduxForm({
   }
 })
 
-export default formDef(SearchForm)
+export default reduxFormWrapper(SearchForm)

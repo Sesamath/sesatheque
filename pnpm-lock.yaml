@@ -2050,8 +2050,8 @@ packages:
   /browserslist/4.1.1:
     dependencies:
       caniuse-lite: 1.0.30000999
-      electron-to-chromium: 1.3.276
-      node-releases: 1.1.34
+      electron-to-chromium: 1.3.277
+      node-releases: 1.1.35
     dev: true
     hasBin: true
     resolution:
@@ -2059,8 +2059,8 @@ packages:
   /browserslist/4.7.0:
     dependencies:
       caniuse-lite: 1.0.30000999
-      electron-to-chromium: 1.3.276
-      node-releases: 1.1.34
+      electron-to-chromium: 1.3.277
+      node-releases: 1.1.35
     dev: true
     hasBin: true
     resolution:
@@ -2648,6 +2648,10 @@ packages:
       node: '>= 0.6.x'
     resolution:
       integrity: sha1-0SG7roYNmZKj1Re6lvVliOR8Z4E=
+  /commander/2.20.0:
+    dev: true
+    resolution:
+      integrity: sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
   /commander/2.20.1:
     dev: true
     resolution:
@@ -3490,10 +3494,10 @@ packages:
   /ee-first/1.1.1:
     resolution:
       integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
-  /electron-to-chromium/1.3.276:
+  /electron-to-chromium/1.3.277:
     dev: true
     resolution:
-      integrity: sha512-J7bVRAW2fHJVOGZqxSvmMcbBAWPiueHsKwSq+TjaNq1wQ71Za0uBExC1ECuMmAAQioDA2//auhI/glFINnUGPw==
+      integrity: sha512-Czmsrgng89DOgJlIknnw9bn5431QdtnUwGp5YYiPwU1DbZQUxCLF+rc1ZC09VNAdalOPcvH6AE8BaA0H5HjI/w==
   /elementtree/0.1.7:
     dependencies:
       sax: 1.1.4
@@ -3560,6 +3564,16 @@ packages:
       node: '>=6.9.0'
     resolution:
       integrity: sha512-F/7vkyTtyc/llOIn8oWclcB25KdRaiPBpZYDgJHgh/UHtpgT2p2eldQgtQnLtUvfMKPKxbRaQM/hHkvLHt1Vng==
+  /enhanced-resolve/4.1.1:
+    dependencies:
+      graceful-fs: 4.2.2
+      memory-fs: 0.5.0
+      tapable: 1.1.3
+    dev: true
+    engines:
+      node: '>=6.9.0'
+    resolution:
+      integrity: sha512-98p2zE+rL7/g/DzMHMTF4zZlCgeVdJ7yr6xzEpJRYwFYrGi9ANdn5DnJURg6RpBkyk60XYDnWIv51VfIhfNGuA==
   /entities/1.1.2:
     resolution:
       integrity: sha512-f2LZMYl1Fzu7YSBKg+RoROelpOaNrcGmE9AZubeDfrCEia483oW4MI4VyFd5VNHIgQ/7qm1I0wUHK1eJnn2y2w==
@@ -5054,10 +5068,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==
-  /hosted-git-info/2.8.4:
+  /hosted-git-info/2.8.5:
     dev: true
     resolution:
-      integrity: sha512-pzXIvANXEFrc5oFFXRMkbLPQ2rXRoDERwDLyrcUxGhaZhgP54BBSl9Oheh7Vv0T090cszWBxPjkQQ5Sq1PbBRQ==
+      integrity: sha512-kssjab8CvdXfcXMXVcvsXum4Hwdq9XGtRD3TteMEvEbq0LXyiNQr6AprqKqfeaDXze7SxWvRxdpwE6ku7ikLkg==
   /hpack.js/2.1.6:
     dependencies:
       inherits: 2.0.4
@@ -6593,6 +6607,15 @@ packages:
     dev: true
     resolution:
       integrity: sha1-OpoguEYlI+RHz7x+i7gO1me/xVI=
+  /memory-fs/0.5.0:
+    dependencies:
+      errno: 0.1.7
+      readable-stream: 2.3.6
+    dev: true
+    engines:
+      node: '>=4.3.0 <5.0.0 || >=5.10'
+    resolution:
+      integrity: sha512-jA0rdU5KoQMC0e6ppoNRtpp6vjFq6+NY7r8hywnC7V+1Xj/MtHwGIbB1QaK/dunyjWteJzmkpd7ooeWg10T7GA==
   /meow/3.7.0:
     dependencies:
       camelcase-keys: 2.1.0
@@ -7048,12 +7071,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-jZ2+KJZKSsVxLpExZCEHxx6Q7EA=
-  /node-releases/1.1.34:
+  /node-releases/1.1.35:
     dependencies:
       semver: 6.3.0
     dev: true
     resolution:
-      integrity: sha512-fNn12JTEfniTuCqo0r9jXgl44+KxRH/huV7zM/KAGOKxDKrHr6EbT7SSs4B+DNxyBE2mks28AD+Jw6PkfY5uwA==
+      integrity: sha512-JGcM/wndCN/2elJlU0IGdVEJQQnJwsLbgPCFd2pY7V0mxf17bZ0Gb/lgOtL29ZQhvEX5shnVhxQyZz3ex94N8w==
   /node-sass/4.12.0:
     dependencies:
       async-foreach: 0.1.3
@@ -7114,7 +7137,7 @@ packages:
       integrity: sha1-xkZdvwirzU2zWTF/eaxopkayj/k=
   /normalize-package-data/2.5.0:
     dependencies:
-      hosted-git-info: 2.8.4
+      hosted-git-info: 2.8.5
       resolve: 1.12.0
       semver: 5.7.1
       validate-npm-package-license: 3.0.4
@@ -10350,16 +10373,16 @@ packages:
     dev: true
     resolution:
       integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==
-  /uglify-js/3.6.0:
+  /uglify-js/3.6.1:
     dependencies:
-      commander: 2.20.1
+      commander: 2.20.0
       source-map: 0.6.1
     dev: true
     engines:
       node: '>=0.8.0'
     hasBin: true
     resolution:
-      integrity: sha512-W+jrUHJr3DXKhrsS7NUVxn3zqMOFn0hL/Ei6v0anCIMoKC93TjcflTagwIHLW7SfMFfiQuktQyFVCFHGUE0+yg==
+      integrity: sha512-+dSJLJpXBb6oMHP+Yvw8hUgElz4gLTh82XuX68QiJVTXaE5ibl6buzhNkQdYhBlIhozWOC9ge16wyRmjG4TwVQ==
   /uglifyjs-webpack-plugin/2.2.0_webpack@4.41.0:
     dependencies:
       cacache: 12.0.3
@@ -10368,7 +10391,7 @@ packages:
       schema-utils: 1.0.0
       serialize-javascript: 1.9.1
       source-map: 0.6.1
-      uglify-js: 3.6.0
+      uglify-js: 3.6.1
       webpack: 4.41.0_webpack@4.41.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
@@ -10853,7 +10876,7 @@ packages:
       ajv: 6.10.2
       ajv-keywords: 3.4.1_ajv@6.10.2
       chrome-trace-event: 1.0.2
-      enhanced-resolve: 4.1.0
+      enhanced-resolve: 4.1.1
       eslint-scope: 4.0.3
       json-parse-better-errors: 1.0.2
       loader-runner: 2.4.0
