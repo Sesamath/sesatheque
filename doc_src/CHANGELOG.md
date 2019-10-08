@@ -1,10 +1,36 @@
 Changelog
 =========
 
-1.4.x
------
+1.6
+---
 
-Plugins externalisés
+* 1.6.5 (2019-10-08) Màj plugin iep (fix import script)
+* 1.6.4 (2019-10-08) Màj plugin url (fix chargement si consigne)
+* 1.6.3 (2019-10-07) Màj plugin mathgraph
+* 1.6.2 (2019-09-03) Modif des polyfill
+* 1.6.1 (2019-08-26) Màj plugin url
+* 1.6.0 (2019-08-22) Refonte polyfill avec passage à babel 7.4 et core-js 3
+
+1.5
+---
+
+* 1.5.5 (2019-08-22) Màj plugin arbre
+* 1.5.4 (2019-08-05) Mutualisation bugsnag & màj plugins arbre et j3p
+* 1.5.3 (2019-08-02) Simplification boot/shutdown, fix des tests (suite passage à lassi 2.5.0)
+* 1.5.2 (2019-08-02) Màj de tous les plugins pour régler des pbs d'icones
+* 1.5.1 (2019-07-24) Màj plugin j3p & fix des 404 sur /api/public/getRid?id=xxx
+* 1.5.0 (2019-07-18) Adaptation à lassi 2.5.0 (plus de request.parsedUrl)
+
+1.4
+---
+
+Plugins externalisés avec la 1.4.0
+
+* 1.4.24 (2019-07-18) Màj lassi#2.5.0, nombreux petits correctifs
+* 1.4.23 (2019-06-05) Màj lassi#2.4.14
+* 1.4.22 (2019-05-25) Màj plugin j3p
+* 1.4.21 (2019-05-24) Màj sesatheque-client et plugin j3p
+
 
 * 1.4.5 (2018-12-18)
   * fix pb webpack dans les plugins (iframe qui affichent `module.exports = __webpack_public_path__ + …` au lieu de la page html en question)
@@ -22,8 +48,8 @@ Plugins externalisés
 * 1.4.1 (2018-11-26)
 * 1.4.0 (2018-10-30)
 
-1.3.x
------
+1.3
+---
 
 * 1.3.13 (2018-09-27)
 * 1.3.12 (2018-09-27)
@@ -41,8 +67,8 @@ Plugins externalisés
 * 1.3.1 (2018-08-30)
 * 1.3.0 (2018-08-30)
 
-1.2.x
------
+1.2
+---
 Premières versions avec front react en production
 
 * 1.2.3 (2018-08-02)
@@ -50,8 +76,8 @@ Premières versions avec front react en production
 * 1.2.1 (2018-08-01)
 * 1.2.0 (2018-07-27) groupes normés, réindexation générale (_data n'est plus une string json dans les entities mais un objet)
 
-1.1.x
------
+1.1
+---
 
 * 1.1.31 (2018-06-04)
 * 1.1.30 (2018-06-01)
@@ -87,7 +113,7 @@ Premières versions avec front react en production
 * 1.1.1 (2017-11-03)
 * 1.1.0 (2017-10-30)
 
-1.0.x
+1.0
 -----
 Mise en production (Labomep + 2 Sésathèques)
 
@@ -115,8 +141,8 @@ Breaking Changes : config.sesatheques doit désormais être sous forme de tablea
 * 1.0.1 (2017-08-02)
 * 1.0.0 (2017-08-01)
 
-0.9.x
------
+0.9
+---
 
 * 0.9.82 (2017-07-31)
 * 0.9.81 (2017-07-25)
@@ -200,8 +226,8 @@ Breaking Changes : config.sesatheques doit désormais être sous forme de tablea
 * 0.9.1 (2017-03-01)
 * 0.9.0 (2017-03-01) 1re version avec rid et aliasOf généralisés
 
-0.0.x
------
+0.0
+---
 
 * 0.0.68 (2017-02-24)
 * 0.0.67 (2017-02-21)
