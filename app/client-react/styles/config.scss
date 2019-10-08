@@ -152,21 +152,26 @@ $red-500    : #D9534F !default;
 $blue-sesatheque : #237;
 
 // Semantic colors
-$color-brand    : $green-500;
-$color-primary  : $blue-sesatheque;
-$color-success  : #dff0d8;
-$color-info     : #d9edf7;
-$color-warning  : #fcf8e3;
-$color-danger   : #f2dede;
-$color-danger-dark : #bb0033;
-$color-inverse  : $gray-800;
-$color-ghost    : transparent;
-$color-muted    : $gray-200;
+$color-brand      : $green-500;
+$color-primary    : $blue-sesatheque;
+$color-success    : #3c763d;
+$color-success-bg : #dff0d8;
+$color-info       : $blue-sesatheque;
+$color-info-bg    : #d9edf7;
+$color-warning    : #8a2d14;
+$color-warning-bg : #fceddb;
+$color-danger     : #bb0033;
+$color-danger-bg  : #f2dede;
+$color-inverse    : $white;
+$color-inverse-bg : $gray-800;
+$color-ghost      : $white;
+$color-ghost-bg   : transparent;
+$color-muted      : $gray-200;
 
-$color-base      : $gray-900;
-$background-base : $white;
+$color-base       : $gray-900;
+$background-base  : $white;
 
-$forms-color     : $gray-800;
+$forms-color      : $gray-800;
 
 // ---------------
 // Components zone
@@ -211,13 +216,13 @@ $table-footer-background    : transparent;
 // Components: buttons, badges, alerts color variants list
 // Convention is: name - background-color - color - border
 $variants-list: (
-  (primary,    $color-primary,    $white,    none),
-  (success,    $color-success,    #3c763d,    0 0 0 1px #d6e9c6),
-  (info,       $color-info,       #31708f,    0 0 0 1px #bce8f1),
-  (warning,    $color-warning,    #8a6d3b,    0 0 0 1px #faebcc),
-  (danger,     $color-danger,     #a94442,    0 0 0 1px #ebccd1),
-  (inverse,    $color-inverse,    $white,    none),
-  (ghost,      $color-ghost,      $white,    0 0 0 1px $white inset)
+  (primary,    $white, $color-primary, none),
+  (success,    $color-success-bg,    $color-success, 0 0 0 1px darken($color-success, 20%)),
+  (info,       $color-info-bg,       $color-info,    0 0 0 1px darken($color-info, 20%)),
+  (warning,    $color-warning-bg,    $color-warning, 0 0 0 1px darken($color-warning, 20%)),
+  (danger,     $color-danger-bg,     $color-danger,  0 0 0 1px darken($color-danger, 20%)),
+  (inverse,    $color-inverse-bg,    $color-inverse, none),
+  (ghost,      $color-ghost-bg,      $color-ghost,   0 0 0 1px $white inset)
 ) !default;
 
 // Component: tabs

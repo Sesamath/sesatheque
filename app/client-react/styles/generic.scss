@@ -3,16 +3,19 @@
 
 .error {
   @include avert($fa-var-exclamation-triangle);
-  color: $color-danger-dark;
-  border-color: $color-danger-dark;
+  color: $color-danger;
+  background-color: $color-danger-bg;
+  border-color: $color-danger;
 }
 .warning {
   @include avert($fa-var-exclamation);
   color: $color-warning;
+  background-color: $color-warning-bg;
   border-color: $color-warning;
 }
 .info {
   @include avert($fa-var-info-circle);
   color: $color-info;
+  background-color: $color-info-bg;
   border-color: $color-info;
 }
