@@ -5,6 +5,7 @@
 @import "./config.scss";
 @import "./fonts.scss";
 @import "./mixins.scss";
+@import "./generic.scss";
 
 #display {
   position: relative;
@@ -52,21 +53,6 @@
   text-align: center;
   font-size: 1.2em;
   font-family: $font-family-base;
-}
-.error {
-  @include avert($fa-var-exclamation-triangle);
-  color: $color-danger-dark;
-  border-color: $color-danger-dark;
-}
-.warning {
-  @include avert($fa-var-exclamation);
-  color: $color-warning;
-  border-color: $color-warning;
-}
-.info {
-  @include avert($fa-var-info-circle);
-  color: $color-info;
-  border-color: $color-info;
 }
 
 /* Pour j3p faut annuler les css de normalize sur sup / sub, car mathquill fait du positionnement en js */

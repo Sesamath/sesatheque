@@ -1,0 +1,18 @@
+/* directives communes à display & app */
+@import "./mixins.scss";
+
+.error {
+  @include avert($fa-var-exclamation-triangle);
+  color: $color-danger-dark;
+  border-color: $color-danger-dark;
+}
+.warning {
+  @include avert($fa-var-exclamation);
+  color: $color-warning;
+  border-color: $color-warning;
+}
+.info {
+  @include avert($fa-var-info-circle);
+  color: $color-info;
+  border-color: $color-info;
+}
