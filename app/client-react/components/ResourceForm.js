@@ -67,8 +67,7 @@ ResourceForm.propTypes = {
   handleSubmit: PropTypes.func,
   submitting: PropTypes.bool,
   saveRessource: PropTypes.func,
-  pristine: PropTypes.bool,
-  initialize: PropTypes.func
+  pristine: PropTypes.bool
 }
 
 const validate = (values) => {
@@ -76,12 +75,14 @@ const validate = (values) => {
   const {type} = values
   const {validate: typeValidate} = getEditor(type)
   if (typeValidate) {
+    console.log(`pour le type ${type} on a un validate`)
     typeValidate(values, errors)
   }
+  console.log(`pour le type ${type} on retourne les erreurs de validation`, errors)
   return errors
 }
 
-const onSubmit = (values, dispatch, {saveRessource, initialize}) => {
+const onSubmit = (values, dispatch, {saveRessource}) => {
   const {saveHook = identity} = getEditor(values.type)
 
   return saveRessource(saveHook(values), (savedRessource) => {
@@ -103,6 +104,13 @@ const onSubmit = (values, dispatch, {saveRessource, initialize}) => {
   })
 }
 
+const propsAfterLoadHook = ({ressource}) => {
+  const {loadHook = identity} = getEditor(ressource.type)
+
+  return {
+    initialValues: loadHook(ressource)
+  }
+}
 const formDef = {
   form: 'ressource',
   validate,
@@ -110,20 +118,13 @@ const formDef = {
   onSubmitFail,
   enableReinitialize: true
 }
+const formComponent = reduxForm(formDef)(ResourceForm)
 
 export default ensureLogged(
   resourceLoader(
     aliasForker( // fork si on édite un alias
       resourceSaver( // fournit saveRessource
-        withProps(({ressource}) => {
-          const {loadHook = identity} = getEditor(ressource.type)
-
-          return {
-            initialValues: loadHook(ressource)
-          }
-        })(
-          reduxForm(formDef)(ResourceForm)
-        )
+        withProps(propsAfterLoadHook)(formComponent)
       )
     )
   )
