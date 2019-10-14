@@ -4,6 +4,7 @@ Changelog
 1.6
 ---
 
+* 1.6.6 (2019-10-08) Màj plugin url (syntaxe wiki + qq tags html autorisés)
 * 1.6.5 (2019-10-08) Màj plugin iep (fix import script)
 * 1.6.4 (2019-10-08) Màj plugin url (fix chargement si consigne)
 * 1.6.3 (2019-10-07) Màj plugin mathgraph
