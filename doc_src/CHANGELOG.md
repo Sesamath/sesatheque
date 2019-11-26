@@ -4,6 +4,8 @@ Changelog
 1.6
 ---
 
+* 1.6.8 (2019-11-26) Màj plugin iep & mathgraph (passage à MathJax3)
+* 1.6.7 (2019-10-18) Màj plugin qcm (rmq sur la syntaxe LaTeX)
 * 1.6.6 (2019-10-08) Màj plugin url (syntaxe wiki + qq tags html autorisés)
 * 1.6.5 (2019-10-08) Màj plugin iep (fix import script)
 * 1.6.4 (2019-10-08) Màj plugin url (fix chargement si consigne)
