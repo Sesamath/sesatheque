@@ -265,7 +265,8 @@ if (isTestEnv) {
 } else if (process.argv.some(arg => arg.includes('webpack-dev-server'))) {
   staging = 'dev'
 } else if (process.env.NODE_ENV === 'production') {
-  staging = 'prod'
+  // on laisse préprod si c'est ça qui était dans localConfig
+  staging = config.application.staging === 'preprod' ? 'preprod' : 'prod'
 } else if (knownStagings.includes(process.env.NODE_ENV)) {
   staging = process.env.NODE_ENV
 } else if (knownStagings.includes(config.application.staging)) {
