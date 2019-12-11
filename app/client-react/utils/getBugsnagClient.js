@@ -69,6 +69,9 @@ function beforeSend (report) {
     // on vire tous les plantages qui concernent une extension firefox
     if (report.stacktrace.some(trace => /^moz-extension:\/\//.test(trace.file))) return false
   }
+  if (/ChunkLoadError/.test(report.errorClass)) {
+    alert('Il y a un problème de chargement de l’application, vous devriez essayer de vider le cache de votre navigateur pour le resoudre (ctrl+maj+suppr en général, puis cocher « fichier en cache »).')
+  }
 
   // si on est toujours là on ajoute ça avant d'envoyer
   report.metaData.frames = getParentUrls()
