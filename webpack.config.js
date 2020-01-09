@@ -42,7 +42,7 @@ const isDebug = process.argv.includes('--debug')
 // prod d'après l'environnement ou la conf (sauf --debug ou test)
 const isProd = !isDebug && (process.NODE_ENV === 'production' || /prod/.test(appConfig.application.staging))
 console.log('wepback production env', isProd ? 'yes' : 'no')
-const isDevServer = !!appConfig.devServer
+const isDevServer = process.argv[1].includes('dev-server')
 console.log('wepback-dev-server', isDevServer ? 'yes' : 'no')
 
 let baseUrl = appConfig.application.baseUrl
