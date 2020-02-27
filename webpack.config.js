@@ -25,10 +25,10 @@ sinon faudrait passer par https://webpack.github.io/docs/shimming-modules.html
 // const fs = require('fs')
 const path = require('path')
 const autoprefixer = require('autoprefixer')
-const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-// const webpack = require('webpack')
+const TerserPlugin = require('terser-webpack-plugin')
+
+const preRun = require('./webpack.preRun')
 
 // On récupère babelConfig pour forcer l'utilisation notre conf babel dans certains node_modules
 // (seatheque-client, sesaeditgraphe et plugins d'édition)
@@ -58,6 +58,17 @@ if (process.env.SESATHEQUE_CONF) {
   buildDir += '.' + process.env.SESATHEQUE_CONF
 }
 
+// on lance preRun qui va vider build et y copier ces deux fichiers (avec substitution qui va bien et minification éventuelle)
+preRun({
+  baseUrl,
+  buildDir,
+  isProd,
+  files: {
+    display: './app/client/display/index.preLoad.js',
+    react: './app/client-react/index.preLoad.js'
+  }
+})
+
 const babelLoader = {
   loader: 'babel-loader',
   options: babelConfig
@@ -79,9 +90,29 @@ const babelLoader = ({realResource}) => {
 }
 /* */
 
+// les différences de conf babel pour la version module (pour noModule on prend la conf du package.json)
+// cf https://philipwalton.com/articles/deploying-es2015-code-in-production-today/
+const babelConfigModule = {
+  ...babelConfig,
+  // on change l'option presets
+  presets: babelConfig.presets.map(preset => {
+    // seulement l'entrée @babel/preset-env
+    if (preset[0] === '@babel/preset-env') {
+      return [
+        '@babel/preset-env',
+        // https://caniuse.com/#feat=es6-module liste les targets qui savent utiliser module, mais targets.esmodules fait ça
+        // et attention, c'est bien module:false qu'il faut passer pour une compilation type=module (pour dire à babel de ne pas convertir les import de type module js)
+        Object.assign({}, preset[1], { modules: false, targets: { esmodules: true } })
+      ]
+    }
+    // le reste tel quel
+    return preset
+  })
+}
+
 // ajout en prod des js appelés par des sites tiers
 const entriesForPeers = isProd ? {
-  // le client classique
+  // le client classique (j3p le charge ici)
   client: 'sesatheque-client',
   // un autre client plus light qui ne fait que récupérer des ressources sur l'api (sites tiers)
   fetch: 'sesatheque-client/src/fetch.js'
@@ -99,9 +130,7 @@ const conf = {
     // fichiers connus qui utilisent ça :
     // https://ressources.sesamath.net/coll/lecteur/voir_j3p.php
     display: ['./app/polyfill.js', './app/client/display/index.js'],
-    // qui utilise ça ?
-    import: './app/client/edit/import.js',
-    // utilisé par editgraphe.html (plugin j3p)
+    // utilisé par editgraphe.html (du plugin j3p)
     registerSesatheques: './app/client/page/registerSesatheques.js',
     ...entriesForPeers
   },
@@ -111,7 +140,9 @@ const conf = {
     path: buildDir,
     publicPath: baseUrl,
     // [name] est remplacé par le nom de la propriété de entry
-    filename: '[name].js',
+    // faut ajouter le suffixe es5 pour les 2 entrées spécifiques es5 (le preload sans suffixe est créé par webpack.preRun)
+    filename: ({chunk}) => `[name]${['react', 'display'].includes(chunk.name) ? '.es5' : ''}.js`,
+    // filename: (data) => {console.log(data); process.exit()}, // pour voir ce que contient data
     chunkFilename: isDevServer ? '[id].js' : '[id]-[chunkhash].js',
     // cf https://github.com/webpack/docs/wiki/configuration#output-library
     // exporte le module mis dans entry (attention, si y'en a plusieurs c'est le dernier) en global dans cette variable
@@ -120,7 +151,7 @@ const conf = {
     library: 'st[name]',
     // comportement par défaut, mais pas plus mal en l'explicitant, pour le type d'export de la library,
     // ici var => on aura l'export de l'entry dispo en global (obj ou fonction suivant le module)
-    libraryTarget: 'var',
+    libraryTarget: 'window',
     // ça c'est pour charger les chunks en cross-domain
     crossOriginLoading: 'anonymous'
   },
@@ -189,9 +220,9 @@ const conf = {
         exclude: [/\/@sesatheque-plugins\//, /\/sesatheque-plugin-[a-z]+\/node_modules\//],
         use: babelLoader
       }, {
-        // idem pour sesatheque-client ou sesaeditgraphe
-        test: /\/sesa(theque-client|editgraphe)\/.+\.js/,
-        exclude: /\/sesa(theque-client|editgraphe)\/node_modules\//,
+        // idem pour sesatheque-client ou sesaeditgraphe ou instrumenpoche
+        test: /\/(sesatheque-client|sesaeditgraphe|instrumenpoche)\/.+\.js/,
+        exclude: /\/(sesatheque-client|sesaeditgraphe|instrumenpoche)\/node_modules\//,
         use: babelLoader
       }, {
         // Pour charger la config qui contient des données sensibles, on passe par un loader qui filtre
@@ -242,8 +273,7 @@ const conf = {
     ]
   },
   plugins: [
-    // On vide le dossier de build
-    new CleanWebpackPlugin(),
+    // plus besoin de CleanWebpackPlugin, le dossier de build est vidé au preRun
     // statique
     new CopyWebpackPlugin([
       // {from: './node_modules/sesaeditgraphe/dist'},
@@ -285,21 +315,61 @@ const conf = {
   }
 }
 if (isProd) {
-  conf.optimization.minimizer = [
-    // we specify a custom UglifyJsPlugin here to get source maps in production
-    // cf https://stackoverflow.com/a/49059746
-    // sinon par défaut y'a du uglify en prod mais sans sourceMap
-    new UglifyJsPlugin({
-      cache: true,
-      parallel: true,
-      uglifyOptions: {
-        compress: false,
-        ecma: 5,
-        mangle: true
+  // on minifie
+  const terserMinimizer = new TerserPlugin({
+    // https://webpack.js.org/plugins/terser-webpack-plugin/
+    // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+    cache: true,
+    parallel: true,
+    // par défaut il laisse N fois les commentaires identiques (avec @licence) dans le fichier minifié
+    // on ne veut pas extraire les commentaires dans un fichier .LICENSE séparé,
+    // seulement n'en garder qu'un, d'où le output.comments ci-dessous
+    extractComments: false,
+    // sourceMap: true, // Must be set to true if using source-maps
+    // pour terserOptions cf https://github.com/terser-js/terser#minify-options
+    terserOptions: {
+      output: {
+        // les seuls qu'on garde dans le fichier minifié
+        // https://github.com/webpack-contrib/terser-webpack-plugin#preserve-comments
+        // Attention, la chaîne passée à la regex démarre après "/*" (ou //)
+        comments: /^\**!/
       },
-      sourceMap: true
+      // https://github.com/webpack-contrib/terser-webpack-plugin#warningsfilter
+      // avec 'verbose' c'est vraiment très verbeux, avec plein de warning qui n'en sont pas vraiment
+      // (par ex il vire une variable utilisée une seule fois sur la ligne suivante,
+      // mais c'est souvent fait exprès et bienvenu pour la lisibilité)
+      // warnings: 'verbose'
+      warnings: true
+    },
+    // cf https://github.com/webpack-contrib/terser-webpack-plugin#warningsfilter
+    warningsFilter: (warning, source, file) => {
+      // on veut pas des warnings sur du code externe
+      if (/node_module/.test(source)) return false
+      // ni sur ces trucs ajoutés par core-js
+      if (/Side effects in initialization of unused variable es_/.test(warning)) return false
+    }
+  })
+  conf.optimization.minimizer = [terserMinimizer]
+}
+
+const confModule = {
+  ...conf,
+  entry: {
+    react: ['./app/client-react/index.js'],
+    display: ['./app/client/display/index.js']
+  },
+  output: {
+    ...conf.output,
+    filename: '[name].module.js'
+  },
+  module: {
+    ...conf.module,
+    rules: conf.module.rules.map(rule => {
+      // on ne modifie que les regles avec babel-loader
+      if (rule.loader === 'babel-loader') return { ...rule, options: babelConfigModule }
+      return rule
     })
-  ]
+  }
 }
 
 if (isDevServer) {
@@ -313,6 +383,8 @@ if (isDevServer) {
       '/': nodeUrl
     }
   }
+  // on exporte que la version module
+  module.exports = confModule
+} else {
+  module.exports = [conf, confModule]
 }
-
-module.exports = conf

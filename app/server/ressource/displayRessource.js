@@ -89,7 +89,7 @@ module.exports = function displayRessource (context, ressource) {
     if (console && console.error) console.error(error);
   }
   try {
-    if (typeof stdisplay === 'undefined') throw new Error('Le chargement a échoué, impossible de charger le module display');
+    if (typeof stdisplay !== 'function') throw new Error('Le chargement a échoué, impossible de charger le module display');
     var options = {
       isDev: ${isDev},
       verbose: ${isDev}

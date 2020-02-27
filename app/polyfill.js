@@ -32,12 +32,16 @@
 // On ajoutait les @babel/polyfill dans app/client-react/index.js et app/client/page/index.js
 // et non directement dans les entries de webpack.
 // C'était le seul moyen pour qu'il soit pris en compte par babel-env-preset 'useBuiltIns' option
-// (qui filtrait pour n'inclure que les polyfills nécessaires pour les browsers ciblés.)
+// (qui sert à n'inclure que les polyfills nécessaires pour les browsers ciblés.)
 // depuis babel 7.4, y'a plus de @babel/polyfill,
 // on utilise directement core-js qui s'occupe d'ajouter les polyfill nécessaires,
 // cf https://www.thebasement.be/updating-to-babel-7.4/
 // https://babeljs.io/blog/2019/03/19/7.4.0
+import 'core-js'
+// bug core-js qui ne l'inclus pas et ça fait planter IE11
+import 'core-js/modules/es.array.iterator'
+// core-js ne s'occupe pas des specs du dom, faut charger le polyfill fetch séparément
+import 'whatwg-fetch'
 
-import 'core-js/stable'
 // lui est nécessaire si on utilise des générateurs (pas le cas) ou async/await (y'en a dans le plugin url)
 import 'regenerator-runtime/runtime'
