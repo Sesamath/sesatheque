@@ -109,6 +109,10 @@ const babelConfigModule = {
     return preset
   })
 }
+const babelLoaderModule = {
+  loader: 'babel-loader',
+  options: babelConfigModule
+}
 
 // ajout en prod des js appelés par des sites tiers
 const entriesForPeers = isProd ? {
@@ -366,7 +370,7 @@ const confModule = {
     ...conf.module,
     rules: conf.module.rules.map(rule => {
       // on ne modifie que les regles avec babel-loader
-      if (rule.loader === 'babel-loader') return { ...rule, options: babelConfigModule }
+      if (rule.use === babelLoader) return {...rule, use: babelLoaderModule}
       return rule
     })
   }

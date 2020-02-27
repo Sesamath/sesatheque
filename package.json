@@ -18,7 +18,7 @@
     "build:commun:prod": "env SESATHEQUE_CONF=commun npm run build:prod",
     "build:commun:watch": "env SESATHEQUE_CONF=commun npm run build:watch",
     "build:dev": "node_modules/.bin/webpack --debug --verbose",
-    "build:prod": "env NODE_ENV=production node_modules/.bin/webpack && npm run build:check",
+    "build:prod": "env NODE_ENV=production node_modules/.bin/webpack",
     "build:watch": "node_modules/.bin/webpack --debug --verbose -w",
     "deploy:dev": "pm2 _private/pm2Deploy.json5 dev",
     "cli": "app/server/cli.js -h",
