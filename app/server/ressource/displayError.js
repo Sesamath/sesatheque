@@ -35,11 +35,14 @@
 const rawOptions = {headers: {'Content-Type': 'text/html'}}
 
 /**
- * Retourne le code html de la page pour afficher la ressource (à priori dans une iframe, pas de header / footer ici)
- * @param {Ressource} ressource
+ * Retourne le code html d'une page d'erreur
+ * @param {Context} context
+ * @param {Error|string} error
+ * @param {number} [status=200] Un éventuel status qu'on affectera à context
  * @returns {string}
  */
-module.exports = function displayError (context, error) {
+module.exports = function displayError (context, error, status) {
+  if (status) context.status = status
   if (!error) throw Error('Pour afficher une erreur il faut la fournir')
   const errorMessage = error.message || error
   let titre = 'Erreur'
