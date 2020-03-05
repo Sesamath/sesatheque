@@ -37,7 +37,9 @@
 // on utilise directement core-js qui s'occupe d'ajouter les polyfill nécessaires,
 // cf https://www.thebasement.be/updating-to-babel-7.4/
 // https://babeljs.io/blog/2019/03/19/7.4.0
-import 'core-js'
+
+// plus besoin avec useBuiltIns usage
+// import 'core-js'
 // bug core-js qui ne l'inclus pas et ça fait planter IE11
 import 'core-js/modules/es.array.iterator'
 // core-js ne s'occupe pas des specs du dom, faut charger le polyfill fetch séparément
