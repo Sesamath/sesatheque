@@ -34,6 +34,7 @@ import Ref from 'sesatheque-client/src/constructors/Ref'
 // si on a pas de link vers le module on peut pas aller dans src
 // import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
 import ClientItem from 'sesatheque-client/src/constructors/ClientItem'
+import { addSesatheque, exists } from 'sesatheque-client/src/sesatheques'
 
 import fakeRef from '../../fixtures/fakeRef'
 import fakeRessource from '../../fixtures/fakeRessource'
@@ -50,6 +51,10 @@ describe('ClientItem', () => {
   const getRessourcesCollection = () => types.map(type => fakeRessource({type}))
   const getRefCollection = () => types.map(type => fakeRef({type}))
   const {describe, display} = configRessource.constantes.routes
+
+  before(() => {
+    if (!exists(myBaseId)) addSesatheque(myBaseId, myBaseUrl)
+  })
 
   it('Converti une ressource', () => {
     // ressource publiques
