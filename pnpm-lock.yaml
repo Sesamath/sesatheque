@@ -96,8 +96,9 @@ devDependencies:
   sinon-chai: 3.5.0_chai@4.2.0+sinon@9.0.0
   style-loader: 1.1.3_webpack@4.41.6
   supertest: 4.0.2
+  terser: 4.6.4
+  terser-webpack-plugin: 2.3.5_webpack@4.41.6
   trace: 3.1.1
-  uglifyjs-webpack-plugin: 2.2.0_webpack@4.41.6
   url-loader: 3.0.0_file-loader@5.1.0+webpack@4.41.6
   webpack: 4.41.6_webpack@4.41.6
   webpack-cli: 3.3.11_webpack@4.41.6
@@ -9845,10 +9846,6 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-BsVKsiGcQMFwT8UxypobUKyv7irCNRHk1T0G680vk88yf6LBByGcZJOTJCrTP2xVN6yI+XjPJcNuE3V4fT9sAg==
-  /serialize-javascript/1.9.1:
-    dev: true
-    resolution:
-      integrity: sha512-0Vb/54WJ6k5v8sSWN09S0ora+Hnr+cX40r9F170nT+mSkaxltoE/7R3OrIdBSUv1OoiobH1QoWQbCnAO+e8J1A==
   /serialize-javascript/2.1.2:
     dev: true
     resolution:
@@ -10952,35 +10949,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==
-  /uglify-js/3.8.0:
-    dependencies:
-      commander: 2.20.3
-      source-map: 0.6.1
-    dev: true
-    engines:
-      node: '>=0.8.0'
-    hasBin: true
-    resolution:
-      integrity: sha512-ugNSTT8ierCsDHso2jkBHXYrU8Y5/fY2ZUprfrJUiD7YpuFvV4jODLFmb3h4btQjqr5Nh4TX4XtgDfCU1WdioQ==
-  /uglifyjs-webpack-plugin/2.2.0_webpack@4.41.6:
-    dependencies:
-      cacache: 12.0.3
-      find-cache-dir: 2.1.0
-      is-wsl: 1.1.0
-      schema-utils: 1.0.0
-      serialize-javascript: 1.9.1
-      source-map: 0.6.1
-      uglify-js: 3.8.0
-      webpack: 4.41.6_webpack@4.41.6
-      webpack-sources: 1.4.3
-      worker-farm: 1.7.0
-    dev: true
-    engines:
-      node: '>= 6.9.0'
-    peerDependencies:
-      webpack: ^4.0.0
-    resolution:
-      integrity: sha512-mHSkufBmBuJ+KHQhv5H0MXijtsoA1lynJt1lXOaotja8/I0pR4L9oGaPIZw+bQBOFittXZg9OC1sXSGO9D9ZYg==
   /uid-safe/2.1.5:
     dependencies:
       random-bytes: 1.0.0
@@ -12009,8 +11977,9 @@ specifiers:
   sinon-chai: ^3.3.0
   style-loader: ^1.0.1
   supertest: ^4.0.2
+  terser: ^4.6.4
+  terser-webpack-plugin: ^2.3.5
   trace: ^3.1.1
-  uglifyjs-webpack-plugin: ^2.2.0
   url-loader: ^3.0.0
   webpack: ^4.41.2
   webpack-cli: ^3.3.10
