@@ -96,7 +96,7 @@ function addCorsAndLog (rail) {
       let isKnown = knownOrigins[origin]
       // ceux-là sont toujours autorisés
       if (!isKnown) {
-        isKnown = /https?:\/\/([^/]+\.)?(sesamath\.net|labomep\.net|devsesamath\.net|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)
+        isKnown = /https?:\/\/([^/]+\.)?(sesamath\.net|sesamath\.dev|local|localhost)(:[0-9]+)?(\/|$)/.test(origin)
         // si pas trouvé, on autorise aussi les sesalab déclarés en configuration
         if (!isKnown && config.sesalabs && config.sesalabs.length) isKnown = config.sesalabs.some((sesalab) => sesalab.baseUrl && sesalab.baseUrl === origin + '/')
         // et on ajoute si trouvé pour pas chercher la prochaine fois

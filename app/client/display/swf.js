@@ -33,8 +33,8 @@
 var log = require('sesajstools/utils/log')
 
 var page = require('../page/index')
-// https://mep-col.devsesamath.net/dev/swf/exo42.swf
-// https://mep-col.devsesamath.net/dev/swf/exo42.swf
+// https://mep-col.sesamath.dev/dev/swf/exo42.swf
+// https://mep-col.sesamath.dev/dev/swf/exo42.swf
 /**
  * Charge un swf dans l'élément container
  * @param {Element}        container L'élément html dans lequel on ajoutera

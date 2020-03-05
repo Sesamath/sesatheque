@@ -420,7 +420,7 @@ if (typeof window !== 'undefined') {
  * @property {Element}          [container]             L'élément html qui servira de conteneur au plugin pour afficher sa ressource, créé si non fourni
  * @property {Element}          [errorsContainer]       L'élément html pour afficher des erreurs éventuelles, créé si non fourni
  * @property {boolean}          [verbose=false]         Passer true pour ajouter des log en console
- * @property {boolean}          [isDev=false]           Passer true pour initialiser le dom source en devsesamath (pour certains plugins)
+ * @property {boolean}          [isDev=false]           Passer true pour initialiser le dom source en sesamath.dev (pour certains plugins)
  * @property {string}           [urlResultatCallback]   Une url vers laquelle poster le résultat
  *                                                        (idem si la page de la ressource contient ?urlScoreCallback=http…)
  * @property {string}           [resultatMessageAction] Un nom d'action pour passer le résultat en postMessage
