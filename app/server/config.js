@@ -341,6 +341,9 @@ if (config.sesatheques.length) {
   }
 }
 
+// faut aussi s'ajouter nous-même, au cas où sesatheque-client ne nous connaîtrait pas
+addSesatheque(config.application.baseId, config.application.baseUrl)
+
 /**
  * On passe à la conf de sesalabSso, déduite du reste si on a mis des sesalabs
  * (dans ce cas on est obligatoirement client sso de ces sesalab,
@@ -431,5 +434,7 @@ if (staging === 'dev') {
   config.devServer = Object.assign({}, defaultDevServer, config.devServer)
   config.$server.port = newNodePort
 }
+
+
 
 module.exports = config

@@ -2,7 +2,6 @@
  * paramètres locaux pour npm test
  */
 const path = require('path')
-const {addSesatheque} = require('sesatheque-client/src/sesatheques')
 const logDir = path.join(__dirname, '../logs.test')
 const appName = 'testSesatheque'
 const port = 3013
@@ -12,7 +11,6 @@ const host = hostname + ':' + port
 // on ajoute cette sesatheque
 const baseId = 'bibliLocalTest'
 const baseUrl = 'http://' + host + '/'
-addSesatheque(baseId, baseUrl)
 
 const getLoggerConf = suffix => ({
   logLevel: 'error',
