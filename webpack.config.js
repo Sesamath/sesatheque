@@ -36,13 +36,14 @@ const babelConfig = require('./package').babel
 
 const appConfig = require('./app/server/config')
 const {entries, plugins, rules} = require('./app/plugins/webpack.config')
-
+// webstorm exécute ce fichier mais n'a pas de process.argv
+const args = process.argv || []
 // passer --debug pour ne pas avoir de minification
-const isDebug = process.argv.includes('--debug')
+const isDebug = args.includes('--debug')
 // prod d'après l'environnement ou la conf (sauf --debug ou test)
 const isProd = !isDebug && (process.NODE_ENV === 'production' || /prod/.test(appConfig.application.staging))
 console.log('wepback production env', isProd ? 'yes' : 'no')
-const isDevServer = process.argv[1].includes('dev-server')
+const isDevServer = args[1] && args[1].includes('dev-server')
 console.log('wepback-dev-server', isDevServer ? 'yes' : 'no')
 
 let baseUrl = appConfig.application.baseUrl
@@ -377,7 +378,7 @@ const confModule = {
 }
 
 if (isDevServer) {
-  const nodeUrl = `http://${appConfig.$server.host}:${appConfig.$server.port}`
+  const nodeUrl = `http://${appConfig.$server.hostname}:${appConfig.$server.port}`
   conf.devServer = {
     contentBase: conf.output.path,
     host: appConfig.devServer.host,
@@ -387,6 +388,8 @@ if (isDevServer) {
       '/': nodeUrl
     }
   }
+  console.log('conf devServer', conf.devServer, 'avec $server', conf.$server)
+  // process.exit()
   // on exporte que la version module
   module.exports = confModule
 } else {
