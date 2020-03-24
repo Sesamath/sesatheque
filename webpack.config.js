@@ -379,16 +379,21 @@ const confModule = {
 
 if (isDevServer) {
   const nodeUrl = `http://${appConfig.$server.hostname}:${appConfig.$server.port}`
-  conf.devServer = {
+  conf.devServer = Object.assign({}, appConfig.devServer, {
+    publicPath: '/',
+    // on impose ça
     contentBase: conf.output.path,
-    host: appConfig.devServer.host,
+    // y'a un bug dans webpack-dev-server, préciser ça ne sert à rien,
+    // il faut le préciser dans la ligne de commande avec du --host
+    // par ex pour le lancer sur commun, il faut
+    // env SESATHEQUE_CONF=commun node_modules/.bin/webpack-dev-server --hot --host commun.local --port 3002
     disableHostCheck: true, // au cas où host ne serait pas dans les dns
-    port: appConfig.devServer.port,
     proxy: {
       '/': nodeUrl
     }
-  }
-  console.log('conf devServer', conf.devServer, 'avec $server', conf.$server)
+  })
+  conf.output.publicPath = '/'
+  console.log('conf devServer', conf.devServer)
   // process.exit()
   // on exporte que la version module
   module.exports = confModule

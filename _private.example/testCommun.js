@@ -54,7 +54,6 @@ module.exports = {
     }
   },
   $server: {
-    hostname: hostname,
     port: port
   },
 
