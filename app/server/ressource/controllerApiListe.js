@@ -88,18 +88,21 @@ module.exports = function (component) {
         ressources.forEach(function (ressource) {
           // vérif des droits
           let droits = ''
-          if ($accessControl.hasReadPermission(context, ressource)) {
-            droits += 'R'
-            if ($accessControl.hasPermission('update', context, ressource)) droits += 'W'
-            if ($accessControl.hasPermission('delete', context, ressource)) droits += 'D'
-          } else {
+          const readErrorMessage = $accessControl.getReadDeniedMessage(context, ressource)
+          if (readErrorMessage) {
             // ça devrait pas arriver, mais au cas où on crée une ressource fake
             // pour avoir le bon nb dans la liste et montrer le pb
             log.error(`sendListe récupère la ressource ${ressource.oid} à envoyer à ${$accessControl.getCurrentUserPid(context)} alors qu’il n’a pas les droits de lecture dessus`, ressource)
             ressource = new Ressource({
-              titre: 'Vous n’avez pas les droits suffisants pour voir cette ressource',
+              titre: readErrorMessage,
               type: 'error'
             })
+            // faut un oid (sinon react est pas content car oid est obligatoire)
+            ressource.oid = ''
+          } else {
+            droits += 'R'
+            if ($accessControl.hasPermission('update', context, ressource)) droits += 'W'
+            if ($accessControl.hasPermission('delete', context, ressource)) droits += 'D'
           }
 
           // formatage

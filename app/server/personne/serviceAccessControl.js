@@ -158,7 +158,6 @@ module.exports = function (component) {
 
     /**
      * Helper de checkAccess pour la permission read
-     * @private
      * @param {Context}   context
      * @param {Ressource} ressource
      * @returns {string|undefined} Le message d'interdiction éventuel (string vide sinon)
@@ -543,10 +542,12 @@ module.exports = function (component) {
      * @memberOf $accessControl
      */
     function hasReadPermission (context, ressource) {
+      const needLog = ['59a05e8264b08a66b5c344ba', '696'].includes(ressource.oid)
       if (!ressource.restriction) return true
       if (hasAllRights(context)) return true
       if (!isAuthenticated(context)) return false
       if (hasGenericPermission('read', context) && ressource.publie) return true
+      if (needLog) console.log(`hasReadPermission pour ${ressource.oid}`, getReadDeniedMessage(context, ressource))
       return (!getReadDeniedMessage(context, ressource))
     }
 
@@ -825,6 +826,7 @@ module.exports = function (component) {
       getCurrentUserGroupesMembre,
       getCurrentUserGroupesSuivis,
       getDeniedMessage,
+      getReadDeniedMessage,
       getTokenValue,
       hasAllRights,
       hasGenericPermission,
