@@ -2,6 +2,8 @@ import PropTypes from 'prop-types'
 import queryString from 'query-string'
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+
+import addNotifyToProps from './addNotifyToProps'
 import {GET} from '../utils/httpMethods'
 import {listes} from '../../server/ressource/config'
 import {getRessourceListUrl} from '../apiRoutes'
@@ -14,6 +16,12 @@ const limitMax = 100
 const emptyState = {
   resources: [],
   total: 0
+}
+
+const errorState = {
+  resources: [],
+  total: 0,
+  error: 'Une erreur est survenue lors de l’appel pour récupérer la liste de ressources.'
 }
 
 /**
@@ -30,7 +38,7 @@ const resourceListProvider = (WrappedComponent) => {
     }
 
     fetchList () {
-      const {query, queryOptions} = this.props
+      const {query, queryOptions, notify} = this.props
       const search = queryString.stringify({
         ...query,
         ...queryOptions,
@@ -46,9 +54,12 @@ const resourceListProvider = (WrappedComponent) => {
           })
         })
         .catch((error) => {
-          // @todo notify
+          // en notif l'erreur envoyée par le serveur ou construite par httpMethods
+          notify({message: error.message, level: 'error'})
+          // en console l'erreur complète
           console.error(error)
-          this.setState(emptyState)
+          // et sur la page un message plus userFriendly et général
+          this.setState(errorState)
         })
     }
 
@@ -69,6 +80,7 @@ const resourceListProvider = (WrappedComponent) => {
           {...this.props}
           resources={this.state.resources}
           total={this.state.total}
+          error={this.state.error}
           refreshList={this.fetchList.bind(this)}
         />
       )
@@ -86,7 +98,8 @@ const resourceListProvider = (WrappedComponent) => {
     queryOptions: PropTypes.shape({
       skip: PropTypes.number,
       limit: PropTypes.number
-    })
+    }),
+    notify: PropTypes.func
   }
 
   /**
@@ -183,7 +196,7 @@ const resourceListProvider = (WrappedComponent) => {
     return {hash, query, queryOptions, search, allowAnyOption}
   }
 
-  return connect(mapStateToProps, {})(ResourceListProvider)
+  return addNotifyToProps(connect(mapStateToProps, {})(ResourceListProvider))
 }
 
 export default resourceListProvider

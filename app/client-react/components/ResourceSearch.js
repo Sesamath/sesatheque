@@ -9,6 +9,7 @@ import ResourceList from './ResourceList'
 import resourceListProvider from '../hoc/resourceListProvider'
 
 const ResourceSearch = (props) => {
+  // si y'a une error dans les props (mise par resourceListProvider), on laisse ResourceList l'afficher, pas besoin de le gérer ici
   const {hash, query, allowAnyOption} = props
   const defaultFormValues = {
     categories: [],
@@ -81,6 +82,5 @@ const mapDispatchToProps = (dispatch, {query, queryOptions}) => ({
 })
 
 export default resourceListProvider(
-  connect(null, mapDispatchToProps)(ResourceSearch
-  )
+  connect(null, mapDispatchToProps)(ResourceSearch)
 )

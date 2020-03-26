@@ -18,8 +18,14 @@ const ResourceList = ({
   resources,
   showSearchLink,
   subNavText,
-  total
+  total,
+  error
 }) => {
+  if (error) {
+    return (
+      <p className="alert--danger">{error}</p>
+    )
+  }
   // query et queryOptions vont toujours ensemble
   if (!queryOptions) {
     // pas très normal…
@@ -175,6 +181,7 @@ ResourceList.propTypes = {
   })).isRequired,
   showSearchLink: PropTypes.bool,
   total: PropTypes.number.isRequired,
+  error: PropTypes.string,
   handlePageClick: PropTypes.func.isRequired,
   askDelete: PropTypes.func.isRequired,
   // fourni par resourceListProvider
