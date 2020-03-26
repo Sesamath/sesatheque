@@ -45,7 +45,7 @@ dependencies:
   roboto-fontface: 0.10.0
   sesajstools: framagit.org/Sesamath/sesajstools/ac6283ba39b63def7e316a1f1c813915656c401e
   sesalab-sso: framagit.org/Sesamath/sesalab-sso/cf8385afaf945196e82229cbe6a7e6d63b443417
-  sesatheque-client: framagit.org/Sesamath/sesatheque-client/3f4f9ded6a0d19bdc6cad897611f1e460dbee3c7
+  sesatheque-client: framagit.org/Sesamath/sesatheque-client/cdcfdbf5e0e28a646641cf47bab55a190d9f3e50
   simple-crypto-js: 2.2.0
   whatwg-fetch: 3.0.0
 devDependencies:
@@ -1204,7 +1204,7 @@ packages:
     dependencies:
       '@types/events': 3.0.0
       '@types/minimatch': 3.0.3
-      '@types/node': 13.9.3
+      '@types/node': 12.12.31
     dev: true
     resolution:
       integrity: sha512-1Bh06cbWJUHMC97acuD6UMG29nMt0Aqz1vF3guLfG+kHHJhy3AyohZFFxYk2f7Q1SQIrNwvncxAE0N/9s70F2w==
@@ -1212,10 +1212,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
-  /@types/node/13.9.3:
+  /@types/node/12.12.31:
     dev: true
     resolution:
-      integrity: sha512-01s+ac4qerwd6RHD+mVbOEsraDHSgUaefQlEdBbUolnQFjKwCr7luvAlEwW1RFojh67u0z4OUTjPn9LEl4zIkA==
+      integrity: sha512-T+wnJno8uh27G9c+1T+a1/WYCHzLeDqtsGJkoEdSp2X8RTh3oOCZQcUnjAx90CS8cmmADX51O0FI/tu9s0yssg==
   /@types/parse-json/4.0.0:
     dev: false
     resolution:
@@ -1240,7 +1240,7 @@ packages:
       integrity: sha512-FvUupuM3rlRsRtCN+fDudtmytGO6iHJuuRKS1Ss0pG5z8oX0diNEw94UEL7hgDbpN94rgaK5R7sWm6RrSkZuAQ==
   /@types/webpack-sources/0.1.7:
     dependencies:
-      '@types/node': 13.9.3
+      '@types/node': 12.12.31
       '@types/source-list-map': 0.1.2
       source-map: 0.6.1
     dev: true
@@ -1249,7 +1249,7 @@ packages:
   /@types/webpack/4.41.8:
     dependencies:
       '@types/anymatch': 1.3.1
-      '@types/node': 13.9.3
+      '@types/node': 12.12.31
       '@types/tapable': 1.0.5
       '@types/uglify-js': 3.0.4
       '@types/webpack-sources': 0.1.7
@@ -1877,7 +1877,7 @@ packages:
   /autoprefixer/9.7.5:
     dependencies:
       browserslist: 4.11.0
-      caniuse-lite: 1.0.30001036
+      caniuse-lite: 1.0.30001038
       chalk: 2.4.2
       normalize-range: 0.1.2
       num2fraction: 1.2.2
@@ -2237,8 +2237,8 @@ packages:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
   /browserslist/4.11.0:
     dependencies:
-      caniuse-lite: 1.0.30001036
-      electron-to-chromium: 1.3.382
+      caniuse-lite: 1.0.30001038
+      electron-to-chromium: 1.3.386
       node-releases: 1.1.52
       pkg-up: 3.1.0
     dev: true
@@ -2247,8 +2247,8 @@ packages:
       integrity: sha512-WqEC7Yr5wUH5sg6ruR++v2SGOQYpyUdYYd4tZoAq1F7y+QXoLoYGXVbxhtaIqWmAJjtNTRjVD3HuJc1OXTel2A==
   /browserslist/4.7.0:
     dependencies:
-      caniuse-lite: 1.0.30001036
-      electron-to-chromium: 1.3.382
+      caniuse-lite: 1.0.30001038
+      electron-to-chromium: 1.3.386
       node-releases: 1.1.52
     dev: true
     hasBin: true
@@ -2318,7 +2318,7 @@ packages:
     dependencies:
       bluebird: 3.7.2
       chownr: 1.1.4
-      figgy-pudding: 3.5.1
+      figgy-pudding: 3.5.2
       glob: 7.1.6
       graceful-fs: 4.2.3
       infer-owner: 1.0.4
@@ -2337,7 +2337,7 @@ packages:
   /cacache/13.0.1:
     dependencies:
       chownr: 1.1.4
-      figgy-pudding: 3.5.1
+      figgy-pudding: 3.5.2
       fs-minipass: 2.1.0
       glob: 7.1.6
       graceful-fs: 4.2.3
@@ -2437,10 +2437,10 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
-  /caniuse-lite/1.0.30001036:
+  /caniuse-lite/1.0.30001038:
     dev: true
     resolution:
-      integrity: sha512-jU8CIFIj2oR7r4W+5AKcsvWNVIb6Q6OZE3UsrXrZBHFtreT4YgTeOJtTucp+zSedEpTi3L5wASSP0LYIE3if6w==
+      integrity: sha512-zii9quPo96XfOiRD4TrfYGs+QsGZpb2cGiMAzPjtf/hpFgB6zCPZgJb7I1+EATeMw/o+lG8FyRAnI+CWStHcaQ==
   /caporal/1.3.0:
     dependencies:
       bluebird: 3.7.2
@@ -3358,7 +3358,7 @@ packages:
       integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==
   /debug/3.2.6:
     dependencies:
-      ms: 2.1.2
+      ms: 2.1.1
     resolution:
       integrity: sha512-mel+jf7nrtEl5Pn1Qx46zARXKDpBbvzezse7p7LqINmdoIk8PYP5SySaxEmYv6TZ0JyEKA1hsCId6DIhgITtWQ==
   /debug/4.1.1:
@@ -3745,10 +3745,10 @@ packages:
   /ee-first/1.1.1:
     resolution:
       integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
-  /electron-to-chromium/1.3.382:
+  /electron-to-chromium/1.3.386:
     dev: true
     resolution:
-      integrity: sha512-gJfxOcgnBlXhfnUUObsq3n3ReU8CT6S8je97HndYRkKsNZMJJ38zO/pI5aqO7L3Myfq+E3pqPyKK/ynyLEQfBA==
+      integrity: sha512-M7JHfp32Bq6Am59AWgglh2d3nqe6y8Y94Vcb/AXUsO3DGvKUHYI5ML9+U5oNShfdOEfurrrjKSoSgFt2mz7mpw==
   /elementtree/0.1.7:
     dependencies:
       sax: 1.1.4
@@ -4554,10 +4554,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-xNWY6taUkRJlPWWIsBpc3Nn5D90=
-  /figgy-pudding/3.5.1:
+  /figgy-pudding/3.5.2:
     dev: true
     resolution:
-      integrity: sha512-vNKxJHTEKNThjfrdJwHc7brvM6eVevuO5nTj6ez8ZQ1qbXTvGthucRF7S4vf2cr71QVnT70V34v0S1DyQsti0w==
+      integrity: sha512-0btnI/H8f2pavGMN8w40mlSKOfTK2SVJmBfBeVIj3kNw0swwgzyRq0d5TJVOwodFmtvpPeWPN/MCcfuWF0Ezbw==
   /figures/1.7.0:
     dependencies:
       escape-string-regexp: 1.0.5
@@ -5257,10 +5257,10 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-FNHi6mmoHvs1mxZAds4PpdCS6QG8B4C1krxJsMutgxl5t3+GlRTzzI3NEkifXx2pVsOvJdOGSmIgDhQ55FwdPA==
-  /handle-thing/2.0.0:
+  /handle-thing/2.0.1:
     dev: true
     resolution:
-      integrity: sha512-d4sze1JNC454Wdo2fkuyzCr6aHcbL6PGGuFAz0Li/NcOm1tCHGnWDRmJP85dh9IhQErTc2svWFEX5xHIOo//kQ==
+      integrity: sha512-9Qn4yBxelxoh2Ow62nP+Ka/kMnOXRi8BXnRaUwezLNhqelnN49xKz4F/dPP8OYLxLxq6JDtZb2i9XznUQbNPTg==
   /har-schema/2.0.0:
     engines:
       node: '>=4'
@@ -6323,7 +6323,7 @@ packages:
     dev: true
     resolution:
       integrity: sha512-yV+gqbd5vaOYjqlbk16EG89xB5udgjqQF3C5FAORDg4f/IS1Yc5ERCv5e/57yBcfJYw05V5JyIXabhwb75Xxow==
-  /jest-worker/25.1.0:
+  /jest-worker/25.2.0:
     dependencies:
       merge-stream: 2.0.0
       supports-color: 7.1.0
@@ -6331,7 +6331,7 @@ packages:
     engines:
       node: '>= 8.3'
     resolution:
-      integrity: sha512-ZHhHtlxOWSxCoNOKHGbiLzXnl42ga9CxDr27H36Qn+15pQZd3R/F24jrmjDelw9j/iHUIWMWs08/u2QN50HHOg==
+      integrity: sha512-oGzUBnVnRdb51Aru3XFNa0zOafAIEerqZoQow+Vy8LDDiy12dvSrOeVeO8oNrxCMkGG4JtXqX9IPC93JJiAk+g==
   /jquery/3.3.1:
     dev: false
     resolution:
@@ -7203,10 +7203,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-3j+YVD2/lggr5IrRoMfNqDYwHc8=
-  /minimist/0.0.8:
-    dev: false
-    resolution:
-      integrity: sha1-hX/Kv8M5fSYluCKCYuhqp6ARsF0=
   /minimist/1.2.5:
     resolution:
       integrity: sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
@@ -7267,14 +7263,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-WRoDn//mXBiJ1H40rqa3vH0toePwSsGb45iInWlTySa+Uu4k3tYUSxa2v1KqAiLtvlrSzaExqS1gtk96A9zvEA==
-  /mkdirp/0.5.1:
-    dependencies:
-      minimist: 0.0.8
-    deprecated: Legacy versions of mkdirp are no longer supported. Please update to mkdirp 1.x. (Note that the API surface has changed to use Promises in 1.x.)
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
   /mkdirp/0.5.3:
     dependencies:
       minimist: 1.2.5
@@ -7290,7 +7278,7 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-iG9AK/dJLtJ0XNgTuDbSyNS3zECqDlAhnQW4CsNxBG3LQJBbHmRX1egw39DmtOdCAqY+dKXV+sgPgilNWUKMVw==
-  /mocha/6.2.2:
+  /mocha/6.2.3:
     dependencies:
       ansi-colors: 3.2.3
       browser-stdout: 1.3.1
@@ -7304,7 +7292,7 @@ packages:
       js-yaml: 3.13.1
       log-symbols: 2.2.0
       minimatch: 3.0.4
-      mkdirp: 0.5.1
+      mkdirp: 0.5.4
       ms: 2.1.1
       node-environment-flags: 1.0.5
       object.assign: 4.1.0
@@ -7312,15 +7300,15 @@ packages:
       supports-color: 6.0.0
       which: 1.3.1
       wide-align: 1.1.3
-      yargs: 13.3.0
-      yargs-parser: 13.1.1
+      yargs: 13.3.2
+      yargs-parser: 13.1.2
       yargs-unparser: 1.6.0
     dev: false
     engines:
       node: '>= 6.0.0'
     hasBin: true
     resolution:
-      integrity: sha512-FgDS9Re79yU1xz5d+C4rv1G7QagNGHZ+iXF81hO8zY35YZZcLEsJVfFolfsqKFWunATEvNzMK0r/CwWd/szO9A==
+      integrity: sha512-0R/3FvjIGH3eEuG17ccFPk117XL2rWxatr81a57D+r/x2uTYZRbdZ4oVidEUMh2W2TJDa7MdAb12Lm2/qrKajg==
   /mocha/7.1.1:
     dependencies:
       ansi-colors: 3.2.3
@@ -8189,7 +8177,7 @@ packages:
       integrity: sha1-bVuTSkVpk7I9N/QKOC1vFmao5cY=
   /parse5/3.0.3:
     dependencies:
-      '@types/node': 13.9.3
+      '@types/node': 12.12.31
     dev: true
     resolution:
       integrity: sha512-rgO9Zg5LLLkfJF9E6CCmXlSE4UVceloys8JrFqCcHloC3usd/kJCyPDwH2SOlzix2j3xaP9sUX3e8+kvkuleAA==
@@ -8589,9 +8577,9 @@ packages:
     dev: true
     resolution:
       integrity: sha1-8FKijacOYYkX7wqKw0wa5aaChrM=
-  /psl/1.7.0:
+  /psl/1.8.0:
     resolution:
-      integrity: sha512-5NsSEDv8zY70ScRnOTn7bK7eanl2MvFrOrS/R6x+dBt5g1ghnj9Zv90kO8GwT8gxcu2ANyFprnFYB85IogIJOQ==
+      integrity: sha512-RIdOzyoavK+hA18OGGWDqUTsCLhtA7IcZ/6NCs4fFJaHBDab+pDDmDIByWFRQJq2Cd7r1OoQxBGKOaztq+hjIQ==
   /pstree.remy/1.1.7:
     dev: true
     resolution:
@@ -8660,12 +8648,12 @@ packages:
       node: '>=0.6'
     resolution:
       integrity: sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
-  /qs/6.9.2:
+  /qs/6.9.3:
     dev: true
     engines:
       node: '>=0.6'
     resolution:
-      integrity: sha512-2eQ6zajpK7HwqrY1rRtGw5IZvjgtELXzJECaEDuzDFo2jjnIXpJSimzd4qflWZq6bLLi+Zgfj5eDrAzl/lptyg==
+      integrity: sha512-EbZYNarm6138UKKq46tdx08Yo/q9ZhFoAXAI1meAFd2GtbRDhbZY2WQSICskT0c5q99aFzLG1D4nvTk9tqfXIw==
   /qss/2.0.3:
     dev: true
     engines:
@@ -10249,7 +10237,7 @@ packages:
   /spdy/4.0.1:
     dependencies:
       debug: 4.1.1
-      handle-thing: 2.0.0
+      handle-thing: 2.0.1
       http-deceiver: 1.2.7
       select-hose: 2.0.0
       spdy-transport: 3.0.0
@@ -10298,13 +10286,13 @@ packages:
       integrity: sha512-HXXqVUq7+pcKeLqqZj6mHFUMvXtOJt1uoUx09pFW6011inTMxqI8BA8PM95myrIyyKwdnzjdFjLiE6KBPVtJIg==
   /ssri/6.0.1:
     dependencies:
-      figgy-pudding: 3.5.1
+      figgy-pudding: 3.5.2
     dev: true
     resolution:
       integrity: sha512-3Wge10hNcT1Kur4PDFwEieXSCMCJs/7WvSACcrMYrNp+b8kDL1/0wJch5Ni2WrtwEa2IO8OsVfeKIciKCDx/QA==
   /ssri/7.1.0:
     dependencies:
-      figgy-pudding: 3.5.1
+      figgy-pudding: 3.5.2
       minipass: 3.1.1
     dev: true
     engines:
@@ -10614,7 +10602,7 @@ packages:
       formidable: 1.2.2
       methods: 1.1.2
       mime: 1.6.0
-      qs: 6.9.2
+      qs: 6.9.3
       readable-stream: 2.3.7
     deprecated: 'Please note that v5.0.1+ of superagent removes User-Agent header by default, therefore you may need to add it yourself (e.g. GitHub blocks requests without a User-Agent header).  This notice will go away with v5.0.2+ once it is released.'
     dev: true
@@ -10751,7 +10739,7 @@ packages:
     dependencies:
       cacache: 13.0.1
       find-cache-dir: 3.3.1
-      jest-worker: 25.1.0
+      jest-worker: 25.2.0
       p-limit: 2.2.2
       schema-utils: 2.6.5
       serialize-javascript: 2.1.2
@@ -10918,7 +10906,7 @@ packages:
       integrity: sha512-TZ6TTfI5NtZnuyy/Kecv+CnoROnyXn2DN97LontgQpCwsX2XyLYCC0ENhYkehSOwAp8rTQKc/NUIF7BkQ5rKLA==
   /tough-cookie/2.5.0:
     dependencies:
-      psl: 1.7.0
+      psl: 1.8.0
       punycode: 2.1.1
     engines:
       node: '>=0.8'
@@ -10927,7 +10915,7 @@ packages:
   /tough-cookie/3.0.1:
     dependencies:
       ip-regex: 2.1.0
-      psl: 1.7.0
+      psl: 1.8.0
       punycode: 2.1.1
     dev: true
     engines:
@@ -11776,13 +11764,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-C6kB/WJDiaxONLJQnF8ccx9SEeoTTLek8RVbaOIsrAUS8VrBEXfmeSnCZxygc+XC2sNMBIwOOnfcxiynjHsVSQ==
-  /yargs-parser/13.1.1:
-    dependencies:
-      camelcase: 5.3.1
-      decamelize: 1.2.0
-    dev: false
-    resolution:
-      integrity: sha512-oVAVsHz6uFrg3XQheFII8ESO2ssAf9luWuAd6Wexsu4F3OtIW0o8IribPXYrD4WC24LWtPrJlGy87y5udK+dxQ==
   /yargs-parser/13.1.2:
     dependencies:
       camelcase: 5.3.1
@@ -11837,21 +11818,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-HG/DWAJa1PAnHT9JAhNa8AbAv3FPaiLzioSjCcmuXXhP8MlpHO5vwls4g4j6n30Z74GVQj8Xa62dWVx1QCGklg==
-  /yargs/13.3.0:
-    dependencies:
-      cliui: 5.0.0
-      find-up: 3.0.0
-      get-caller-file: 2.0.5
-      require-directory: 2.1.1
-      require-main-filename: 2.0.0
-      set-blocking: 2.0.0
-      string-width: 3.1.0
-      which-module: 2.0.0
-      y18n: 4.0.0
-      yargs-parser: 13.1.1
-    dev: false
-    resolution:
-      integrity: sha512-2eehun/8ALW8TLoIl7MVaRUrg+yCnenu8B4kBlRxj3GJGDKU1Og7sMXPNm1BYyM1DOJmTZ4YeN/Nwxv+8XJsUA==
   /yargs/13.3.2:
     dependencies:
       cliui: 5.0.0
@@ -11919,7 +11885,7 @@ packages:
     dependencies:
       chai: 4.2.0
       lodash.isequal: 4.5.0
-      mocha: 6.2.2
+      mocha: 6.2.3
     dev: false
     name: sesajstools
     resolution:
@@ -11940,7 +11906,7 @@ packages:
       repo: 'https://framagit.org/Sesamath/sesalab-sso.git'
       type: git
     version: 1.0.18
-  framagit.org/Sesamath/sesatheque-client/3f4f9ded6a0d19bdc6cad897611f1e460dbee3c7:
+  framagit.org/Sesamath/sesatheque-client/cdcfdbf5e0e28a646641cf47bab55a190d9f3e50:
     dependencies:
       an-uuid: src.sesamath.net/an-uuid/ed6af31c2d6f526d1108c0a7cfebfdcb9868ff29
       query-string: 5.1.1
@@ -11948,10 +11914,10 @@ packages:
     dev: false
     name: sesatheque-client
     resolution:
-      commit: 3f4f9ded6a0d19bdc6cad897611f1e460dbee3c7
+      commit: cdcfdbf5e0e28a646641cf47bab55a190d9f3e50
       repo: 'https://framagit.org/Sesamath/sesatheque-client.git'
       type: git
-    version: 3.0.9
+    version: 3.1.0
   src.sesamath.net/an-ansi/369cba247330cb088a5640707c8ca5bd515f4f0d:
     dev: false
     name: an-ansi
