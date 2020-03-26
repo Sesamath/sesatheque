@@ -34,7 +34,7 @@
  * Configuration de l'application
  */
 const path = require('path')
-const URL = require('URL')
+const { URL } = require('url')
 
 const log = require('sesajstools/utils/log')
 const sjtObj = require('sesajstools/utils/object')
@@ -426,11 +426,14 @@ if (staging === 'dev') {
   const frontPort = config.$server.port
   if (!Number.isInteger(frontPort)) throw new Error('Il faut préciser un port dans config.$server.port')
   const newNodePort = frontPort + 20 // arbitraire, en test on décale de 10
+  const url = new URL(config.application.baseUrl)
   const defaultDevServer = {
-    host: (new URL(config.application.baseUrl)).hostname, // sans le port
+    host: url.hostname, // sans le port, mais ça marche pas (ça reste localhost), faut le préciser avec --host dans l'appel pour que ce soit vraiment pris en compte
     port: frontPort
   }
-  config.devServer = Object.assign({}, defaultDevServer, config.devServer)
+  if (url.port) url.port = newNodePort
+  const proxyUrl = url.toString().replace(/\/$/, '') // sans slash de fin
+  config.devServer = Object.assign({}, defaultDevServer, config.devServer, { proxy: { '/': proxyUrl } })
   config.$server.port = newNodePort
 }
 

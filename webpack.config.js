@@ -360,6 +360,7 @@ if (isProd) {
 const confModule = {
   ...conf,
   entry: {
+    // pour les autres js c'est la version es5 pour tout le monde
     react: ['./app/client-react/index.js'],
     display: ['./app/client/display/index.js']
   },
@@ -378,23 +379,31 @@ const confModule = {
 }
 
 if (isDevServer) {
-  const nodeUrl = `http://${appConfig.$server.hostname}:${appConfig.$server.port}`
+  // pas de chargement cross-domain
+  conf.output.publicPath = '/'
+  // y'a un bug dans webpack-dev-server, préciser le port ne sert à rien, il démarre toujours sur le 8081
+  // il faut le préciser dans la ligne de commande avec du --host
+  // par ex pour le lancer sur commun, il faut
+  // env SESATHEQUE_CONF=commun node_modules/.bin/webpack-dev-server --hot --host commun.local --port 3002
+  /* mais ça marche toujours pas… après des heures à chercher on laisse tomber pour le moment
+    en 1.6 ça fonctionnait avec
+    conf.devServer = {
+      host: 'localhost',
+      contentBase: conf.output.path,
+      port: 3001,
+      proxy: {
+        '/': 'http://localhost:3021'
+      },
+      disableHostCheck: true
+    }
+    mais ça marche plus… (probablement lié à la double compilation car imposer les même version de webpack* que 1.6 ne change rien
+   */
   conf.devServer = Object.assign({}, appConfig.devServer, {
-    publicPath: '/',
     // on impose ça
     contentBase: conf.output.path,
-    // y'a un bug dans webpack-dev-server, préciser ça ne sert à rien,
-    // il faut le préciser dans la ligne de commande avec du --host
-    // par ex pour le lancer sur commun, il faut
-    // env SESATHEQUE_CONF=commun node_modules/.bin/webpack-dev-server --hot --host commun.local --port 3002
-    disableHostCheck: true, // au cas où host ne serait pas dans les dns
-    proxy: {
-      '/': nodeUrl
-    }
+    disableHostCheck: true // au cas où host ne serait pas dans les dns
   })
-  conf.output.publicPath = '/'
   console.log('conf devServer', conf.devServer)
-  // process.exit()
   // on exporte que la version module
   module.exports = confModule
 } else {
