@@ -387,7 +387,8 @@ module.exports = function display (ressource, options, next) {
     if (window.bugsnagClient) {
       window.bugsnagClient.metaData.exo = {
         rid: ressource.rid,
-        type: ressource.type
+        type: ressource.type,
+        url: location.href // déjà dispo dans l'onglet request mais plus pratique que l'avoir là aussi
       }
     }
 
