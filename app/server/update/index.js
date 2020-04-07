@@ -95,9 +95,9 @@ module.exports = function updateComponentFactory (lassi) {
           })
         }
 
-        if (error) return done(error)
         // à partir de la sesatheque 1.0.1 on démarre en db version 27
         let dbVersion = (update && update.num) || 27
+        if (error) return done(error)
         nextUpdate()
       })
     })
