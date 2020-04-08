@@ -42,6 +42,9 @@ const tools = require('./lib/tools')
 const config = require('./config')
 const applog = require('an-log')(config.application.name)
 
+// 10min pour la majorité du statique
+const shortStaticTtl = 600
+// 24h pour ce qui sort de webpack (y'a etag qui jouera aussi)
 const staticTtl = 3600 * 24
 // const publicTtl = 3600 * 4 // 4h seulement pour les résultats de recherche ou les ressources
 
@@ -149,11 +152,17 @@ function addCorsAndLog (rail) {
     // pas de cache sur le display, car coté client élève dans sesalab y'a pas moyen de connaître ressource.inc
     // pour en déduire un $displayUrl fiable (le rid est enregistré dans la séquence)
     // idem pour l'api, on laisse express gérer le etag (ça fait du 304 not modified si y'a pas de changement)
-    if (tools.isStatic(req.url)) {
-      const ttl = staticTtl
-      // faut mettre ça au format de la RFC 1123
-      res.header('Expires', moment().utc().add(ttl, 's').format('ddd, DD MMM YYYY HH:mm:ss') + ' GMT')
-      res.header('Cache-Control', 'public, max-age=' + ttl)
+    if (tools.isStatic(req.url) || /\/public\//.test(req.url)) {
+      // avant 2020-04-07 on avait expires au format de la RFC 1123, on ne garde que max-age car il doit plus rester bcp de http/1.0
+      // On ne met 24h de cache que sur ce qui sort de webpack (nom de fichier avec minuscules et chiffres de longueur 20 minimum)
+      // ça match pas les urls /api/public/xxxxx qui n'ont pas de point dans l'id xxxxx
+      if (/\/[a-z0-9]{20,}\./.test(req.url)) {
+        res.header('Cache-Control', `public, max-age=${staticTtl}, stale-while-revalidate=${shortStaticTtl}`)
+      } else {
+        // sinon on met un délai bcp plus court (etag & 304 continueront de jouer leur role ensuite, et varnish fera un check toutes les 10min)
+        // cf https://www.keycdn.com/blog/keycdn-supports-stale-while-revalidate
+        res.header('Cache-Control', `public, max-age=${shortStaticTtl}, stale-while-revalidate=${shortStaticTtl}`)
+      }
     }
     next()
   })
