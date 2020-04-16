@@ -258,7 +258,15 @@ if (localConfig) sjtObj.merge(config, localConfig)
 // - sinon on prend NODE_ENV
 // - sinon config.application.staging
 // - sinon dev
-const knownStagings = ['prod', 'preprod', 'dev', 'test']
+
+// -pre-prod- et pas preprod pour avoir le même nombre de lettre que production,
+// pour préserver les source-map lors du passage en production
+// (y'a un coup de sed sur les fichiers compilés par webpack, mais pas de recompil)
+const knownStagings = ['production', '-pre-prod-', 'dev', 'test']
+let stagingConf = config.application.staging
+if (stagingConf === 'prod') stagingConf = 'production'
+if (stagingConf === 'preprod') stagingConf = '-pre-prod-'
+
 let staging
 if (isTestEnv) {
   staging = 'test'
@@ -266,7 +274,7 @@ if (isTestEnv) {
   staging = 'dev'
 } else if (process.env.NODE_ENV === 'production') {
   // on laisse préprod si c'est ça qui était dans localConfig
-  staging = config.application.staging === 'preprod' ? 'preprod' : 'prod'
+  staging = config.application.staging === '-pre-prod-' ? '-pre-prod-' : 'production'
 } else if (knownStagings.includes(process.env.NODE_ENV)) {
   staging = process.env.NODE_ENV
 } else if (knownStagings.includes(config.application.staging)) {

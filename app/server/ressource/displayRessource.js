@@ -35,7 +35,7 @@
 const {version} = require('../../../package')
 const {application: {staging}} = require('../config')
 const isDev = !staging.includes('prod')
-const robotCanIndex = /^prod/.test(staging) // prod|production mais pas preprod
+const robotCanIndex = /^prod/.test(staging) // prod|production mais pas -pre-prod-
 const {escapeForHtml} = require('sesajstools')
 
 const rawOptions = {headers: {'Content-Type': 'text/html'}}
