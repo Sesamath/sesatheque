@@ -166,6 +166,7 @@ const configRessource = {
    * types qui peuvent être utilisés pour une ressource perso (form de ressource/ajouter)
    */
   typePerso: {
+    arbre: true,
     ecjs: true,
     iep: true,
     j3p: true,
