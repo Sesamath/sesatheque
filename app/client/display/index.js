@@ -227,7 +227,13 @@ function load (ressource, options, next) {
     else throw new Error("L'initialisation a échoué, pas de conteneur pour la ressource")
     if (!options.errorsContainer) throw new Error("L'initialisation a échoué, pas de conteneur pour afficher les erreurs")
 
-    if (!pluginDisplay) throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
+    if (!pluginDisplay) {
+      switch (pluginName) {
+        case 'ec2': throw new Error('Cette ressource calcul@tice en flash n’est pas gérée dans la bibliothèque, vous devez utiliser son équivalent javascript (icône avec un "C" bleu)')
+        case 'sequenceModele': throw Error('Ce contenu ne peut être affiché ici, il ne peut être utilisé que dans Labomep (le glisser dans "Mes séquences" pour l’y dupliquer puis le modifier pour y ajouter des élèves)')
+        default: throw new Error(`L'affichage des ressources de type ${pluginName} n'est pas encore implémenté`)
+      }
+    }
 
     // On vire le titre si on nous le demande via les options ou un param dans l'url
     if (
