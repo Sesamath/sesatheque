@@ -22,9 +22,10 @@ const {jour: dateFormat} = formats
  */
 const nl2br = (str) => {
   if (!str) return null
-  // on ajoute des parenthèses capturantes dans la regex pour avoir les \n comme élément de tableau
+  // Le 1er replace sert au cas où y'aurait du <br> dans la string d'origine.
+  // Parenthèses capturantes dans la regex pour avoir les \n comme élément de tableau
   // (sinon un split('\n') suffisait mais ça obligeait à mettre du <Fragment> dans le retour du map)
-  return str.split(/(\n)/g).map((part, index) => {
+  return str.replace(/<[bB][rR] *\/?>/g, '\n').split(/(\n)/g).map((part, index) => {
     return (part === '\n') ? (<br key={index} />) : part
   })
 }
@@ -142,25 +143,23 @@ export const Description = ({
 
           {_enfants.length ? (
             <Fragment>
-              <div className="txtbold">Liens vers les enfants&nbsp;:</div>
+              <div className="txtbold">Enfants&nbsp;:</div>
               <div className="col-4">
                 <ul>
+                  {console.log('enfants', _enfants)}
                   {_enfants.map(({url, titre}, index) => (
                     <li key={index.toString()}>
-                      {url ? (
-                        <NavLink
-                          to={url}
-                          target="_blank"
-                        >
-                          {titre}
-                        </NavLink>
-                      ) : titre}
+                      {url
+                        ? (
+                          <NavLink
+                            to={url.replace(location.origin, '') /* faut passer une url qui démarre avec / */}
+                            target="_blank"
+                          >{titre}</NavLink>
+                        )
+                        : titre}
                     </li>
                   ))}
                 </ul>
-                <div>{labels.enfants} :
-                  <pre>{JSON.stringify(_enfants)}</pre>
-                </div>
               </div>
             </Fragment>
           ) : null}
