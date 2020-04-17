@@ -5,6 +5,5 @@ _private
 *.md
 logs
 .bin
-tasks
 documentation
 ./test/
