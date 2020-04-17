@@ -86,7 +86,7 @@ fi
 [ "$justPrint" == 'Yes' ] && echo "mongo(import|export) $args (--db $db) …" && exit 0
 
 if [ "$isImport" == "Yes" ]; then
-  [ "$staging" == "prod" ] && echo 'Import en production impossible (mettre config.application.staging=dev ou -pre-prod- pour le forcer)'>&2 && usage 1
+  [ "$staging" == "prod" -o  "$staging" == "production" ] && echo 'Import en production impossible (mettre config.application.staging=dev ou -pre-prod- pour le forcer)'>&2 && usage 1
   [ "$isUpsert" == "Yes" ] && args="--upsert $args --db $db" || args="--drop $args --db $db"
   # On précise un fichier
   if [ -n "$file" ]; then

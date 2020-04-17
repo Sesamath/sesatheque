@@ -28,7 +28,7 @@ function usage() {
   echo "  -l : affiche les logs pm2 (avec pm2 logs, après les autres commandes)"
   echo "  -n : lancement avec node directement en mode dev, sans watch"
   echo "  -o : pour passer des options à pm2"
-  echo "  -p : lancement avec $PM2 en mode prod (utiliser -sp si on était en watch)"
+  echo "  -p : lancement avec $PM2 en mode production (utiliser -sp si on était en watch)"
   echo "  -s : stoppe les process pm2 sesatheque qui pourraient tourner (pm2 delete)"
   echo "  -t : lance les tests (avec docker si $dockerFlag présent)"
   echo "  -w : lancement avec $PM2 en mode dev avec watch, utiliser -sw si pm2 tournait déjà (sinon le statut watch n'est pas modifié)"

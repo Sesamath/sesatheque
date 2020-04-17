@@ -274,13 +274,13 @@ if (isTestEnv) {
   staging = 'dev'
 } else if (process.env.NODE_ENV === 'production') {
   // on laisse préprod si c'est ça qui était dans localConfig
-  staging = config.application.staging === '-pre-prod-' ? '-pre-prod-' : 'production'
+  staging = stagingConf === '-pre-prod-' ? '-pre-prod-' : 'production'
 } else if (knownStagings.includes(process.env.NODE_ENV)) {
   staging = process.env.NODE_ENV
-} else if (knownStagings.includes(config.application.staging)) {
-  staging = config.application.staging
+} else if (knownStagings.includes(stagingConf)) {
+  staging = stagingConf
 } else {
-  staging = 'dev'
+  staging = 'production'
 }
 config.application.staging = staging
 
@@ -297,7 +297,7 @@ if (!config.lassiLogger) {
   // pour an-log, si on veut récupérer les logs db
   config.lassiLogger = {
     $entities: {
-      logLevel: config.application.staging === 'prod' ? 'warning' : 'debug',
+      logLevel: config.application.staging === 'production' ? 'warning' : 'debug',
       renderer: {name: 'file', target: config.logs.dir + '/entities.log'}
     }
   }
