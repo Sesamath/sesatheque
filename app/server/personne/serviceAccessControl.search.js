@@ -68,6 +68,7 @@ module.exports = function ($accessControl) {
       // et sans risque si ça contient n'importe quoi
       queryOptions.orderBy = wantedQuery.orderBy
     }
+    if (wantedQuery.order === 'desc') queryOptions.order = 'desc'
 
     return queryOptions
   }
