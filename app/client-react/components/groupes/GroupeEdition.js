@@ -51,7 +51,7 @@ const GroupeEdition = ({
           />
           <span className="remarque">({isOuvert
             ? 'tout le monde pourra devenir membre du groupe'
-            : 'seul un gestionnaire pourra ajouter un membre'
+            : 'personne ne pourra devenir membre du groupe' // 'seul un gestionnaire pourra ajouter un membre' à mettre quand ce sera géré sur une page de gestion des membres du groupe
           })</span>
         </div>
         <div>
@@ -72,10 +72,13 @@ const GroupeEdition = ({
               <li key={index}>{name}</li>
             ))}
           </ul>
-          <label className="field">Ajouter un gestionnaire <i>(en le faisant vous vous engagez à lui avoir demandé son avis avant, toutes les modifications de gestionnaires sont enregistrées)</i></label>
-          <p>ATTENTION : l’ajout sera effectif lors du clic sur « Modifier » et il est irrévocable.</p>
+          <label className="field">
+            Ajouter un gestionnaire <i>(en le faisant vous vous engagez à lui avoir demandé son avis avant, toutes les modifications de gestionnaires sont enregistrées)</i><br />
+            L’identifiant est celui qui apparaît dans le lien du menu <a href="/compte" target="_blank">mes informations personnelles</a> (ce lien affiche ici le votre, c’est évidemment le sien qu’il faudra ajouter).
+          </label>
+          <p><strong>ATTENTION : l’ajout est irrévocable</strong>, il sera effectif lors du clic sur « Modifier ».</p>
           <div className="grid-2">
-            <InputField name="newGestionnairePid" label="Son identifiant" placeholder="celui qui apparaît dans « mes informations personnelles »"/>
+            <InputField name="newGestionnairePid" label="Son identifiant" placeholder="identifiant  xxx/yyy"/>
             <InputField name="newGestionnaireNom" label="Son nom" placeholder="Entrez également le nom (insensible à la casse)" />
           </div>
         </div>
