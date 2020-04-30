@@ -63,7 +63,9 @@
     "prod": "./scripts/run -sp",
     "stop": "./scripts/run -s",
     "watch": "./scripts/run -swl",
-    "postinstall": "cd app/plugins && node buildSrc && pnpm update"
+    "postinstall": "cd app/plugins && node buildSrc && pnpm update",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "babel": {
     "presets": [
@@ -107,7 +109,7 @@
     "history": "^4.10.1",
     "html-to-text": "^4.0.0",
     "ip": "^1.1.5",
-    "jquery": "3.3.1",
+    "jquery": "3.5.0",
     "knacss": "^7.1.3",
     "lassi": "git+https://framagit.org/Sesamath/lassi.git#2.5.0",
     "loadjs": "^3.6.1",
@@ -137,7 +139,8 @@
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git",
     "simple-crypto-js": "^2.2.0",
-    "whatwg-fetch": "^3.0.0"
+    "whatwg-fetch": "^3.0.0",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -275,5 +278,6 @@
   "pre-push": [
     "test",
     "lint"
-  ]
+  ],
+  "snyk": true
 }
