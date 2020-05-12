@@ -122,8 +122,6 @@ module.exports = function (component) {
         else route += isPublic ? 'public/' : 'ressource/'
         // on ajoute l'oid éventuel
         route += $routes.get(action, id)
-        // et la version en parametre pour le cache du navigateur
-        if (isPublic && ressource && ressource.inc) route += `?${ressource.inc}`
       } else {
         log.error(new Error('appel de $routes.getAbs avec une action non gérée : ' + action))
       }
