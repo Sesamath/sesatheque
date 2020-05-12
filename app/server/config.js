@@ -262,7 +262,7 @@ if (localConfig) sjtObj.merge(config, localConfig)
 // -pre-prod- et pas preprod pour avoir le même nombre de lettre que production,
 // pour préserver les source-map lors du passage en production
 // (y'a un coup de sed sur les fichiers compilés par webpack, mais pas de recompil)
-const knownStagings = ['production', '-pre-prod-', 'dev', 'test']
+const knownStagings = ['production', '-pre-prod-', 'debug', 'dev', 'test']
 let stagingConf = config.application.staging
 if (stagingConf === 'prod') stagingConf = 'production'
 if (stagingConf === 'preprod') stagingConf = '-pre-prod-'
