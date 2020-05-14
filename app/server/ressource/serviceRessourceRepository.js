@@ -423,7 +423,7 @@ module.exports = function (ressourceComponent) {
         })
         ressource.parametres = params
         // on enregistre la ressource modifiée en async
-        save(ressource)
+        save(ressource, error => error && console.error(error))
       }
       log.debug('convertXmlEc2', params)
     }
@@ -440,6 +440,8 @@ module.exports = function (ressourceComponent) {
           ressource.parametres = {
             g: graphe
           }
+          // on enregistre pour pas revenir ici la prochaine fois
+          save(ressource, error => error && console.error(error))
         } catch (error) {
           log.error('plantage dans la conversion du xml de la ressource j3p')
           if (!ressource.$errors) ressource.$errors = []
@@ -583,7 +585,7 @@ module.exports = function (ressourceComponent) {
       } catch (error) {
         next(error)
       }
-    }
+    } // grabSearch
 
     /**
      * Compte le nb de ressources d'après les critères de recherche
@@ -821,7 +823,7 @@ module.exports = function (ressourceComponent) {
         log.error(error)
         if (next) next(error)
       })
-    }
+    } // save
 
     /**
      * Récupère un liste de ressource d'après critères
