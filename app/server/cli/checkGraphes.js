@@ -105,7 +105,7 @@ function getNormalizedGraphe (ressource) {
               cleanGraphe.push([id, 'fin'])
               ids.push(id)
             } else if (ids.indexOf(br.nn) === -1) {
-              console.error('Le branchement d’index ' + i + ' du nœud n° ' + numNode + ' pointe vers ' + br.nn + ' qui n’existe pas', grapheOriginal)
+              logError('Le branchement d’index ' + i + ' du nœud n° ' + numNode + ' pointe vers ' + br.nn + ' qui n’existe pas')
             } else {
               // on vérifie aussi que la condition existe
               if (!hasProp(br, 'pe') && !hasProp(br, 'score')) logError('Le branchement d’index ' + i + ' du nœud n° ' + numNode + ' n’a pas de condition (ni pe ni score)')
@@ -169,7 +169,7 @@ function checkGraphes (oid, done) {
       // faut passer par $ressourceRepository pour qu'il convertisse (et sauvegarde la modif en tâche de fond, il ne le faisait pas avant le 13/05/2020)
       log(`Ressource ${oid} avec du xml, on lance la conversion`)
       $ressourceRepository.save(ress, (error, ress) => {
-        if (error) log.error(error)
+        if (error) log.error(`Pb avec la ressource ${oid}`, error)
         else if (ress) getNormalizedGraphe(ress)
         else log.error(Error(`On a récupéré une ressource via EntityRessource ${oid} que $ressourceRepository ne remonte pas`))
         // faut laisser le temps à mongo d'écrire ça avant de passer à la suite, on attends arbitrairement 500ms
