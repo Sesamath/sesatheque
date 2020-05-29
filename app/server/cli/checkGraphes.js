@@ -95,6 +95,11 @@ function getNormalizedGraphe (ressource) {
       const nbParams = Array.isArray(node[2]) && node[2].length
       if (nbParams) {
         node[2].forEach(function (br, i) {
+          if (br.pe === '>=0') {
+            logError('branchement avec la condition pe >= 0 qui est à éviter (si pe n’est pas numérique ça plante, et sinon ça revient au même que sans condition)')
+            delete br.pe
+            br.score = 'sans+condition'
+          }
           if (typeof br.nn === 'number') br.nn = String(br.nn)
           if (typeof br.nn === 'string') {
             if (br.nn.toLowerCase() === 'fin') {
