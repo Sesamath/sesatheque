@@ -229,7 +229,10 @@ const config = {
   },
 
   // une liste de plugins à charger
-  plugins: [],
+  plugins: {
+    internal: [],
+    external: []
+  },
   // et d'éventuelles options à leur passer
   pluginsOptions: {},
 

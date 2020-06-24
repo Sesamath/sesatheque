@@ -12,6 +12,7 @@
   "scripts": {
     "build": "node_modules/.bin/webpack",
     "build:both": "node_modules/.bin/webpack && env SESATHEQUE_CONF=commun node_modules/.bin/webpack",
+    "build:testBoth": "env SESATHEQUE_CONF=test npm run build && env SESATHEQUE_CONF=testCommun npm run build",
     "build:check": "es-check es5 './build/**/*.js'",
     "build:commun": "env SESATHEQUE_CONF=commun npm run build",
     "build:commun:dev": "env SESATHEQUE_CONF=commun npm run build:dev",
