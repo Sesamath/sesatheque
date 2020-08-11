@@ -19,7 +19,7 @@ dependencies:
   ip: 1.1.5
   jquery: 3.3.1
   knacss: 7.1.3
-  lassi: framagit.org/Sesamath/lassi/d0a0ad2b352ae9b289a537538f71eda612969369
+  lassi: framagit.org/Sesamath/lassi/7d3fa90efce8f12b582efb062990a21461b07838
   loadjs: 3.6.1
   lodash: 4.17.15
   minimist: 1.2.5
@@ -11928,7 +11928,7 @@ packages:
     dev: true
     resolution:
       integrity: sha1-a6MY6xaWFyf10oT46gA+jWFU0Mg=
-  framagit.org/Sesamath/lassi/d0a0ad2b352ae9b289a537538f71eda612969369:
+  framagit.org/Sesamath/lassi/7d3fa90efce8f12b582efb062990a21461b07838:
     dependencies:
       ajv: 6.12.3
       ajv-errors: 1.0.1_ajv@6.12.3
@@ -11955,10 +11955,10 @@ packages:
     dev: false
     name: lassi
     resolution:
-      commit: d0a0ad2b352ae9b289a537538f71eda612969369
+      commit: 7d3fa90efce8f12b582efb062990a21461b07838
       repo: 'https://framagit.org/Sesamath/lassi.git'
       type: git
-    version: 2.5.7
+    version: 2.5.8
   framagit.org/Sesamath/sesajstools/ac6283ba39b63def7e316a1f1c813915656c401e:
     dependencies:
       chai: 4.2.0
@@ -12094,7 +12094,7 @@ specifiers:
   jsdoc: ^3.6.4
   jsdom: ^16.2.2
   knacss: ^7.1.3
-  lassi: 'git+https://framagit.org/Sesamath/lassi.git#2.5.7'
+  lassi: 'git+https://framagit.org/Sesamath/lassi.git#2.5.8'
   loadjs: ^3.6.1
   lodash: ^4.17.15
   minimist: ^1.2.5
