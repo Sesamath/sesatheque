@@ -9,7 +9,7 @@ let ErrorBoundary
 // cf https://docs.bugsnag.com/platforms/javascript/react/
 // App.js nous passe un onError
 
-const bugsnagClient = getBugsnagClient({ plugins: [new BugsnagPluginReact(React)] })
+const bugsnagClient = getBugsnagClient({ plugins: [new BugsnagPluginReact()] })
 
 if (bugsnagClient) {
   ErrorBoundary = Bugsnag.getPlugin('react').createErrorBoundary(React)

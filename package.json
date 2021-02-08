@@ -91,7 +91,7 @@
   ],
   "dependencies": {
     "@bugsnag/js": "^7.6.0",
-    "@bugsnag/plugin-react": "^6.5.0",
+    "@bugsnag/plugin-react": "^7.6.0",
     "@fortawesome/fontawesome-free": "^5.15.2",
     "an-ansi": "git://src.sesamath.net/an-ansi#2.0.4",
     "an-flow": "git://src.sesamath.net/an-flow#3.0.2",
