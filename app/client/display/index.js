@@ -391,11 +391,11 @@ module.exports = function display (ressource, options, next) {
 
     // ajout de metadata pour bugsnag
     if (window.bugsnagClient) {
-      window.bugsnagClient.metaData.exo = {
+      window.bugsnagClient.addMetadata('exo', {
         rid: ressource.rid,
         type: ressource.type,
         url: location.href // déjà dispo dans l'onglet request mais plus pratique que l'avoir là aussi
-      }
+      })
     }
 
     // on peut lancer l'init

@@ -40,18 +40,21 @@ if (typeof window === 'undefined') {
   const bugsnagClient = getBugsnagClient()
   if (bugsnagClient) {
     window.bugsnagClient = bugsnagClient
-    // et on ajoute ça pour que ce soit toujours présent (ça ne l'est pas par défaut)
-    window.bugsnagClient.metaData = {}
-    window.bugsnagClient.user = {}
   } else {
     console.error('pas d’apiKey pour bugsnag, on crée un fake qui sortira les erreurs en console')
     // pour que ceux qui s'attendent à trouver ça ne plantent pas
     window.bugsnagClient = {
+      addMetadata: function addMetadata (section, prop, value) {
+        if (!window.bugsnagClient.metadata[section]) window.bugsnagClient.metadata[section] = {}
+        if (typeof prop === 'object') window.bugsnagClient.metadata[section] = { ...window.bugsnagClient.metadata[section], ...prop}
+        else if (typeof prop === 'string') window.bugsnagClient.metadata[section][prop] = value
+        else console.error(Error('addMetadata appelée avec des arguments invalides'), arguments)
+      },
       notify: function fakeNotify () {
         console.error('bugsnag n’a pas été instancié, mais il reçoit')
         console.error.apply(console, arguments)
       },
-      metaData: {},
+      metadata: {},
       user: {}
     }
   }

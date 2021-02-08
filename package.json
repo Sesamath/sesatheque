@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.7.14",
+  "version": "1.7.15",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -90,8 +90,7 @@
     "ie 11"
   ],
   "dependencies": {
-    "@bugsnag/browser": "^6.5.2",
-    "@bugsnag/js": "^6.5.2",
+    "@bugsnag/js": "^7.6.0",
     "@bugsnag/plugin-react": "^6.5.0",
     "@fortawesome/fontawesome-free": "^5.13.0",
     "an-ansi": "git://src.sesamath.net/an-ansi#2.0.4",
