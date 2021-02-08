@@ -31,15 +31,12 @@ import store from './store'
 import './App.scss'
 
 // ATTENTION il y a une deuxième conf bugsnag dans app/client/page/bugsnag.js pour le display et les editeurs iframes
-const beforeSend = (report) => {
-  if (/^file:\/\//.test(report.request.url)) return false
-  report.metaData.state = store.getState()
-}
+const onError = (event) => event.addMetadata('state', store.getState())
 
 // ATTENTION à garder la liste des routes synchrones dans app/server/main/controllerMain.js
 
 const App = () => (
-  <ErrorBoundary beforeSend={beforeSend}>
+  <ErrorBoundary onError={onError}>
     <Provider store={store}>
       <ConnectedRouter history={history}>
         <Fragment>

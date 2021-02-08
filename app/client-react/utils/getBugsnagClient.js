@@ -30,66 +30,69 @@
  */
 'use strict'
 
-import bugsnagJs from '@bugsnag/js'
+import Bugsnag from '@bugsnag/js'
 
 import config from '../../server/config'
 import getParentUrls from './getParentUrls'
 
 const {application, bugsnag, version} = config
+const apiKeyByType = bugsnag.apiKeyByType || {}
 
 /**
  * Appelé avant d'envoyer le rapport, pour filtrer
- * @param report
+ * @param event
  * @return {boolean}
  */
-function beforeSend (report) {
+function onError (event) {
   // cf https://docs.bugsnag.com/platforms/browsers/js/customizing-error-reports/
   if (/local/.test(window.location.hostname)) return false
-  if (/^file:\/\//.test(report.request.url)) return false
-  if (report && report.metaData) {
-    const md = report.metaData
-    const type = md && md.exo && md.exo.type
-    if (!type || ['am', 'em'].includes(type)) {
-      // si pas de type on teste quand même ce qui suit
-      // apparemment le flash tente de lire des trucs sur la fenêtre parente, et il a pas le droit
-      if (/Permission denied to (get|access) property/.test(report.errorMessage)) return false
-      if (/Accès refusé/.test(report.errorMessage)) return false
-    }
-    // on ignore pour le moment les erreurs des js de calculatice, y'en a un peu trop…
-    if (md.source && /\/replication_calculatice\//.test(md.source)) return false
-    if (type === 'ecjs') {
-      // des erreurs fréquentes sur ecjs qu'on regardera le jour où on aura la main sur le code
-      if (/BigError/.test(report.errorClass)) return false
-      if (/Unable to get property/.test(report.errorMessage)) return false
-      // on vire tous les rapport qui ont du replication_calculatice dans la stacktrace
-      if (report.stacktrace.some(trace => /replication_calculatice/.test(trace.file))) return false
-    }
+  if (/^file:\/\//.test(event.request.url)) return false
+  // normalement ça existe toujours à cet endroit, mais on blinde quand même
+  const errorMessage = (event && event.originalError && event.originalError.errorMessage) || ''
+  const errorClass = (event && event.originalError && event.originalError.errorClass) || ''
+  const stacktrace = (event && event.originalError && event.originalError.stacktrace) || []
+  // on regarde suivant le contexte
+  const type = event.getMetadata('exo', 'type')
+  if (!type || ['am', 'em'].includes(type)) {
+    // si pas de type on teste quand même ce qui suit
+    // apparemment le flash tente de lire des trucs sur la fenêtre parente, et il a pas le droit
+    if (/Permission denied to (get|access) property/.test(errorMessage)) return false
+    if (/Accès refusé/.test(errorMessage)) return false
   }
-  if (report && Array.isArray(report.stacktrace)) {
-    // on vire tous les plantages qui concernent une extension firefox
-    if (report.stacktrace.some(trace => /^moz-extension:\/\//.test(trace.file))) return false
+  // on ignore pour le moment les erreurs des js de calculatice, y'en a un peu trop…
+  if (type === 'ecjs') {
+    // des erreurs fréquentes sur ecjs qu'on regardera le jour où on aura la main sur le code
+    if (/BigError/.test(errorClass)) return false
+    if (/Unable to get property/.test(errorMessage)) return false
+    // on vire tous les rapport qui ont du replication_calculatice dans la stacktrace
+    if (stacktrace.some(stackFrame => /replication_calculatice/.test(stackFrame.file))) return false
   }
-  if (/ChunkLoadError/.test(report.errorClass)) {
+  // si y'a une apiKey spécifique à ce type on l'ajoute
+  if (apiKeyByType[type]) event.apiKey = apiKeyByType[type]
+  // on vire tous les plantages qui concernent une extension firefox
+  if (stacktrace.some(stackFrame => /^moz-extension:\/\//.test(stackFrame.file))) return false
+  if (/ChunkLoadError/.test(errorClass)) {
     alert('Il y a un problème de chargement de l’application, vous devriez essayer de vider le cache de votre navigateur pour le resoudre (ctrl+maj+suppr en général, puis cocher « fichier en cache »).')
   }
 
   // si on est toujours là on ajoute ça avant d'envoyer
-  report.metaData.frames = getParentUrls()
+  event.addMetadata('frames', { urls: getParentUrls() })
 }
 
 /**
  * Retourne un client bugsnag si on a une apiKey en config, null sinon
  * @return {Client|null}
  */
-export default function getBugsnagClient () {
+export default function getBugsnagClient (config = {}) {
   if (!bugsnag || !bugsnag.apiKey) return null
-  return bugsnagJs({
+  const defaultConfig = {
     // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#apikey
     apiKey: bugsnag.apiKey,
-    beforeSend,
+    onError,
     // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#appversion
     appVersion: version,
     // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#releasestage
     releaseStage: application.staging
-  })
+  }
+  return Bugsnag.createClient({ ...defaultConfig, ...config })
 }
