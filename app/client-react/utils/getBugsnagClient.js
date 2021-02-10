@@ -94,5 +94,6 @@ export default function getBugsnagClient (config = {}) {
     // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#releasestage
     releaseStage: application.staging
   }
-  return Bugsnag.createClient({ ...defaultConfig, ...config })
+  Bugsnag.start({ ...defaultConfig, ...config })
+  return Bugsnag
 }
