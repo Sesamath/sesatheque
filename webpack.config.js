@@ -338,20 +338,7 @@ if (isProd) {
         // https://github.com/webpack-contrib/terser-webpack-plugin#preserve-comments
         // Attention, la chaîne passée à la regex démarre après "/*" (ou //)
         comments: /^\**!/
-      },
-      // https://github.com/webpack-contrib/terser-webpack-plugin#warningsfilter
-      // avec 'verbose' c'est vraiment très verbeux, avec plein de warning qui n'en sont pas vraiment
-      // (par ex il vire une variable utilisée une seule fois sur la ligne suivante,
-      // mais c'est souvent fait exprès et bienvenu pour la lisibilité)
-      // warnings: 'verbose'
-      warnings: true
-    },
-    // cf https://github.com/webpack-contrib/terser-webpack-plugin#warningsfilter
-    warningsFilter: (warning, source, file) => {
-      // on veut pas des warnings sur du code externe
-      if (/node_module/.test(source)) return false
-      // ni sur ces trucs ajoutés par core-js
-      if (/Side effects in initialization of unused variable es_/.test(warning)) return false
+      }
     }
   })
   conf.optimization.minimizer = [terserMinimizer]
