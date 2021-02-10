@@ -30,7 +30,7 @@ const TerserPlugin = require('terser-webpack-plugin')
 
 const preRun = require('./webpack.preRun')
 
-// On récupère babelConfig pour forcer l'utilisation notre conf babel dans certains node_modules
+// On récupère babelConfig pour forcer l'utilisation de notre conf babel dans certains node_modules
 // (seatheque-client, sesaeditgraphe et plugins d'édition)
 const babelConfig = require('./package').babel
 

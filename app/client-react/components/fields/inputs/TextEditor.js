@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import AceEditor from 'react-ace-builds'
-import 'react-ace-builds/webpack-resolver-min'
+import AceEditor from 'react-ace'
+// faut importer tous les modes qu'on veut gérer (listés dans les PropTypes de ce composant)
+import 'ace-builds/src-noconflict/mode-json'
+import 'ace-builds/src-noconflict/mode-xml'
+// le thème
+import 'ace-builds/src-noconflict/theme-github'
+
 import showInvalidField from '../hoc/showInvalidField'
 
 import './TextEditor.scss'
@@ -49,7 +54,8 @@ TextEditor.propTypes = {
     onFocus: PropTypes.func,
     name: PropTypes.string
   }),
-  mode: PropTypes.string,
+  // attention à modifier les imports si cette liste change
+  mode: PropTypes.oneOf(['json', 'xml']),
   onValidate: PropTypes.func
 }
 
