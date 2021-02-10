@@ -76,7 +76,7 @@ function onError (event) {
   }
 
   // si on est toujours là on ajoute ça avant d'envoyer
-  event.addMetadata('frames', { urls: getParentUrls() })
+  event.addMetadata('request', { frames: getParentUrls() })
 }
 
 /**
