@@ -1,6 +1,6 @@
 {
   "name": "Sesatheque",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -137,7 +137,7 @@
     "sesajstools": "git+https://framagit.org/Sesamath/sesajstools.git",
     "sesalab-sso": "git+https://framagit.org/Sesamath/sesalab-sso.git",
     "sesatheque-client": "git+https://framagit.org/Sesamath/sesatheque-client.git",
-    "simple-crypto-js": "^2.5.0",
+    "simple-crypto-js": "2.2.0",
     "whatwg-fetch": "^3.5.0"
   },
   "devDependencies": {
