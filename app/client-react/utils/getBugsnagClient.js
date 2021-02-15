@@ -47,10 +47,8 @@ function onError (event) {
   // cf https://docs.bugsnag.com/platforms/browsers/js/customizing-error-reports/
   if (/local/.test(window.location.hostname)) return false
   if (/^file:\/\//.test(event.request.url)) return false
-  // normalement ça existe toujours à cet endroit, mais on blinde quand même
-  const errorMessage = (event && event.originalError && event.originalError.errorMessage) || ''
-  const errorClass = (event && event.originalError && event.originalError.errorClass) || ''
-  const stacktrace = (event && event.originalError && event.originalError.stacktrace) || []
+  // on étudie la 1re erreur
+  const { errorClass, errorMessage, stacktrace } = event.errors[0]
   // on regarde suivant le contexte
   const type = event.getMetadata('exo', 'type')
   if (!type || ['am', 'em'].includes(type)) {
@@ -88,6 +86,7 @@ export default function getBugsnagClient (config = {}) {
   const defaultConfig = {
     // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#apikey
     apiKey: bugsnag.apiKey,
+    // https://docs.bugsnag.com/platforms/javascript/customizing-error-reports/
     onError,
     // https://docs.bugsnag.com/platforms/browsers/js/configuration-options/#appversion
     appVersion: version,
