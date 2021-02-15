@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import AceEditor from 'react-ace'
-// faut importer tous les modes qu'on veut gérer (listés dans les PropTypes de ce composant)
-import 'ace-builds/src-noconflict/mode-json'
-import 'ace-builds/src-noconflict/mode-xml'
-// le thème
-import 'ace-builds/src-noconflict/theme-github'
+// cf https://ace.c9.io/#nav=howto pour l'usage avec webpack
+import 'ace-builds/webpack-resolver'
+// qui évite de charger ça en préventif, et règle le pb des 404 sur worker-json
+// import 'ace-builds/src-noconflict/mode-json'
+// import 'ace-builds/src-noconflict/mode-xml'
+// import 'ace-builds/src-noconflict/theme-github'
 
 import showInvalidField from '../hoc/showInvalidField'
 
